@@ -1,4 +1,4 @@
-this.version = "2025.06.24.10";
+this.version = "2025.06.25.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,49 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.24.10",
-  "generated": "2025-06-24T21:51:51Z",
+  "version": "2025.06.25.1",
+  "generated": "2025-06-24T23:19:56Z",
   "files": {
-    "/img/png-file-type-svgrepo-com.svg": {
-      "checksum": "ba847b53eba1f7e7be13000fc4c5ea27",
-      "size": 1921,
-      "priority": "important"
-    },
-    "/img/ppt-file-type-svgrepo-com.svg": {
-      "checksum": "8487976bee6f78adc7caee5b71479743",
-      "size": 2103,
-      "priority": "important"
-    },
-    "/img/psd-file-type-svgrepo-com.svg": {
-      "checksum": "752cee1bb240f2679af2f068930fa2cf",
-      "size": 2242,
-      "priority": "important"
-    },
-    "/img/ragnarok.png": {
-      "checksum": "5934b1a258fdf602cd78b1c35f276b8d",
-      "size": 133078,
-      "priority": "important"
-    },
-    "/img/ragnarok_sealed.png": {
-      "checksum": "a7558e86491320184e56d6a8f909d695",
-      "size": 74886,
-      "priority": "important"
-    },
-    "/img/rar-file-type-svgrepo-com.svg": {
-      "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
-      "size": 1835,
-      "priority": "important"
-    },
-    "/img/spk192.png": {
-      "checksum": "411500d1b3e3b31bf0b90c5b8126c634",
-      "size": 10149,
-      "priority": "important"
-    },
-    "/img/spk512.png": {
-      "checksum": "98a452727661d34f119ddf6a3fd920a8",
-      "size": 21939,
-      "priority": "important"
-    },
     "/img/spknetwork.png": {
       "checksum": "4d91f7a0ed50ac7b0d27cbd52794078a",
       "size": 51410,
@@ -1093,7 +1053,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "eb0c865264d4b531e4669d4fe1e1beb7",
+      "checksum": "0924a86c30a25a61740eac8188d98bc7",
       "size": 36523,
       "priority": "important"
     },
@@ -1313,7 +1273,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "bc89619f2ea95f6ba9f423efea9f02f2",
+      "checksum": "8befbf7d1efb5f75ca0a4910e5b28039",
       "size": 7299,
       "priority": "important"
     },
@@ -1401,46 +1361,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
-      "checksum": "29b986d5bcd6489356dc6ae20169d520",
-      "size": 4266,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
-      "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
-      "size": 4721,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
-      "checksum": "84e5717bbd776f7141b79675d92a115d",
-      "size": 3262,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
-      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
-      "size": 5005,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
-      "checksum": "f84ef485240448f04f47ae177e7c66f7",
-      "size": 2944,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
-      "checksum": "c34c934e8f69865c733a040288167bca",
-      "size": 3636,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
-      "checksum": "e19ba42ced633c14b87715c3bdf66316",
-      "size": 4619,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
-      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
-      "size": 5916,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
       "checksum": "12c2d9fd66a10e9ea6b84915d0909781",

@@ -114,12 +114,7 @@ When reading code examples that reference `titleEditor`, understand that in the 
 const config = yjsDoc.getMap('config');
 this.configObserver = (event) => {
     event.changes.keys.forEach((change, key) => {
-        if (key === 'title' && (change.action === 'update' || change.action === 'add')) {
-            const newTitle = config.get('title');
-            this.component.$nextTick(() => {
-                this.component.titleInput = newTitle || '';
-            });
-        }
+        // Title moved to metadata map
         if (key === 'documentName' && (change.action === 'update' || change.action === 'add')) {
             const newDocumentName = config.get('documentName');
             this.component.currentFile.name = newDocumentName;
@@ -10590,8 +10585,8 @@ Based on codebase analysis, these fields need reactive wrappers:
 | metadata | maxAcceptedPayout | Direct assignment | `reactiveCommentOptions.maxAcceptedPayout` ❌ |
 | metadata | percentHbd | Direct assignment | `reactiveCommentOptions.percentHbd` ❌ |
 | config | documentName | Partial reactive | `reactiveDocumentName` ⚠️ |
-| config | title | Input binding | `titleInput` ✅ |
-| config | permlink | Input binding | `permlinkInput` ✅ |
+| metadata | title | Input binding | `titleInput` ✅ |
+| metadata | permlink | Input binding | `permlinkInput` ✅ |
 
 Legend: ✅ = Implemented, ⚠️ = Partial, ❌ = Missing
 
@@ -10627,6 +10622,95 @@ This comprehensive update adds critical missing patterns to the TIPTAP_OFFLINE_F
 5. **Comprehensive error recovery strategies**
 
 These additions future-proof the document and provide production-ready patterns for handling edge cases and performance optimization.
+
+## 💾 **SAVE INDICATOR PATTERN**
+
+### **Consistent Save Status Display**
+
+All user input handlers must show immediate save status feedback. This ensures users know their changes are being saved.
+
+**✅ CORRECT PATTERN:**
+```javascript
+// For any input change handler (title, tags, beneficiaries, etc.)
+onInputChange() {
+    // 1. Update Y.js document
+    this.ydoc.transact(() => {
+        const metadata = this.ydoc.getMap('metadata');
+        metadata.set('fieldName', newValue);
+    }, 'field-update');
+    
+    // 2. Set save flags
+    this.hasUnsavedChanges = true;
+    this.hasUserIntent = true;
+    
+    // 3. Show save indicator immediately
+    this.$nextTick(() => {
+        this.updateSaveStatus();
+    });
+    
+    // 4. Trigger autosave
+    this.autoSave(); // or this.debouncedUpdateContent()
+}
+```
+
+**❌ INCORRECT PATTERNS:**
+```javascript
+// Missing updateSaveStatus() - only shows "Saved" after save completes
+this.hasUnsavedChanges = true;
+this.autoSave();
+
+// Conditional updateSaveStatus() - inconsistent behavior
+if (!this.isTemporaryDocument) {
+    this.$nextTick(() => {
+        this.updateSaveStatus();
+    });
+}
+
+// No save indicator at all
+this.ydoc.transact(() => {
+    metadata.set('field', value);
+});
+```
+
+### **Required for All Input Types**
+
+The save indicator pattern must be applied to:
+
+1. **Direct Input Fields**
+   - Title input (`onTitleInput`)
+   - Permlink editor (`savePermlinkEdit`)
+   - Custom JSON editor (`handleCustomJsonInput`)
+
+2. **Collection Operations**
+   - Tag addition/removal (`addTagToYjs`, `removeTagFromYjs`)
+   - Beneficiary management (`addBeneficiary`, `removeBeneficiary`)
+
+3. **Checkbox/Toggle Changes**
+   - Comment options watchers (`reactiveCommentOptions.*`)
+   - Any boolean preference toggles
+
+4. **Generic Handlers**
+   - `triggerUserIntentDetection()` - used by multiple metadata fields
+   - Any custom change handlers
+
+### **Implementation Checklist**
+
+When adding new input fields:
+
+- [ ] Update Y.js in a transaction with origin tag
+- [ ] Set `hasUnsavedChanges = true`
+- [ ] Set `hasUserIntent = true`
+- [ ] Call `this.$nextTick(() => { this.updateSaveStatus(); })`
+- [ ] Trigger appropriate autosave method
+- [ ] Handle temporary document conversion if needed
+- [ ] Check for read-only mode before allowing changes
+
+### **Why This Pattern Matters**
+
+1. **User Feedback**: Immediate "Saving locally..." feedback reduces anxiety
+2. **Consistency**: All inputs behave the same way
+3. **Debugging**: Clear save status helps identify sync issues
+4. **Trust**: Users trust the system when they see their changes being saved
 
 ## 📡 **CONNECTION STATUS MANAGEMENT**
 
