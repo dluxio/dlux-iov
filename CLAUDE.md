@@ -113,6 +113,19 @@ Key issues covered:
 - State synchronization problems
 - Memory management and cleanup
 
+## Recent Updates (v2025.01.24)
+### Server-Side Fixes for Readonly Users
+- **CORS**: Fixed /api/system/versions endpoint CORS headers
+- **WebSocket Timeout**: Extended to 5 minutes (was 30 seconds)
+- **Message Handling**: Readonly users can now send all protocol messages (0-4, 8) including Awareness
+- **Connection Monitoring**: Server logs keepalive every 30 seconds
+- **Enhanced Logging**: Detailed connection/disconnection tracking
+
+### Client-Side Changes
+- **Removed Custom Extensions**: All users now use standard CollaborationCaret
+- **No More Workarounds**: Removed ReadOnlyCollaborationCaret custom extension
+- **Simplified Code**: Unified cursor handling for all permission levels
+
 ## Recent Updates (v2025.01.23)
 - Migrated to single editor architecture
 - Consolidated all metadata into single Y.js map
