@@ -2604,6 +2604,15 @@ class SyncManager {
                     this.component.commentOptions.percentHbd = metadata.get('percentHbd') === true;
                 }
                 
+                // ✅ FIX: Handle permlink changes from remote users
+                if (event.keysChanged.has('permlink')) {
+                    const newPermlink = metadata.get('permlink') || '';
+                    // Only update permlinkInput if not currently updating and it's a custom permlink
+                    if (!this.component._isUpdatingPermlink && newPermlink !== this.component.generatedPermlink) {
+                        this.component.permlinkInput = newPermlink;
+                    }
+                }
+                
                 // ✅ FIX: Set unsaved changes flags when metadata changes
                 if (event.keysChanged.size > 0) {
                     // Only log significant changes, not every metadata field
