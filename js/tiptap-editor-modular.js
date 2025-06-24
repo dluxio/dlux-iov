@@ -2604,6 +2604,28 @@ class SyncManager {
                     this.component.commentOptions.percentHbd = metadata.get('percentHbd') === true;
                 }
                 
+                // ✅ FIX: Handle permlink changes from remote users
+                if (event.keysChanged.has('permlink')) {
+                    const newPermlink = metadata.get('permlink') || '';
+                    console.log('📝 Y.js permlink changed remotely:', { newPermlink });
+                    
+                    // Prevent recursion: temporarily disable watcher
+                    this.component._isUpdatingPermlink = true;
+                    
+                    // Update the permlinkInput if it's a custom permlink
+                    if (newPermlink && newPermlink !== this.component.generatedPermlink) {
+                        this.component.permlinkInput = newPermlink;
+                    } else {
+                        // Clear input to show generated permlink
+                        this.component.permlinkInput = '';
+                    }
+                    
+                    // Re-enable watcher after Vue processes the change
+                    this.component.$nextTick(() => {
+                        this.component._isUpdatingPermlink = false;
+                    });
+                }
+                
                 // ✅ FIX: Set unsaved changes flags when metadata changes
                 if (event.keysChanged.size > 0) {
                     // Only log significant changes, not every metadata field
