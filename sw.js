@@ -1,4 +1,4 @@
-this.version = "2025.06.24.3";
+this.version = "2025.06.24.4";
 this.version = "2025.06.24.7";
 =======
 this.version = "2025.06.24.5";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.24.11",
-  "generated": "2025-06-24T18:29:13Z",
+  "version": "2025.06.24.4",
+  "generated": "2025-06-24T18:29:26Z",
   "files": {
-    "/img/metaverse-vr-comp.jpg": {
-      "checksum": "82c7278828d85ace9036d87c72801e20",
-      "size": 124780,
-      "priority": "important"
-    },
     "/img/mov-file-type-svgrepo-com.svg": {
       "checksum": "0af98e452f25a7739bb978a7ed02051b",
       "size": 1745,
@@ -1441,11 +1436,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
-      "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
-      "size": 7827,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
       "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
       "size": 4411,
@@ -1996,12 +1986,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
