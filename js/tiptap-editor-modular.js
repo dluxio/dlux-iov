@@ -5622,7 +5622,7 @@ export default {
                     "author": this.username || 'anonymous',
                     "permlink": this.actualPermlink,
                     "title": this.titleInput || 'Untitled',
-                    "body": this.bodyEditor ? this.bodyEditor.getText() : '',
+                    "body": this.getBodyContent ? this.getBodyContent() : '',
                     "json_metadata": JSON.stringify(this.jsonMetadata)
                 }
             };
@@ -5923,6 +5923,261 @@ export default {
                     }
                 }
             }
+        }
+    },
+    
+    
+    async mounted() {
+        // ✅ PROTOCOL ERROR HANDLER: Handle WebSocket protocol mismatches globally
+        this.setupGlobalErrorHandler();
+        
+        // ✅ API LOGGING: All collaboration endpoints have JSON response logging enabled
+        
+        // ✅ COMPLIANCE: Debug collaboration endpoints code removed
+        
+        // Set a timeout to mark auth as loaded if no headers arrive
+        setTimeout(() => {
+            if (!this.hasReceivedInitialAuthHeaders) {
+                console.log('⏱️ Auth timeout - marking as loaded without headers');
+                this.hasReceivedInitialAuthHeaders = true;
+                
+                // Process any deferred local connections (collaborative won't work without auth)
+                if (this.deferredLocalConnection) {
+                    const { owner, permlink } = this.deferredLocalConnection;
+                    console.log('🔄 Processing deferred local connection after timeout:', { owner, permlink });
+                    this.deferredLocalConnection = null;
+                    this.$nextTick(() => {
+                        this.autoConnectToLocalDocument(owner, permlink).catch(error => {
+                            console.error('❌ Deferred local connection failed:', error);
+                        });
+                    });
+                }
+            }
+        }, 1000); // 1 second timeout
+        
+        try {
+            // Initialize managers
+            this.documentManager = new DocumentManager(this);
+            this.recoveryManager = new RecoveryManager(this);
+            this.contentStateManager = new ContentStateManager(this);
+            
+            // ✅ COMPLIANCE: Auth header caching is handled by the parent component
+            // The sessionStorage cache is used for API calls when headers expire mid-session
+            // We don't auto-restore here to prevent triggering keychain on every mount
+            
+            // ✅ TIPTAP BEST PRACTICE: Check URL parameters FIRST before any other initialization
+            const urlParams = new URLSearchParams(window.location.search);
+            const collabOwner = urlParams.get('collab_owner');
+            const collabPermlink = urlParams.get('collab_permlink');
+            const localOwner = urlParams.get('local_owner');
+            const localPermlink = urlParams.get('local_permlink');
+            
+            console.log('🔍 URL Parameters detected (checking first):', {
+                collabOwner, collabPermlink, localOwner, localPermlink
+            });
+            
+            // ✅ OFFLINE-FIRST: Preload all cached data for instant display
+            this.loadCachedCollaborativeDocs();
+            this.loadPersistedPermissions();
+            
+            // ✅ PERFORMANCE: Pre-load permissions and metadata for collaborative documents
+            if (collabOwner && collabPermlink) {
+                this.preloadCollaborativePermissions(collabOwner, collabPermlink);
+                const cachedMetadata = this.preloadCollaborativeMetadata(collabOwner, collabPermlink);
+                if (cachedMetadata && cachedMetadata.documentName) {
+                    console.log('📄 Preloaded document name from cache:', cachedMetadata.documentName);
+                    this.reactiveDocumentName = cachedMetadata.documentName;
+                }
+            }
+            
+            if (collabOwner && collabPermlink) {
+                // ✅ AUTHENTICATION CHECK: Handle auth loading state properly
+                if (this.authLoading) {
+                    console.log('🔐 Authentication loading, deferring collaborative document load');
+                    // The authenticationState watcher will handle it when auth completes
+                    // Create a temp document for now
+                    this.documentManager.newDocument();
+                } else if (this.isAuthenticated) {
+                    console.log('🔐 Already authenticated, loading collaborative document immediately');
+                    this.isLoadingFromURL = true;
+                    this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
+                        console.error('❌ Failed to auto-connect to collaborative document:', error);
+                        
+                        // ✅ SMART ERROR HANDLING: Only clear URL for permanent errors
+                        const isTemporaryError = error.message.includes('fetch') || 
+                                               error.message.includes('network') || 
+                                               error.message.includes('timeout') ||
+                                               error.message.includes('authentication') ||
+                                               error.message.includes('permission') ||
+                                               error.message.includes('updateReactiveDocumentName is not a function') ||
+                                               error.message.includes('not a function');
+                        
+                        if (!isTemporaryError) {
+                            // Clear bad URL parameters and fall back to temp document for permanent errors
+                            console.warn('🔗 MOUNTED: Clearing URL due to permanent error:', error.message);
+                        this.clearCollabURLParams();
+                            this.documentManager.newDocument();
+                        } else {
+                            // Keep URL for temporary errors - show error but allow retry
+                            console.log('🔗 MOUNTED: Keeping URL for temporary error - user can refresh to retry');
+                            // Still create a temp document so user has something to work with
+                            this.documentManager.newDocument();
+                            // ✅ FIX: Reset loading flag to allow retry
+                            this.isLoadingFromURL = false;
+                        }
+                    });
+                } else {
+                    console.log('🔐 Not authenticated yet, will load collaborative document when auth completes', {
+                        authLoading: this.authLoading,
+                        isAuthenticated: this.isAuthenticated,
+                        authState: this.authenticationState
+                    });
+                    // The authLoading watcher will handle loading when auth completes
+                    // Set up deferred connection
+                    this.deferredCollabConnection = { owner: collabOwner, permlink: collabPermlink };
+                    this.showLoadingMessage = 'Waiting for authentication...';
+                    this.loadingStates.auth = true;
+                }
+                
+            } else if (localOwner && localPermlink) {
+                // ✅ TIPTAP BEST PRACTICE: Non-blocking local document loading
+                this.isLoadingFromURL = true;
+                this.autoConnectToLocalDocument(localOwner, localPermlink).catch(error => {
+                    console.error('❌ Failed to auto-connect to local document:', error);
+                    // ✅ FIX: Don't clear URL on failed document load - preserve for retry
+                    // User may need to log in or document may be temporarily unavailable
+                    console.warn('⚠️ Document load failed - preserving URL for potential retry');
+                    this.documentManager.newDocument();
+                });
+                
+            } else {
+                // ✅ TIPTAP BEST PRACTICE: Non-blocking initialization
+                
+                // Load document lists in background (non-blocking)
+                this.refreshDocumentLists().catch(error => {
+                    console.warn('⚠️ Background document list loading failed:', error);
+                });
+                
+                // Create new temp document immediately (non-blocking)
+                this.documentManager.newDocument().catch(error => {
+                    console.error('❌ Failed to create new document:', error);
+                });
+            }
+            
+        } catch (error) {
+            console.error('❌ Failed to initialize TipTap modular editor:', error);
+            
+            // Check if TipTap collaboration bundle is missing
+            const bundle = window.TiptapCollaboration;
+            if (!bundle) {
+                console.error('❌ TipTap collaboration bundle not found. Please ensure TipTap dependencies are loaded.');
+            }
+            throw error;
+        }
+        
+        // ✅ TIPTAP BEST PRACTICE: Load persisted permissions for offline-first access
+        this.loadPersistedPermissions();
+        
+        // ✅ COLLABORATIVE USER WIDGET: Initialize user color and awareness
+        this.initializeUserColor();
+        
+        // ✅ REACTIVE PATTERNS: All debounced methods are now defined as reactive methods below
+        // No legacy timeout-based method creation during component initialization
+        
+        // ✅ OFFLINE-FIRST: Start permission refresh system when authenticated
+        this.$nextTick(() => {
+            // Only start permission refresh if already authenticated
+            // This won't trigger keychain because it only runs if auth is valid
+            if (this.isAuthenticated && !this.isAuthExpired) {
+                this.startPermissionRefresh();
+            }
+            
+            // ✅ SERVER VERSION: Check server version on startup (non-blocking)
+            this.checkServerVersion().catch(error => {
+                console.warn('⚠️ Background server version check failed:', error);
+            });
+        });
+        
+        // ✅ STATE MONITORING: Add keyboard shortcuts for debug commands
+        this.setupDebugKeyboardShortcuts();
+        
+        // ✅ DEFERRED AUTH CHECK: Check for collaborative document after component is fully mounted
+        // Get URL params again for deferred loading check (they were defined in try block scope)
+        const urlParamsDeferred = new URLSearchParams(window.location.search);
+        const deferredCollabOwner = urlParamsDeferred.get('collab_owner');
+        const deferredCollabPermlink = urlParamsDeferred.get('collab_permlink');
+        
+        this.$nextTick(() => {
+            // If we have collaborative URL params but haven't started loading yet
+            if (deferredCollabOwner && deferredCollabPermlink && !this.isLoadingFromURL && !this.currentFile) {
+                // Check if auth has already completed
+                if (!this.authLoading && this.isAuthenticated) {
+                    console.log('🔐 Component mounted with auth ready, loading collaborative document');
+                    this.isLoadingFromURL = true;
+                    this.autoConnectToCollaborativeDocument(deferredCollabOwner, deferredCollabPermlink).catch(error => {
+                        console.error('❌ Failed to auto-connect to collaborative document:', error);
+                        this.isLoadingFromURL = false;
+                        
+                        const isTemporaryError = error.message.includes('fetch') || 
+                                               error.message.includes('network') || 
+                                               error.message.includes('timeout');
+                        
+                        if (!isTemporaryError) {
+                            console.warn('🔗 Clearing URL due to permanent error');
+                            this.clearCollabURLParams();
+                        }
+                        
+                        // Create a temp document if we don't have one
+                        if (!this.currentFile) {
+                            this.documentManager.newDocument();
+                        }
+                    });
+                }
+            }
+        });
+    },
+    
+    watch: {
+        // ✅ AUTHENTICATION REACTIVITY: Load collaborative documents when auth completes
+        authenticationState: {
+            handler(newState, oldState) {
+                // Only proceed if changing TO authenticated state
+                if (newState !== 'authenticated') return;
+                
+                // Skip if already loading from URL
+                if (this.isLoadingFromURL) return;
+                
+                console.log('🔐 Authentication state changed to authenticated, checking for collaborative URL');
+                
+                // Check for collaborative URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const collabOwner = urlParams.get('collab_owner');
+                const collabPermlink = urlParams.get('collab_permlink');
+                
+                if (collabOwner && collabPermlink && !this.isLoadingFromURL) {
+                    console.log('🔐 Authentication complete, loading collaborative document:', {
+                        owner: collabOwner,
+                        permlink: collabPermlink
+                    });
+                    this.isLoadingFromURL = true;
+                    this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
+                        console.error('❌ Failed to auto-connect to collaborative document:', error);
+                        this.isLoadingFromURL = false;
+                        
+                        // Check if it's a temporary error
+                        const isTemporaryError = error.message.includes('fetch') || 
+                                               error.message.includes('network') || 
+                                               error.message.includes('timeout');
+                        
+                        if (!isTemporaryError) {
+                            console.warn('🔗 Clearing URL due to permanent error');
+                            this.clearCollabURLParams();
+                            this.documentManager.newDocument();
+                        }
+                    });
+                }
+            },
+            immediate: false
         },
         
         // ✅ AUTO-REFRESH: Automatically refresh document list when load modal opens
@@ -5984,6 +6239,7 @@ export default {
             },
             immediate: false
         },
+        
         
         authHeaders: {
             handler(newHeaders, oldHeaders) {
@@ -6447,217 +6703,6 @@ export default {
             }
         }
     },
-    
-    
-    async mounted() {
-        // ✅ PROTOCOL ERROR HANDLER: Handle WebSocket protocol mismatches globally
-        this.setupGlobalErrorHandler();
-        
-        // ✅ API LOGGING: All collaboration endpoints have JSON response logging enabled
-        
-        // ✅ COMPLIANCE: Debug collaboration endpoints code removed
-        
-        // Set a timeout to mark auth as loaded if no headers arrive
-        setTimeout(() => {
-            if (!this.hasReceivedInitialAuthHeaders) {
-                console.log('⏱️ Auth timeout - marking as loaded without headers');
-                this.hasReceivedInitialAuthHeaders = true;
-                
-                // Process any deferred local connections (collaborative won't work without auth)
-                if (this.deferredLocalConnection) {
-                    const { owner, permlink } = this.deferredLocalConnection;
-                    console.log('🔄 Processing deferred local connection after timeout:', { owner, permlink });
-                    this.deferredLocalConnection = null;
-                    this.$nextTick(() => {
-                        this.autoConnectToLocalDocument(owner, permlink).catch(error => {
-                            console.error('❌ Deferred local connection failed:', error);
-                        });
-                    });
-                }
-            }
-        }, 1000); // 1 second timeout
-        
-        try {
-            // Initialize managers
-            this.documentManager = new DocumentManager(this);
-            this.recoveryManager = new RecoveryManager(this);
-            this.contentStateManager = new ContentStateManager(this);
-            
-            // ✅ COMPLIANCE: Auth header caching is handled by the parent component
-            // The sessionStorage cache is used for API calls when headers expire mid-session
-            // We don't auto-restore here to prevent triggering keychain on every mount
-            
-            // ✅ TIPTAP BEST PRACTICE: Check URL parameters FIRST before any other initialization
-            const urlParams = new URLSearchParams(window.location.search);
-            const collabOwner = urlParams.get('collab_owner');
-            const collabPermlink = urlParams.get('collab_permlink');
-            const localOwner = urlParams.get('local_owner');
-            const localPermlink = urlParams.get('local_permlink');
-            
-            console.log('🔍 URL Parameters detected (checking first):', {
-                collabOwner, collabPermlink, localOwner, localPermlink
-            });
-            
-            // ✅ OFFLINE-FIRST: Preload all cached data for instant display
-            this.loadCachedCollaborativeDocs();
-            this.loadPersistedPermissions();
-            
-            // ✅ PERFORMANCE: Pre-load permissions and metadata for collaborative documents
-            if (collabOwner && collabPermlink) {
-                this.preloadCollaborativePermissions(collabOwner, collabPermlink);
-                const cachedMetadata = this.preloadCollaborativeMetadata(collabOwner, collabPermlink);
-                if (cachedMetadata && cachedMetadata.documentName) {
-                    console.log('📄 Preloaded document name from cache:', cachedMetadata.documentName);
-                    this.reactiveDocumentName = cachedMetadata.documentName;
-                }
-            }
-            
-            if (collabOwner && collabPermlink) {
-                // ✅ AUTHENTICATION CHECK: Handle auth loading state properly
-                if (this.authLoading) {
-                    console.log('🔐 Authentication loading, deferring collaborative document load');
-                    // The authenticationState watcher will handle it when auth completes
-                    // Create a temp document for now
-                    this.documentManager.newDocument();
-                } else if (this.isAuthenticated) {
-                    console.log('🔐 Already authenticated, loading collaborative document immediately');
-                    this.isLoadingFromURL = true;
-                    this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
-                        console.error('❌ Failed to auto-connect to collaborative document:', error);
-                        
-                        // ✅ SMART ERROR HANDLING: Only clear URL for permanent errors
-                        const isTemporaryError = error.message.includes('fetch') || 
-                                               error.message.includes('network') || 
-                                               error.message.includes('timeout') ||
-                                               error.message.includes('authentication') ||
-                                               error.message.includes('permission') ||
-                                               error.message.includes('updateReactiveDocumentName is not a function') ||
-                                               error.message.includes('not a function');
-                        
-                        if (!isTemporaryError) {
-                            // Clear bad URL parameters and fall back to temp document for permanent errors
-                            console.warn('🔗 MOUNTED: Clearing URL due to permanent error:', error.message);
-                        this.clearCollabURLParams();
-                            this.documentManager.newDocument();
-                        } else {
-                            // Keep URL for temporary errors - show error but allow retry
-                            console.log('🔗 MOUNTED: Keeping URL for temporary error - user can refresh to retry');
-                            // Still create a temp document so user has something to work with
-                            this.documentManager.newDocument();
-                            // ✅ FIX: Reset loading flag to allow retry
-                            this.isLoadingFromURL = false;
-                        }
-                    });
-                } else {
-                    console.log('🔐 Not authenticated yet, will load collaborative document when auth completes', {
-                        authLoading: this.authLoading,
-                        isAuthenticated: this.isAuthenticated,
-                        authState: this.authenticationState
-                    });
-                    // The authLoading watcher will handle loading when auth completes
-                    // Set up deferred connection
-                    this.deferredCollabConnection = { owner: collabOwner, permlink: collabPermlink };
-                    this.showLoadingMessage = 'Waiting for authentication...';
-                    this.loadingStates.auth = true;
-                }
-                
-            } else if (localOwner && localPermlink) {
-                // ✅ TIPTAP BEST PRACTICE: Non-blocking local document loading
-                this.isLoadingFromURL = true;
-                this.autoConnectToLocalDocument(localOwner, localPermlink).catch(error => {
-                    console.error('❌ Failed to auto-connect to local document:', error);
-                    // ✅ FIX: Don't clear URL on failed document load - preserve for retry
-                    // User may need to log in or document may be temporarily unavailable
-                    console.warn('⚠️ Document load failed - preserving URL for potential retry');
-                    this.documentManager.newDocument();
-                });
-                
-            } else {
-                // ✅ TIPTAP BEST PRACTICE: Non-blocking initialization
-                
-                // Load document lists in background (non-blocking)
-                this.refreshDocumentLists().catch(error => {
-                    console.warn('⚠️ Background document list loading failed:', error);
-                });
-                
-                // Create new temp document immediately (non-blocking)
-                this.documentManager.newDocument().catch(error => {
-                    console.error('❌ Failed to create new document:', error);
-                });
-            }
-            
-        } catch (error) {
-            console.error('❌ Failed to initialize TipTap modular editor:', error);
-            
-            // Check if TipTap collaboration bundle is missing
-            const bundle = window.TiptapCollaboration;
-            if (!bundle) {
-                console.error('❌ TipTap collaboration bundle not found. Please ensure TipTap dependencies are loaded.');
-            }
-            throw error;
-        }
-        
-        // ✅ TIPTAP BEST PRACTICE: Load persisted permissions for offline-first access
-        this.loadPersistedPermissions();
-        
-        // ✅ COLLABORATIVE USER WIDGET: Initialize user color and awareness
-        this.initializeUserColor();
-        
-        // ✅ REACTIVE PATTERNS: All debounced methods are now defined as reactive methods below
-        // No legacy timeout-based method creation during component initialization
-        
-        // ✅ OFFLINE-FIRST: Start permission refresh system when authenticated
-        this.$nextTick(() => {
-            // Only start permission refresh if already authenticated
-            // This won't trigger keychain because it only runs if auth is valid
-            if (this.isAuthenticated && !this.isAuthExpired) {
-                this.startPermissionRefresh();
-            }
-            
-            // ✅ SERVER VERSION: Check server version on startup (non-blocking)
-            this.checkServerVersion().catch(error => {
-                console.warn('⚠️ Background server version check failed:', error);
-            });
-        });
-        
-        // ✅ STATE MONITORING: Add keyboard shortcuts for debug commands
-        this.setupDebugKeyboardShortcuts();
-        
-        // ✅ DEFERRED AUTH CHECK: Check for collaborative document after component is fully mounted
-        // Get URL params again for deferred loading check (they were defined in try block scope)
-        const urlParamsDeferred = new URLSearchParams(window.location.search);
-        const deferredCollabOwner = urlParamsDeferred.get('collab_owner');
-        const deferredCollabPermlink = urlParamsDeferred.get('collab_permlink');
-        
-        this.$nextTick(() => {
-            // If we have collaborative URL params but haven't started loading yet
-            if (deferredCollabOwner && deferredCollabPermlink && !this.isLoadingFromURL && !this.currentFile) {
-                // Check if auth has already completed
-                if (!this.authLoading && this.isAuthenticated) {
-                    console.log('🔐 Component mounted with auth ready, loading collaborative document');
-                    this.isLoadingFromURL = true;
-                    this.autoConnectToCollaborativeDocument(deferredCollabOwner, deferredCollabPermlink).catch(error => {
-                        console.error('❌ Failed to auto-connect to collaborative document:', error);
-                        this.isLoadingFromURL = false;
-                        
-                        const isTemporaryError = error.message.includes('fetch') || 
-                                               error.message.includes('network') || 
-                                               error.message.includes('timeout');
-                        
-                        if (!isTemporaryError) {
-                            console.warn('🔗 Clearing URL due to permanent error');
-                            this.clearCollabURLParams();
-                        }
-                        
-                        // Create a temp document if we don't have one
-                        if (!this.currentFile) {
-                            this.documentManager.newDocument();
-                        }
-                    });
-                }
-            }
-        });
-    },
 
     async beforeUnmount() {
         this.isUnmounting = true;
@@ -6936,8 +6981,10 @@ export default {
         displayTitleExists() {
             // For template validation display  
             return Boolean(this.titleInput ? this.titleInput.trim() : '');
-        },
-        
+        }
+    },
+    
+    methods: {
         // ===== AUTHENTICATION HANDLING =====
         
         // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
@@ -8681,8 +8728,8 @@ export default {
         validateHiveRequirements() {
             const errors = [];
             
-            // ✅ TIPTAP BEST PRACTICE: Use reactive data for title
-            const titleText = this.titleInput || '';
+            // ✅ TIPTAP BEST PRACTICE: Use method calls for display data
+            const titleText = this.displayTitleForUI();
             const permlink = this.actualPermlink;
             
             // Get tags from Y.js metadata
