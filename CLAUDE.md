@@ -32,13 +32,13 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 ```javascript
 // 1. CONFIG MAP - Document metadata (handled by config observer)
 ydoc.getMap('config')
-  .set('title', 'Document Title')         // → titleInput (with recursion protection)
-  .set('documentName', 'My Document')     // → currentFile.name/documentName/title
+  .set('documentName', 'My Document')     // → currentFile.name/documentName (auto-set from title if default)
   .set('lastModified', '2024-01-01T12:00:00Z')
   .set('owner', 'username')               // Document owner
 
 // 2. METADATA MAP - Publishing data (handled by metadata observer)
 ydoc.getMap('metadata')
+  .set('title', 'Document Title')         // → titleInput (with recursion protection)
   .set('tags', ['tag1', 'tag2'])          // → reactiveTags + content.tags
   .set('beneficiaries', [{account: 'alice', weight: 500}])  // → reactiveBeneficiaries + content.beneficiaries
   .set('customJson', { app: 'dlux/1.0' }) // → reactiveCustomJson + customJsonString
@@ -61,16 +61,16 @@ ydoc.getMap('permissions')  // DO NOT modify directly
 ### Two-Observer System
 The system uses two dedicated Y.js observers for clean separation of concerns:
 
-- **CONFIG OBSERVER**: Document-level metadata (title, documentName)
-- **METADATA OBSERVER**: Publishing metadata (tags, beneficiaries, permlink, comment options, customJson)
+- **CONFIG OBSERVER**: Document management metadata (documentName, owner, lastModified)
+- **METADATA OBSERVER**: Publishing metadata (title, tags, beneficiaries, permlink, comment options, customJson)
 
 ### Field Sync Patterns
 ```javascript
 // CONFIG MAP → Vue reactive properties
-title         → titleInput (with recursion protection)
-documentName  → currentFile.name/documentName/title
+documentName  → currentFile.name/documentName (auto-set from title if default)
 
 // METADATA MAP → Vue reactive properties  
+title         → titleInput (with recursion protection)
 tags          → reactiveTags + content.tags
 beneficiaries → reactiveBeneficiaries + content.beneficiaries
 permlink      ↔ permlinkInput (bidirectional with recursion protection)
@@ -217,6 +217,17 @@ Key issues covered:
 - Memory management and cleanup
 
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
+
+## Recent Updates (v2025.06.24)
+### ✅ Title Field Migration to Metadata Map
+- **Issue Fixed**: Title was inconsistently stored in config map while other Hive post attributes were in metadata
+- **Solution**: Moved title from config map to metadata map for logical grouping with other publishable fields
+- **Result**: Cleaner architecture - config map for document management, metadata map for all Hive post attributes
+
+### ✅ Save Indicator Fix for All Input Fields
+- **Issue Fixed**: Save indicator only showed for body editor, not for title/tags/beneficiaries changes
+- **Solution**: Applied consistent updateSaveStatus() pattern to all field handlers
+- **Result**: "Saving locally..." message now appears immediately for all user inputs
 
 ## Recent Updates (v2025.06.24)
 ### ✅ File > New Reset Fix

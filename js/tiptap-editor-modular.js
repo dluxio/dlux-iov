@@ -2523,15 +2523,7 @@ class SyncManager {
                             }
                         }
                     
-                    // ✅ NEW: Handle title changes (single editor solution)
-                    if (key === 'title' && (change.action === 'update' || change.action === 'add')) {
-                        const newTitle = config.get('title');
-                        if (this.component) {
-                            this.component.$nextTick(() => {
-                                this.component.titleInput = newTitle || '';
-                            });
-                        }
-                    }
+                    // Title moved to metadata map
                     
                     // ✅ RECURSION FIX: Permlink now handled by metadata observer, not config
                     // Config observer should NOT handle permlink anymore
@@ -2543,17 +2535,6 @@ class SyncManager {
             
             // ✅ BEST PRACTICE: Attach observer with reference for cleanup
             config.observe(this.configObserver);
-            
-            // ✅ SINGLE EDITOR: Load initial title from config (permlink now in metadata)
-            const initialTitle = config.get('title');
-            
-            if (this.component) {
-                this.component.$nextTick(() => {
-                    if (initialTitle !== undefined) {
-                        this.component.titleInput = initialTitle || '';
-                    }
-                });
-            }
             
             // ✅ METADATA OBSERVER: Sync metadata changes for UI reactivity
             const metadata = yjsDoc.getMap('metadata');
@@ -2624,6 +2605,21 @@ class SyncManager {
                     }
                 }
                 
+                // ✅ NEW: Handle title changes (moved from config to metadata)
+                if (event.keysChanged.has('title')) {
+                    const newTitle = metadata.get('title') || '';
+                    this.component.$nextTick(() => {
+                        this.component.titleInput = newTitle;
+                        
+                        // ✅ FIX: Set save indicator when title changes from Y.js
+                        if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
+                            this.component.hasUnsavedChanges = true;
+                            this.component.hasUserIntent = true;
+                            this.component.updateSaveStatus();
+                        }
+                    });
+                }
+                
                 // ✅ FIX: Set unsaved changes flags when metadata changes
                 if (event.keysChanged.size > 0) {
                     // Only log significant changes, not every metadata field
@@ -2648,6 +2644,14 @@ class SyncManager {
             };
             
             metadata.observe(this.metadataObserver);
+            
+            // ✅ INITIAL LOAD: Load title from metadata (moved from config)
+            const initialTitle = metadata.get('title');
+            if (this.component && initialTitle !== undefined) {
+                this.component.$nextTick(() => {
+                    this.component.titleInput = initialTitle || '';
+                });
+            }
             
             // ✅ RECURSION FIX: Don't load initial permlink into permlinkInput
             // permlinkInput is user input only - metadata provides separate reactive value
@@ -5957,12 +5961,11 @@ export default {
                     this.debouncedSetTitleInConfig();
                 }
                 
-                // Then trigger auto-save if needed:
-                // 1. We have a Y.js document
-                // 2. Title actually changed 
-                // 3. Document isn't temporary anymore
-                if (this.ydoc && newTitle !== oldTitle && !this.isTemporaryDocument) {
+                // ✅ FIX: Show save indicator for all persistent documents, not just non-temporary
+                // Check if we have persistence (either not temporary OR has IndexedDB)
+                if (this.ydoc && newTitle !== oldTitle && (!this.isTemporaryDocument || this.indexeddbProvider)) {
                     // Set unsaved changes flag
+                    console.log('🔍 Title watcher: Setting hasUnsavedChanges = true');
                     this.hasUnsavedChanges = true;
                     this.hasUserIntent = true;
                     
@@ -11738,11 +11741,12 @@ export default {
                 hasIndexeddbProvider: !!this.indexeddbProvider
             });
 
-            // ✅ Y.js TRANSACTION: Store title in config map using individual transaction pattern
+            // ✅ Y.js TRANSACTION: Store title in metadata map using individual transaction pattern
             if (this.ydoc && this.titleInput !== undefined) {
                 this.ydoc.transact(() => {
+                    const metadata = this.ydoc.getMap('metadata');
+                    metadata.set('title', this.titleInput || '');
                     const config = this.ydoc.getMap('config');
-                    config.set('title', this.titleInput || '');
                     config.set('lastModified', new Date().toISOString());
                 }, 'title-update'); // Origin tag for debugging
             }
@@ -11762,7 +11766,25 @@ export default {
             // ✅ AUTO-SAVE TRIGGER: Mark as unsaved and trigger auto-save
             // ✅ READ-ONLY PROTECTION: Block save operations for read-only users
             if (!this.isReadOnlyMode) {
-                this.hasUnsavedChanges = true;
+                // ✅ FIX: Apply same pattern as body editor for immediate save indicator
+                if (!this.isTemporaryDocument || this.indexeddbProvider) {
+                    // For persistent documents, always track changes and show indicator
+                    console.log('🔍 Setting hasUnsavedChanges = true from title input');
+                    this.hasUnsavedChanges = true;
+                    this.hasUserIntent = true;
+                    // Call updateSaveStatus directly to ensure message shows
+                    this.$nextTick(() => {
+                        this.updateSaveStatus();
+                    });
+                } else {
+                    // For temporary documents, still show save indicator
+                    this.hasUnsavedChanges = true;
+                    this.hasUserIntent = true;
+                    // Call updateSaveStatus directly to ensure message shows
+                    this.$nextTick(() => {
+                        this.updateSaveStatus();
+                    });
+                }
                 this.debouncedUpdateContent();
             }
         },
@@ -11775,10 +11797,20 @@ export default {
 
             this.titleUpdateTimeout = setTimeout(() => {
                 if (this.titleInput && this.titleInput.trim()) {
-                    // ✅ Y.js TRANSACTION: Update document name with individual transaction
+                    // ✅ Y.js TRANSACTION: Update document name only if not already set
                     this.ydoc.transact(() => {
                         const config = this.ydoc.getMap('config');
-                        config.set('documentName', this.titleInput.trim());
+                        const currentDocName = config.get('documentName');
+                        
+                        // Only update documentName if it's not already set or is a default name
+                        // Use same eligibility check as body editor for consistency
+                        if (!currentDocName || 
+                            currentDocName === '' || 
+                            currentDocName.startsWith('Untitled - ') ||
+                            currentDocName === 'New Document' ||
+                            currentDocName.length < 3) {
+                            config.set('documentName', this.titleInput.trim());
+                        }
                         config.set('lastModified', new Date().toISOString());
                     }, 'document-name-sync'); // Origin tag for debugging
 
@@ -11887,6 +11919,16 @@ export default {
             // ✅ READ-ONLY PROTECTION: Block save operations for read-only users
             if (!this.isReadOnlyMode) {
                 this.hasUnsavedChanges = true;
+                this.hasUserIntent = true;
+                
+                // ✅ FIX: Apply same pattern as body editor for immediate save indicator
+                if (!this.isTemporaryDocument || this.indexeddbProvider) {
+                    // Call updateSaveStatus directly to ensure message shows
+                    this.$nextTick(() => {
+                        this.updateSaveStatus();
+                    });
+                }
+                
                 this.debouncedUpdateContent();
             }
         },
@@ -12158,19 +12200,21 @@ export default {
                 
                 // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
                 this.ydoc.transact(() => {
-                    const config = this.ydoc.getMap('config');
-                    if (!config) {
-                        console.warn('⚠️ Could not access Y.js config map');
+                    const metadata = this.ydoc.getMap('metadata');
+                    if (!metadata) {
+                        console.warn('⚠️ Could not access Y.js metadata map');
                         return;
                     }
                     
-                    config.set('title', title || '');
+                    metadata.set('title', title || '');
+                    
+                    const config = this.ydoc.getMap('config');
                     config.set('lastModified', new Date().toISOString());
                 }, 'title-update'); // Origin tag to identify this transaction
                 
                 return true;
             } catch (error) {
-                console.error('❌ Failed to set title in Y.js config:', error);
+                console.error('❌ Failed to set title in Y.js metadata:', error);
                 return false;
             }
         },

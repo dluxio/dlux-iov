@@ -114,12 +114,7 @@ When reading code examples that reference `titleEditor`, understand that in the 
 const config = yjsDoc.getMap('config');
 this.configObserver = (event) => {
     event.changes.keys.forEach((change, key) => {
-        if (key === 'title' && (change.action === 'update' || change.action === 'add')) {
-            const newTitle = config.get('title');
-            this.component.$nextTick(() => {
-                this.component.titleInput = newTitle || '';
-            });
-        }
+        // Title moved to metadata map
         if (key === 'documentName' && (change.action === 'update' || change.action === 'add')) {
             const newDocumentName = config.get('documentName');
             this.component.currentFile.name = newDocumentName;
@@ -10590,8 +10585,8 @@ Based on codebase analysis, these fields need reactive wrappers:
 | metadata | maxAcceptedPayout | Direct assignment | `reactiveCommentOptions.maxAcceptedPayout` ❌ |
 | metadata | percentHbd | Direct assignment | `reactiveCommentOptions.percentHbd` ❌ |
 | config | documentName | Partial reactive | `reactiveDocumentName` ⚠️ |
-| config | title | Input binding | `titleInput` ✅ |
-| config | permlink | Input binding | `permlinkInput` ✅ |
+| metadata | title | Input binding | `titleInput` ✅ |
+| metadata | permlink | Input binding | `permlinkInput` ✅ |
 
 Legend: ✅ = Implemented, ⚠️ = Partial, ❌ = Missing
 
