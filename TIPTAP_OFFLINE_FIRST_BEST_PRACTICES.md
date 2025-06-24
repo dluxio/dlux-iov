@@ -4,7 +4,13 @@
 
 This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
 
-### 🚀 **Latest Updates (v2025.01.23)**
+### 🚀 **Latest Updates (v2025.06.24)**
+- **Permlink Sync Resolution**: Fixed bidirectional sync between owner and editor users
+- **Observer Architecture**: Unified two-observer system handling all metadata fields
+- **Recursion Protection**: Robust circular update prevention for all reactive fields
+- **Field Consistency**: All metadata fields now consistently handled by observers
+
+### 🚀 **Previous Updates (v2025.01.23)**
 - **Single Editor Architecture**: Title now uses simple input field, body uses TipTap
 - **Consolidated Y.js Maps**: All metadata in single `metadata` map
 - **Vue 3 Integration**: Proper use of `markRaw()` for editor instances
@@ -94,6 +100,95 @@ When reading code examples that reference `titleEditor`, understand that in the 
 - `this.titleEditor.getText()` → `this.titleInput`
 - `this.titleEditor.commands.setContent()` → `this.titleInput = value`
 - Title content is synchronized to Y.js config map via input event handlers
+
+### 🔧 **OBSERVER ARCHITECTURE PATTERN**
+
+**DLUX IOV uses a two-observer system** for clean separation of concerns and optimal performance:
+
+#### **1. CONFIG OBSERVER** - Document-Level Metadata
+```javascript
+// Handles document structure and identity
+const config = yjsDoc.getMap('config');
+this.configObserver = (event) => {
+    event.changes.keys.forEach((change, key) => {
+        if (key === 'title' && (change.action === 'update' || change.action === 'add')) {
+            const newTitle = config.get('title');
+            this.component.$nextTick(() => {
+                this.component.titleInput = newTitle || '';
+            });
+        }
+        if (key === 'documentName' && (change.action === 'update' || change.action === 'add')) {
+            const newDocumentName = config.get('documentName');
+            this.component.currentFile.name = newDocumentName;
+            this.component.currentFile.documentName = newDocumentName;
+        }
+    });
+};
+config.observe(this.configObserver);
+```
+
+#### **2. METADATA OBSERVER** - Publishing Metadata
+```javascript
+// Handles publishing-related fields with reactive patterns
+const metadata = yjsDoc.getMap('metadata');
+this.metadataObserver = (event) => {
+    // Update reactive properties for Vue tracking
+    this.component.reactiveTags = metadata.get('tags') || [];
+    this.component.reactiveBeneficiaries = metadata.get('beneficiaries') || [];
+    this.component.reactiveCustomJson = { ...metadata.get('customJson') || {} };
+    
+    // Handle comment options
+    this.component.reactiveCommentOptions = {
+        allowVotes: metadata.get('allowVotes') !== false,
+        allowCurationRewards: metadata.get('allowCurationRewards') !== false,
+        maxAcceptedPayout: metadata.get('maxAcceptedPayout') === true,
+        percentHbd: metadata.get('percentHbd') === true
+    };
+    
+    // ✅ BIDIRECTIONAL SYNC: Handle permlink changes from remote users
+    if (event.keysChanged.has('permlink')) {
+        const newPermlink = metadata.get('permlink') || '';
+        // Only update permlinkInput if not currently updating and it's a custom permlink
+        if (!this.component._isUpdatingPermlink && newPermlink !== this.component.generatedPermlink) {
+            this.component.permlinkInput = newPermlink;
+        }
+    }
+};
+metadata.observe(this.metadataObserver);
+```
+
+#### **Recursion Protection Patterns**
+
+**1. Flag-Based Protection (for bidirectional fields):**
+```javascript
+// Permlink uses flag protection for bidirectional sync
+permlinkInput: {
+    handler(newPermlink, oldPermlink) {
+        if (this._isUpdatingPermlink) return; // Prevent recursion
+        this.debouncedSetPermlinkInMetadata();
+    }
+}
+
+// Y.js observer respects the flag
+if (event.keysChanged.has('permlink')) {
+    if (!this.component._isUpdatingPermlink) {
+        this.component.permlinkInput = newPermlink;
+    }
+}
+```
+
+**2. Unidirectional Sync (for simple fields):**
+```javascript
+// Title uses simple unidirectional sync from Y.js to Vue
+// Vue → Y.js via input handlers, Y.js → Vue via observer
+// No recursion because Y.js doesn't trigger Vue watchers directly
+```
+
+#### **Field Distribution Logic**
+- **CONFIG MAP**: Document identity and structure (title, documentName, owner)
+- **METADATA MAP**: Publishing and collaboration data (tags, beneficiaries, permlink, comment options)
+- **Clear Separation**: No overlap between observers, each handles distinct field sets
+- **Performance**: Observers only fire when their specific fields change
 
 ### 📚 **Official Documentation References**
 

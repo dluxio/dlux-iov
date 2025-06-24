@@ -30,22 +30,23 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 ## Y.js Document Structure
 
 ```javascript
-// 1. CONFIG MAP - Document metadata
+// 1. CONFIG MAP - Document metadata (handled by config observer)
 ydoc.getMap('config')
-  .set('documentName', 'My Document')      // Display name
+  .set('title', 'Document Title')         // → titleInput (with recursion protection)
+  .set('documentName', 'My Document')     // → currentFile.name/documentName/title
   .set('lastModified', '2024-01-01T12:00:00Z')
-  .set('owner', 'username')                // Document owner
+  .set('owner', 'username')               // Document owner
 
-// 2. METADATA MAP - Publishing data (consolidated)
+// 2. METADATA MAP - Publishing data (handled by metadata observer)
 ydoc.getMap('metadata')
-  .set('tags', ['tag1', 'tag2'])          // Post tags
-  .set('beneficiaries', [{account: 'alice', weight: 500}])  // 5%
-  .set('customJson', { app: 'dlux/1.0' })  // Custom metadata
-  .set('permlink', 'my-post-url')         // URL slug
-  .set('allowVotes', true)                // Comment options
-  .set('allowCurationRewards', true)
-  .set('maxAcceptedPayout', '1000000.000 SBD')
-  .set('percentHbd', true)
+  .set('tags', ['tag1', 'tag2'])          // → reactiveTags + content.tags
+  .set('beneficiaries', [{account: 'alice', weight: 500}])  // → reactiveBeneficiaries + content.beneficiaries
+  .set('customJson', { app: 'dlux/1.0' }) // → reactiveCustomJson + customJsonString
+  .set('permlink', 'my-post-url')         // ↔ permlinkInput (bidirectional with recursion protection)
+  .set('allowVotes', true)                // → reactiveCommentOptions + commentOptions
+  .set('allowCurationRewards', true)      // → reactiveCommentOptions + commentOptions
+  .set('maxAcceptedPayout', '1000000.000 SBD')  // → reactiveCommentOptions + commentOptions
+  .set('percentHbd', true)                // → reactiveCommentOptions + commentOptions
 
 // 3. PERMISSIONS MAP - Server-managed
 ydoc.getMap('permissions')  // DO NOT modify directly
@@ -54,6 +55,43 @@ ydoc.getMap('permissions')  // DO NOT modify directly
 // Created automatically via Collaboration extension
 // Never access directly - use editor.getText() etc.
 ```
+
+## Observer Architecture
+
+### Two-Observer System
+The system uses two dedicated Y.js observers for clean separation of concerns:
+
+- **CONFIG OBSERVER**: Document-level metadata (title, documentName)
+- **METADATA OBSERVER**: Publishing metadata (tags, beneficiaries, permlink, comment options, customJson)
+
+### Field Sync Patterns
+```javascript
+// CONFIG MAP → Vue reactive properties
+title         → titleInput (with recursion protection)
+documentName  → currentFile.name/documentName/title
+
+// METADATA MAP → Vue reactive properties  
+tags          → reactiveTags + content.tags
+beneficiaries → reactiveBeneficiaries + content.beneficiaries
+permlink      ↔ permlinkInput (bidirectional with recursion protection)
+customJson    → reactiveCustomJson + customJsonString + content.custom_json
+allowVotes    → reactiveCommentOptions + commentOptions.allowVotes
+// ... other comment options follow same pattern
+```
+
+### Recursion Protection
+Critical fields use recursion protection flags:
+- **title**: Uses implicit Vue watcher debouncing
+- **permlink**: Uses `_isUpdatingPermlink` flag to prevent circular updates
+- **Remote vs Local**: Y.js observers only update Vue when not in local update cycle
+
+### File Operations
+**File > New Behavior**:
+- All reactive properties reset to defaults (reactiveTags: [], reactiveBeneficiaries: [], etc.)
+- `permlinkInput` cleared to show generated permlink
+- `titleInput` cleared for new content
+- Y.js document and observers properly cleaned up and recreated
+- Recursion protection flags reset to prevent state pollution
 
 ## API Endpoints
 
@@ -170,6 +208,12 @@ Key issues covered:
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
 
 ## Recent Updates (v2025.06.24)
+### ✅ Permlink Sync Resolution  
+- **Issue Fixed**: Permlink changes now sync correctly between owner and editor users
+- **Root Cause**: Missing permlink handler in metadata observer
+- **Solution**: Added bidirectional permlink sync with recursion protection
+- **Architecture**: Unified observer system handling all metadata fields consistently
+
 ### ⚠️ WebSocket Permission Broadcast System - CLIENT READY, SERVER PENDING
 - **Client-Side**: ✅ Complete - Awareness listener detects and processes permission broadcasts
 - **Server-Side**: ❌ Pending - REST API updates database but not Y.js document

@@ -2607,9 +2607,15 @@ class SyncManager {
                 // ✅ FIX: Handle permlink changes from remote users
                 if (event.keysChanged.has('permlink')) {
                     const newPermlink = metadata.get('permlink') || '';
-                    // Only update permlinkInput if not currently updating and it's a custom permlink
-                    if (!this.component._isUpdatingPermlink && newPermlink !== this.component.generatedPermlink) {
-                        this.component.permlinkInput = newPermlink;
+                    // Only update if not currently updating from local user input
+                    if (!this.component._isUpdatingPermlink) {
+                        if (newPermlink === this.component.generatedPermlink) {
+                            // Auto-generated permlink - clear input to show generated
+                            this.component.permlinkInput = '';
+                        } else if (newPermlink && newPermlink !== this.component.generatedPermlink) {
+                            // Custom permlink - set input to show custom value
+                            this.component.permlinkInput = newPermlink;
+                        }
                     }
                 }
                 
@@ -17318,7 +17324,7 @@ export default {
                     Auto-generate
                   </button>
                 </div>
-                <small class="text-muted">URL-safe characters only. Not synchronized in collaborative mode.</small>
+                <small class="text-muted">URL-safe characters only.</small>
               </div>
 
               <!-- Beneficiaries Section -->
