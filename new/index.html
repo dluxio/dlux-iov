@@ -267,6 +267,21 @@
             transform: scale(1.02);
             border-color: #4ECDC4;
         }
+
+        /* Generic iframe Drop Zone Styles */
+        .iframe-drop-zone {
+            transition: all 0.3s ease;
+        }
+        
+        .iframe-drop-zone.dragover {
+            background-color: rgba(78, 205, 196, 0.1);
+            border-radius: 8px;
+        }
+        
+        .iframe-drop-zone.dragover .bg-darker {
+            border: 2px dashed #4ECDC4;
+            background-color: #1e2329;
+        }
    
     </style>
 </head>
@@ -503,6 +518,14 @@
                                 @click="postCustom_json.vrHash = 'video';types='img,vid'">
                                 <i class="fa-solid fa-film fa-fw"></i><span class="d-none d-md-block ms-2">Video</span>
                             </button>
+                            <!-- ReMix dApp -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'remix'}"
+                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                <i class="fa-solid fa-shuffle fa-fw"></i><span
+                                    class="d-none d-md-flex ms-2 align-items-center">ReMix<span
+                                        class="d-none d-xl-block ms-1">dApp</span></span>
+                            </button>
                             <!-- 360 Image Gallery -->
                             <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
                                 :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
@@ -516,14 +539,6 @@
                                 <i class="fa-solid fa-mobile-screen-button fa-fw"></i><span
                                     class="d-none d-md-flex ms-2 align-items-center"><span
                                         class="d-none d-xl-block me-1">New</span>dApp</span>
-                            </button>
-                            <!-- ReMix dApp -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'remix'}"
-                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-shuffle fa-fw"></i><span
-                                    class="d-none d-md-flex ms-2 align-items-center">ReMix<span
-                                        class="d-none d-xl-block ms-1">dApp</span></span>
                             </button>
                         </div>
                     </div>
@@ -815,26 +830,53 @@
                         </h2>
                         <div id="assetManager" class="accordion-collapse collapse show"
                             data-bs-parent="#assetAccordion">
-                            <div class="accordion-body">
-                                <!-- New 360° Asset Manager Component -->
+                            <div class="accordion-body p-0">
+                                <!-- Generic File Drop Zone for iframe Applications -->
+                                <div class="iframe-drop-zone p-3 mb-0" 
+                                     @drop="handleIframeDrop($event)" 
+                                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
+                                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
+                                     @dragleave="handleDragLeave($event)">
+                                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3 mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
+                                            <div>
+                                                <h6 class="mb-1">Drop Files Here</h6>
+                                                <p class="small text-muted mb-0">
+                                                    Drag files from SPK Drive or use the context menu "Add to 360° Gallery" option
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button class="btn btn-outline-info btn-sm" @click="$refs.iframeFileInput.click()">
+                                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 360° Gallery Builder iFrame -->
                                 <!-- 
                                     Integration Notes:
-                                    - This component manages 360° images with canvas-based editing for focus/horizon adjustment
-                                    - Integrates with SPK Drive for file selection and upload
-                                    - Outputs assets and navigation data according to the 360° gallery format (see readme)
-                                    - Data is passed to TipTap editor via @assets-updated event for blockchain posting
-                                    - SPK contract IDs are preserved for proper asset referencing in posts
+                                    - Monolithic 360° gallery builder runs in iframe for isolation
+                                    - Communicates with parent via window messaging
+                                    - Drag and drop from SPK Drive works across iframe boundary
+                                    - Updates postCustom_json.assets and postCustom_json.navigation via messaging
                                 -->
-                                <asset-360-manager
-                                    v-if="account"
-                                    :account="account"
-                                    :spk-api="spkapi"
-                                    :initial-assets="postCustom_json.assets || []"
-                                    :initial-navigation="postCustom_json.navigation || []"
-                                    :spk-file-to-add="handleSPKFileForAssets"
-                                    @assets-updated="handle360AssetsUpdated($event)"
-                                    @tosign="sendIt($event)">
-                                </asset-360-manager>
+                                <div v-if="account" style="height: 800px; min-height: 800px;">
+                                    <iframe 
+                                        ref="gallery360Iframe"
+                                        src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
+                                        width="100%" 
+                                        height="100%"
+                                        frameborder="0"
+                                        style="border-radius: 8px;"
+                                        @load="init360GalleryIframe">
+                                    </iframe>
+                                </div>
+                                
+                                <!-- Hidden File Input for direct uploads -->
+                                <input ref="iframeFileInput" type="file" multiple accept="image/*" @change="handleIframeFileInput" style="display: none;">
                                 
                                 <!-- Fallback when not logged in -->
                                 <div v-else class="text-center text-muted py-5">

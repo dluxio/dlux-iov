@@ -729,7 +729,7 @@ export default {
                 <li v-if="contextMenu.type === 'file' && postComponentAvailable" class="dropdown-divider"></li>
                 <li v-if="contextMenu.type === 'file' && postComponentAvailable">
                     <a class="dropdown-item py-1" href="#" @click="addToPost(contextMenu.item); hideContextMenu();">
-                        <i class="fa-solid fa-plus fa-fw me-2"></i>{{ postType === 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k' ? 'Add to 360 Gallery' : 'Add to Post' }}
+                        <i class="fa-solid fa-plus fa-fw me-2"></i>{{ getAddToPostText() }}
                     </a>
                 </li>
                 
@@ -5136,6 +5136,23 @@ export default {
                 f: file.f,
                 i: file.i
             });
+        },
+
+        // Get context menu text based on post type (generic for any iframe app)
+        getAddToPostText() {
+            switch(this.postType) {
+                case 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k':
+                    return 'Add to 360° Gallery';
+                case 'dapp':
+                    return 'Add to dApp Builder';
+                case 'remix':
+                    return 'Add to ReMix Builder';
+                case 'video':
+                    return 'Add to Video Post';
+                case 'blog':
+                default:
+                    return 'Add to Post';
+            }
         },
     },
     computed: {

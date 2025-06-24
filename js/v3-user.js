@@ -6341,13 +6341,9 @@ function buyNFT(setname, uid, price, type, callback){
       this.post();
     },
 
-    // 360° Asset Manager Integration Methods
+    // 360° Asset Manager Integration Methods (Window Messaging)
     handle360AssetsUpdated(data) {
-      // Integration Point: 360° Asset Manager Data Handler
-      // This method receives the complete 360° gallery data from the Asset Manager including:
-      // - assets: array with index, url, thumb, rotation, title, description, contractId
-      // - navigation: array with fromIndex, toIndex, position (phi, theta, radius), label, description
-      
+      console.log('📊 360° Assets updated via window messaging:', data);
       
       // Update the post's custom JSON with the new 360° gallery data
       this.postCustom_json.assets = data.assets || [];
@@ -6356,22 +6352,140 @@ function buyNFT(setname, uid, price, type, callback){
       // Trigger mock update for preview
       this.dluxMock();
       
-      // Log the structure for debugging
+      console.log('✅ PostCustom_json updated with 360° data:', this.postCustom_json);
     },
 
-    // Handle file selection from SPK Drive for 360° assets
-    handleSPKFileForAssets(fileData) {
-      // This method receives file data when users drag/select files from SPK Drive
-      // and passes it to the 360° asset manager component
+    // Initialize 360° Gallery iframe and set up window messaging
+    init360GalleryIframe() {
+      console.log('🖼️ Initializing 360° Gallery iframe');
       
-      // If this is from drag/drop, we need to look up the actual file metadata
-      if (fileData.fromDragDrop && fileData.cid && fileData.contractId) {
-        
-        // For now, just pass the data as-is and let the component handle the metadata lookup
-        // The context menu approach should provide better metadata
+      const iframe = this.$refs.gallery360Iframe;
+      if (!iframe) {
+        console.warn('⚠️ 360° Gallery iframe ref not found');
+        return;
       }
       
-              this.spkFileForAssets = fileData;
+      // Send initial data to iframe once it's loaded
+      setTimeout(() => {
+        const initData = {
+          type: '360_gallery_init',
+          assets: this.postCustom_json?.assets || [],
+          navigation: this.postCustom_json?.navigation || []
+        };
+        
+        console.log('📤 Sending init data to 360° iframe:', initData);
+        iframe.contentWindow.postMessage(initData, '*');
+      }, 1000); // Small delay to ensure iframe is fully loaded
+    },
+
+    // Handle file selection from SPK Drive for any iframe application (generic)
+    handleSPKFileForAssets(fileData) {
+      console.log('📁 Sending SPK file to iframe application:', fileData);
+      
+      // Determine the current post type and send to the appropriate iframe
+      let iframe = null;
+      let messageType = 'spk_file_added';
+      
+      if (this.postCustom_json?.vrHash === 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k') {
+        // 360° Gallery
+        iframe = this.$refs.gallery360Iframe;
+      } else if (this.postCustom_json?.vrHash === 'dapp') {
+        // Future: dApp iframe if needed
+        console.log('📁 dApp post detected - using component method');
+        return; // Use component-based method for dApp
+      } else if (this.postCustom_json?.vrHash === 'remix') {
+        // Future: ReMix iframe if needed
+        console.log('📁 ReMix post detected - using component method');
+        return; // Use component-based method for ReMix
+      }
+      
+      if (iframe && iframe.contentWindow) {
+        const message = {
+          type: messageType,
+          file: fileData
+        };
+        
+        iframe.contentWindow.postMessage(message, '*');
+      } else {
+        console.warn('📁 No suitable iframe found for file:', fileData);
+      }
+    },
+
+    // Generic iframe file drop handler
+    handleIframeDrop(event) {
+      event.preventDefault();
+      
+      // Remove drag styling
+      event.currentTarget.classList.remove('dragover');
+      
+      // Handle SPK Drive file drops
+      const itemIds = event.dataTransfer.getData("itemids");
+      const contractId = event.dataTransfer.getData("contractid");
+      
+      if (itemIds && contractId) {
+        console.log('📁 SPK files dropped on iframe zone:', { itemIds, contractId });
+        
+        try {
+          const parsedIds = JSON.parse(itemIds);
+          parsedIds.forEach(fileId => {
+            if (!fileId.startsWith('folder-')) {
+              const spkFileData = {
+                cid: fileId,
+                hash: fileId,
+                url: fileId,
+                name: fileId,
+                filename: fileId,
+                contractId: contractId,
+                fromDragDrop: true
+              };
+              
+              this.handleSPKFileForAssets(spkFileData);
+            }
+          });
+        } catch (error) {
+          console.error('Failed to parse dropped SPK file IDs:', error);
+        }
+        return;
+      }
+      
+      // Handle regular file drops
+      const files = Array.from(event.dataTransfer.files);
+      if (files.length > 0) {
+        this.handleIframeFileInput({ target: { files } });
+      }
+    },
+
+    // Handle drag leave for iframe drop zone
+    handleDragLeave(event) {
+      // Only remove styling if we're actually leaving the drop zone
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        event.currentTarget.classList.remove('dragover');
+      }
+    },
+
+    // Handle file input for iframe applications
+    handleIframeFileInput(event) {
+      const files = Array.from(event.target.files);
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const fileData = {
+            url: e.target.result,
+            name: file.name,
+            filename: file.name,
+            type: file.type,
+            size: file.size,
+            fromFileInput: true
+          };
+          
+          this.handleSPKFileForAssets(fileData);
+        };
+        reader.readAsDataURL(file);
+      });
+      
+      // Clear the input
+      event.target.value = '';
     },
 
     // dApp Manager Integration Methods
@@ -6512,6 +6626,13 @@ function buyNFT(setname, uid, price, type, callback){
     
     // Load collaboration headers for current user
     this.loadCollaborationAuthHeaders();
+    
+    // Set up window messaging for 360° Gallery iframe
+    window.addEventListener('message', (event) => {
+      if (event.data.type === '360_gallery_update') {
+        this.handle360AssetsUpdated(event.data);
+      }
+    });
   },
   beforeDestroy() {
     if (this.observer) {

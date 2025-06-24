@@ -20,12 +20,9 @@ const DappManager = {
         return {
             // dApp structure based on standard dApp JSON format
             dappStructure: {
-                entry: null, // Main entry file (index.html, main.js, etc.)
+                entry: null, // Main entry file (must be HTML)
                 assets: [], // Static assets (images, fonts, etc.)
-                scripts: [], // JavaScript files
-                styles: [], // CSS files
-                data: [], // JSON/data files
-                other: [] // Other files
+                remixer: null // Base HTML file to remix from existing dApp
             },
             
             // dApp metadata
@@ -65,19 +62,8 @@ const DappManager = {
             
             // File type mappings
             fileTypeMapping: {
-                'html': 'entry',
-                'htm': 'entry',
-                'js': 'scripts',
-                'mjs': 'scripts',
-                'ts': 'scripts',
-                'css': 'styles',
-                'scss': 'styles',
-                'sass': 'styles',
-                'less': 'styles',
-                'json': 'data',
-                'xml': 'data',
-                'yaml': 'data',
-                'yml': 'data',
+                'html': 'entry', // HTML files for entry point
+                'htm': 'entry',  // HTML files for entry point
                 'png': 'assets',
                 'jpg': 'assets',
                 'jpeg': 'assets',
@@ -91,7 +77,18 @@ const DappManager = {
                 'mp3': 'assets',
                 'wav': 'assets',
                 'mp4': 'assets',
-                'webm': 'assets'
+                'webm': 'assets',
+                'js': 'assets',     // All other files go to assets
+                'mjs': 'assets',
+                'ts': 'assets',
+                'css': 'assets',
+                'scss': 'assets',
+                'sass': 'assets',
+                'less': 'assets',
+                'json': 'assets',
+                'xml': 'assets',
+                'yaml': 'assets',
+                'yml': 'assets'
             },
             
             // Available dApp types (from hub postSelect.types)
@@ -185,13 +182,19 @@ const DappManager = {
     },
     computed: {
         totalFiles() {
-            return Object.values(this.dappStructure)
-                .flat()
-                .filter(item => Array.isArray(item) ? item.length > 0 : item !== null).length;
+            let count = 0;
+            if (this.dappStructure.entry !== null) count++;
+            if (this.dappStructure.remixer !== null) count++;
+            count += this.dappStructure.assets.length;
+            return count;
         },
         
         hasEntryFile() {
             return this.dappStructure.entry !== null;
+        },
+        
+        hasRemixerFile() {
+            return this.dappStructure.remixer !== null;
         },
         
         customJsonData() {
@@ -428,6 +431,8 @@ const DappManager = {
             if (category === 'entry') {
                 this.dappStructure.entry = fileObject;
                 this.dappCID = fileObject.cid; // Set dappCID when entry is added
+            } else if (category === 'remixer') {
+                this.dappStructure.remixer = fileObject;
             } else {
                 if (!this.dappStructure[category]) {
                     this.dappStructure[category] = [];
@@ -453,20 +458,22 @@ const DappManager = {
             const mapping = this.fileTypeMapping[fileType];
             if (mapping) return mapping;
             
-            // Special logic for entry files
+            // Special logic for entry files - only HTML allowed
             if (fileName.toLowerCase().includes('index') || fileName.toLowerCase().includes('main')) {
-                if (['html', 'htm', 'js', 'mjs'].includes(fileType)) {
+                if (['html', 'htm'].includes(fileType)) {
                     return 'entry';
                 }
             }
             
-            return 'other';
+            return 'assets';
         },
         
         removeFile(category, index = null) {
             if (category === 'entry') {
                 this.dappStructure.entry = null;
                 this.dappCID = '';
+            } else if (category === 'remixer') {
+                this.dappStructure.remixer = null;
             } else if (index !== null && this.dappStructure[category]) {
                 this.dappStructure[category].splice(index, 1);
             }
@@ -480,6 +487,9 @@ const DappManager = {
                 file = this.dappStructure.entry;
                 this.dappStructure.entry = null;
                 this.dappCID = '';
+            } else if (fromCategory === 'remixer') {
+                file = this.dappStructure.remixer;
+                this.dappStructure.remixer = null;
             } else {
                 file = this.dappStructure[fromCategory][fileIndex];
                 this.dappStructure[fromCategory].splice(fileIndex, 1);
@@ -488,6 +498,8 @@ const DappManager = {
             if (toCategory === 'entry') {
                 this.dappStructure.entry = file;
                 this.dappCID = file.cid;
+            } else if (toCategory === 'remixer') {
+                this.dappStructure.remixer = file;
             } else {
                 if (!this.dappStructure[toCategory]) {
                     this.dappStructure[toCategory] = [];
@@ -586,6 +598,15 @@ const DappManager = {
                                 targetCategory: category
                             };
                             
+                            // For entry and remixer, only allow HTML files
+                            if ((category === 'entry' || category === 'remixer')) {
+                                const fileType = this.getFileType(fileId);
+                                if (!['html', 'htm'].includes(fileType)) {
+                                    console.warn(`Only HTML files allowed for ${category}. Skipping ${fileId}`);
+                                    return;
+                                }
+                            }
+                            
                             console.log('🎯 Processing dropped SPK file for category:', category, spkFileData);
                             this.addFileToStructure(spkFileData);
                         }
@@ -659,10 +680,7 @@ const DappManager = {
             const iconMap = {
                 'entry': 'fa-solid fa-home',
                 'assets': 'fa-solid fa-images',
-                'scripts': 'fa-brands fa-js',
-                'styles': 'fa-brands fa-css3-alt',
-                'data': 'fa-solid fa-database',
-                'other': 'fa-solid fa-folder'
+                'remixer': 'fa-solid fa-shuffle'
             };
             
             return iconMap[category] || 'fa-solid fa-folder';
@@ -670,12 +688,9 @@ const DappManager = {
         
         getCategoryDescription(category) {
             const descriptions = {
-                'entry': 'Main application entry point (index.html, main.js, etc.)',
-                'assets': 'Static assets like images, fonts, and media files',
-                'scripts': 'JavaScript and TypeScript files',
-                'styles': 'CSS and stylesheet files',
-                'data': 'JSON, XML, and data configuration files',
-                'other': 'Other files and resources'
+                'entry': 'Main application entry point (must be HTML file)',
+                'assets': 'Static assets like images, fonts, media files, CSS, JS, and other resources',
+                'remixer': 'Base HTML file from existing dApp to remix from (must be HTML file)'
             };
             
             return descriptions[category] || 'Files';
@@ -733,26 +748,71 @@ const DappManager = {
                     </div>
                 </div>
                 
-                <!-- Other Categories -->
-                <div v-for="category in ['assets', 'scripts', 'styles', 'data', 'other']" 
-                     :key="category" class="col-md-6">
-                    <div class="card bg-darker" :data-drop-category="category">
+                <!-- ReMixer File -->
+                <div class="col-md-6">
+                    <div class="card bg-darker border-info" 
+                         data-drop-category="remixer"
+                         :class="{ 'border-success': hasRemixerFile }">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">
-                                <i :class="getCategoryIcon(category)" class="fa-fw me-2"></i>
-                                {{ category.charAt(0).toUpperCase() + category.slice(1) }}
-                                <span class="badge bg-secondary ms-2">{{ dappStructure[category]?.length || 0 }}</span>
+                                <i :class="getCategoryIcon('remixer')" class="fa-fw me-2"></i>
+                                ReMixer Base
+                                <span v-if="hasRemixerFile" class="badge bg-success ms-2">Set</span>
+                                <span v-else class="badge bg-info ms-2">Optional</span>
                             </h6>
                         </div>
                         <div class="card-body" style="min-height: 120px;">
-                            <div v-if="!dappStructure[category] || dappStructure[category].length === 0" 
+                            <div v-if="!dappStructure.remixer" class="drop-zone text-center py-3">
+                                <i class="fa-solid fa-shuffle fa-2x mb-2 text-muted"></i>
+                                <p class="mb-1 text-muted">Drop an HTML file to remix</p>
+                                <small class="text-muted">{{ getCategoryDescription('remixer') }}</small>
+                            </div>
+                            <div v-else class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i :class="getFileIcon(dappStructure.remixer.type)" class="fa-fw me-2"></i>
+                                    <div>
+                                        <div class="fw-bold">{{ dappStructure.remixer.name }}</div>
+                                        <small class="text-muted">{{ dappStructure.remixer.type.toUpperCase() }} • ReMixer base</small>
+                                    </div>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-warning"
+                                            @click="moveFile('remixer', 'entry')"
+                                            v-if="!hasEntryFile"
+                                            title="Set as entry point">
+                                        <i class="fa-solid fa-home fa-fw"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger"
+                                            @click="removeFile('remixer')">
+                                        <i class="fa-solid fa-trash fa-fw"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assets -->
+                <div class="col-md-6">
+                    <div class="card bg-darker" data-drop-category="assets">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i :class="getCategoryIcon('assets')" class="fa-fw me-2"></i>
+                                Assets
+                                <span class="badge bg-secondary ms-2">{{ dappStructure.assets?.length || 0 }}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body" style="min-height: 120px;">
+                            <div v-if="!dappStructure.assets || dappStructure.assets.length === 0" 
                                  class="drop-zone text-center py-3">
                                 <i class="fa-solid fa-plus fa-lg mb-2 text-muted"></i>
                                 <p class="mb-1 text-muted">Drop files here</p>
-                                <small class="text-muted">{{ getCategoryDescription(category) }}</small>
+                                <small class="text-muted">{{ getCategoryDescription('assets') }}</small>
                             </div>
                             <div v-else>
-                                <div v-for="(file, index) in dappStructure[category]" 
+                                <div v-for="(file, index) in dappStructure.assets" 
                                      :key="index" 
                                      class="d-flex justify-content-between align-items-center mb-2 p-2 bg-secondary rounded">
                                     <div class="d-flex align-items-center">
@@ -765,14 +825,21 @@ const DappManager = {
                                     <div class="btn-group">
                                         <button type="button" 
                                                 class="btn btn-sm btn-outline-warning"
-                                                @click="moveFile(category, 'entry', index)"
-                                                v-if="category !== 'entry' && !hasEntryFile"
+                                                @click="moveFile('assets', 'entry', index)"
+                                                v-if="!hasEntryFile && ['html', 'htm'].includes(file.type)"
                                                 title="Set as entry point">
                                             <i class="fa-solid fa-home fa-fw"></i>
                                         </button>
                                         <button type="button" 
+                                                class="btn btn-sm btn-outline-info"
+                                                @click="moveFile('assets', 'remixer', index)"
+                                                v-if="!hasRemixerFile && ['html', 'htm'].includes(file.type)"
+                                                title="Set as ReMixer base">
+                                            <i class="fa-solid fa-shuffle fa-fw"></i>
+                                        </button>
+                                        <button type="button" 
                                                 class="btn btn-sm btn-outline-danger"
-                                                @click="removeFile(category, index)">
+                                                @click="removeFile('assets', index)">
                                             <i class="fa-solid fa-trash fa-fw"></i>
                                         </button>
                                     </div>
@@ -787,7 +854,7 @@ const DappManager = {
             <div class="alert alert-info">
                 <i class="fa-solid fa-info-circle fa-fw me-1"></i>
                 <strong>Tip:</strong> Drag files from "Your Files" section above directly into the appropriate categories.
-                The entry point should be your main HTML or JavaScript file.
+                The entry point must be an HTML file. Use the ReMixer to select a base HTML file from an existing dApp to build upon.
             </div>
             
             <!-- Licensing Selection -->

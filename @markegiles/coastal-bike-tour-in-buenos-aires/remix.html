@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360° Gallery Builder</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <style>
+        :root {
+            --bs-dark: #212529;
+            --bs-darker: #1a1e21;
+            --bs-secondary: #6c757d;
+        }
+        
+        body {
+            background-color: var(--bs-darker);
+            color: #fff;
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .bg-darker { background-color: var(--bs-darker) !important; }
+        .bg-dark-1 { background-color: #1e2329 !important; }
+        .text-muted { color: #adb5bd !important; }
+        .border-info { border-color: #0dcaf0 !important; }
+        .border-success { border-color: #198754 !important; }
+        .cursor-pointer { cursor: pointer; }
+        
+        .drop-zone {
+            border: 2px dashed #495057;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #212529;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #4ECDC4;
+            background-color: #1e2329;
+        }
+        
+        .card:hover {
+            transform: scale(1.02);
+            border-color: #4ECDC4;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body class="p-3">
+    <div id="app">
+        <h4 class="mb-3">
+            <i class="fa-solid fa-globe fa-fw me-2"></i>360° Gallery Builder
+        </h4>
+        
+        <!-- Asset List -->
+        <div v-if="assets.length > 0">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3">
+                    <!-- Asset Selection -->
+                    <div class="card bg-darker">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Gallery Images</h6>
+                            <button class="btn btn-sm btn-primary" @click="$refs.fileInput.click()">
+                                <i class="fa-solid fa-plus fa-fw me-1"></i>Add
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
+                                <div v-for="(asset, index) in assets" :key="index"
+                                     @click="selectedAssetIndex = index"
+                                     class="list-group-item list-group-item-action bg-darker cursor-pointer"
+                                     :class="{ active: index === selectedAssetIndex }">
+                                    <div class="d-flex align-items-center">
+                                        <img :src="asset.thumb || asset.url" 
+                                             class="me-2 rounded" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold small">{{ asset.title || 'Untitled' }}</div>
+                                            <small class="text-muted">Photo {{ index + 1 }}</small>
+                                        </div>
+                                        <button @click.stop="removeAsset(index)" 
+                                                class="btn btn-sm btn-outline-danger">
+                                            <i class="fa-solid fa-trash fa-fw"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mode Selection -->
+                    <div class="card bg-darker mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Edit Mode</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" id="focus-mode" v-model="editMode" value="focus">
+                                <label class="btn btn-outline-primary" for="focus-mode">
+                                    <i class="fa-solid fa-crosshairs fa-fw me-1"></i>Focus
+                                </label>
+                                
+                                <input type="radio" class="btn-check" id="nav-mode" v-model="editMode" value="navigation">
+                                <label class="btn btn-outline-info" for="nav-mode">
+                                    <i class="fa-solid fa-route fa-fw me-1"></i>Navigation
+                                </label>
+                            </div>
+                            
+                            <!-- Navigation Controls -->
+                            <div v-if="editMode === 'navigation'" class="mt-2">
+                                <div class="btn-group w-100">
+                                    <button class="btn btn-sm btn-success" 
+                                            @click="startNavigationPlacement()"
+                                            :disabled="isPlacingNavigation">
+                                        <i class="fa-solid fa-plus fa-fw me-1"></i>Add Link
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" 
+                                            @click="ensureNavigationConnectivity()">
+                                        <i class="fa-solid fa-robot fa-fw me-1"></i>Auto-Connect
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-9">
+                    <!-- Canvas and Editor -->
+                    <div v-if="currentAsset">
+                        <!-- Target Selection Modal -->
+                        <div v-if="showTargetSelection" class="card bg-dark-1 border-info mb-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Select Navigation Target</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted">Choose which image this navigation link should go to:</p>
+                                <div class="row g-2">
+                                    <div v-for="(asset, assetIndex) in assets" :key="assetIndex" class="col-md-3"
+                                         v-if="assetIndex !== selectedAssetIndex">
+                                        <div class="card bg-secondary text-white h-100 cursor-pointer"
+                                             @click="selectNavigationTarget(assetIndex)">
+                                            <img :src="asset.thumb || asset.url" class="card-img-top"
+                                                 style="height: 80px; object-fit: cover;" :alt="asset.title">
+                                            <div class="card-body p-2">
+                                                <h6 class="card-title small mb-0">{{ asset.title || 'Untitled' }}</h6>
+                                                <small class="text-muted">Photo {{ assetIndex + 1 }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button class="btn btn-sm btn-outline-secondary" @click="cancelNavigationPlacement()">
+                                        <i class="fa-solid fa-times fa-fw me-1"></i>Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Canvas -->
+                        <canvas ref="canvas" :style="canvasStyle" class="mb-3"></canvas>
+                        
+                        <!-- Instructions -->
+                        <div class="alert alert-info">
+                            <div v-if="editMode === 'focus'">
+                                <i class="fa-solid fa-info-circle fa-fw me-1"></i>
+                                Drag to adjust initial view direction. Use Tilt and Roll controls below to align the horizon.
+                            </div>
+                            <div v-else-if="editMode === 'navigation' && isPlacingNavigation">
+                                <i class="fa-solid fa-crosshairs fa-fw me-1"></i>
+                                <strong>Click on the canvas</strong> to place navigation link to "{{ assets[pendingNavigation?.toIndex]?.title }}"
+                            </div>
+                            <div v-else-if="editMode === 'navigation'">
+                                <i class="fa-solid fa-route fa-fw me-1"></i>
+                                Navigation mode active. Click and drag spheres to reposition them.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div v-else class="text-center py-5">
+            <div class="alert alert-info">
+                <i class="fa-solid fa-arrow-up fa-2x text-info mb-3"></i>
+                <h5 class="text-info">Add Files Above</h5>
+                <p class="mb-0">Use the drop zone or SPK Drive context menu above to add 360° images to your gallery</p>
+            </div>
+        </div>
+        
+        <!-- Hidden File Input -->
+        <input ref="fileInput" type="file" multiple accept="image/*" @change="onFileInputChange" style="display: none;">
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    assets: [],
+                    navigation: [],
+                    selectedAssetIndex: 0,
+                    editMode: 'focus',
+                    canvasWidth: 800,
+                    canvasHeight: 400,
+                    currentRotation: { x: 0, y: 0, z: 0 },
+                    isPlacingNavigation: false,
+                    showTargetSelection: false,
+                    pendingNavigation: null,
+                    mouseDown: false,
+                    lastMousePos: { x: 0, y: 0 },
+                    navSpheresVisible: true,
+                    selectedNavIndex: -1,
+                    isDraggingNavSphere: false,
+                    draggedNavIndex: -1,
+                    hoveringOverSphere: false,
+                    currentImage: null,
+                    acceptedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+                }
+            },
+            computed: {
+                currentAsset() {
+                    return this.assets[this.selectedAssetIndex] || null;
+                },
+                navigationForCurrentAsset() {
+                    return this.navigation.filter(nav => nav.fromIndex === this.selectedAssetIndex);
+                },
+                canvasStyle() {
+                    let cursor = 'grab';
+                    if (this.editMode === 'navigation' && this.isPlacingNavigation) {
+                        cursor = 'crosshair';
+                    } else if (this.editMode === 'navigation' && this.hoveringOverSphere) {
+                        cursor = 'pointer';
+                    } else if (this.editMode === 'focus') {
+                        cursor = this.mouseDown ? 'grabbing' : 'grab';
+                    }
+                    
+                    return {
+                        width: `${this.canvasWidth}px`,
+                        height: `${this.canvasHeight}px`,
+                        border: '2px solid #495057',
+                        borderRadius: '8px',
+                        cursor: cursor,
+                        touchAction: 'none'
+                    };
+                }
+            },
+            watch: {
+                selectedAssetIndex(newIndex) {
+                    this.loadAssetOnCanvas(newIndex);
+                    this.$nextTick(() => {
+                        this.initializeCanvas();
+                    });
+                },
+                currentRotation: {
+                    handler() {
+                        this.updateAssetRotation();
+                        this.redrawCanvas();
+                    },
+                    deep: true
+                },
+                assets: {
+                    handler() {
+                        this.sendUpdateToParent();
+                    },
+                    deep: true
+                },
+                navigation: {
+                    handler() {
+                        this.sendUpdateToParent();
+                    },
+                    deep: true
+                }
+            },
+            mounted() {
+                this.$nextTick(() => {
+                    this.initializeCanvas();
+                    this.listenForParentMessages();
+                });
+            },
+            methods: {
+                // Window messaging to parent
+                sendUpdateToParent() {
+                    const data = {
+                        type: '360_gallery_update',
+                        assets: JSON.parse(JSON.stringify(this.assets)), // Convert Proxy to plain array
+                        navigation: JSON.parse(JSON.stringify(this.navigation)) // Convert Proxy to plain array
+                    };
+                    
+                    console.log('📤 Sending update to parent:', data);
+                    
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage(data, '*');
+                    }
+                },
+                
+                listenForParentMessages() {
+                    window.addEventListener('message', (event) => {
+                        console.log('📥 Received message from parent:', event.data);
+                        
+                        if (event.data.type === '360_gallery_init') {
+                            this.assets = event.data.assets || [];
+                            this.navigation = event.data.navigation || [];
+                            
+                            if (this.assets.length > 0) {
+                                this.$nextTick(() => {
+                                    this.loadAssetOnCanvas(0);
+                                });
+                            }
+                        }
+                        
+                        if (event.data.type === 'spk_file_added') {
+                            this.addAssetFromSPK(event.data.file);
+                        }
+                    });
+                },
+                
+                // Canvas initialization and management
+                initializeCanvas() {
+                    const canvas = this.$refs.canvas;
+                    if (!canvas) return;
+                    
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = this.canvasWidth;
+                    canvas.height = this.canvasHeight;
+                    
+                    // Remove existing event listeners
+                    canvas.removeEventListener('mousedown', this.onCanvasMouseDown);
+                    canvas.removeEventListener('mousemove', this.onCanvasMouseMove);
+                    canvas.removeEventListener('mouseup', this.onCanvasMouseUp);
+                    canvas.removeEventListener('click', this.onCanvasClick);
+                    
+                    // Set up canvas event listeners
+                    canvas.addEventListener('mousedown', this.onCanvasMouseDown);
+                    canvas.addEventListener('mousemove', this.onCanvasMouseMove);
+                    canvas.addEventListener('mouseup', this.onCanvasMouseUp);
+                    canvas.addEventListener('click', this.onCanvasClick);
+                },
+                
+                // Load 360° image onto canvas
+                async loadAssetOnCanvas(assetIndex) {
+                    if (!this.assets[assetIndex]) return;
+                    
+                    const canvas = this.$refs.canvas;
+                    const ctx = canvas.getContext('2d');
+                    const asset = this.assets[assetIndex];
+                    
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    try {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        
+                        img.onload = () => {
+                            this.currentImage = img;
+                            const storedRotation = asset.rotation || { x: 0, y: 0, z: 0 };
+                            this.currentRotation = {
+                                x: storedRotation.z,
+                                y: storedRotation.y,
+                                z: -storedRotation.x
+                            };
+                            this.redrawCanvas();
+                        };
+                        
+                        img.onerror = () => {
+                            console.error('Failed to load image:', asset.url);
+                            ctx.fillStyle = '#495057';
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.fillStyle = '#fff';
+                            ctx.font = '16px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.fillText('Failed to load image', canvas.width / 2, canvas.height / 2);
+                        };
+                        
+                        const imageUrl = asset.url.startsWith('Qm') ? 
+                            `https://ipfs.dlux.io/ipfs/${asset.url}` : asset.url;
+                        img.src = imageUrl;
+                        
+                    } catch (error) {
+                        console.error('Error loading asset on canvas:', error);
+                    }
+                },
+                
+                redrawCanvas() {
+                    const canvas = this.$refs.canvas;
+                    if (!canvas || !this.currentImage) return;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    this.drawWrappedImage(ctx, canvas);
+                    
+                    if (this.editMode === 'focus') {
+                        this.drawHorizonLine();
+                        this.drawCrosshair();
+                    }
+                    
+                    if (this.editMode === 'navigation') {
+                        this.drawNavigationSpheres();
+                    }
+                },
+                
+                drawWrappedImage(ctx, canvas) {
+                    if (!this.currentImage) return;
+                    
+                    const img = this.currentImage;
+                    const canvasRatio = canvas.width / canvas.height;
+                    const imageRatio = img.width / img.height;
+                    
+                    let drawWidth, drawHeight;
+                    if (imageRatio > canvasRatio) {
+                        drawHeight = canvas.height;
+                        drawWidth = drawHeight * imageRatio;
+                    } else {
+                        drawWidth = canvas.width;
+                        drawHeight = drawWidth / imageRatio;
+                    }
+                    
+                    const offsetX = (canvas.width - drawWidth) / 2;
+                    const offsetY = (canvas.height - drawHeight) / 2;
+                    
+                    ctx.save();
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    
+                    const radX = (this.currentRotation.x * Math.PI) / 180;
+                    const radY = (this.currentRotation.y * Math.PI) / 180;
+                    const radZ = (this.currentRotation.z * Math.PI) / 180;
+                    
+                    ctx.rotate(radZ);
+                    ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                    
+                    ctx.drawImage(img, offsetX - radY * 50, offsetY - radX * 50, drawWidth, drawHeight);
+                    ctx.restore();
+                },
+                
+                drawHorizonLine() {
+                    const canvas = this.$refs.canvas;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.strokeStyle = '#00ff00';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    
+                    const centerY = canvas.height / 2 + (this.currentRotation.x * 2);
+                    ctx.beginPath();
+                    ctx.moveTo(0, centerY);
+                    ctx.lineTo(canvas.width, centerY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                },
+                
+                drawCrosshair() {
+                    const canvas = this.$refs.canvas;
+                    const ctx = canvas.getContext('2d');
+                    
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - 20, centerY);
+                    ctx.lineTo(centerX + 20, centerY);
+                    ctx.moveTo(centerX, centerY - 20);
+                    ctx.lineTo(centerX, centerY + 20);
+                    ctx.stroke();
+                },
+                
+                drawNavigationSpheres() {
+                    if (!this.navSpheresVisible) return;
+                    
+                    const canvas = this.$refs.canvas;
+                    const ctx = canvas.getContext('2d');
+                    
+                    this.navigationForCurrentAsset.forEach((nav, index) => {
+                        const canvasPos = this.sphericalToCanvas(nav.position);
+                        if (canvasPos) {
+                            const isSelected = index === this.selectedNavIndex;
+                            
+                            ctx.fillStyle = nav.autoGenerated ? '#ffc107' : '#0dcaf0';
+                            ctx.strokeStyle = isSelected ? '#ff0000' : '#ffffff';
+                            ctx.lineWidth = isSelected ? 3 : 2;
+                            
+                            ctx.beginPath();
+                            ctx.arc(canvasPos.x, canvasPos.y, 12, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.stroke();
+                            
+                            if (nav.label) {
+                                ctx.fillStyle = '#ffffff';
+                                ctx.font = '12px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.fillText(nav.label, canvasPos.x, canvasPos.y + 25);
+                            }
+                        }
+                    });
+                },
+                
+                sphericalToCanvas(sphericalPos) {
+                    const canvas = this.$refs.canvas;
+                    if (!canvas) return null;
+                    
+                    const phi = (sphericalPos.phi - this.currentRotation.y) * Math.PI / 180;
+                    const theta = (sphericalPos.theta - this.currentRotation.x) * Math.PI / 180;
+                    
+                    const x = canvas.width / 2 + (phi * canvas.width / (2 * Math.PI));
+                    const y = canvas.height / 2 + (theta * canvas.height / Math.PI);
+                    
+                    if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
+                        return null;
+                    }
+                    
+                    return { x, y };
+                },
+                
+                canvasToSpherical(canvasPos) {
+                    const canvas = this.$refs.canvas;
+                    
+                    const phi = ((canvasPos.x - canvas.width / 2) * 2 * Math.PI / canvas.width) + this.currentRotation.y;
+                    const theta = ((canvasPos.y - canvas.height / 2) * Math.PI / canvas.height) + this.currentRotation.x;
+                    
+                    return {
+                        phi: parseFloat(phi.toFixed(1)),
+                        theta: parseFloat(theta.toFixed(1))
+                    };
+                },
+                
+                // Canvas event handlers
+                onCanvasMouseDown(event) {
+                    this.mouseDown = true;
+                    const rect = event.target.getBoundingClientRect();
+                    this.lastMousePos = {
+                        x: event.clientX - rect.left,
+                        y: event.clientY - rect.top
+                    };
+                    
+                    if (this.editMode === 'navigation') {
+                        const sphere = this.getNavigationSphereAt(this.lastMousePos);
+                        if (sphere) {
+                            this.isDraggingNavSphere = true;
+                            this.draggedNavIndex = sphere.index;
+                            this.selectedNavIndex = sphere.index;
+                        }
+                    }
+                },
+                
+                onCanvasMouseMove(event) {
+                    const rect = event.target.getBoundingClientRect();
+                    const currentPos = {
+                        x: event.clientX - rect.left,
+                        y: event.clientY - rect.top
+                    };
+                    
+                    if (this.editMode === 'focus' && this.mouseDown) {
+                        const deltaX = currentPos.x - this.lastMousePos.x;
+                        const deltaY = currentPos.y - this.lastMousePos.y;
+                        
+                        this.currentRotation.y += deltaX * 0.5;
+                        this.currentRotation.x -= deltaY * 0.5;
+                        
+                        this.lastMousePos = currentPos;
+                    } else if (this.editMode === 'navigation') {
+                        this.hoveringOverSphere = !!this.getNavigationSphereAt(currentPos);
+                        
+                        if (this.isDraggingNavSphere && this.draggedNavIndex >= 0) {
+                            const sphericalPos = this.canvasToSpherical(currentPos);
+                            const navItem = this.navigationForCurrentAsset[this.draggedNavIndex];
+                            if (navItem) {
+                                navItem.position = sphericalPos;
+                                this.redrawCanvas();
+                            }
+                        }
+                    }
+                },
+                
+                onCanvasMouseUp() {
+                    this.mouseDown = false;
+                    this.isDraggingNavSphere = false;
+                    this.draggedNavIndex = -1;
+                },
+                
+                onCanvasClick(event) {
+                    if (this.editMode === 'navigation' && this.isPlacingNavigation) {
+                        const rect = event.target.getBoundingClientRect();
+                        const clickPos = {
+                            x: event.clientX - rect.left,
+                            y: event.clientY - rect.top
+                        };
+                        
+                        const sphericalPos = this.canvasToSpherical(clickPos);
+                        const newNav = {
+                            fromIndex: this.selectedAssetIndex,
+                            toIndex: this.pendingNavigation.toIndex,
+                            position: sphericalPos,
+                            label: this.assets[this.pendingNavigation.toIndex]?.title || `Photo ${this.pendingNavigation.toIndex + 1}`,
+                            autoGenerated: false
+                        };
+                        
+                        this.navigation.push(newNav);
+                        this.isPlacingNavigation = false;
+                        this.showTargetSelection = false;
+                        this.pendingNavigation = null;
+                        this.redrawCanvas();
+                    }
+                },
+                
+                getNavigationSphereAt(mousePos) {
+                    const hitRadius = 15;
+                    
+                    for (let i = 0; i < this.navigationForCurrentAsset.length; i++) {
+                        const nav = this.navigationForCurrentAsset[i];
+                        const canvasPos = this.sphericalToCanvas(nav.position);
+                        
+                        if (canvasPos) {
+                            const distance = Math.sqrt(
+                                Math.pow(mousePos.x - canvasPos.x, 2) + 
+                                Math.pow(mousePos.y - canvasPos.y, 2)
+                            );
+                            
+                            if (distance <= hitRadius) {
+                                return { index: i, nav: nav, position: canvasPos };
+                            }
+                        }
+                    }
+                    
+                    return null;
+                },
+                
+                // File handling
+                onFileInputChange(event) {
+                    this.processFiles(Array.from(event.target.files));
+                    event.target.value = '';
+                },
+                
+                handleDrop(e) {
+                    e.preventDefault();
+                    const files = Array.from(e.dataTransfer.files);
+                    this.processFiles(files);
+                },
+                
+                processFiles(files) {
+                    const imageFiles = files.filter(file => this.acceptedTypes.includes(file.type));
+                    
+                    imageFiles.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const newAsset = {
+                                url: e.target.result,
+                                title: file.name.replace(/\.[^/.]+$/, ""),
+                                description: '',
+                                rotation: { x: 0, y: 0, z: 0 },
+                                type: 'image',
+                                size: file.size,
+                                filename: file.name
+                            };
+                            
+                            this.assets.push(newAsset);
+                            
+                            if (this.assets.length === 1) {
+                                this.selectedAssetIndex = 0;
+                                this.$nextTick(() => {
+                                    this.loadAssetOnCanvas(0);
+                                });
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                },
+                
+                // Asset management
+                removeAsset(index) {
+                    if (confirm('Are you sure you want to remove this image?')) {
+                        this.assets.splice(index, 1);
+                        
+                        this.navigation = this.navigation.filter(nav => 
+                            nav.fromIndex !== index && nav.toIndex !== index
+                        );
+                        
+                        this.navigation.forEach(nav => {
+                            if (nav.fromIndex > index) nav.fromIndex--;
+                            if (nav.toIndex > index) nav.toIndex--;
+                        });
+                        
+                        if (this.selectedAssetIndex >= this.assets.length) {
+                            this.selectedAssetIndex = Math.max(0, this.assets.length - 1);
+                        }
+                        
+                        if (this.assets.length > 0) {
+                            this.loadAssetOnCanvas(this.selectedAssetIndex);
+                        }
+                    }
+                },
+                
+                updateAssetRotation() {
+                    if (this.currentAsset) {
+                        this.currentAsset.rotation = {
+                            x: -this.currentRotation.z,
+                            y: this.currentRotation.y,
+                            z: this.currentRotation.x
+                        };
+                    }
+                },
+                
+                // Navigation management
+                startNavigationPlacement() {
+                    if (this.assets.length < 2) {
+                        alert('You need at least 2 images to create navigation links.');
+                        return;
+                    }
+                    
+                    this.showTargetSelection = true;
+                },
+                
+                selectNavigationTarget(targetIndex) {
+                    this.pendingNavigation = {
+                        fromIndex: this.selectedAssetIndex,
+                        toIndex: targetIndex
+                    };
+                    this.showTargetSelection = false;
+                    this.isPlacingNavigation = true;
+                },
+                
+                cancelNavigationPlacement() {
+                    this.isPlacingNavigation = false;
+                    this.showTargetSelection = false;
+                    this.pendingNavigation = null;
+                },
+                
+                ensureNavigationConnectivity() {
+                    if (this.assets.length < 2) return;
+                    
+                    const adjacencyList = {};
+                    this.assets.forEach((_, index) => {
+                        adjacencyList[index] = [];
+                    });
+                    
+                    this.navigation.forEach(nav => {
+                        if (!adjacencyList[nav.fromIndex].includes(nav.toIndex)) {
+                            adjacencyList[nav.fromIndex].push(nav.toIndex);
+                        }
+                    });
+                    
+                    if (!this.isGraphConnected(adjacencyList)) {
+                        this.addMissingConnections(adjacencyList);
+                    }
+                },
+                
+                isGraphConnected(adjacencyList) {
+                    const nodes = Object.keys(adjacencyList).map(k => parseInt(k));
+                    if (nodes.length === 0) return true;
+                    
+                    const visited = new Set();
+                    const queue = [nodes[0]];
+                    visited.add(nodes[0]);
+                    
+                    while (queue.length > 0) {
+                        const current = queue.shift();
+                        const neighbors = adjacencyList[current] || [];
+                        
+                        neighbors.forEach(neighbor => {
+                            if (!visited.has(neighbor)) {
+                                visited.add(neighbor);
+                                queue.push(neighbor);
+                            }
+                        });
+                        
+                        nodes.forEach(node => {
+                            const reverseNeighbors = adjacencyList[node] || [];
+                            if (reverseNeighbors.includes(current) && !visited.has(node)) {
+                                visited.add(node);
+                                queue.push(node);
+                            }
+                        });
+                    }
+                    
+                    return visited.size === nodes.length;
+                },
+                
+                addMissingConnections(adjacencyList) {
+                    const nodes = Object.keys(adjacencyList).map(k => parseInt(k));
+                    
+                    for (let i = 0; i < nodes.length - 1; i++) {
+                        const from = nodes[i];
+                        const to = nodes[i + 1];
+                        
+                        if (!adjacencyList[from].includes(to)) {
+                            const position = this.generateDefaultNavPosition(from, to);
+                            const newNav = {
+                                fromIndex: from,
+                                toIndex: to,
+                                position: position,
+                                label: this.assets[to]?.title || `Photo ${to + 1}`,
+                                autoGenerated: true
+                            };
+                            this.navigation.push(newNav);
+                            adjacencyList[from].push(to);
+                        }
+                        
+                        if (!adjacencyList[to].includes(from)) {
+                            const position = this.generateDefaultNavPosition(to, from);
+                            const newNav = {
+                                fromIndex: to,
+                                toIndex: from,
+                                position: position,
+                                label: this.assets[from]?.title || `Photo ${from + 1}`,
+                                autoGenerated: true
+                            };
+                            this.navigation.push(newNav);
+                            adjacencyList[to].push(from);
+                        }
+                    }
+                    
+                    this.redrawCanvas();
+                },
+                
+                generateDefaultNavPosition(fromIndex, toIndex) {
+                    const angle = (toIndex - fromIndex) * 60;
+                    return {
+                        phi: parseFloat(angle.toFixed(1)),
+                        theta: parseFloat((0).toFixed(1))
+                    };
+                },
+                
+                addAssetFromSPK(spkFile) {
+                    console.log('📁 Adding SPK file:', spkFile);
+                    
+                    const newAsset = {
+                        url: spkFile.cid || spkFile.hash || spkFile.url,
+                        title: spkFile.fileName || spkFile.name || spkFile.filename || 'Untitled',
+                        description: spkFile.description || '',
+                        rotation: { x: 0, y: 0, z: 0 },
+                        type: 'image',
+                        contractId: spkFile.contractId || spkFile.id,
+                        size: spkFile.size || 0
+                    };
+                    
+                    this.assets.push(newAsset);
+                    
+                    if (this.assets.length === 1) {
+                        this.selectedAssetIndex = 0;
+                        this.$nextTick(() => {
+                            this.loadAssetOnCanvas(0);
+                        });
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
