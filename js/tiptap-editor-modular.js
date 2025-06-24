@@ -4337,8 +4337,8 @@ export default {
             lastPermissionRefresh: 0,
             lastPermissionCheck: 0, // Track last processed permission broadcast timestamp
             lastBroadcastProcessed: 0, // Rate limiting for permission broadcasts
-            permissionRefreshRate: 300000, // 5 minutes - reduced from 1 minute due to WebSocket permission broadcasts
-            fastPermissionRefreshRate: 120000, // 2 minutes when actively collaborating - reduced from 30 seconds
+            permissionRefreshRate: 60000, // 1 minute - temporary until WebSocket broadcasts work
+            fastPermissionRefreshRate: 30000, // 30 seconds when actively collaborating - temporary fast rate
             backgroundPermissionUpdates: new Map(), // Track background permission updates
             realtimePermissionUpdates: true, // Enable real-time permission updates
             isActivelyCollaborating: false, // Track if user is in active collaborative session
@@ -5353,10 +5353,13 @@ export default {
 
         // ===== DROPDOWN MENU SUPPORT =====
         canShare() {
-            return this.isAuthenticated && 
-                   this.currentFile && 
-                   this.currentFile.type === 'collaborative' &&
-                   !this.isReadOnlyMode;
+            // Only document owners can share
+            if (!this.isAuthenticated || !this.currentFile || this.currentFile.type !== 'collaborative') {
+                return false;
+            }
+            
+            // Direct owner check instead of using isOwner computed property
+            return this.currentFile.owner === this.username;
         },
         
         // ===== COLLABORATION ANALYTICS COMPUTED PROPERTIES =====
@@ -5663,6 +5666,111 @@ export default {
             
             return ops;
         },
+        
+        // ===== PERMISSION LEVEL COMPUTED PROPERTIES =====
+        
+        /**
+         * Current user's permission level for the active document
+         */
+        currentPermissionLevel() {
+            if (!this.currentFile || !this.username) return 'no-access';
+            
+            // Owner always has owner permission
+            if (this.currentFile.owner === this.username) return 'owner';
+            
+            // For local documents - user always has full control
+            if (this.currentFile.type === 'local') return 'owner';
+            
+            // For collaborative docs:
+            // 1. Check reactive state cache (for offline support)
+            const documentKey = this.getDocumentKey(this.currentFile);
+            if (this.reactivePermissionState[documentKey]) {
+                const cached = this.reactivePermissionState[documentKey];
+                if (Date.now() - cached.timestamp < 300000) { // 5 min cache
+                    return cached.permissionLevel;
+                }
+            }
+            
+            // 2. Check documentPermissions array (from latest API call)
+            const userPerm = this.documentPermissions?.find(p => p.account === this.username);
+            if (userPerm) return userPerm.permissionType;
+            
+            // 3. Default to readonly for collaborative docs without permission data
+            return 'readonly';
+        },
+        
+        /**
+         * Permission level checks for UI reactivity
+         */
+        isOwner() {
+            // Check if current user is the document owner
+            if (!this.currentFile) return false;
+            
+            // For collaborative documents, check the owner field
+            if (this.currentFile.type === 'collaborative') {
+                return this.currentFile.owner === this.username;
+            }
+            
+            // For local documents, user is always the owner
+            if (this.currentFile.type === 'local') {
+                return true;
+            }
+            
+            // Fallback to permission level check
+            return this.currentPermissionLevel === 'owner';
+        },
+        
+        isPostable() {
+            return ['owner', 'postable'].includes(this.currentPermissionLevel);
+        },
+        
+        isEditable() {
+            return ['owner', 'postable', 'editable'].includes(this.currentPermissionLevel);
+        },
+        
+        isReadonly() {
+            return this.currentPermissionLevel === 'readonly';
+        },
+        
+        hasNoAccess() {
+            return this.currentPermissionLevel === 'no-access';
+        },
+
+        canPublish() {
+            // ✅ TIPTAP COMPLIANCE: Use computed properties instead of methods
+            const titleText = this.titleInput ? this.titleInput.trim() : '';
+            const bodyText = this.bodyEditor ? this.bodyEditor.getText().trim() : '';
+            
+            // Basic content validation
+            if (!titleText || !bodyText) return false;
+            
+            // Check tags from Y.js metadata or content fallback
+            let hasTags = false;
+            if (this.ydoc) {
+                const metadata = this.ydoc.getMap('metadata');
+                const tags = metadata.get('tags') || [];
+                hasTags = tags.length > 0;
+            } else {
+                hasTags = this.reactiveTags.length > 0;
+            }
+            
+            if (!hasTags) return false;
+            
+            // ✅ ENHANCED: Permission-based publish validation
+            if (this.currentFile?.type === 'collaborative') {
+                // Collaborative documents require authentication AND publish permission
+                if (!this.isAuthenticated || this.isAuthExpired) {
+                    return false;
+                }
+                
+                // Use simplified currentPermissionLevel instead of getUserPermissionLevel
+                return this.isPostable; // This checks for 'postable' or 'owner'
+            } else {
+                // Local documents and temp documents can be published without authentication
+                // (publishing will prompt for auth when needed)
+                return true;
+            }
+        }
     },
 
     watch: {
@@ -6709,7 +6817,6 @@ export default {
             console.error('❌ Cleanup failed, falling back to emergency cleanup:', error);
             await this.emergencyWebGLCleanup();
         }
-        
     },
     
     methods: {
@@ -6874,119 +6981,51 @@ export default {
         displayTitleExists() {
             // For template validation display  
             return Boolean(this.titleInput ? this.titleInput.trim() : '');
-        },
-
+        }
+    },
+    
+    methods: {
+        // ===== AUTHENTICATION HANDLING =====
         
-
-        canPublish() {
-            // ✅ TIPTAP COMPLIANCE: Use methods instead of reactive state
-            const titleText = this.titleInput ? this.titleInput.trim() : '';
-            const bodyText = this.bodyEditor ? this.bodyEditor.getText().trim() : '';
+        // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
+        handleAuthenticationReady(authState) {
+            console.log('🔐 Authentication ready, processing pending operations:', {
+                authState,
+                hasPendingAutoConnect: !!this.pendingAutoConnect,
+                currentFile: this.currentFile?.id
+            });
             
-            // Basic content validation
-            if (!titleText || !bodyText) return false;
+            // Clear any loading messages
+            this.showLoadingMessage = '';
+            this.loadingStates.auth = false;
             
-            // Check tags from Y.js metadata or content fallback
-            let hasTags = false;
-            if (this.ydoc) {
-                const metadata = this.ydoc.getMap('metadata');
-                const tags = metadata.get('tags') || [];
-                hasTags = tags.length > 0;
-            } else {
-                hasTags = this.reactiveTags.length > 0;
-            }
-            
-            if (!hasTags) return false;
-            
-            // ✅ ENHANCED: Permission-based publish validation
-            if (this.currentFile?.type === 'collaborative') {
-                // Collaborative documents require authentication AND publish permission
-                if (!this.isAuthenticated || this.isAuthExpired) {
-                    return false;
+            // Handle pending document connections
+            if (this.pendingAutoConnect) {
+                const { owner, permlink, type } = this.pendingAutoConnect;
+                this.pendingAutoConnect = null;
+                
+                // Clear any existing timeout
+                if (this.authLoadTimeout) {
+                    clearTimeout(this.authLoadTimeout);
+                    this.authLoadTimeout = null;
                 }
                 
-                const permissionLevel = this.getUserPermissionLevel(this.currentFile);
-                // Only allow publishing if user has postable permission or is owner
-                return ['postable', 'owner'].includes(permissionLevel);
-            } else {
-                // Local documents and temp documents can be published without authentication
-                // (publishing will prompt for auth when needed)
-                return true;
-            }
-        },
-
-        // ===== PERMISSION LEVEL COMPUTED PROPERTIES =====
-        
-        /**
-         * Current user's permission level for the active document
-         */
-        currentPermissionLevel() {
-            if (!this.currentFile) return 'unknown';
-            return this.getUserPermissionLevel(this.currentFile);
-        },
-        
-        /**
-         * Permission level checks for UI reactivity
-         */
-        isOwner() {
-            return this.currentPermissionLevel === 'owner';
-        },
-        
-        isPostable() {
-            return ['owner', 'postable'].includes(this.currentPermissionLevel);
-        },
-        
-        isEditable() {
-            return ['owner', 'postable', 'editable'].includes(this.currentPermissionLevel);
-        },
-        
-        isReadonly() {
-            return this.currentPermissionLevel === 'readonly';
-        },
-        
-        hasNoAccess() {
-            return this.currentPermissionLevel === 'no-access';
-        },
-        
-        /**
-         * UI Feature Controls based on permission levels
-         */
-        canManagePermissions() {
-            return this.isOwner && this.currentFile?.type === 'collaborative';
-        },
-        
-        canViewDocument() {
-            return !this.hasNoAccess;
-        },
-        
-        /**
-         * Enhanced sharing control with permission-specific logic
-         */
-        canShareAdvanced() {
-            return this.isAuthenticated && 
-                   this.currentFile?.type === 'collaborative' &&
-                   this.isOwner; // Only owners can manage sharing
-        },
-        
-        /**
-         * Enhanced deletion control with permission-specific logic
-         */
-        canDeleteDocument() {
-            if (!this.currentFile) return false;
-            
-            // Local documents: always deletable by user
-            if (this.currentFile.type === 'local' || this.isTemporaryDocument) {
-                return !this.deleting;
+                // Retry the connection now that auth is ready
+                this.$nextTick(async () => {
+                    if (type === 'collaborative') {
+                        await this.autoConnectToCollaborativeDocument(owner, permlink);
+                    } else {
+                        await this.autoConnectToLocalDocument(owner, permlink);
+                    }
+                });
             }
             
-            // Collaborative documents: only owner can delete
-            if (this.currentFile.type === 'collaborative') {
-                return this.isOwner && !this.deleting;
+            // Load permissions for current document if needed
+            if (this.currentFile && authState === 'authenticated') {
+                this.loadPermissionForDocument(this.currentFile);
             }
-            
-            return false;
         },
-
+        
         // ===== STATE MONITORING AND VALIDATION =====
         validateEditorState() {
             // ✅ STATE VALIDATION: Check ProseMirror-Y.js consistency
@@ -16124,152 +16163,57 @@ export default {
             return result;
         },
         
-        // ✅ UPDATED: Replace old getUserPermissionLevel with master authority
+        // ✅ SIMPLIFIED: getUserPermissionLevel for backward compatibility
         getUserPermissionLevel(file) {
-            // For synchronous UI calls, use cached result or conservative default
-            if (!file) return 'unknown';
+            if (!file || !this.username) return 'no-access';
             
-            // ✅ FIX: Use getDocumentKey method for consistent key generation
-            const documentKey = this.getDocumentKey(file) || 'unknown';
+            // Owner always has owner permission
+            if (file.owner === this.username) return 'owner';
             
-            // ✅ SAFETY CHECK: Ensure we have a valid username (should never be undefined with consolidated username)
-            const currentUsername = this.username;
-            if (!currentUsername) {
-                console.warn('⚠️ getUserPermissionLevel called without valid username, defaulting to GUEST');
-                return 'unknown';
+            // For local documents - check creator/author
+            if (file.type === 'local' || (!file.type && !file.owner && !file.permlink)) {
+                const fileOwner = file.creator || file.author;
+                if (!fileOwner || fileOwner === this.username) return 'owner';
+                return 'no-access'; // No access to other users' local files
             }
             
-            // ✅ FIX: Don't use _collaborativeDefaultProcessed flag - always check actual cached permissions first
-        
-        // ✅ TIPTAP.DEV SECURITY: Use cached permission if available, fresh, and for current user
-            if (file.cachedPermissions && file.cachedPermissions[currentUsername]) {
-            const cachedData = file.cachedPermissions[currentUsername];
-            
-            // Handle both old format (string) and new format (object)
-            const cachedLevel = typeof cachedData === 'string' ? cachedData : cachedData.level;
-            const cacheTimestamp = typeof cachedData === 'object' ? cachedData.timestamp : file.permissionCacheTime;
-            const cachedUsername = typeof cachedData === 'object' ? cachedData.username : currentUsername;
-            
-            // ✅ SECURITY: Verify cache is for current user (prevent cache poisoning)
-            if (cachedUsername === currentUsername) {
-                const cacheAge = cacheTimestamp ? Date.now() - cacheTimestamp : Infinity;
-                if (cacheAge < 300000) { // 5 minutes
-                    // Using fresh cached permission
-                    return cachedLevel;
-                } else {
-                    console.log('⏰ PERMISSION: Cache expired, falling through to default logic', {
-                        document: documentKey,
-                        cachedLevel,
-                        cacheAge: Math.round(cacheAge / 1000) + 's'
-                    });
-                    // Cache expired - will fall through to default logic
-                }
-            } else {
-                console.warn('🚫 Permission cache username mismatch - clearing stale cache');
-                delete file.cachedPermissions[currentUsername];
-            }
-        }
-            
-            // ✅ FIX: Check for local files by ID (not type property)
-            const isLocalFile = file.id && !file.owner && !file.permlink;
-            
-            // Fast synchronous checks for immediate UI needs
-            if (isLocalFile) {
-                const fileOwner = file.creator || file.author || file.owner;
-                
-                // ✅ TIPTAP SECURITY: Strict local document ownership enforcement
-                // If auth is still loading (username is undefined), allow access for now
-                if (this.username === undefined) {
-                    // Auth still loading - allow access to prevent blocking UI
-                    return 'owner';
-                } else if (!this.username) {
-                    // Anonymous users (null username) can only access files with no owner
-                    return !fileOwner ? 'owner' : 'no-access';
-                } else {
-                    // Authenticated users can only access their own files
-                    if (!fileOwner || fileOwner === this.username) {
-                        return 'owner';
-                    } else {
-                        // ✅ SECURITY: NO ACCESS to other users' local files
-                        console.log('🚫 TipTap Security: Local file ownership violation', {
-                            fileOwner,
-                            currentUser: this.username,
-                            fileId: file.id
-                        });
-                        return 'no-access';
-                    }
+            // For collaborative docs:
+            // 1. Check reactive state cache (for offline support)
+            const documentKey = this.getDocumentKey(file);
+            if (this.reactivePermissionState[documentKey]) {
+                const cached = this.reactivePermissionState[documentKey];
+                if (Date.now() - cached.timestamp < 300000) { // 5 min cache
+                    return cached.permissionLevel;
                 }
             }
             
-            // ✅ FIX: Check for collaborative files by type/flag AND owner/permlink
-            const isCollaborativeFile = (file.type === 'collaborative' || file.isCollaborative) && file.owner && file.permlink;
-            
-            if (isCollaborativeFile) {
-                if (!this.isAuthenticated) return 'readonly';
-                if (file.owner === this.username) return 'owner';
-                
-                                // ✅ OFFLINE-FIRST: For current document, use loaded permissions (if available and not stale)
-                if (this.currentFile && 
-                    file.owner === this.currentFile.owner && 
-                    file.permlink === this.currentFile.permlink &&
-                    this.documentPermissions && this.documentPermissions.length > 0) {
-                    
-                    const userPermission = this.documentPermissions.find(p => p.account === this.username);
-                    if (userPermission) {
-                        // ✅ CACHE: Store the permission for offline-first access
-                        this.cachePermissionForFile(file, userPermission.permissionType);
-                        return userPermission.permissionType;
-                    } else {
-                        // ✅ SECURITY: Explicit server denial = no access, cache it
-                        this.cachePermissionForFile(file, 'no-access');
-                        return 'no-access';
-                    }
-                }
-                
-                // ✅ OFFLINE-FIRST: Use stale cached permissions if available for better UX
-                if (file.cachedPermissions && file.cachedPermissions[currentUsername]) {
-                    const cachedData = file.cachedPermissions[currentUsername];
-                    const cachedLevel = typeof cachedData === 'string' ? cachedData : cachedData.level;
-                    return cachedLevel;
-                }
-                
-                            // ✅ COLLABORATIVE DOCUMENT RULE: If document appears in collaborative list,
-            // user has at least readonly access (server wouldn't return it otherwise)
-            
-            // ✅ FIX: Always check actual cached permissions instead of using processed flag
-            const documentKey = `${file.owner}/${file.permlink}`;
-            
-            // Check if we have actual cached permissions for this user
-            if (file.cachedPermissions && file.cachedPermissions[currentUsername]) {
-                const cachedData = file.cachedPermissions[currentUsername];
+            // 2. Check in-memory cache on file object
+            if (file.cachedPermissions && file.cachedPermissions[this.username]) {
+                const cachedData = file.cachedPermissions[this.username];
                 const cachedLevel = typeof cachedData === 'string' ? cachedData : cachedData.level;
                 const cacheTimestamp = typeof cachedData === 'object' ? cachedData.timestamp : Date.now();
-                const cacheAge = Date.now() - cacheTimestamp;
                 
-                // ✅ TIPTAP BEST PRACTICE: Use cached permission if it's fresh (5 minutes)
-                if (cacheAge < 300000) {
+                if (Date.now() - cacheTimestamp < 300000) { // 5 min cache
                     return cachedLevel;
                 }
-            
-                // ✅ TIPTAP BEST PRACTICE: If cache is stale but exists, still use it for better UX
-                // Don't override with readonly - let the background refresh update it
-                console.log('🔄 Using stale cached permission for better UX:', {
-                    document: documentKey,
-                    cachedLevel,
-                    cacheAge: Math.round(cacheAge / 1000) + 's'
-                });
-                return cachedLevel;
             }
             
-            // ✅ TIPTAP BEST PRACTICE: Only default to readonly if NO cached permission exists
-            // (since they appear in the collaborative list, user has at least readonly access)
-            const defaultLevel = 'readonly';
-            this.cachePermissionForFile(file, defaultLevel);
-            
-            return defaultLevel;
+            // 3. For current document, check documentPermissions array
+            if (this.currentFile && 
+                file.owner === this.currentFile.owner && 
+                file.permlink === this.currentFile.permlink &&
+                this.documentPermissions) {
+                
+                const userPerm = this.documentPermissions.find(p => p.account === this.username);
+                if (userPerm) {
+                    // Cache for next time
+                    this.cachePermissionForFile(file, userPerm.permissionType);
+                    return userPerm.permissionType;
+                }
             }
             
-            return 'unknown';
+            // 4. Default to readonly for collaborative docs without permission data
+            return 'readonly';
         },
 
         // ✅ REMOVED: Duplicate method - using optimized version at line 4897
@@ -16879,7 +16823,7 @@ export default {
                 <i class="fas fa-fw fa-folder-open me-2"></i>Open
               </a></li>
                 <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" @click="shareDocument()">
+              <li v-if="canShare"><a class="dropdown-item" href="#" @click="shareDocument()">
                 <i class="fas fa-fw fa-user-plus me-2"></i>Share
               </a></li>
                 <li><a class="dropdown-item" href="#" @click="showJsonPreview()">
@@ -16889,11 +16833,12 @@ export default {
                     <li><a class="dropdown-item" href="#" @click="exportAsMarkdown()">
                 <i class="fas fa-fw fa-file-text me-2"></i>Export Markdown
               </a></li> 
-              <li><a class="dropdown-item" href="#" @click="publishDocument()">
+              <li><a class="dropdown-item" href="#" @click.prevent="canPublish && publishDocument()" 
+                     :class="{ disabled: !canPublish }">
                 <i class="fas fa-fw fa-paper-plane me-2"></i>Publish to Hive
               </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#" @click="deleteDocument()">
+              <li v-if="isOwner"><hr class="dropdown-divider"></li>
+              <li v-if="isOwner"><a class="dropdown-item" href="#" @click="deleteDocument()">
                 <i class="fas fa-fw fa-trash me-2"></i>Delete
               </a></li>
             </ul>
@@ -17047,11 +16992,8 @@ export default {
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-dark">
                     
                         <!-- Document Sharing & Collaboration -->
-                     <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
-                             :class="{ disabled: !canShare }">
+                     <li v-if="canShare"><a class="dropdown-item" href="#" @click.prevent="shareDocument">
                              <i class="fas fa-user-plus me-2"></i>Share Document
-                             <small v-if="!isCollaborativeMode" class="d-block text-muted">Cloud Collaboration required</small>
-                             <small v-else-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
                          </a></li>
                     
                     <li><hr class="dropdown-divider"></li>
@@ -17141,7 +17083,7 @@ export default {
                         @click="convertToCollaborative" class="status-action-btn">
                   Enable Collaboration
                 </button>
-                <button @click="shareDocument()" class="status-action-btn">
+                <button v-if="canShare" @click="shareDocument()" class="status-action-btn">
                   Share Document
                 </button>
               </div>
@@ -17168,7 +17110,7 @@ export default {
                 type="text" 
                 class="form-control bg-dark text-white border-0" 
                 placeholder="Enter title..." 
-                :readonly="isReadOnlyMode"
+                :disabled="isReadOnlyMode"
               />
             </div>
             <!-- Auto-generated permlink display -->
@@ -17337,8 +17279,9 @@ export default {
                 <div class="d-flex align-items-center gap-2">
                   <code class="text-info">/@{{ username }}/</code>
                   <div class="flex-grow-1">
-                    <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
-                         class="bg-dark border border-secondary rounded p-2 text-white cursor-pointer">
+                    <div v-if="!showPermlinkEditor" @click="!isReadOnlyMode && togglePermlinkEditor()"
+                         class="bg-dark border border-secondary rounded p-2 text-white"
+                         :class="{ 'cursor-pointer': !isReadOnlyMode, 'opacity-50': isReadOnlyMode }">
                       {{ actualPermlink || 'Click to edit...' }}
                     </div>
                     <div v-else class="d-flex align-items-center gap-2">
@@ -17349,7 +17292,7 @@ export default {
                         type="text" 
                         class="form-control bg-dark text-white border-secondary flex-grow-1" 
                         placeholder="Auto-generated from title"
-                        :readonly="isReadOnlyMode"
+                        :disabled="isReadOnlyMode"
                       />
                       <button @click="savePermlink" class="btn btn-sm btn-success" title="Save permlink">
                         <i class="fas fa-check"></i>
@@ -17360,7 +17303,7 @@ export default {
                     </div>
                   </div>
                   <button @click="useGeneratedPermlink" 
-                          :disabled="!titleInput || !titleInput.trim()"
+                          :disabled="!titleInput || !titleInput.trim() || isReadOnlyMode"
                           class="btn btn-sm btn-outline-secondary"
                           title="Generate URL slug from title">
                     Auto-generate
@@ -17377,10 +17320,10 @@ export default {
                 <div class="bg-dark border border-secondary rounded p-3">
                   <div class="d-flex align-items-center gap-2 mb-2">
                     <input type="text" class="form-control bg-dark text-white border-secondary"
-                           placeholder="@username" v-model="beneficiaryInput.account">
+                           placeholder="@username" v-model="beneficiaryInput.account" :disabled="isReadOnlyMode">
                     <input type="number" class="form-control bg-dark text-white border-secondary"
-                           placeholder="%" v-model="beneficiaryInput.percent" min="0.01" max="100" step="0.01">
-                    <button @click="addBeneficiary()" class="btn btn-outline-success">
+                           placeholder="%" v-model="beneficiaryInput.percent" min="0.01" max="100" step="0.01" :disabled="isReadOnlyMode">
+                    <button @click="addBeneficiary()" class="btn btn-outline-success" :disabled="isReadOnlyMode">
                       <i class="fas fa-plus"></i>
                     </button>
                   </div>
@@ -17388,7 +17331,7 @@ export default {
                     <div v-for="(ben, index) in displayBeneficiaries" :key="index"
                          class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
                       <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
-                      <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
+                      <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger" :disabled="isReadOnlyMode">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
@@ -17404,7 +17347,7 @@ export default {
                 <div class="bg-dark border border-secondary rounded p-3">
                   <textarea v-model="customJsonString" @input="handleCustomJsonInput"
                             class="form-control bg-dark text-white border-secondary font-monospace" 
-                            rows="6" placeholder="Enter custom JSON metadata..."></textarea>
+                            rows="6" placeholder="Enter custom JSON metadata..." :disabled="isReadOnlyMode"></textarea>
                   <div v-if="customJsonError" class="text-danger small mt-1">
                     <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
                   </div>
@@ -17420,21 +17363,21 @@ export default {
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.allowVotes">
+                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.allowVotes" :disabled="isReadOnlyMode">
                         <label class="form-check-label text-white">Allow votes</label>
                       </div>
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.allowCurationRewards">
+                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.allowCurationRewards" :disabled="isReadOnlyMode">
                         <label class="form-check-label text-white">Allow curation rewards</label>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.maxAcceptedPayout">
+                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.maxAcceptedPayout" :disabled="isReadOnlyMode">
                         <label class="form-check-label text-white">Decline payout</label>
                       </div>
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.percentHbd">
+                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.percentHbd" :disabled="isReadOnlyMode">
                         <label class="form-check-label text-white">100% Power Up</label>
                       </div>
                     </div>
@@ -17648,14 +17591,32 @@ export default {
                       <div class="d-flex align-items-center">
                         <div class="user-avatar-fallback me-2 bg-primary rounded-circle d-flex align-items-center justify-content-center"
                              style="width: 40px; height: 40px; font-size: 1rem; font-weight: bold; color: white;">
-                          {{ username?.charAt(0).toUpperCase() || 'U' }}
+                          {{ currentFile?.owner?.charAt(0).toUpperCase() || 'U' }}
                         </div>
                         <div>
-                          <strong>@{{ username || 'You' }}</strong>
+                          <strong>@{{ currentFile?.owner || username }}</strong>
                           <div class="text-muted small">Owner</div>
                         </div>
                       </div>
                       <span class="badge bg-success">Full Access</span>
+                    </div>
+                    
+                    <!-- Show current user's permission if not owner -->
+                    <div v-if="currentFile?.owner !== username" class="d-flex align-items-center justify-content-between p-2 bg-secondary rounded">
+                      <div class="d-flex align-items-center">
+                        <div class="user-avatar-fallback me-2 bg-info rounded-circle d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px; font-size: 1rem; font-weight: bold; color: white;">
+                          {{ username?.charAt(0).toUpperCase() || 'U' }}
+                        </div>
+                        <div>
+                          <strong>@{{ username }}</strong>
+                          <div class="text-muted small">Your Permission</div>
+                        </div>
+                      </div>
+                      <span class="badge" 
+                            :class="'bg-' + getPermissionDisplayInfo(currentPermissionLevel).color">
+                        {{ getPermissionDisplayInfo(currentPermissionLevel).label }}
+                      </span>
                     </div>
                   </div>
 

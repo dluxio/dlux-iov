@@ -170,17 +170,15 @@ Key issues covered:
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
 
 ## Recent Updates (v2025.06.24)
-### ✅ WebSocket Permission Broadcast System - PRODUCTION READY & DEPLOYED
-- **Real-time Updates**: Near-instant permission changes (1-2 seconds) via Y.js awareness broadcasts
-- **Dual-Layer Architecture**: WebSocket broadcasts + HTTP polling fallback (5-minute intervals)
-- **✅ Server-Side Complete**: 6-step implementation with onChangeDocument observers, API integration, monitoring
-- **✅ Integration Fixed**: REST API endpoint now properly triggers Y.js document updates and broadcasts
-- **✅ Client-Side Complete**: Enhanced awareness listener detects and processes permission broadcasts
-- **Performance Improvement**: 30-60 second delays reduced to 1-2 seconds (95%+ improvement)
-- **Server Load Reduction**: HTTP polling reduced from 30s/60s to 2min/5min intervals
+### ⚠️ WebSocket Permission Broadcast System - CLIENT READY, SERVER PENDING
+- **Client-Side**: ✅ Complete - Awareness listener detects and processes permission broadcasts
+- **Server-Side**: ❌ Pending - REST API updates database but not Y.js document
+- **Temporary Fallback**: HTTP polling increased to 30s/1min until server fix deployed
+- **Expected Performance**: Will achieve 1-2 second updates once server integration complete
+- **Current Performance**: 30 seconds (active collaboration) to 1 minute (normal) via polling
 
 ### Real-time Permission System Enhancement
-- **Adaptive Permission Refresh**: Dynamic refresh rates (2min during collaboration, 5min normal)
+- **Adaptive Permission Refresh**: Dynamic refresh rates (30s during collaboration, 1min normal)
 - **Seamless Permission Transitions**: All permission level changes update UI without page refresh
 - **WebSocket Reconnection**: Automatic reconnection when crossing readonly/editable boundary
 - **Comprehensive UI Updates**: All computed properties react instantly to permission changes
