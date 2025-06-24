@@ -2370,9 +2370,10 @@ export default {
           const headers = JSON.parse(cachedHeaders);
           const cachedChallenge = parseInt(headers['x-challenge']);
           const now = Math.floor(Date.now() / 1000);
+          const challengeAge = now - cachedChallenge;
           
-          // If headers are valid (less than 23 hours old), reuse them
-          if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
+          // Use cached headers if they're less than 23 hours old
+          if (cachedChallenge && challengeAge < (23 * 60 * 60)) {
             obj.status = 'Using cached authentication';
             
             // Call success callback if provided

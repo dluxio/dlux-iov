@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Read-Only Cursors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        .editor-container {
+            border: 2px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Read-Only Cursor Visibility Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Overview</h2>
+        <p>This test verifies that read-only users can see other users' cursors without causing WebSocket disconnections.</p>
+        
+        <div class="status info">
+            <strong>Expected Behavior:</strong>
+            <ul>
+                <li>Read-only users connect to WebSocket and maintain stable connection</li>
+                <li>Read-only users can see cursors from editable users</li>
+                <li>Read-only users do not broadcast their own cursor positions</li>
+                <li>No server errors from unauthorized broadcasts</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Solution Summary</h2>
+        <div class="status success">
+            <strong>Implemented Changes:</strong>
+            <ul>
+                <li>✅ Using standard CollaborationCaret for all users (no custom extension)</li>
+                <li>✅ Enhanced beforeBroadcastStateless to block ALL broadcasts from read-only users</li>
+                <li>✅ Fixed getUserColor() method call (was missing parentheses)</li>
+                <li>✅ Read-only users receive cursor updates but cannot send them</li>
+            </ul>
+        </div>
+        
+        <h3>Code Changes</h3>
+        <pre><code>// Simplified cursor setup - same for all users
+if (webSocketProvider && CollaborationCaret) {
+    const cursorConfig = {
+        provider: webSocketProvider,
+        user: {
+            name: this.component.username || 'Anonymous',
+            color: this.component.getUserColor() // Fixed: added ()
+        }
+    };
+    
+    bodyExtensions.push(CollaborationCaret.configure(cursorConfig));
+}
+
+// Enhanced WebSocket blocking for read-only users
+beforeBroadcastStateless(payload) {
+    if (persistenceManager.component.isReadOnlyMode && payload) {
+        // Allow initial presence announcement
+        if (!persistenceManager.component.hasAnnouncedPresence && 
+            payloadStr.includes('user')) {
+            persistenceManager.component.hasAnnouncedPresence = true;
+            return payload;
+        }
+        
+        // Block ALL other broadcasts
+        return null;
+    }
+    return payload;
+}</code></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Testing Instructions</h2>
+        <ol>
+            <li>Open a document with edit permissions in one browser window</li>
+            <li>Open the same document with read-only permissions in another window</li>
+            <li>Move cursor in the editor window - read-only user should see the cursor</li>
+            <li>Try to click/type in read-only window - should not cause disconnection</li>
+            <li>Monitor console logs for connection stability</li>
+        </ol>
+        
+        <div class="status warning">
+            <strong>Console Logs to Monitor:</strong>
+            <ul>
+                <li>"🔒 Read-only: Blocking awareness broadcast" - Should appear when read-only user tries to broadcast</li>
+                <li>"✅ Allowing initial presence announcement" - Should appear once on connection</li>
+                <li>"✅ CollaborationCaret added for cursor visibility" - Confirms cursor extension loaded</li>
+                <li>No "WebSocket disconnected" or server errors should appear</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Technical Details</h2>
+        <p>The solution works by:</p>
+        <ul>
+            <li><strong>Transport Layer Blocking:</strong> All broadcast filtering happens at the WebSocket provider level</li>
+            <li><strong>Standard Extensions:</strong> Using unmodified TipTap extensions for maximum compatibility</li>
+            <li><strong>Selective Blocking:</strong> Only outgoing messages are blocked; incoming messages are processed normally</li>
+            <li><strong>Initial Presence:</strong> One-time announcement allows read-only users to appear in user list</li>
+        </ul>
+    </div>
+</body>
+</html>

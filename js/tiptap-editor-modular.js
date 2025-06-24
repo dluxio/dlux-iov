@@ -503,7 +503,7 @@ class PersistenceManager {
     }
     
     async setupWebSocketWithOnSynced(yjsDoc, file) {
-        // ✅ AUTHENTICATION CHECK: WebSocket requires authentication for all collaborative documents
+        // ✅ AUTHENTICATION CHECK: All users require authentication for WebSocket connections
         const hasValidAuth = this.component.isAuthenticated && !this.component.isAuthExpired;
         
         if (!hasValidAuth) {
@@ -574,21 +574,105 @@ class PersistenceManager {
         const persistenceManager = this;
         
         try {
-            // Build auth token - authentication is required
+            // Build auth token - all users require full authentication
             if (!this.component.isAuthenticated || !this.component.authHeaders) {
                 throw new Error('Authentication required for collaborative documents');
             }
             
-            // Full authentication for collaborative documents
+            // ✅ AUTH HEADERS INVESTIGATION: Check for potential issues
+            const challengeAge = this.component.authHeaders?.['x-challenge'] ? 
+                Math.round((Date.now() / 1000) - parseInt(this.component.authHeaders['x-challenge'])) : null;
+            const isChallengeTooOldForWebSocket = challengeAge > (24 * 60 * 60); // 24 hours same as API
+            
+            console.log('🔍 AUTH HEADERS INVESTIGATION:', {
+                hasAuthHeaders: !!this.component.authHeaders,
+                authHeaderKeys: this.component.authHeaders ? Object.keys(this.component.authHeaders) : [],
+                account: this.component.authHeaders?.['x-account'],
+                challengeTimestamp: this.component.authHeaders?.['x-challenge'],
+                challengeAgeSeconds: challengeAge,
+                challengeAgeMinutes: challengeAge ? Math.round(challengeAge / 60) : null,
+                isChallengeTooOldForWebSocket,
+                isAuthExpired: this.component.isAuthExpired,
+                username: this.component.username,
+                documentPath: docPath
+            });
+            
+            // ✅ WEBSOCKET CHALLENGE CHECK: WebSocket uses same 24-hour limit as API
+            if (isChallengeTooOldForWebSocket) {
+                console.warn('⚠️ CHALLENGE TOO OLD FOR WEBSOCKET:', {
+                    challengeAge: challengeAge + 's',
+                    limit: '86400s (24 hours)',
+                    suggestion: 'Waiting for fresh auth headers before WebSocket connection'
+                });
+                
+                // ✅ CRITICAL FIX: Wait for fresh auth headers instead of proceeding
+                console.log('🔄 Requesting fresh auth headers and waiting...');
+                this.component.$emit('request-auth-headers');
+                
+                // ✅ SOLUTION: Return a promise that waits for fresh headers
+                return new Promise((resolve, reject) => {
+                    console.log('⏳ Waiting for fresh auth headers before WebSocket connection...');
+                    
+                    // Set up a one-time watcher for fresh auth headers
+                    const unwatchAuth = this.component.$watch('authHeaders', (newHeaders) => {
+                        if (newHeaders && newHeaders['x-challenge']) {
+                            const newChallengeAge = Math.round((Date.now() / 1000) - parseInt(newHeaders['x-challenge']));
+                            console.log('🔍 New auth headers received:', {
+                                newChallengeAge: newChallengeAge + 's',
+                                isFresh: newChallengeAge < 300, // Less than 5 minutes
+                                isValidForWebSocket: newChallengeAge < (24 * 60 * 60) // Less than 24 hours
+                            });
+                            
+                            // ✅ WEBSOCKET FIX: Accept headers that are valid for WebSocket (< 24 hours)
+                            if (newChallengeAge < (24 * 60 * 60)) { // Valid for WebSocket (< 24 hours)
+                                console.log('✅ WebSocket-compatible auth headers received, proceeding with connection...');
+                                unwatchAuth(); // Stop watching
+                                
+                                // Restart the WebSocket setup with fresh headers
+                                this.setupWebSocketWithOnSynced(yjsDoc, file).then(resolve).catch(reject);
+                                return;
+                            } else {
+                                console.warn('⚠️ Received headers are still too old for WebSocket:', {
+                                    challengeAge: newChallengeAge + 's',
+                                    limit: '86400s (24 hours)',
+                                    willContinueWaiting: true
+                                });
+                                // Continue waiting for better headers
+                            }
+                        }
+                    }, { immediate: false });
+                    
+                    // Timeout after 10 seconds if no fresh headers arrive
+                    setTimeout(() => {
+                        unwatchAuth();
+                        console.warn('⚠️ Timeout waiting for fresh auth headers, proceeding with old headers');
+                        console.warn('🔄 WebSocket may disconnect, but will reconnect with IndexedDB persistence');
+                        // Continue with existing headers
+                        // Don't reject - just continue with warning
+                        resolve();
+                    }, 10000);
+                });
+            }
+            
+            // ✅ PERMISSION DETECTION: Ensure we have a valid permission level
+            const detectedPermissionLevel = file.permissionLevel || this.component.getUserPermissionLevel(file);
+            const finalPermissionLevel = detectedPermissionLevel !== 'unknown' ? detectedPermissionLevel : 'readonly';
+            
+            console.log('🔍 PERMISSION RESOLUTION for WebSocket auth:', {
+                filePermissionLevel: file.permissionLevel,
+                detectedLevel: detectedPermissionLevel,
+                finalLevel: finalPermissionLevel,
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                documentPath: docPath
+            });
+            
+            // Create auth token - all users (readonly + editor) use full authentication
             const authToken = JSON.stringify({
                 account: this.component.authHeaders['x-account'],
                 signature: this.component.authHeaders['x-signature'],
                 challenge: this.component.authHeaders['x-challenge'],
                 pubkey: this.component.authHeaders['x-pubkey'],
-                // ✅ FIX: Include permission level in auth token
-                permission_level: file.permissionLevel || 'readonly',
-                // ✅ COMPLIANCE: Add explicit readonly flag for server
-                readonly: file.permissionLevel === 'readonly'
+                permission_level: finalPermissionLevel
             });
             
             // ✅ DEBUG: Log WebSocket auth token details
@@ -600,7 +684,8 @@ class PersistenceManager {
                 hasChallenge: !!this.component.authHeaders?.['x-challenge'],
                 hasPubkey: !!this.component.authHeaders?.['x-pubkey'],
                 authTokenPreview: authToken.substring(0, 100) + '...',
-                permissionLevel: file.permissionLevel,
+                originalPermissionLevel: file.permissionLevel,
+                finalPermissionLevel: finalPermissionLevel,
                 isReadOnlyMode: this.component.isReadOnlyMode,
                 isAuthenticated: this.component.isAuthenticated,
                 isAuthExpired: this.component.isAuthExpired
@@ -617,7 +702,8 @@ class PersistenceManager {
                 yjsDocClientID: yjsDoc.clientID,
                 tokenPreview: authToken.substring(0, 50) + '...',
                 isAuthenticated: this.component.isAuthenticated,
-                permissionLevel: file.permissionLevel,
+                originalPermissionLevel: file.permissionLevel,
+                resolvedPermissionLevel: finalPermissionLevel,
                 isReadOnly: this.component.isReadOnlyMode,
                 willIncludeAwareness: true // ✅ All users participate in awareness
             });
@@ -685,7 +771,9 @@ class PersistenceManager {
                     
                     // Process any queued commands
                     persistenceManager.component.$nextTick(() => {
-                        if (persistenceManager.component.commandQueue.length > 0) {
+                        if (persistenceManager.component.commandQueue && persistenceManager.component.commandQueue.length > 0) {
+                            console.log('🔄 Processing queued commands after WebSocket sync');
+                            // Process commands here if needed
                         }
                     });
                     
@@ -830,12 +918,13 @@ class PersistenceManager {
                     if (provider.awareness) {
                         provider.awareness.setLocalStateField('user', {
                             name: persistenceManager.component.username || 'Anonymous',
-                            color: persistenceManager.component.getUserColor,
+                            color: (typeof persistenceManager.component.getUserColor === 'function') ? persistenceManager.component.getUserColor() : '#3498db',
                             permissionLevel: file.permissionLevel,
                             isReadOnly: persistenceManager.component.isReadOnlyMode
                         });
                         console.log('✅ Awareness user info set after connection');
                     }
+                    
                     
                     // ✅ TIPTAP COMPLIANCE: Track reconnection for exponential backoff
                     if (persistenceManager.component.reconnectAttempts > 0) {
@@ -969,8 +1058,6 @@ class PersistenceManager {
                 
                 onAuthenticationFailed(data) {
                     console.error('🔒 WebSocket authentication failed', data);
-                    persistenceManager.component.connectionStatus = 'error';
-                    persistenceManager.component.connectionMessage = 'Authentication failed';
                     
                     // ✅ DEBUG: Log authentication failure details
                     console.log('🚫 Authentication failure details:', {
@@ -985,18 +1072,48 @@ class PersistenceManager {
                         }
                     });
                     
-                    // ✅ FIX: For read-only users, authentication failures might be permission-based
-                    if (persistenceManager.component.isReadOnlyMode) {
-                        console.log('📖 Read-only user authentication failed - may need to refresh permissions');
+                    // ✅ DEBUG: Enhanced logging for WebSocket authentication failures
+                    console.log('🔍 WEBSOCKET AUTH FAILURE ANALYSIS:', {
+                        reason: data.reason,
+                        hasAuthHeaders: !!persistenceManager.component.authHeaders,
+                        authHeaderKeys: persistenceManager.component.authHeaders ? Object.keys(persistenceManager.component.authHeaders) : [],
+                        authAccount: persistenceManager.component.authHeaders?.['x-account'],
+                        documentPath: docPath,
+                        isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
+                        permissionLevel: file.permissionLevel
+                    });
+                    
+                    // ✅ READ-ONLY USERS SHOULD CONNECT: They need WebSocket for awareness and broadcasts
+                    if (data.reason === 'permission-denied') {
+                        console.error('🚨 WEBSOCKET PERMISSION DENIED - This should not happen for valid users!');
+                        console.error('📋 Read-only users need WebSocket for:');
+                        console.error('   - Real-time permission broadcasts');
+                        console.error('   - User awareness and live cursors');
+                        console.error('   - Collaborative content updates');
+                        console.error('🔧 Investigation needed: Why is server rejecting WebSocket auth?');
                         
-                        // Try to refresh authentication
-                        if (persistenceManager.component.loadCollaborationAuthHeaders) {
-                            persistenceManager.component.loadCollaborationAuthHeaders(true).then(() => {
-                                console.log('🔄 Authentication headers refreshed - reconnection may be attempted');
-                            }).catch(error => {
-                                console.error('❌ Failed to refresh authentication headers:', error);
+                        // Log auth details for debugging
+                        if (persistenceManager.component.authHeaders) {
+                            console.log('🔍 Auth headers being sent:', {
+                                account: persistenceManager.component.authHeaders['x-account'],
+                                challenge: persistenceManager.component.authHeaders['x-challenge'],
+                                hasPubkey: !!persistenceManager.component.authHeaders['x-pubkey'],
+                                hasSignature: !!persistenceManager.component.authHeaders['x-signature']
                             });
                         }
+                    }
+                    
+                    // Regular error handling for non-read-only users
+                    persistenceManager.component.connectionStatus = 'error';
+                    persistenceManager.component.connectionMessage = 'Authentication failed';
+                    
+                    // Try to refresh authentication for editable users
+                    if (!persistenceManager.component.isReadOnlyMode && persistenceManager.component.loadCollaborationAuthHeaders) {
+                        persistenceManager.component.loadCollaborationAuthHeaders(true).then(() => {
+                            console.log('🔄 Authentication headers refreshed - reconnection may be attempted');
+                        }).catch(error => {
+                            console.error('❌ Failed to refresh authentication headers:', error);
+                        });
                     }
                 },
                 
@@ -1061,11 +1178,54 @@ class PersistenceManager {
                     });
                 },
                 
-                // ✅ DEBUG: Track message flow
+                // ✅ DEBUG: Track message flow and handle permission broadcasts
                 onMessage(data) {
                     messageCount++;
                     const timeSinceLastMessage = Date.now() - lastMessageTime;
                     lastMessageTime = Date.now();
+                    
+                    // ✅ DEBUG: Track heartbeat/keepalive messages
+                    if (data && (data.type === 'pong' || data.type === 'ping' || data.type === 'heartbeat')) {
+                        console.log('💓 WebSocket heartbeat received', {
+                            type: data.type,
+                            messageNumber: messageCount,
+                            timeSinceLastMessage: timeSinceLastMessage + 'ms'
+                        });
+                        return; // Skip further processing for heartbeat messages
+                    }
+                    
+                    // ✅ PERMISSION BROADCAST DEBUG: Try to detect permission-related messages
+                    let hasPermissionData = false;
+                    let messageInfo = 'unknown';
+                    
+                    try {
+                        // Check if this is a text message that might contain permission data
+                        if (typeof data === 'string') {
+                            const lowerData = data.toLowerCase();
+                            if (lowerData.includes('permission') || lowerData.includes('access') || lowerData.includes('grant') || lowerData.includes('revoke')) {
+                                hasPermissionData = true;
+                                messageInfo = 'potential-permission-broadcast';
+                                console.log('🔍 POTENTIAL PERMISSION MESSAGE:', data);
+                            }
+                        }
+                        
+                        // Check if this is a binary message with Uint8Array content that might be Y.js update with permission info
+                        if (data instanceof Uint8Array || data?.byteLength) {
+                            // For debugging: Try to decode if it contains permission info in the update
+                            try {
+                                const decoded = new TextDecoder().decode(data);
+                                if (decoded.includes('permission') || decoded.includes('access')) {
+                                    hasPermissionData = true;
+                                    messageInfo = 'yjs-update-with-permission-data';
+                                    console.log('🔍 Y.js UPDATE WITH PERMISSION DATA:', decoded.substring(0, 200));
+                                }
+                            } catch (e) {
+                                // Expected for binary Y.js updates
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ Error analyzing message for permission data:', e);
+                    }
                     
                     console.log('📨 WebSocket message received', {
                         messageNumber: messageCount,
@@ -1074,6 +1234,8 @@ class PersistenceManager {
                         dataSize: data?.byteLength || data?.length || 0,
                         isReadOnly: persistenceManager.component.isReadOnlyMode,
                         documentPath: docPath,
+                        hasPermissionData,
+                        messageInfo,
                         providerStatus: {
                             synced: provider.synced,
                             hasAwareness: !!provider.awareness,
@@ -1097,17 +1259,160 @@ class PersistenceManager {
                     console.log('📨 WebSocket onStateless event:', {
                         hasPayload: !!payload,
                         payloadKeys: payload ? Object.keys(payload) : [],
-                        documentPath: docPath
+                        documentPath: docPath,
+                        payloadType: payload?.type,
+                        payloadData: payload
                     });
+                    
+                    // ✅ ENHANCED PERMISSION BROADCAST DETECTION: Handle multiple formats
+                    const isPermissionBroadcast = payload && (
+                        payload.type === 'permission-update' ||
+                        payload.type === 'permission-change' ||
+                        payload.type === 'permission-grant' ||
+                        payload.type === 'permission-revoke' ||
+                        payload.type === 'access-update' ||
+                        payload.event === 'permission-update' ||
+                        payload.action === 'permission-update' ||
+                        (payload.targetAccount && payload.permissionType) ||
+                        (payload.account && payload.permission) ||
+                        (payload.user && payload.access)
+                    );
+                    
+                    if (isPermissionBroadcast) {
+                        console.log('🔐 Permission broadcast detected:', {
+                            type: payload.type || payload.event || payload.action || 'implicit',
+                            targetAccount: payload.targetAccount || payload.account || payload.user,
+                            permissionType: payload.permissionType || payload.permission || payload.access,
+                            grantedBy: payload.grantedBy || payload.by || payload.from,
+                            documentPath: docPath,
+                            fullPayload: payload
+                        });
+                        
+                        // Normalize the payload to the expected format
+                        const normalizedPayload = {
+                            type: payload.type || 'permission-update',
+                            targetAccount: payload.targetAccount || payload.account || payload.user,
+                            permissionType: payload.permissionType || payload.permission || payload.access,
+                            grantedBy: payload.grantedBy || payload.by || payload.from,
+                            owner: payload.owner,
+                            permlink: payload.permlink
+                        };
+                        
+                        // Check if this permission update is for the current user
+                        if (normalizedPayload.targetAccount === persistenceManager.component.username) {
+                            console.log('🎯 Permission update is for current user - processing...');
+                            
+                            // Use Vue's nextTick to ensure reactive updates
+                            persistenceManager.component.$nextTick(() => {
+                                persistenceManager.component.handleRemotePermissionUpdate(normalizedPayload);
+                            });
+                        } else {
+                            console.log('ℹ️ Permission update for different user:', normalizedPayload.targetAccount);
+                        }
+                    }
+                    
+                    // ✅ LEGACY FORMAT: Handle original permission-update type
+                    if (payload && payload.type === 'permission-update') {
+                        console.log('🔐 Legacy permission update broadcast received:', {
+                            targetAccount: payload.targetAccount,
+                            newPermission: payload.permissionType,
+                            grantedBy: payload.grantedBy,
+                            documentPath: docPath
+                        });
+                        
+                        // Check if this permission update is for the current user
+                        if (payload.targetAccount === persistenceManager.component.username) {
+                            console.log('🎯 Legacy permission update is for current user');
+                            
+                            // Use Vue's nextTick to ensure reactive updates
+                            persistenceManager.component.$nextTick(() => {
+                                persistenceManager.component.handleRemotePermissionUpdate(payload);
+                            });
+                        } else {
+                            console.log('ℹ️ Legacy permission update for different user:', payload.targetAccount);
+                        }
+                    }
+                    
+                    // ✅ REACTIVE PERMISSIONS: Handle permission revocation broadcasts
+                    if (payload && payload.type === 'permission-revoke') {
+                        console.log('🚫 Permission revocation broadcast received:', {
+                            targetAccount: payload.targetAccount,
+                            revokedBy: payload.revokedBy,
+                            documentPath: docPath
+                        });
+                        
+                        // Check if this revocation is for the current user
+                        if (payload.targetAccount === persistenceManager.component.username) {
+                            console.log('🎯 Permission revocation is for current user');
+                            
+                            // Handle as no-access permission update
+                            const revokePayload = {
+                                ...payload,
+                                permissionType: 'no-access'
+                            };
+                            
+                            persistenceManager.component.$nextTick(() => {
+                                persistenceManager.component.handleRemotePermissionUpdate(revokePayload);
+                            });
+                        }
+                    }
                 },
                 
+                // Block stateless broadcasts for read-only users
                 beforeBroadcastStateless(payload) {
-                    console.log('📤 WebSocket beforeBroadcastStateless:', {
+                    // Debug: Log all broadcast attempts
+                    console.log('🔍 beforeBroadcastStateless called:', {
+                        isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
                         hasPayload: !!payload,
-                        payloadKeys: payload ? Object.keys(payload) : [],
-                        documentPath: docPath
+                        payloadType: typeof payload,
+                        hasAnnouncedPresence: persistenceManager.component.hasAnnouncedPresence
                     });
+                    
+                    // ✅ COMPREHENSIVE READ-ONLY BLOCKING: Block all non-essential broadcasts
+                    if (persistenceManager.component.isReadOnlyMode && payload) {
+                        const payloadStr = JSON.stringify(payload);
+                        
+                        // Allow initial user presence announcement
+                        if (!persistenceManager.component.hasAnnouncedPresence && payloadStr.includes('user')) {
+                            persistenceManager.component.hasAnnouncedPresence = true;
+                            console.log('✅ Allowing initial presence announcement for read-only user');
+                            return payload;
+                        }
+                        
+                        // Block ALL awareness updates from read-only users
+                        // This includes cursor position, selection, and any other awareness state
+                        console.log('🔒 Read-only: Blocking awareness broadcast', {
+                            payloadPreview: payloadStr.substring(0, 100) + '...',
+                            payloadType: typeof payload,
+                            hasAwareness: payloadStr.includes('awareness'),
+                            hasCursor: payloadStr.includes('cursor'),
+                            hasSelection: payloadStr.includes('selection'),
+                            hasUser: payloadStr.includes('user')
+                        });
+                        
+                        // Block everything except the initial presence
+                        return null;
+                    }
+                    
+                    // For non-read-only users, allow everything
                     return payload;
+                },
+                
+                // Also block regular broadcasts for read-only users
+                beforeBroadcast(data) {
+                    console.log('🔍 beforeBroadcast called:', {
+                        isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
+                        hasData: !!data,
+                        dataType: typeof data,
+                        dataKeys: data ? Object.keys(data) : []
+                    });
+                    
+                    if (persistenceManager.component.isReadOnlyMode) {
+                        console.log('🔒 Read-only: Blocking regular broadcast');
+                        return false; // Return false to block the broadcast
+                    }
+                    
+                    return true; // Allow for non-read-only users
                 }
             });
             
@@ -1123,6 +1428,12 @@ class PersistenceManager {
                 hasWebSocket: !!provider.ws,
                 wsState: provider.ws?.readyState
             });
+            
+            // ✅ CRITICAL: For read-only users, we rely on beforeBroadcastStateless to block broadcasts
+            // We DON'T override awareness methods because that prevents receiving other users' cursors
+            if (this.component.isReadOnlyMode) {
+                console.log('🔒 Read-only mode: Broadcast blocking enabled, awareness reception allowed');
+            }
             
             // ✅ TIPTAP BEST PRACTICE: Awareness state is properly set in onConnect
             // No need to clear it here - CollaborationCaret will work correctly
@@ -1578,23 +1889,21 @@ class EditorFactory {
             isDestroyed: yjsDoc?.isDestroyed
         });
         
-        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret when WebSocket is available
-        if (CollaborationCaret && webSocketProvider) {
+        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret for all users (server will handle read-only awareness)
+        if (webSocketProvider && CollaborationCaret) {
             const cursorConfig = {
                 provider: webSocketProvider,
                 user: {
                     name: this.component.username || 'Anonymous',
-                    color: this.component.getUserColor
+                    color: (typeof this.component.getUserColor === 'function') ? this.component.getUserColor() : '#3498db'
                 }
             };
             
-            if (this.component.isReadOnlyMode) {
-                cursorConfig.user.isReadOnly = true;
-                cursorConfig.user.color = '#808080';
-            }
-            
             bodyExtensions.push(CollaborationCaret.configure(cursorConfig));
-            console.log('✅ CollaborationCaret added for', this.component.isReadOnlyMode ? 'read-only' : 'editable', 'user');
+            console.log('✅ CollaborationCaret added for cursor visibility', {
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                username: this.component.username
+            });
         }
         
         // ✅ CRITICAL: Wait for DOM element to be ready
@@ -1723,18 +2032,21 @@ class EditorFactory {
                 // ✅ TIPTAP v3: Updates handled automatically by Collaboration extension
 
                 // ✅ TIPTAP COMPLIANCE: Only process updates for editable documents
-                // ✅ FIX: Don't set intent flags for temporary documents until we verify content
-                if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
-                    // For persistent documents, always track changes
-                    this.component.hasUnsavedChanges = true;
-                    this.component.hasUserIntent = true;
-                } else {
-                    // For temporary documents, defer intent detection to content check
-                    this.component.hasUnsavedChanges = true; // Track that something changed
-                    // Don't set hasUserIntent yet - let content check determine this
+                // ✅ READ-ONLY PROTECTION: Block all save operations for read-only users
+                if (!this.component.isReadOnlyMode) {
+                    // ✅ FIX: Don't set intent flags for temporary documents until we verify content
+                    if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
+                        // For persistent documents, always track changes
+                        this.component.hasUnsavedChanges = true;
+                        this.component.hasUserIntent = true;
+                    } else {
+                        // For temporary documents, defer intent detection to content check
+                        this.component.hasUnsavedChanges = true; // Track that something changed
+                        // Don't set hasUserIntent yet - let content check determine this
+                    }
+                    
+                    this.component.debouncedUpdateContent();
                 }
-                
-                this.component.debouncedUpdateContent();
                 
                 // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
                 if (this.component.isTemporaryDocument && !this.component.indexeddbProvider && !this.component.isCreatingPersistence) {
@@ -1837,6 +2149,7 @@ class EditorFactory {
         const Collaboration = tiptapBundle.Collaboration;
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
+        
 
         if (!Editor || !StarterKit || !Collaboration) {
             throw new Error('Required TipTap components missing from bundle and window');
@@ -1862,24 +2175,21 @@ class EditorFactory {
             })
         ];
 
-        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret when WebSocket is available
-        if (CollaborationCaret && webSocketProvider) {
+        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret for all users (server will handle read-only awareness)
+        if (webSocketProvider && CollaborationCaret) {
             const cursorConfig = {
                 provider: webSocketProvider,
                 user: {
                     name: this.component.username || 'Anonymous',
-                    color: this.component.getUserColor
+                    color: (typeof this.component.getUserColor === 'function') ? this.component.getUserColor() : '#3498db'
                 }
             };
             
-            // ✅ TIPTAP BEST PRACTICE: Add read-only indicator for cursor visibility
-            if (this.component.isReadOnlyMode) {
-                cursorConfig.user.isReadOnly = true;
-                cursorConfig.user.color = '#808080'; // Gray for read-only users
-            }
-            
             bodyExtensions.push(CollaborationCaret.configure(cursorConfig));
-            console.log('✅ CollaborationCaret added for', this.component.isReadOnlyMode ? 'read-only' : 'editable', 'user');
+            console.log('✅ CollaborationCaret added for cursor visibility', {
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                username: this.component.username
+            });
         }
 
         // ✅ CRITICAL FIX: Calculate editable state based on current permissions
@@ -2012,10 +2322,16 @@ class SyncManager {
         // titleEditor removed - using simple input field with debounced sync
         
         editors.bodyEditor.on('update', ({ editor }) => {
-            // ✅ ONLY FLAGS: Update UI flags, never sync content
-            this.component.hasUnsavedChanges = true;
+            // ✅ READ-ONLY PROTECTION: Block all write operations for read-only users
+            if (!this.component.isReadOnlyMode) {
+                // ✅ ONLY FLAGS: Update UI flags, never sync content
+                this.component.hasUnsavedChanges = true;
+                
+                // ✅ TIPTAP BEST PRACTICE: Wait for user to stop typing before any persistence action
+                triggerAutoNameAndSave(); // Resets 800ms timeout on each keystroke
+            }
             
-            // ✅ TIPTAP COMPLIANCE: Start memory monitoring for large documents
+            // ✅ TIPTAP COMPLIANCE: Memory monitoring works for all users (read-only safe)
             const textLength = editor.getText().length;
             if (textLength > 50000 && !this.component.memoryMonitorInterval) {
                 console.log('📊 Large document detected, starting memory monitoring');
@@ -2024,10 +2340,6 @@ class SyncManager {
                 console.log('📊 Document size reduced, stopping memory monitoring');
                 this.component.stopMemoryMonitoring();
             }
-            
-            // ✅ TIPTAP BEST PRACTICE: Wait for user to stop typing before any persistence action
-            
-            triggerAutoNameAndSave(); // Resets 800ms timeout on each keystroke
         });
         
         // ❌ REMOVED: Direct Y.js XML fragment manipulation
@@ -3722,6 +4034,7 @@ export default {
             // ===== AUTHENTICATION =====
             serverAuthFailed: false,
             lastAuthCheck: null,
+            hasAnnouncedPresence: false, // Track if read-only user has sent initial presence
             
             // ===== FILE MANAGEMENT =====
             currentFile: null,
@@ -3921,6 +4234,9 @@ export default {
             
             // ===== FILE BROWSER PROTECTION: Separate flag for file browser permission loading =====
             loadingFileBrowserPermissions: false,
+            
+            // ===== WEBSOCKET COMMAND QUEUE =====
+            commandQueue: [], // Queue for commands to execute after WebSocket sync
             permissionLoadThrottle: null,
             
             // ===== PERMISSION CACHE: In-memory cache for permission data =====
@@ -7846,9 +8162,9 @@ export default {
                 this.updateURLWithCollabParams(file.owner, file.permlink);
             }
             
-            // ✅ TIPTAP BEST PRACTICE: Non-blocking permission loading for collaborative documents
+            // ✅ TIPTAP BEST PRACTICE: Force permission refresh for document access
             if (file && file.type === 'collaborative') {
-                this.loadDocumentPermissions().then(() => {
+                this.loadDocumentPermissions('document-access').then(() => {
                     // ✅ FIX: Force Vue to re-evaluate computed properties
                     if (this.collaborativeDocs && this.collaborativeDocs.length > 0) {
                         this.$nextTick(() => {
@@ -8288,7 +8604,7 @@ export default {
                     await this.convertToCollaborative();
                     // After publishing, continue to share modal
                     if (this.currentFile?.type === 'collaborative') {
-                        await this.loadDocumentPermissions();
+                        await this.loadDocumentPermissions('force-refresh');
                         await this.loadSharedUsers();
                         this.showShareModal = true;
                     }
@@ -8298,7 +8614,7 @@ export default {
             
             // For collaborative documents, show share modal directly
             if (this.currentFile?.type === 'collaborative') {
-                await this.loadDocumentPermissions();
+                await this.loadDocumentPermissions('force-refresh');
                 await this.loadSharedUsers();
                 
                 // No public access option - all documents require authentication
@@ -9301,14 +9617,18 @@ export default {
             const documentKey = `${this.currentFile.owner}/${this.currentFile.permlink}`;
             const cachedPermission = this.currentFile.cachedPermissions?.[this.username];
             
-            if (cachedPermission && context !== 'force-refresh') {
+            // ✅ BALANCED CACHING: Distinguish between contexts
+            const isDocumentAccess = context === 'document-access' || context === 'force-refresh';
+            const shouldUseCache = cachedPermission && !isDocumentAccess;
+            
+            if (shouldUseCache) {
                 const cacheAge = typeof cachedPermission === 'object' && cachedPermission.timestamp 
                     ? Date.now() - cachedPermission.timestamp 
                     : 0;
                 
-                // If cache is fresh (less than 5 minutes), use it instead of hitting API
+                // For file browser operations, use cache if fresh
                 if (cacheAge < 300000) {
-                    console.log('🚀 CACHE-FIRST: Using fresh cached permissions, skipping API call', {
+                    console.log('🚀 CACHE-FIRST: Using fresh cached permissions for file browser', {
                         document: documentKey,
                         cachedLevel: typeof cachedPermission === 'string' ? cachedPermission : cachedPermission.level,
                         cacheAge: Math.round(cacheAge / 1000) + 's',
@@ -9324,8 +9644,33 @@ export default {
                         cached: true
                     }];
                     
-                    return; // Skip API call entirely
+                    return; // Skip API call entirely for file browser
                 }
+            }
+            
+            // ✅ DOCUMENT ACCESS: Use cache for immediate display but always refresh
+            if (isDocumentAccess && cachedPermission) {
+                const cachedLevel = typeof cachedPermission === 'string' ? cachedPermission : cachedPermission.level;
+                const cacheTimestamp = typeof cachedPermission === 'object' ? cachedPermission.timestamp : Date.now();
+                
+                console.log('📄 DOCUMENT ACCESS: Using cached permissions for fast display, refreshing in background', {
+                    document: documentKey,
+                    cachedLevel,
+                    cacheAge: Math.round((Date.now() - cacheTimestamp) / 1000) + 's',
+                    context
+                });
+                
+                // Update UI immediately with cached data
+                this.documentPermissions = [{
+                    account: this.username,
+                    permissionType: cachedLevel,
+                    grantedBy: 'cached-permission',
+                    grantedAt: new Date(cacheTimestamp).toISOString(),
+                    cached: true,
+                    pendingRefresh: true
+                }];
+                
+                // Continue to refresh in background
             }
             
             // ✅ PERFORMANCE: Prevent duplicate loads within 5 seconds
@@ -9498,16 +9843,38 @@ export default {
                 
                 // ✅ STEP 7: Set final permissions based on unified resolution
                 if (unifiedPermission.level !== 'no-access') {
-                    // Ensure documentPermissions reflects the resolved permission
-                    if (!this.documentPermissions || this.documentPermissions.length === 0) {
-                        // Create synthetic permission entry for caching and UI
+                    // Check if permission changed from cached version
+                    const currentPermission = this.documentPermissions?.[0]?.permissionType;
+                    const newPermission = unifiedPermission.level;
+                    const hasPermissionChanged = currentPermission !== newPermission;
+                    
+                    // Update documentPermissions with fresh data
                     this.documentPermissions = [{
-                            account: this.username,
-                            permissionType: unifiedPermission.level,
-                            grantedBy: unifiedPermission.source,
-                            grantedAt: new Date().toISOString(),
-                            synthetic: true // Mark as synthetic for debugging
-                        }];
+                        account: this.username,
+                        permissionType: newPermission,
+                        grantedBy: unifiedPermission.source,
+                        grantedAt: new Date().toISOString(),
+                        synthetic: false, // Mark as real API data
+                        fresh: true
+                    }];
+                    
+                    // ✅ REACTIVE UPDATE: If permission changed, update UI and editor state
+                    if (hasPermissionChanged && isDocumentAccess) {
+                        console.log('🔄 PERMISSION CHANGE DETECTED: Updating UI reactively', {
+                            document: documentKey,
+                            oldPermission: currentPermission,
+                            newPermission: newPermission,
+                            context
+                        });
+                        
+                        // Update reactive permission state
+                        this.updateReactivePermissionState(documentKey, newPermission === 'readonly', newPermission);
+                        
+                        // Update editor mode if needed
+                        this.$nextTick(() => {
+                            this.updateEditorMode();
+                            this.triggerPermissionReactivity();
+                        });
                     }
                 }
                 
@@ -10882,8 +11249,11 @@ export default {
             }
 
             // ✅ AUTO-SAVE TRIGGER: Mark as unsaved and trigger auto-save
-            this.hasUnsavedChanges = true;
-            this.debouncedUpdateContent();
+            // ✅ READ-ONLY PROTECTION: Block save operations for read-only users
+            if (!this.isReadOnlyMode) {
+                this.hasUnsavedChanges = true;
+                this.debouncedUpdateContent();
+            }
         },
 
         // ✅ DEBOUNCED: Update document name when title changes (best practice)
@@ -11003,8 +11373,11 @@ export default {
             }
 
             // ✅ AUTO-SAVE TRIGGER: Mark as unsaved and trigger auto-save
-            this.hasUnsavedChanges = true;
-            this.debouncedUpdateContent();
+            // ✅ READ-ONLY PROTECTION: Block save operations for read-only users
+            if (!this.isReadOnlyMode) {
+                this.hasUnsavedChanges = true;
+                this.debouncedUpdateContent();
+            }
         },
         
         // ===== EXPORT FUNCTIONALITY =====
@@ -11420,8 +11793,11 @@ export default {
                     }
 
                                     // ✅ TRIGGER AUTOSAVE: Y.js config change will trigger sync automatically
-                this.hasUnsavedChanges = true;
-                this.clearUnsavedAfterSync(); // Clear unsaved flag after delay (follows TipTap pattern)
+                // ✅ READ-ONLY PROTECTION: Block save operations for read-only users
+                if (!this.isReadOnlyMode) {
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync(); // Clear unsaved flag after delay (follows TipTap pattern)
+                }
                 
                 } else {
                     throw new Error('Failed to update document name in Y.js config');
@@ -12554,6 +12930,12 @@ export default {
         
         // ✅ PHASE 1: Missing debouncedUpdateContent method - fixes hanging saving indicator
         debouncedUpdateContent() {
+            // ✅ READ-ONLY PROTECTION: Block auto-save for read-only users
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Auto-save blocked for read-only user - content updates are receive-only');
+                return;
+            }
+            
             console.log('🔍 debouncedUpdateContent called - starting auto-save process');
             
             // Clear any existing content update timer
@@ -14904,20 +15286,34 @@ export default {
         },
 
         // ✅ TIPTAP BEST PRACTICE: Update reactive permission state (onSynced pattern)
-        updateReactivePermissionState(documentKey, isReadOnly, permissionLevel) {
+        updateReactivePermissionState(documentKey, isReadOnly, permissionLevel, source = 'unknown') {
             // ✅ PERFORMANCE: Check if permission actually changed to prevent redundant updates
+            // ✅ REACTIVE PERMISSIONS: Always allow broadcasts to trigger updates
             const existing = this.reactivePermissionState[documentKey];
-            if (existing && 
+            const isBroadcast = source === 'broadcast' || source === 'permission-broadcast';
+            
+            if (!isBroadcast && existing && 
                 existing.isReadOnly === isReadOnly && 
                 existing.permissionLevel === permissionLevel && 
                 existing.username === this.username) {
-                // Permission hasn't changed - skip redundant update
+                // Permission hasn't changed - skip redundant update (unless it's a broadcast)
                 console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
                     document: documentKey,
                     permissionLevel,
-                    isReadOnly
+                    isReadOnly,
+                    source
                 });
                 return;
+            }
+            
+            if (isBroadcast) {
+                console.log('📡 BROADCAST: Processing permission update from broadcast', {
+                    document: documentKey,
+                    permissionLevel,
+                    isReadOnly,
+                    source,
+                    previous: existing
+                });
             }
             
             // ✅ OFFLINE-FIRST: Store permission state for instant access
@@ -15275,6 +15671,108 @@ export default {
                 });
             }
         },
+
+        // ✅ REACTIVE PERMISSIONS: Handle remote permission updates from WebSocket broadcasts
+        handleRemotePermissionUpdate(payload) {
+            if (!payload || !this.currentFile) return;
+            
+            const { targetAccount, permissionType, grantedBy, revokedBy } = payload;
+            
+            // Verify this update is for the current user
+            if (targetAccount !== this.username) {
+                console.warn('⚠️ Permission update for different user:', targetAccount);
+                return;
+            }
+            
+            // Verify this update is for the current document
+            const documentKey = this.getDocumentKey(this.currentFile);
+            const payloadDocKey = `${payload.owner || this.currentFile.owner}/${payload.permlink || this.currentFile.permlink}`;
+            
+            if (documentKey !== payloadDocKey) {
+                console.log('ℹ️ Permission update for different document:', payloadDocKey);
+                return;
+            }
+            
+            console.log('🔐 Processing remote permission update:', {
+                previousPermission: this.getUserPermissionLevel(this.currentFile),
+                newPermission: permissionType,
+                grantedBy: grantedBy || revokedBy,
+                document: documentKey
+            });
+            
+            // Update the permission cache immediately
+            this.cachePermissionForFile(this.currentFile, permissionType);
+            
+            // Update reactive permission state with broadcast source
+            const isReadOnly = (permissionType === 'readonly' || permissionType === 'no-access');
+            this.updateReactivePermissionState(documentKey, isReadOnly, permissionType, 'permission-broadcast');
+            
+            // Update document permissions array if it exists
+            if (this.documentPermissions) {
+                const existingIndex = this.documentPermissions.findIndex(p => p.account === this.username);
+                if (existingIndex >= 0) {
+                    // Update existing permission
+                    this.documentPermissions[existingIndex] = {
+                        ...this.documentPermissions[existingIndex],
+                        permissionType: permissionType,
+                        grantedBy: grantedBy || revokedBy,
+                        grantedAt: new Date().toISOString()
+                    };
+                } else if (permissionType !== 'no-access') {
+                    // Add new permission (not for revocations)
+                    this.documentPermissions.push({
+                        account: this.username,
+                        permissionType: permissionType,
+                        grantedBy: grantedBy || 'unknown',
+                        grantedAt: new Date().toISOString()
+                    });
+                }
+                
+                // Remove entry if access was revoked
+                if (permissionType === 'no-access' && existingIndex >= 0) {
+                    this.documentPermissions.splice(existingIndex, 1);
+                }
+            }
+            
+            // Show user notification about the permission change
+            const permissionMessages = {
+                'owner': 'You now have owner access',
+                'postable': 'You can now edit and publish this document',
+                'editable': 'You can now edit this document',
+                'readonly': 'You now have read-only access',
+                'no-access': 'Your access has been revoked'
+            };
+            
+            const message = permissionMessages[permissionType] || `Permission changed to ${permissionType}`;
+            
+            // Show notification to user
+            console.log('📢 Permission Update:', message);
+            
+            // For significant permission changes, show an alert
+            if (permissionType === 'no-access' || 
+                (this.bodyEditor?.isEditable && permissionType === 'readonly') ||
+                (!this.bodyEditor?.isEditable && ['editable', 'postable'].includes(permissionType))) {
+                // Use setTimeout to avoid blocking the permission update process
+                setTimeout(() => {
+                    alert(message);
+                }, 100);
+            }
+            
+            // Update editor mode after permission change
+            this.$nextTick(() => {
+                this.updateEditorMode();
+                
+                // Force UI update to reflect permission changes
+                this.triggerPermissionReactivity();
+                
+                // If access was revoked, consider redirecting or showing access denied
+                if (permissionType === 'no-access') {
+                    console.warn('🚫 Access revoked - user may need to close document');
+                    // Let the UI handle this appropriately based on UX requirements
+                }
+            });
+        },
+
 
         // Efficiently get permissions for multiple files (for file table display)
         

@@ -106,7 +106,7 @@ When reading code examples that reference `titleEditor`, understand that in the 
 - **StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
 - **Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
 - **CollaborationCaret Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
-- **UndoRedo Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/undo-redo
+- **Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 - **Provider Integration**: https://next.tiptap.dev/docs/collaboration/provider/integration
 - **Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
 - **REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
