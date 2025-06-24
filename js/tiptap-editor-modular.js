@@ -9981,6 +9981,23 @@ export default {
                 // ✅ STEP 5: Cache the resolved permission for offline-first access
                 this.cachePermissionForFile(this.currentFile, unifiedPermission.level);
                 
+                // ✅ STEP 5.5: Update collaborative docs cache with fresh server data
+                if (documentInfo && documentInfo.accessType) {
+                    const collaborativeDocToUpdate = this.collaborativeDocs?.find(doc => 
+                        doc.owner === this.currentFile.owner && doc.permlink === this.currentFile.permlink);
+                    
+                    if (collaborativeDocToUpdate) {
+                        // Update the cached accessType with fresh server data
+                        collaborativeDocToUpdate.accessType = documentInfo.accessType;
+                        console.log('📂 CACHE UPDATE: Updated collaborative docs with fresh accessType', {
+                            document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
+                            oldAccessType: collaborativeDocToUpdate.accessType,
+                            newAccessType: documentInfo.accessType,
+                            source: 'info-endpoint-update'
+                        });
+                    }
+                }
+                
                 // ✅ STEP 6: Handle access denial if needed
                 if (unifiedPermission.level === 'no-access' && context === 'document-access') {
                     console.warn('🚫 Unified permission resolution: Access denied');
@@ -10117,59 +10134,15 @@ export default {
                 };
             }
             
-            // ✅ STEP 1.5: PRIORITY CHECK - Collaborative docs API data (most authoritative for permissions)
-            const collaborativeDocPriority = this.collaborativeDocs?.find(doc => 
-                doc.owner === this.currentFile.owner && doc.permlink === this.currentFile.permlink);
-            
-            if (collaborativeDocPriority && collaborativeDocPriority.accessType) {
-                const accessType = collaborativeDocPriority.accessType.toLowerCase();
-                
-                console.log('🏆 PRIORITY: Using collaborative docs accessType', {
-                    document,
-                    accessType: collaborativeDocPriority.accessType,
-                    source: 'collaborative-docs-priority'
-                });
-                
-                // Handle postable permission (highest level - can publish to blockchain)
-                if (accessType === 'postable' || accessType === 'publisher' || accessType === 'post') {
-                    return {
-                        level: 'postable',
-                        source: 'collaborative-docs-access-type',
-                        confidence: 'high',
-                        reasoning: `Collaborative docs shows accessType: ${collaborativeDocPriority.accessType} (can publish to blockchain)`
-                    };
-                }
-                
-                // Handle editable permission (can edit content)
-                if (accessType === 'editable' || accessType === 'editor' || accessType === 'edit') {
-                    return {
-                        level: 'editable',
-                        source: 'collaborative-docs-access-type',
-                        confidence: 'high',
-                        reasoning: `Collaborative docs shows accessType: ${collaborativeDocPriority.accessType} (can edit content)`
-                    };
-                }
-                
-                // Handle readonly permission (view only)
-                if (accessType === 'readonly' || accessType === 'read' || accessType === 'viewer') {
-                        return {
-                            level: 'readonly',
-                        source: 'collaborative-docs-access-type',
-                            confidence: 'high',
-                        reasoning: `Collaborative docs shows accessType: ${collaborativeDocPriority.accessType} (view only)`
-                    };
-                }
-            }
-            
-            // ✅ STEP 2: Check Info endpoint accessType (secondary priority)
+            // ✅ STEP 2: Check Info endpoint accessType (HIGHEST PRIORITY - Fresh server data)
             if (documentInfo && documentInfo.accessType) {
                 const accessType = documentInfo.accessType.toLowerCase();
                 
-                console.log('📋 SECONDARY: Using info endpoint accessType', {
+                console.log('🏆 PRIMARY: Using fresh info endpoint accessType', {
                     document,
                     accessType: documentInfo.accessType,
-                    source: 'info-endpoint-secondary',
-                    note: 'No collaborative docs data available'
+                    source: 'info-endpoint-fresh',
+                    note: 'Fresh server data takes priority'
                 });
                 
                 // Handle postable permission (highest level - can publish to blockchain)
@@ -10203,7 +10176,7 @@ export default {
                     }
                 }
                 
-            // ✅ STEP 2: Check Permissions endpoint (explicit user permissions)
+            // ✅ STEP 3: Check Permissions endpoint (explicit user permissions)
             if (permissionsData && permissionsData.permissions) {
                 const userPermission = permissionsData.permissions.find(p => p.account === this.username);
                 if (userPermission) {
@@ -10216,7 +10189,54 @@ export default {
                 }
             }
             
-            // ✅ STEP 3: Handle permission API errors with Info endpoint context
+            // ✅ STEP 4: FALLBACK - Check collaborative docs cache (only if no fresh server data)
+            if (!documentInfo && !permissionsData) {
+                const collaborativeDocFallback = this.collaborativeDocs?.find(doc => 
+                    doc.owner === this.currentFile.owner && doc.permlink === this.currentFile.permlink);
+                
+                if (collaborativeDocFallback && collaborativeDocFallback.accessType) {
+                    const accessType = collaborativeDocFallback.accessType.toLowerCase();
+                    
+                    console.log('📂 FALLBACK: Using cached collaborative docs accessType', {
+                        document,
+                        accessType: collaborativeDocFallback.accessType,
+                        source: 'collaborative-docs-cache',
+                        note: 'No fresh server data available - using cache'
+                    });
+                    
+                    // Handle postable permission (highest level - can publish to blockchain)
+                    if (accessType === 'postable' || accessType === 'publisher' || accessType === 'post') {
+                        return {
+                            level: 'postable',
+                            source: 'collaborative-docs-cache',
+                            confidence: 'medium',
+                            reasoning: `Cached collaborative docs shows accessType: ${collaborativeDocFallback.accessType}`
+                        };
+                    }
+                    
+                    // Handle editable permission (can edit content)
+                    if (accessType === 'editable' || accessType === 'editor' || accessType === 'edit') {
+                        return {
+                            level: 'editable',
+                            source: 'collaborative-docs-cache',
+                            confidence: 'medium',
+                            reasoning: `Cached collaborative docs shows accessType: ${collaborativeDocFallback.accessType}`
+                        };
+                    }
+                    
+                    // Handle readonly permission (view only)
+                    if (accessType === 'readonly' || accessType === 'read' || accessType === 'viewer') {
+                        return {
+                            level: 'readonly',
+                            source: 'collaborative-docs-cache',
+                            confidence: 'medium',
+                            reasoning: `Cached collaborative docs shows accessType: ${collaborativeDocFallback.accessType}`
+                        };
+                    }
+                }
+            }
+            
+            // ✅ STEP 5: Handle permission API errors with Info endpoint context
             if (permissionError) {
                 if (permissionError.status === 403) {
                     
