@@ -226,7 +226,23 @@ Key issues covered:
 
 ### ✅ Save Indicator Fix for All Input Fields
 - **Issue Fixed**: Save indicator only showed for body editor, not for title/tags/beneficiaries changes
-- **Solution**: Applied consistent updateSaveStatus() pattern to all field handlers
+- **Root Cause**: Input handlers were missing the immediate `updateSaveStatus()` call after setting `hasUnsavedChanges`
+- **Solution**: Applied consistent pattern to all field handlers:
+  ```javascript
+  this.hasUnsavedChanges = true;
+  this.hasUserIntent = true;
+  // Call updateSaveStatus directly to ensure message shows
+  this.$nextTick(() => {
+      this.updateSaveStatus();
+  });
+  ```
+- **Fixed Handlers**:
+  - Title input (for both temp and persistent documents)
+  - Tag operations (addTagToYjs, removeTagFromYjs)
+  - Beneficiary operations (addBeneficiary, removeBeneficiary)
+  - Comment options (all checkbox watchers)
+  - Custom JSON editor (handleCustomJsonInput)
+  - Generic metadata handler (triggerUserIntentDetection)
 - **Result**: "Saving locally..." message now appears immediately for all user inputs
 
 ## Recent Updates (v2025.06.24)
