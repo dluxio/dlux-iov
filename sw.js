@@ -1,4 +1,4 @@
-this.version = "2025.06.24.1";
+this.version = "2025.06.25.1";
 this.version = "2025.06.24.7";
 =======
 this.version = "2025.06.24.5";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.24.16",
-  "generated": "2025-06-24T23:19:44Z",
+  "version": "2025.06.25.1",
+  "generated": "2025-06-24T23:19:56Z",
   "files": {
-    "/img/spk512.png": {
-      "checksum": "98a452727661d34f119ddf6a3fd920a8",
-      "size": 21939,
-      "priority": "important"
-    },
     "/img/spknetwork.png": {
       "checksum": "4d91f7a0ed50ac7b0d27cbd52794078a",
       "size": 51410,
@@ -1371,11 +1366,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
-      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
-      "size": 5916,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
       "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
       "size": 3402,
@@ -1856,12 +1846,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
