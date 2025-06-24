@@ -1813,13 +1813,16 @@ const app = createApp({
 
     getBudgetImpact(proposal) {
       const dailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000;
-      const yearlyPay = dailyPay * 365;
-      const yearlyInflow = this.daoFund.dailyInflow * 365;
+      const totalCost = dailyPay * 365; // Always show annual/total cost
+      
+      // Include ninja grant and beneficiary rewards in total inflow (matching main dashboard)
+      const totalDailyInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant + this.daoFund.beneficiaryRewards;
+      const yearlyInflow = totalDailyInflow * 365;
       
       return {
         daily: dailyPay,
-        yearly: yearlyPay,
-        percentOfInflow: yearlyInflow > 0 ? (yearlyPay / yearlyInflow) * 100 : 0,
+        yearly: totalCost,
+        percentOfInflow: yearlyInflow > 0 ? (totalCost / yearlyInflow) * 100 : 0,
         yearlyInflow: yearlyInflow
       };
     },

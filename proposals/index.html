@@ -156,7 +156,7 @@
 								<div class="card-body text-center">
 									<h6 class="card-title text-info">Daily Inflow</h6>
 									<h4 class="text-warning mb-1">${{ fancyRounding(daoFund.dailyInflow) }}</h4>
-									<small class="text-muted">From rewards</small>
+									<small class="text-muted">From Inflation</small>
 								</div>
 							</div>
 						</div>
@@ -1234,7 +1234,7 @@
 															<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).daily) }} HBD</span>
 														</div>
 														<div class="col-md-4">
-															<strong>{{ isShortTermProposal(proposal) ? 'Remaining Cost:' : 'Annual Cost:' }}</strong><br>
+															<strong>{{ isShortTermProposal(proposal) ? 'Remaining Cost:' : 'Total Cost:' }}</strong><br>
 															<span class="text-warning">
 																{{ isShortTermProposal(proposal) ? 
 																	fancyRounding(getBudgetImpact(proposal).daily * Math.max(0, getRemainingDays(proposal))) : 
@@ -1282,11 +1282,11 @@
 														This short-term proposal would consume 
 														{{ ((getBudgetImpact(proposal).daily * Math.max(0, getRemainingDays(proposal))) / getBudgetImpact(proposal).yearlyInflow * 100).toFixed(1) }}% 
 														of the annual DAO inflow over its remaining {{ Math.max(0, getRemainingDays(proposal)).toFixed(0) }} days
-														({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year total available)
+														({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year total inflow including ninja grant & beneficiary rewards)
 													</span>
 													<span v-else>
 														This proposal would consume {{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}% 
-														of the annual DAO inflow ({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year)
+														of the annual DAO inflow ({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year including ninja grant & beneficiary rewards)
 													</span>
 												</div>
 											</div>
