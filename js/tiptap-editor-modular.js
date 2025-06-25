@@ -6074,6 +6074,22 @@ export default {
             return this.currentFile.owner === this.username;
         },
 
+        canDuplicate() {
+            // Can only duplicate documents that have persistence
+            if (!this.currentFile) {
+                return false;
+            }
+
+            // Collaborative documents are always duplicable (already persisted on server)
+            if (this.currentFile.type === 'collaborative') {
+                return true;
+            }
+
+            // Local documents: only duplicable if they have IndexedDB persistence
+            // (i.e., user has shown intent and autosave created persistence)
+            return !this.isTemporaryDocument || this.hasIndexedDBPersistence;
+        },
+
         // ===== COLLABORATION ANALYTICS COMPUTED PROPERTIES =====
 
         showCollaborationAnalytics() {
@@ -14039,6 +14055,169 @@ export default {
             await this.publishDocument();
         },
 
+        // ===== DUPLICATE DOCUMENT =====
+        async duplicateDocument() {
+            if (!this.currentFile) {
+                alert('No document to duplicate');
+                return;
+            }
+
+            try {
+                // Extract current document data
+                const documentData = this.extractCurrentDocumentData();
+                
+                // Generate copy name
+                const originalName = documentData.documentName || 'Untitled';
+                const copyName = `${originalName} - Copy`;
+                
+                console.log('🔄 Duplicating document:', {
+                    originalName,
+                    copyName,
+                    type: this.currentFile.type,
+                    hasContent: !!(documentData.title || documentData.body)
+                });
+
+                // Create new document based on type
+                if (this.currentFile.type === 'collaborative') {
+                    await this.duplicateCollaborativeDocument(copyName, documentData);
+                } else {
+                    await this.duplicateLocalDocument(copyName, documentData);
+                }
+
+                // Show success message
+                this.showSaveMessage(`Document duplicated as "${copyName}"`, false);
+
+            } catch (error) {
+                console.error('Failed to duplicate document:', error);
+                alert(`Failed to duplicate document: ${error.message}`);
+            }
+        },
+
+        extractCurrentDocumentData() {
+            // Extract all current document data
+            const data = {
+                // Get document name from Y.js config
+                documentName: this.ydoc?.getMap('config').get('documentName') || this.currentFile?.name || 'Untitled',
+                
+                // Content from editors (following TipTap best practices)
+                title: this.titleInput || '',
+                body: this.bodyEditor ? this.bodyEditor.getHTML() : '',
+                
+                // Metadata from reactive properties
+                tags: [...(this.reactiveTags || [])],
+                beneficiaries: [...(this.reactiveBeneficiaries || [])],
+                customJson: { ...(this.reactiveCustomJson || {}) },
+                commentOptions: { ...(this.reactiveCommentOptions || {}) },
+                
+                // Additional metadata from Y.js maps if available
+                permlink: this.ydoc?.getMap('metadata').get('permlink') || ''
+            };
+
+            console.log('📋 Extracted document data:', data);
+            return data;
+        },
+
+        async duplicateLocalDocument(copyName, documentData) {
+            // Create new local document
+            await this.newDocument();
+            
+            // Populate with extracted data
+            await this.populateDocumentData(copyName, documentData);
+            
+            // Trigger persistence immediately since we have content
+            this.hasUserIntent = true;
+            this.hasUnsavedChanges = true;
+            this.debouncedCreateIndexedDBForTempDocument();
+        },
+
+        async duplicateCollaborativeDocument(copyName, documentData) {
+            if (!this.isAuthenticated) {
+                throw new Error('Authentication required for collaborative document duplication');
+            }
+
+            // Create collaborative document via API
+            const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.authHeaders
+                },
+                body: JSON.stringify({
+                    documentName: copyName,
+                    title: documentData.title || copyName,
+                    description: 'Duplicated document created with DLUX TipTap Editor'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(`Failed to create collaborative document: ${errorData.error || response.statusText}`);
+            }
+
+            const docData = await response.json();
+            const serverDoc = docData.document || docData;
+            
+            // Create collaborative file object with proper structure
+            const collaborativeFile = {
+                ...serverDoc,
+                id: `${serverDoc.owner}/${serverDoc.permlink}`, // Collaborative documents use owner/permlink as ID
+                type: 'collaborative',
+                name: serverDoc.documentName || copyName,
+                documentName: serverDoc.documentName || copyName
+            };
+            
+            // Load the new collaborative document using the main loadDocument method
+            await this.loadDocument(collaborativeFile);
+            
+            // Populate with extracted data
+            await this.populateDocumentData(copyName, documentData);
+        },
+
+        async populateDocumentData(documentName, data) {
+            if (!this.ydoc) {
+                console.error('No Y.js document available for population');
+                return;
+            }
+
+            // Set document name in config map
+            this.ydoc.transact(() => {
+                const config = this.ydoc.getMap('config');
+                config.set('documentName', documentName);
+            }, 'duplicate-config');
+
+            // Set metadata in metadata map
+            this.ydoc.transact(() => {
+                const metadata = this.ydoc.getMap('metadata');
+                if (data.title) metadata.set('title', data.title);
+                if (data.tags.length > 0) metadata.set('tags', data.tags);
+                if (data.beneficiaries.length > 0) metadata.set('beneficiaries', data.beneficiaries);
+                if (Object.keys(data.customJson).length > 0) metadata.set('customJson', data.customJson);
+                if (data.permlink) metadata.set('permlink', data.permlink);
+                
+                // Set comment options
+                if (data.commentOptions.allowVotes !== undefined) metadata.set('allowVotes', data.commentOptions.allowVotes);
+                if (data.commentOptions.allowCurationRewards !== undefined) metadata.set('allowCurationRewards', data.commentOptions.allowCurationRewards);
+                if (data.commentOptions.maxAcceptedPayout !== undefined) metadata.set('maxAcceptedPayout', data.commentOptions.maxAcceptedPayout);
+                if (data.commentOptions.percentHbd !== undefined) metadata.set('percentHbd', data.commentOptions.percentHbd);
+            }, 'duplicate-metadata');
+
+            // Set title in input (will sync to metadata map via watcher)
+            if (data.title) {
+                this.titleInput = data.title;
+            }
+
+            // Set body content in editor (following TipTap best practices)
+            if (data.body && this.bodyEditor) {
+                // Use nextTick to ensure editor is ready
+                await this.$nextTick();
+                if (!this.bodyEditor.isDestroyed) {
+                    this.bodyEditor.commands.setContent(data.body);
+                }
+            }
+
+            console.log('✅ Document data populated successfully');
+        },
+
         // ===== ENHANCED DELETE DOCUMENT =====
         async deleteDocument(file) {
             if (!file) return;
@@ -18240,6 +18419,11 @@ export default {
               </a></li>
               <li><a class="dropdown-item" href="#" @click="openLoadModal()">
                 <i class="fas fa-fw fa-folder-open me-2"></i>Open
+              </a></li>
+              <li v-if="currentFile"><a class="dropdown-item" href="#" @click="canDuplicate && duplicateDocument()" 
+                                    :class="{ disabled: !canDuplicate }"
+                                    :title="canDuplicate ? 'Create a copy of this document' : 'Document must be saved before it can be duplicated'">
+                <i class="fas fa-fw fa-copy me-2"></i>Duplicate
               </a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li v-if="currentFile?.type !== 'collaborative'">

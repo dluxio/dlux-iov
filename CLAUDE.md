@@ -302,6 +302,21 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Result**: "Saving locally..." message now appears immediately for all user inputs
 
 ## Recent Updates (v2025.06.25)
+### ✅ Document Duplicate Functionality - NEW FEATURE  
+- **Feature Added**: Duplicate button in File menu dropdown creates exact copy of current document
+- **Implementation**: Complete duplicate system for both local and collaborative documents
+- **Data Copying**: All document data preserved (title, body, metadata, tags, beneficiaries, custom JSON, comment options)
+- **Naming Convention**: Appends " - Copy" to original document name
+- **Type Support**: Works for both local documents (creates IndexedDB copy) and collaborative documents (creates new cloud document)
+- **TipTap v3 Compliant**: Uses proper Y.js transactions with origin tags, follows all best practices
+- **Location**: `js/tiptap-editor-modular.js:14043` - `duplicateDocument()` method with helper functions
+- **Persistence Logic**: `canDuplicate` computed property controls button state with helpful UX:
+  - **Collaborative documents**: Always enabled (server-persisted)
+  - **Local documents**: Enabled only after IndexedDB persistence created (user intent + autosave)
+  - **Temporary documents**: Shown as disabled with tooltip "Document must be saved before it can be duplicated"
+  - **No current file**: Button hidden completely
+- **Fix Applied**: Corrected collaborative document loading to use proper `loadDocument(file)` method with correct file structure
+
 ### ✅ Security Fix - Authentication State Change Vulnerability
 - **Issue Fixed**: Switching users didn't immediately revoke collaborative document access
 - **Root Cause**: Permission caches not invalidated on auth state changes
