@@ -1,4 +1,4 @@
-this.version = "2025.06.25.1";
+this.version = "2025.06.25.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.25.1",
-  "generated": "2025-06-25T01:46:07Z",
+  "version": "2025.06.25.08",
+  "generated": "2025-06-25T15:44:11Z",
   "files": {
-    "/img/tokens/larynx_logomark.png": {
-      "checksum": "c053db05ca715d5494af1e8cf0b9759b",
-      "size": 28604,
-      "priority": "important"
-    },
     "/img/tokens/spk_icon.png": {
       "checksum": "ec1db8b25b57776a93d8efd59bcdfd7a",
       "size": 33772,
@@ -1008,7 +1003,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "0924a86c30a25a61740eac8188d98bc7",
+      "checksum": "b8a622f71b80995e7f751f773c8e0cb7",
       "size": 36523,
       "priority": "important"
     },
@@ -1163,8 +1158,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "dd75f74f23288c8966a0b89bffccb3ec",
-      "size": 68218,
+      "checksum": "73492721610ffd919830099b8f11f67d",
+      "size": 68252,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1228,7 +1223,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "8befbf7d1efb5f75ca0a4910e5b28039",
+      "checksum": "a27f2e000a62fabfabd5f9b8ad911ab3",
       "size": 7299,
       "priority": "important"
     },
@@ -1316,11 +1311,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pla/pla.js": {
-      "checksum": "c9ef8f4e89f51be4b77219f181e4ffbd",
-      "size": 2504,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/postiats/postiats.js": {
       "checksum": "afb4a398865589aeb02db737b6a840fb",
@@ -1752,12 +1742,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
