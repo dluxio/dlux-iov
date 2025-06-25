@@ -160,6 +160,34 @@ const app = createApp({
         account: ''
       },
       
+      // Proposal management
+      creatingProposal: false,
+      updatingProposal: null,
+      removingProposal: null,
+
+      // State for supporters functionality
+      showSupportersModal: false,
+      selectedProposalForSupporters: null,
+      proposalSupporters: [],
+      loadingSupporters: false,
+      createProposalForm: {
+        subject: '',
+        receiver: '',
+        start_date: '',
+        end_date: '',
+        daily_pay: '',
+        permlink: '',
+        permlinkValid: null // null = not checked, true = valid, false = invalid
+      },
+      updateProposalForm: {
+        id: null,
+        subject: '',
+        daily_pay: '',
+        original_daily_pay: 0,
+        permlink: '',
+        permlinkValid: null // null = not checked, true = valid, false = invalid
+      },
+      
       accountapi: {},
       accountinfo: null,
       authors: {}, // Store author information for reputation calculations
@@ -1282,50 +1310,47 @@ const app = createApp({
     },
 
     calculateProposalThreshold() {
-      // Calculate funding threshold based on daily available amount
-      // Only consider active proposals for funding threshold calculation
-      if (this.proposals.length > 0 && this.daoFund.available > 0) {
-        // Filter to only active proposals and sort by total votes (highest first)
-        const activeProposals = this.proposals.filter(p => this.isProposalActive(p));
-        const sortedProposals = [...activeProposals].sort((a, b) => 
-          parseFloat(b.total_votes) - parseFloat(a.total_votes)
-        );
-        
-        let cumulativeDailyPayout = 0;
-        let thresholdVotes = 0;
-        let lastFundedProposal = null;
-        
-        // Add up daily payouts until we exceed the daily available amount
-        for (const proposal of sortedProposals) {
-          const dailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000; // Convert from millicents
-          
-          if (cumulativeDailyPayout + dailyPay <= this.daoFund.available) {
-            // This proposal can still be funded
-            cumulativeDailyPayout += dailyPay;
-          } else {
-            lastFundedProposal = proposal;
-            thresholdVotes = parseFloat(proposal.total_votes); // Update threshold to current proposal's votes
-            break;
-          }
-        }
-        
-        this.proposalThreshold = thresholdVotes;
-        console.log('Funding threshold calculated:', {
-          dailyAvailable: this.daoFund.available,
-          thresholdVotes: thresholdVotes,
-          lastFundedProposal: lastFundedProposal ? {
-            id: lastFundedProposal.proposal_id || lastFundedProposal.id,
-            subject: lastFundedProposal.subject.substring(0, 50),
-            votes: lastFundedProposal.total_votes,
-            dailyPay: parseFloat(lastFundedProposal.daily_pay?.amount || 0) / 1000
-          } : null,
-          cumulativePayout: cumulativeDailyPayout,
-          totalActiveProposals: activeProposals.length,
-          fundedCount: lastFundedProposal ? sortedProposals.indexOf(lastFundedProposal) + 1 : 0
+      // The funding threshold is determined by the Return Proposal (proposal #0)
+      // Any proposal with more votes than the Return Proposal gets funded
+      const returnProposal = this.proposals.find(p => (p.proposal_id || p.id) === 0);
+      
+      if (returnProposal) {
+        this.proposalThreshold = parseFloat(returnProposal.total_votes);
+        console.log('Funding threshold set by Return Proposal:', {
+          returnProposalVotes: this.proposalThreshold,
+          dailyAvailable: this.daoFund.available
         });
       } else {
-        this.proposalThreshold = 0;
-        console.log('No threshold calculated - no proposals or no available funds');
+        // Fallback: if no return proposal found, calculate based on funding capacity
+        if (this.proposals.length > 0 && this.daoFund.available > 0) {
+          const activeProposals = this.proposals.filter(p => this.isProposalActive(p));
+          const sortedProposals = [...activeProposals].sort((a, b) => 
+            parseFloat(b.total_votes) - parseFloat(a.total_votes)
+          );
+          
+          let cumulativeDailyPayout = 0;
+          let thresholdVotes = 0;
+          
+          for (const proposal of sortedProposals) {
+            const dailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000;
+            
+            if (cumulativeDailyPayout + dailyPay <= this.daoFund.available) {
+              cumulativeDailyPayout += dailyPay;
+            } else {
+              thresholdVotes = parseFloat(proposal.total_votes);
+              break;
+            }
+          }
+          
+          this.proposalThreshold = thresholdVotes;
+          console.log('Fallback threshold calculated:', {
+            thresholdVotes: thresholdVotes,
+            dailyAvailable: this.daoFund.available
+          });
+        } else {
+          this.proposalThreshold = 0;
+          console.log('No threshold calculated - no proposals or no available funds');
+        }
       }
     },
 
@@ -1366,6 +1391,16 @@ const app = createApp({
     removeOp(txid) {
       if (this.toSign.txid === txid) {
         this.toSign = {};
+      }
+      // Reset management states if needed
+      if (txid.includes('create_proposal')) {
+        this.creatingProposal = false;
+      }
+      if (txid.includes('update_proposal')) {
+        this.updatingProposal = null;
+      }
+      if (txid.includes('remove_proposal')) {
+        this.removingProposal = null;
       }
     },
 
@@ -2027,6 +2062,608 @@ const app = createApp({
         userVotedOutflowsNoZero: userVotedNoZero,
         userVotedOutflowsNoStabilizer: userVotedNoStabilizer
       };
+    },
+
+    // Proposal Management Methods
+    openCreateProposalModal() {
+      // Reset form
+      this.createProposalForm = {
+        subject: '',
+        receiver: this.account,
+        start_date: this.getMinStartDate(),
+        end_date: '',
+        daily_pay: '',
+        permlink: ''
+      };
+      const modal = new bootstrap.Modal(document.getElementById('createProposalModal'));
+      modal.show();
+    },
+
+    closeCreateProposalModal() {
+      this.createProposalForm = {
+        subject: '',
+        receiver: '',
+        start_date: '',
+        end_date: '',
+        daily_pay: '',
+        permlink: '',
+        permlinkValid: null
+      };
+    },
+
+    openUpdateProposalModal(proposal) {
+      // Populate form with current proposal data
+      this.updateProposalForm = {
+        id: proposal.id,
+        subject: proposal.subject,
+        daily_pay: proposal.daily_pay.amount / 1000, // Convert from satoshi to HBD
+        original_daily_pay: proposal.daily_pay.amount / 1000, // Store original for validation
+        permlink: proposal.permlink,
+        permlinkValid: null // Reset validation state
+      };
+      const modal = new bootstrap.Modal(document.getElementById('updateProposalModal'));
+      modal.show();
+    },
+
+    closeUpdateProposalModal() {
+      this.updateProposalForm = {
+        id: null,
+        subject: '',
+        daily_pay: '',
+        original_daily_pay: 0,
+        permlink: '',
+        permlinkValid: null
+      };
+    },
+
+    getMinStartDate() {
+      // Start date must be tomorrow or later
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow.toISOString().split('T')[0];
+    },
+
+    getTomorrowDate() {
+      // For update modal - can only extend end date
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow.toISOString().split('T')[0];
+    },
+
+    calculateDuration() {
+      if (!this.createProposalForm.start_date || !this.createProposalForm.end_date) {
+        return 0;
+      }
+      const start = new Date(this.createProposalForm.start_date);
+      const end = new Date(this.createProposalForm.end_date);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    },
+
+    canCreateProposal() {
+      return this.createProposalForm.subject.trim() &&
+             this.createProposalForm.receiver.trim() &&
+             this.createProposalForm.start_date &&
+             this.createProposalForm.end_date &&
+             this.createProposalForm.daily_pay > 0 &&
+             this.createProposalForm.permlink.trim() &&
+             this.account;
+    },
+
+    canUpdateProposal() {
+      return this.updateProposalForm.subject.trim() &&
+             this.updateProposalForm.daily_pay > 0 &&
+             this.updateProposalForm.daily_pay <= this.updateProposalForm.original_daily_pay && // Can only lower or keep same
+             this.updateProposalForm.permlink.trim() &&
+             this.account;
+    },
+
+    async createProposal() {
+      if (!this.canCreateProposal()) return;
+      
+      this.creatingProposal = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "create_proposal",
+            {
+              creator: this.account,
+              receiver: this.createProposalForm.receiver,
+              start_date: this.createProposalForm.start_date + "T00:00:00",
+              end_date: this.createProposalForm.end_date + "T23:59:59",
+              daily_pay: {
+                amount: Math.floor(this.createProposalForm.daily_pay * 1000).toString(),
+                precision: 3,
+                nai: "@@000000013" // HBD NAI
+              },
+              subject: this.createProposalForm.subject,
+              permlink: this.createProposalForm.permlink,
+              extensions: []
+            }
+          ]
+        ],
+        key: "active",
+        msg: `Creating proposal: ${this.createProposalForm.subject}`,
+        txid: `create_proposal_${Date.now()}`,
+        api: "https://hive-api.dlux.io",
+        delay: 250,
+        ops: ["loadProposals", "resetCreateProposalState"]
+      };
+
+      this.toSign = op;
+      
+      // Close modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('createProposalModal'));
+      modal.hide();
+    },
+
+    async updateProposal() {
+      if (!this.canUpdateProposal()) return;
+      
+      this.updatingProposal = this.updateProposalForm.id;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "update_proposal",
+            {
+              proposal_id: this.updateProposalForm.id,
+              creator: this.account,
+              daily_pay: {
+                amount: Math.floor(this.updateProposalForm.daily_pay * 1000).toString(),
+                precision: 3,
+                nai: "@@000000013" // HBD NAI
+              },
+              subject: this.updateProposalForm.subject,
+              permlink: this.updateProposalForm.permlink
+            }
+          ]
+        ],
+        key: "active",
+        msg: `Updating proposal #${this.updateProposalForm.id}: ${this.updateProposalForm.subject}`,
+        txid: `update_proposal_${this.updateProposalForm.id}_${Date.now()}`,
+        api: "https://hive-api.dlux.io",
+        delay: 250,
+        ops: ["loadProposals", "resetUpdateProposalState"]
+      };
+
+      this.toSign = op;
+      
+      // Close modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('updateProposalModal'));
+      modal.hide();
+    },
+
+    async removeProposal(proposalId) {
+      if (!this.account || !proposalId) return;
+      
+      if (!confirm('Are you sure you want to cancel this proposal? This action cannot be undone.')) {
+        return;
+      }
+      
+      this.removingProposal = proposalId;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "remove_proposal",
+            {
+              proposal_id: proposalId,
+              proposal_owner: this.account,
+              extensions: []
+            }
+          ]
+        ],
+        key: "active",
+        msg: `Canceling proposal #${proposalId}`,
+        txid: `remove_proposal_${proposalId}_${Date.now()}`,
+        api: "https://hive-api.dlux.io",
+        delay: 250,
+        ops: ["loadProposals", "resetRemoveProposalState"]
+      };
+
+      this.toSign = op;
+    },
+
+    resetCreateProposalState() {
+      this.creatingProposal = false;
+    },
+
+    resetUpdateProposalState() {
+      this.updatingProposal = null;
+    },
+
+    resetRemoveProposalState() {
+      this.removingProposal = null;
+    },
+
+    async validatePermlink(permlink, creator) {
+      if (!permlink || !creator) return false;
+      
+      try {
+        const response = await fetch(`https://api.hive.blog`, {
+          method: 'POST',
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'bridge.get_post',
+            params: {
+              author: creator,
+              permlink: permlink
+            },
+            id: 1
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const result = await response.json();
+        return result.result && result.result.author; // Post exists if author is returned
+      } catch (error) {
+        console.error('Error validating permlink:', error);
+        return false;
+      }
+    },
+
+    getProposalCreationCost() {
+      // 10 HBD for up to 30 days, then 1 HBD per additional day
+      const duration = this.calculateDuration();
+      if (duration <= 30) {
+        return 10.000;
+      } else {
+        return 10.000 + (duration - 30);
+      }
+    },
+
+    // Supporters functionality
+    async openSupportersModal(proposal) {
+      this.selectedProposalForSupporters = proposal;
+      this.showSupportersModal = true;
+      this.proposalSupporters = [];
+      
+      // Immediately show modal and then load supporters
+      this.$nextTick(() => {
+        const modalElement = document.getElementById('supportersModal');
+        if (modalElement) {
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        }
+      });
+      
+      // Load supporters data
+      await this.fetchProposalSupporters(proposal.proposal_id || proposal.id);
+    },
+
+    closeSupportersModal() {
+      this.showSupportersModal = false;
+      this.selectedProposalForSupporters = null;
+      this.proposalSupporters = [];
+      this.loadingSupporters = false;
+    },
+
+    async fetchProposalSupporters(proposalId) {
+      this.loadingSupporters = true;
+      
+      try {
+        // Correct API call structure according to Hive documentation
+        const response = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'database_api.list_proposal_votes',
+            params: {
+              start: [proposalId, ""],
+              limit: 1000,
+              order: 'by_proposal_voter',
+              order_direction: 'ascending',
+              status: 'all'
+            },
+            id: 1
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || 'API error fetching supporters');
+        
+        console.log('Proposal votes response:', data); // Debug log
+        
+        const votes = data.result?.proposal_votes || [];
+        
+        // Filter to only supporters for this specific proposal and exclude the proposal creator
+        const supporters = votes.filter(vote => {
+          const proposalIdMatch = vote.proposal?.id === proposalId;
+          const isNotCreator = vote.voter !== this.selectedProposalForSupporters?.creator;
+          return proposalIdMatch && isNotCreator;
+        });
+        
+        console.log('Filtered supporters:', supporters); // Debug log
+        
+        // Get voter governance HP for each supporter
+        if (supporters.length > 0) {
+          const voterNames = supporters.map(vote => vote.voter);
+          const voterAccounts = await this.getVoterAccounts(voterNames);
+          
+          // Combine vote data with account data and calculate HP
+          this.proposalSupporters = supporters.map(vote => {
+            const account = voterAccounts[vote.voter];
+            const votingPower = this.calculateVotingPower(account);
+            
+            return {
+              voter: vote.voter,
+              governanceHP: votingPower,
+              account: account
+            };
+          }).sort((a, b) => b.governanceHP - a.governanceHP); // Sort by HP descending
+        } else {
+          this.proposalSupporters = [];
+        }
+        
+      } catch (error) {
+        console.error('Error fetching proposal supporters:', error);
+        this.proposalSupporters = [];
+      } finally {
+        this.loadingSupporters = false;
+      }
+    },
+
+    async getVoterAccounts(voterNames) {
+      try {
+        const accountsObj = {};
+        
+        // Process accounts in batches of 100 (API limit)
+        for (let i = 0; i < voterNames.length; i += 100) {
+          const batch = voterNames.slice(i, i + 100);
+          
+          const response = await fetch(this.hapi, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'condenser_api.get_accounts',
+              params: [batch],
+              id: 1
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message || 'API error fetching accounts');
+          
+          const accounts = data.result || [];
+          
+          // Convert array to object keyed by account name
+          accounts.forEach(account => {
+            accountsObj[account.name] = account;
+          });
+          
+          // Small delay between batches to be API-friendly
+          if (i + 100 < voterNames.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        console.log(`Fetched ${Object.keys(accountsObj).length} accounts in ${Math.ceil(voterNames.length / 100)} batches`);
+        
+        return accountsObj;
+      } catch (error) {
+        console.error('Error fetching voter accounts:', error);
+        return {};
+      }
+    },
+
+    calculateVotingPower(account) {
+      if (!account || !this.hivestats) return 0;
+      
+      try {
+        // If account has a proxy set, their voting power is 0 (proxy votes for them)
+        if (account.proxy && account.proxy !== '') {
+          return 0;
+        }
+        
+        // Get base vesting shares
+        const vestingShares = parseFloat(account.vesting_shares.split(' ')[0]);
+        
+        // Add proxied votes if they exist
+        let proxiedVotes = 0;
+        if (account.proxied_vsf_votes && Array.isArray(account.proxied_vsf_votes)) {
+          // Sum all proxied vote weights: proxied_vsf_votes[0] + [1] + [2] + [3]
+          // Note: proxied_vsf_votes are in VSF format and need to be divided by 1,000,000 to convert to vests
+          const totalProxiedVSF = account.proxied_vsf_votes.reduce((sum, votes) => {
+            return sum + parseFloat(votes);
+          }, 0);
+          proxiedVotes = totalProxiedVSF / 1000000; // Convert VSF to vests
+        }
+        
+        // Calculate total effective vesting shares
+        // Formula: vesting_shares + proxied_vsf_votes (converted from VSF to vests)
+        const totalVests = vestingShares + proxiedVotes;
+        
+        // Convert to HP using global properties
+        if (this.hivestats.total_vesting_fund_hive && this.hivestats.total_vesting_shares) {
+          const totalVestingFund = parseInt(this.hivestats.total_vesting_fund_hive.split(' ')[0]);
+          const totalVestingShares = parseFloat(this.hivestats.total_vesting_shares.split(' ')[0]);
+          const hp = (totalVests * totalVestingFund) / totalVestingShares;
+          return Math.max(0, hp); // Ensure non-negative
+        }
+        
+        // Fallback approximation
+        return Math.max(0, totalVests / 1000);
+      } catch (error) {
+        console.error('Error calculating voting power for account:', account?.name, error);
+        return 0;
+      }
+    },
+
+    calculateGovernanceHP(account) {
+      // Alias for backward compatibility
+      return this.calculateVotingPower(account);
+    },
+
+    getSupporterCount(proposal) {
+      // For display in the UI, we can estimate based on total votes
+      // This is an approximation since we don't have the full supporter list loaded by default
+      const totalVotes = parseFloat(proposal.total_votes);
+      const avgVoteWeight = 50000; // Rough average HP per voter (will vary widely)
+      return Math.round(totalVotes / (avgVoteWeight * 1000000)); // Convert HP to vests
+    },
+
+    openDirectMessage(username) {
+      // Open a new window/tab to send a direct message to the supporter
+      // This could be extended to integrate with Hive messaging systems
+      const url = `/@${username}`;
+      window.open(url, '_blank');
+    },
+
+    exportSupportersList() {
+      if (!this.selectedProposalForSupporters || !this.proposalSupporters.length) return;
+      
+      // Create CSV content
+      const headers = ['Rank', 'Account', 'Own Vests', 'Proxied Vests', 'Total HP', 'Percentage of Total'];
+      const csvContent = [
+        headers.join(','),
+        ...this.proposalSupporters.map((supporter, index) => [
+          index + 1,
+          supporter.voter,
+          this.formatVests(this.getOwnVests(supporter.account)),
+          this.formatVests(this.getProxiedVests(supporter.account)),
+          supporter.governanceHP.toFixed(2),
+          this.getSupporterPercentage(supporter) + '%'
+        ].join(','))
+      ].join('\n');
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `proposal_${this.selectedProposalForSupporters.proposal_id || this.selectedProposalForSupporters.id}_supporters.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    },
+
+    // Support bar visualization methods
+    getSupporterPercentage(supporter) {
+      if (!supporter || !this.selectedProposalForSupporters || supporter.governanceHP <= 0) return '0.00';
+      
+      // Calculate total HP of all supporters
+      const totalSupportersHP = this.proposalSupporters.reduce((sum, s) => sum + s.governanceHP, 0);
+      
+      if (totalSupportersHP <= 0) return '0.00';
+      
+      // Calculate percentage based on supporter's HP vs total supporters HP
+      return ((supporter.governanceHP / totalSupportersHP) * 100).toFixed(2);
+    },
+
+    getSignificantSupporters() {
+      return this.proposalSupporters.filter(supporter => {
+        const percentage = parseFloat(this.getSupporterPercentage(supporter));
+        return percentage >= 1.0; // 1% or more
+      });
+    },
+
+    getSignificantSupportersPercentage() {
+      const significantSupporters = this.getSignificantSupporters();
+      return significantSupporters.reduce((total, supporter) => {
+        return total + parseFloat(this.getSupporterPercentage(supporter));
+      }, 0);
+    },
+
+    getRemainingPercentage() {
+      return Math.max(0, 100 - this.getSignificantSupportersPercentage());
+    },
+
+    getRemainingHP() {
+      const significantSupporters = this.getSignificantSupporters();
+      const significantHP = significantSupporters.reduce((total, supporter) => {
+        return total + supporter.governanceHP;
+      }, 0);
+      const totalHP = this.proposalSupporters.reduce((total, supporter) => {
+        return total + supporter.governanceHP;
+      }, 0);
+      return Math.max(0, totalHP - significantHP);
+    },
+
+    getSupporterBarStyle(supporter, index) {
+      const percentage = parseFloat(this.getSupporterPercentage(supporter));
+      const significantSupporters = this.getSignificantSupporters();
+      
+      // Calculate left position based on previous supporters
+      const leftPercentage = significantSupporters.slice(0, index).reduce((total, prevSupporter) => {
+        return total + parseFloat(this.getSupporterPercentage(prevSupporter));
+      }, 0);
+      
+      // Generate a distinct color for each supporter
+      const colors = [
+        'linear-gradient(45deg, #007bff, #0056b3)', // Blue
+        'linear-gradient(45deg, #28a745, #1e7e34)', // Green
+        'linear-gradient(45deg, #ffc107, #e0a800)', // Yellow
+        'linear-gradient(45deg, #dc3545, #bd2130)', // Red
+        'linear-gradient(45deg, #6f42c1, #563d7c)', // Purple
+        'linear-gradient(45deg, #fd7e14, #e55100)', // Orange
+        'linear-gradient(45deg, #20c997, #17a2b8)', // Teal
+        'linear-gradient(45deg, #e83e8c, #d73975)', // Pink
+        'linear-gradient(45deg, #6c757d, #545b62)', // Gray
+        'linear-gradient(45deg, #17a2b8, #138496)'  // Info
+      ];
+      
+      const colorIndex = index % colors.length;
+      const background = colors[colorIndex];
+      
+      return `left: ${leftPercentage}%; width: ${percentage}%; background: ${background}; border-right: 1px solid rgba(255,255,255,0.2);`;
+    },
+
+    // Helper methods for vesting shares breakdown
+    getOwnVests(account) {
+      if (!account) return 0;
+      try {
+        return parseFloat(account.vesting_shares.split(' ')[0]);
+      } catch (error) {
+        return 0;
+      }
+    },
+
+    getProxiedVests(account) {
+      if (!account || !account.proxied_vsf_votes) return 0;
+      try {
+        // Sum all proxied VSF votes and convert to vests (divide by 1,000,000)
+        const totalProxiedVSF = account.proxied_vsf_votes.reduce((sum, votes) => {
+          return sum + parseFloat(votes);
+        }, 0);
+        return totalProxiedVSF / 1000000;
+      } catch (error) {
+        return 0;
+      }
+    },
+
+    // Format vests with appropriate units (B, M, K, or just number)
+    formatVests(vests) {
+      if (vests >= 1000000000) {
+        return this.fancyRounding(vests / 1000000000) + 'B';
+      } else if (vests >= 1000000) {
+        return this.fancyRounding(vests / 1000000) + 'M';
+      } else if (vests >= 1000) {
+        return this.fancyRounding(vests / 1000) + 'K';
+      } else {
+        return this.fancyRounding(vests);
+      }
     },
 
     getProjectedValues(timeframe = 365) {

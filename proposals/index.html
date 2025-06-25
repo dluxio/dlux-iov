@@ -107,6 +107,39 @@
 		.proposal-scroll::-webkit-scrollbar-thumb:hover {
 			background: rgba(255,255,255,0.5);
 		}
+		
+		/* Support bar text styling */
+		.text-shadow {
+			text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+		}
+		
+		/* Support bar hover labels */
+		.support-segment {
+			position: relative;
+		}
+		
+		.support-segment::after {
+			content: attr(data-label);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background: rgba(0,0,0,0.9);
+			color: white;
+			padding: 4px 8px;
+			border-radius: 4px;
+			font-size: 11px;
+			font-weight: bold;
+			white-space: nowrap;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.2s ease;
+			z-index: 1000;
+		}
+		
+		.support-segment:hover::after {
+			opacity: 1;
+		}
 	</style>
 </head>
 
@@ -1016,7 +1049,7 @@
 			<!-- Main Content -->
 			<div id="proposals" class="container-fluid py-4">
 				<div class="container">
-					<!-- Filter and Stats Bar -->
+					<!-- Filter, Stats, and Create Proposal Bar -->
 					<div class="row mb-4">
 						<div class="col-lg-8">
 							<div class="card card-bg text-light">
@@ -1050,13 +1083,27 @@
 						</div>
 						<div class="col-lg-4">
 							<div class="card card-bg text-light">
-								<div class="card-body text-center">
-									<h6 class="card-title mb-1">Quick Stats</h6>
-									<p class="h4 mb-0 text-info">{{ proposals.length }} Proposals</p>
-									<small class="text-muted d-block">{{ filteredProposals.length }} shown</small>
-									<small class="text-success">
-										{{ proposals.filter(p => isProposalFunded(p)).length }} funded
-									</small>
+								<div class="card-body">
+									<div class="row">
+										<div class="col-8">
+											<h6 class="card-title mb-1">Quick Stats</h6>
+											<p class="h4 mb-0 text-info">{{ proposals.length }} Proposals</p>
+											<small class="text-muted d-block">{{ filteredProposals.length }} shown</small>
+											<small class="text-success">
+												{{ proposals.filter(p => isProposalFunded(p)).length }} funded
+											</small>
+										</div>
+										<div class="col-4 d-flex align-items-center">
+											<button v-if="account" @click="openCreateProposalModal()" 
+												class="btn btn-primary btn-sm w-100">
+												<i class="fa-solid fa-plus me-1"></i>
+												Create
+											</button>
+											<div v-else class="text-center w-100">
+												<small class="text-muted">Login to create proposals</small>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -1128,11 +1175,19 @@
 															:style="'width: ' + Math.max(getVotePercentage(proposal), 10) + '%'">
 														</div>
 													</div>
-													<small class="text-muted">
-														<span v-if="isProposalFunded(proposal)" class="text-success">✓ Funded</span>
-														<span v-else-if="getVotePercentage(proposal) >= 100" class="text-warning">Above Threshold</span>
-														<span v-else class="text-danger">{{ getSupportLabel(proposal) }}</span>
-													</small>
+													<div class="d-flex justify-content-between align-items-center">
+														<small class="text-muted">
+															<span v-if="isProposalFunded(proposal)" class="text-success">✓ Funded</span>
+															<span v-else-if="getVotePercentage(proposal) >= 100" class="text-warning">Threshold</span>
+															<span v-else class="text-danger">{{ getSupportLabel(proposal) }}</span>
+														</small>
+														<button @click="openSupportersModal(proposal)" 
+															class="btn btn-outline-info btn-sm"
+															title="View supporters list">
+															<i class="fa-solid fa-users fa-xs me-1"></i>
+															<span class="d-none d-sm-inline">Supporters</span>
+														</button>
+													</div>
 												</div>
 
 												<!-- User Vote Status -->
@@ -1142,6 +1197,30 @@
 													</div>
 													<div v-else class="text-muted small">
 														<i class="fa-solid fa-minus me-1"></i>Not voted
+													</div>
+												</div>
+
+												<!-- Management Buttons (for proposal creator) -->
+												<div v-if="account && account === proposal.creator" class="d-grid gap-2 mb-2">
+													<div class="btn-group" role="group">
+														<button v-if="isProposalActive(proposal)"
+															@click="openUpdateProposalModal(proposal)"
+															:disabled="updatingProposal === proposal.id"
+															class="btn btn-warning btn-sm"
+															title="Update proposal details">
+															<span v-if="updatingProposal === proposal.id" class="spinner-border spinner-border-sm me-1"></span>
+															<i v-else class="fa-solid fa-edit me-1"></i>
+															Update
+														</button>
+														<button v-if="isProposalActive(proposal)"
+															@click="removeProposal(proposal.id)"
+															:disabled="removingProposal === proposal.id"
+															class="btn btn-danger btn-sm"
+															title="Cancel this proposal">
+															<span v-if="removingProposal === proposal.id" class="spinner-border spinner-border-sm me-1"></span>
+															<i v-else class="fa-solid fa-times me-1"></i>
+															Cancel
+														</button>
 													</div>
 												</div>
 
@@ -1372,7 +1451,7 @@
 								<div class="col-md-6">
 									<strong class="text-info">Status:</strong><br>
 									<span v-if="isProposalFunded(selectedProposal)" class="text-success">✓ Funded</span>
-									<span v-else-if="getVotePercentage(selectedProposal) >= 100" class="text-warning">Above Threshold</span>
+									<span v-else-if="getVotePercentage(selectedProposal) >= 100" class="text-warning">Threshold</span>
 									<span v-else class="text-danger">{{ getSupportLabel(selectedProposal) }}</span>
 								</div>
 							</div>
@@ -1408,7 +1487,14 @@
 							</div>
 
 							<div class="mb-3">
-								<strong class="text-info">Support Progress:</strong>
+								<div class="d-flex justify-content-between align-items-center mb-2">
+									<strong class="text-info">Support Progress:</strong>
+									<button @click="openSupportersModal(selectedProposal)" 
+										class="btn btn-outline-info btn-sm">
+										<i class="fa-solid fa-users me-1"></i>
+										View Supporters
+									</button>
+								</div>
 								<div class="progress mt-2" style="height: 12px;">
 									<div class="progress-bar" role="progressbar" 
 										:class="isProposalFunded(selectedProposal) ? 'bg-success' : (getVotePercentage(selectedProposal) >= 100 ? 'bg-warning' : 'bg-danger')"
@@ -1479,6 +1565,524 @@
 								Remove Support
 							</button>
 						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Create Proposal Modal -->
+		<div class="modal fade" id="createProposalModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title">
+							<i class="fa-solid fa-plus-circle me-2"></i>Create New Proposal
+						</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
+								@click="closeCreateProposalModal"></button>
+					</div>
+					<div class="modal-body">
+						<form @submit.prevent="createProposal">
+							<div class="mb-3">
+								<label class="form-label">Subject <span class="text-danger">*</span></label>
+								<input 
+									v-model="createProposalForm.subject" 
+									type="text" 
+									class="form-control bg-dark text-light border-secondary"
+									placeholder="Brief description of your proposal (max 80 characters)"
+									maxlength="80"
+									required>
+								<div class="form-text">{{ createProposalForm.subject.length }}/80 characters</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label">Creator <span class="text-danger">*</span></label>
+									<input 
+										:value="account" 
+										type="text" 
+										class="form-control bg-secondary text-light border-secondary"
+										disabled>
+									<div class="form-text">Your account that will create this proposal</div>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">Receiver <span class="text-danger">*</span></label>
+									<input 
+										v-model="createProposalForm.receiver" 
+										type="text" 
+										class="form-control bg-dark text-light border-secondary"
+										placeholder="Account that will receive the funds"
+										required>
+									<div class="form-text">Account name that will receive payments</div>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label">Start Date <span class="text-danger">*</span></label>
+									<input 
+										v-model="createProposalForm.start_date" 
+										type="date" 
+										class="form-control bg-dark text-light border-secondary"
+										:min="getMinStartDate()"
+										required>
+									<div class="form-text">When payments should begin</div>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">End Date <span class="text-danger">*</span></label>
+									<input 
+										v-model="createProposalForm.end_date" 
+										type="date" 
+										class="form-control bg-dark text-light border-secondary"
+										:min="createProposalForm.start_date"
+										required>
+									<div class="form-text">When payments should end</div>
+								</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label">Daily Payment <span class="text-danger">*</span></label>
+									<div class="input-group">
+										<input 
+											v-model.number="createProposalForm.daily_pay" 
+											type="number" 
+											step="0.001" 
+											min="0.001"
+											class="form-control bg-dark text-light border-secondary"
+											placeholder="0.000"
+											required>
+										<span class="input-group-text bg-dark text-light border-secondary">HBD</span>
+									</div>
+									<div class="form-text">Amount paid per day in HBD</div>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">Permlink <span class="text-danger">*</span></label>
+									<div class="input-group">
+										<input 
+											v-model="createProposalForm.permlink" 
+											type="text" 
+											class="form-control bg-dark text-light border-secondary"
+											:class="createProposalForm.permlinkValid === false ? 'is-invalid' : (createProposalForm.permlinkValid === true ? 'is-valid' : '')"
+											placeholder="your-proposal-post-permlink"
+											pattern="[a-z0-9-]+"
+											title="Only lowercase letters, numbers, and hyphens allowed"
+											@blur="validatePermlink(createProposalForm.permlink, account).then(valid => createProposalForm.permlinkValid = valid)"
+											required>
+										<span v-if="createProposalForm.permlinkValid === true" class="input-group-text bg-success text-white border-secondary">
+											<i class="fa-solid fa-check"></i>
+										</span>
+										<span v-else-if="createProposalForm.permlinkValid === false" class="input-group-text bg-danger text-white border-secondary">
+											<i class="fa-solid fa-times"></i>
+										</span>
+									</div>
+									<div class="form-text">
+										Permlink of your detailed proposal post
+										<span v-if="createProposalForm.permlinkValid === false" class="text-danger d-block">
+											<i class="fa-solid fa-exclamation-triangle me-1"></i>
+											Post not found at /@{{ account }}/{{ createProposalForm.permlink }}
+										</span>
+										<span v-else-if="createProposalForm.permlinkValid === true" class="text-success d-block">
+											<i class="fa-solid fa-check me-1"></i>
+											Post found and validated
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="mb-4">
+								<h6 class="text-warning">Cost Summary</h6>
+								<div v-if="createProposalForm.daily_pay && createProposalForm.start_date && createProposalForm.end_date" 
+									class="p-3 rounded bg-secondary bg-opacity-25">
+									<div class="row">
+										<div class="col-md-3">
+											<div class="text-center">
+												<div class="small text-muted">Daily Payment</div>
+												<div class="h6 text-warning">{{ createProposalForm.daily_pay }} HBD</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="text-center">
+												<div class="small text-muted">Duration</div>
+												<div class="h6 text-info">{{ calculateDuration() }} days</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="text-center">
+												<div class="small text-muted">Total Payments</div>
+												<div class="h6 text-primary">{{ (createProposalForm.daily_pay * calculateDuration()).toFixed(3) }} HBD</div>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="text-center">
+												<div class="small text-muted">Creation Fee</div>
+												<div class="h6 text-danger">{{ getProposalCreationCost().toFixed(3) }} HBD</div>
+											</div>
+										</div>
+									</div>
+									<hr class="border-secondary my-3">
+									<div class="text-center">
+										<div class="small text-muted">
+											One-time fee charged to your account
+											<span v-if="calculateDuration() <= 30">(10 HBD base for ≤30 days)</span>
+											<span v-else>(10 HBD base + {{ calculateDuration() - 30 }} HBD for extra days)</span>
+										</div>
+										<div class="h5 text-danger">{{ getProposalCreationCost().toFixed(3) }} HBD</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="alert alert-info">
+								<h6 class="alert-heading">
+									<i class="fa-solid fa-info-circle me-1"></i>Important Notes
+								</h6>
+								<ul class="mb-0 small">
+									<li><strong>Creation Fee:</strong> 10 HBD for proposals ≤30 days, +1 HBD per additional day beyond 30</li>
+									<li><strong>Your Fee:</strong> {{ getProposalCreationCost().toFixed(3) }} HBD will be deducted from your account balance</li>
+									<li><strong>Blog Post:</strong> Create a detailed blog post explaining your proposal first</li>
+									<li><strong>Community Support:</strong> Gather community feedback before submitting</li>
+									<li><strong>Funding Threshold:</strong> Proposals need more votes than the Return Proposal to receive funding</li>
+									<li><strong>Permlink Validation:</strong> Ensure your blog post exists before creating the proposal</li>
+								</ul>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer border-secondary">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeCreateProposalModal">
+							Cancel
+						</button>
+						<button 
+							@click="createProposal()" 
+							:disabled="!canCreateProposal() || creatingProposal"
+							class="btn btn-primary">
+							<span v-if="creatingProposal" class="spinner-border spinner-border-sm me-1"></span>
+							<i v-else class="fa-solid fa-plus me-1"></i>
+							Create Proposal ({{ getProposalCreationCost().toFixed(3) }} HBD)
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Update Proposal Modal -->
+		<div class="modal fade" id="updateProposalModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title">
+							<i class="fa-solid fa-edit me-2"></i>Update Proposal #{{ updateProposalForm.id }}
+						</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
+								@click="closeUpdateProposalModal"></button>
+					</div>
+					<div class="modal-body">
+						<form @submit.prevent="updateProposal">
+							<div class="mb-3">
+								<label class="form-label">Subject <span class="text-danger">*</span></label>
+								<input 
+									v-model="updateProposalForm.subject" 
+									type="text" 
+									class="form-control bg-dark text-light border-secondary"
+									placeholder="Brief description of your proposal (max 80 characters)"
+									maxlength="80"
+									required>
+								<div class="form-text">{{ updateProposalForm.subject.length }}/80 characters</div>
+							</div>
+
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<label class="form-label">Creator</label>
+									<input 
+										:value="account" 
+										type="text" 
+										class="form-control bg-secondary text-light border-secondary"
+										disabled>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label">Daily Payment <span class="text-danger">*</span></label>
+									<div class="input-group">
+										<input 
+											v-model.number="updateProposalForm.daily_pay" 
+											type="number" 
+											step="0.001" 
+											min="0.001"
+											:max="updateProposalForm.original_daily_pay"
+											class="form-control bg-dark text-light border-secondary"
+											placeholder="0.000"
+											required>
+										<span class="input-group-text bg-dark text-light border-secondary">HBD</span>
+									</div>
+									<div class="form-text">
+										You can only lower the daily payment (max: {{ updateProposalForm.original_daily_pay }} HBD)
+									</div>
+								</div>
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label">Permlink <span class="text-danger">*</span></label>
+								<div class="input-group">
+									<input 
+										v-model="updateProposalForm.permlink" 
+										type="text" 
+										class="form-control bg-dark text-light border-secondary"
+										:class="updateProposalForm.permlinkValid === false ? 'is-invalid' : (updateProposalForm.permlinkValid === true ? 'is-valid' : '')"
+										placeholder="your-updated-proposal-post-permlink"
+										pattern="[a-z0-9-]+"
+										title="Only lowercase letters, numbers, and hyphens allowed"
+										@blur="validatePermlink(updateProposalForm.permlink, account).then(valid => updateProposalForm.permlinkValid = valid)"
+										required>
+									<span v-if="updateProposalForm.permlinkValid === true" class="input-group-text bg-success text-white border-secondary">
+										<i class="fa-solid fa-check"></i>
+									</span>
+									<span v-else-if="updateProposalForm.permlinkValid === false" class="input-group-text bg-danger text-white border-secondary">
+										<i class="fa-solid fa-times"></i>
+									</span>
+								</div>
+								<div class="form-text">
+									Permlink of your updated proposal post
+									<span v-if="updateProposalForm.permlinkValid === false" class="text-danger d-block">
+										<i class="fa-solid fa-exclamation-triangle me-1"></i>
+										Post not found at /@{{ account }}/{{ updateProposalForm.permlink }}
+									</span>
+									<span v-else-if="updateProposalForm.permlinkValid === true" class="text-success d-block">
+										<i class="fa-solid fa-check me-1"></i>
+										Post found and validated
+									</span>
+								</div>
+							</div>
+
+							<div class="alert alert-warning">
+								<h6 class="alert-heading">
+									<i class="fa-solid fa-exclamation-triangle me-1"></i>Update Restrictions
+								</h6>
+								<ul class="mb-0 small">
+									<li>You can only <strong>lower</strong> the daily payment, not increase it</li>
+									<li>You cannot change the receiver or extend the proposal duration</li>
+									<li>You can change the subject and point to a new permlink</li>
+									<li>Create a blog post explaining the changes before updating</li>
+									<li>Community will need to re-evaluate their support</li>
+								</ul>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer border-secondary">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeUpdateProposalModal">
+							Cancel
+						</button>
+						<button 
+							@click="updateProposal()" 
+							:disabled="!canUpdateProposal() || updatingProposal"
+							class="btn btn-warning">
+							<span v-if="updatingProposal" class="spinner-border spinner-border-sm me-1"></span>
+							<i v-else class="fa-solid fa-save me-1"></i>
+							Update Proposal
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Proposal Supporters Modal -->
+		<div class="modal fade" id="supportersModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title">
+							<i class="fa-solid fa-users me-2"></i>Proposal Supporters
+							<span v-if="selectedProposalForSupporters">
+								- #{{ selectedProposalForSupporters.proposal_id || selectedProposalForSupporters.id }}
+							</span>
+						</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
+								@click="closeSupportersModal"></button>
+					</div>
+					<div class="modal-body">
+						<div v-if="selectedProposalForSupporters" class="mb-4">
+							<h6 class="text-info mb-2">{{ selectedProposalForSupporters.subject }}</h6>
+							<div class="row">
+								<div class="col-md-6">
+									<small class="text-muted">Total Support:</small><br>
+									<span class="h6 text-warning">{{ formatVotes(selectedProposalForSupporters.total_votes) }} HP</span>
+								</div>
+								<div class="col-md-6">
+									<small class="text-muted">Number of Supporters:</small><br>
+									<span class="h6 text-info">{{ proposalSupporters.length }}</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Loading State -->
+						<div v-if="loadingSupporters" class="text-center py-4">
+							<div class="spinner-border text-light mb-3" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+							<p class="text-light">Loading supporters...</p>
+						</div>
+
+						<!-- Supporters List -->
+						<div v-else-if="proposalSupporters.length > 0">
+							<h6 class="text-info mb-3">
+								<i class="fa-solid fa-list me-2"></i>Supporters List ({{ proposalSupporters.length }})
+								<small class="text-muted">- Sorted by Governance HP</small>
+							</h6>
+							
+							<!-- Visual Support Bar -->
+							<div class="mb-4">
+								<h6 class="text-info mb-3">
+									<i class="fa-solid fa-chart-pie me-2"></i>Support Distribution
+								</h6>
+								<div class="position-relative" style="height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
+									<!-- Support segments for supporters with >1% -->
+									<div v-for="(supporter, index) in getSignificantSupporters()" :key="supporter.voter"
+										class="position-absolute h-100 support-segment"
+										:style="getSupporterBarStyle(supporter, index)"
+										:data-label="'@' + supporter.voter"
+										:title="supporter.voter + ': ' + fancyRounding(supporter.governanceHP) + ' HP (' + getSupporterPercentage(supporter) + '%)'">
+									</div>
+									<!-- Remaining supporters grouped -->
+									<div v-if="getRemainingPercentage() > 0"
+										class="position-absolute h-100 support-segment bg-secondary"
+										:style="'left: ' + getSignificantSupportersPercentage() + '%; width: ' + getRemainingPercentage() + '%; background: linear-gradient(45deg, #6c757d, #495057);'"
+										:data-label="(proposalSupporters.length - getSignificantSupporters().length) + ' others'"
+										:title="(proposalSupporters.length - getSignificantSupporters().length) + ' other supporters: ' + fancyRounding(getRemainingHP()) + ' HP (' + getRemainingPercentage().toFixed(1) + '%)'">
+									</div>
+								</div>
+								<div class="d-flex justify-content-between mt-2 small text-muted">
+									<span>Most significant supporters shown by name (≥1% support)</span>
+									<span>{{ proposalSupporters.length }} total supporters</span>
+								</div>
+							</div>
+
+							<div class="table-responsive">
+								<table class="table table-dark table-striped">
+									<thead>
+										<tr>
+											<th scope="col" style="width: 50px;">#</th>
+											<th scope="col">Account</th>
+											<th scope="col">Own Vests</th>
+											<th scope="col">Proxied Vests</th>
+											<th scope="col">Total HP</th>
+											<th scope="col">% of Total</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr v-for="(supporter, index) in proposalSupporters" :key="supporter.voter">
+											<td>{{ index + 1 }}</td>
+											<td>
+												<a :href="'/@' + supporter.voter" 
+													class="text-light text-decoration-none"
+													target="_blank">
+													@{{ supporter.voter }}
+													<i class="fa-solid fa-external-link fa-xs ms-1"></i>
+												</a>
+											</td>
+											<td>
+												<span v-if="supporter.account && !supporter.account.proxy" class="text-info">
+													{{ formatVests(getOwnVests(supporter.account)) }}
+												</span>
+												<span v-else class="text-muted">
+													{{ supporter.account?.proxy ? 'Proxied' : '0' }}
+												</span>
+											</td>
+											<td>
+												<span v-if="supporter.account && getProxiedVests(supporter.account) > 0" class="text-success">
+													{{ formatVests(getProxiedVests(supporter.account)) }}
+												</span>
+												<span v-else class="text-muted">
+													0
+												</span>
+											</td>
+											<td>
+												<span v-if="supporter.governanceHP > 0" class="text-warning">
+													{{ fancyRounding(supporter.governanceHP) }} HP
+												</span>
+												<span v-else-if="supporter.account?.proxy" class="text-muted">
+													Proxied to @{{ supporter.account.proxy }}
+												</span>
+												<span v-else class="text-muted">
+													0 HP
+												</span>
+											</td>
+											<td>
+												<span v-if="supporter.governanceHP > 0" class="text-warning">
+													{{ getSupporterPercentage(supporter) }}%
+												</span>
+												<span v-else class="text-muted">
+													Proxy vote
+												</span>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+							<!-- Summary Stats -->
+							<div class="mt-4 p-3 rounded bg-secondary bg-opacity-25">
+								<h6 class="text-warning mb-2">
+									<i class="fa-solid fa-chart-bar me-2"></i>Support Analysis
+								</h6>
+								<div class="row">
+									<div class="col-md-3">
+										<div class="text-center">
+											<div class="small text-muted">Top 5 Supporters</div>
+											<div class="h6 text-success">
+												{{ fancyRounding(proposalSupporters.slice(0, 5).reduce((sum, s) => sum + s.governanceHP, 0)) }} HP
+											</div>
+											<div class="small text-muted">
+												{{ proposalSupporters.length >= 5 ? 
+													((proposalSupporters.slice(0, 5).reduce((sum, s) => sum + s.governanceHP, 0) * 1000000) / parseFloat(selectedProposalForSupporters.total_votes) * 100).toFixed(1) : 
+													'100' }}%
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-center">
+											<div class="small text-muted">Median HP</div>
+											<div class="h6 text-info">
+												{{ proposalSupporters.length > 0 ? 
+													fancyRounding(proposalSupporters[Math.floor(proposalSupporters.length / 2)]?.governanceHP || 0) : 0 }} HP
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-center">
+											<div class="small text-muted">Average HP</div>
+											<div class="h6 text-primary">
+												{{ proposalSupporters.length > 0 ? 
+													fancyRounding(proposalSupporters.reduce((sum, s) => sum + s.governanceHP, 0) / proposalSupporters.length) : 0 }} HP
+											</div>
+										</div>
+									</div>
+									<div class="col-md-3">
+										<div class="text-center">
+											<div class="small text-muted">Whale Supporters</div>
+											<div class="h6 text-warning">
+												{{ proposalSupporters.filter(s => s.governanceHP >= 100000).length }}
+											</div>
+											<div class="small text-muted">(≥100K HP)</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- No Supporters State -->
+						<div v-else-if="!loadingSupporters" class="text-center py-4">
+							<i class="fa-solid fa-users-slash fa-3x text-muted mb-3"></i>
+							<h5 class="text-light">No Supporters Found</h5>
+							<p class="text-muted">This proposal doesn't have any supporters yet, or there was an error loading the data.</p>
+						</div>
+					</div>
+					<div class="modal-footer border-secondary">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeSupportersModal">
+							Close
+						</button>
+						<button v-if="selectedProposalForSupporters && proposalSupporters.length > 0" 
+							@click="exportSupportersList()"
+							class="btn btn-outline-info">
+							<i class="fa-solid fa-download me-1"></i>
+							Export List
+						</button>
 					</div>
 				</div>
 			</div>
