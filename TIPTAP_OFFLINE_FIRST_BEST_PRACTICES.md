@@ -293,6 +293,7 @@ this.createIndexedDBForTempDocument();
 
 #### Hocuspocus Documentation
 - **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
+- **DLUX Server**: https://github.com/dluxio/docker-data
 
 ## 🔐 **REAL-TIME PERMISSION SYSTEM (v2025.06.24)**
 

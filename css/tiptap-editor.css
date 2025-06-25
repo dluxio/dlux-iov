@@ -282,4 +282,33 @@
   margin-bottom: 10px;
   min-width: 250px;
   z-index: 1000;
+}
+
+/* Document Table Column Widths */
+.documents-table {
+  table-layout: fixed;
+}
+
+.documents-table .col-name {
+  width: 30%;
+}
+
+.documents-table .col-type {
+  width: 10%;
+}
+
+.documents-table .col-owner {
+  width: 15%;
+}
+
+.documents-table .col-access {
+  width: 15%;
+}
+
+.documents-table .col-modified {
+  width: 15%;
+}
+
+.documents-table .col-actions {
+  width: 15%;
 } 

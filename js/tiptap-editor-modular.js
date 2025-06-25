@@ -4327,6 +4327,10 @@ export default {
             loadingDocs: false,
             loadCollaborativeDocsController: null, // AbortController for request cancellation
             autoRefreshTimer: null,
+            
+            // ===== TABLE SORTING =====
+            sortColumn: 'lastModified', // default sort by last modified
+            sortDirection: 'desc', // 'asc' or 'desc'
 
             // ===== FORMS =====
             saveForm: {
@@ -4757,7 +4761,7 @@ export default {
         // ✅ SECURITY: Filtered document list - only shows documents user can access
         accessibleDocuments() {
             // Filter allDocuments to only show files the user can access
-            return this.allDocuments.filter(file => {
+            const filteredDocs = this.allDocuments.filter(file => {
                 const permissionLevel = this.getUserPermissionLevel(file);
 
                 // ✅ COLLABORATIVE DOCUMENT RULE: Never hide collaborative documents
@@ -4789,6 +4793,48 @@ export default {
 
                 return hasAccess;
             });
+            
+            // Apply sorting
+            if (!filteredDocs || !Array.isArray(filteredDocs)) {
+                return [];
+            }
+            
+            // Sort documents based on current sort column and direction
+            const sorted = [...filteredDocs].sort((a, b) => {
+                let aValue, bValue;
+                
+                switch (this.sortColumn) {
+                    case 'name':
+                        aValue = (a.name || a.documentName || a.permlink || '').toLowerCase();
+                        bValue = (b.name || b.documentName || b.permlink || '').toLowerCase();
+                        break;
+                    case 'type':
+                        aValue = a.hasCloudVersion ? 'cloud' : 'local';
+                        bValue = b.hasCloudVersion ? 'cloud' : 'local';
+                        break;
+                    case 'owner':
+                        aValue = (a.owner || a.creator || '').toLowerCase();
+                        bValue = (b.owner || b.creator || '').toLowerCase();
+                        break;
+                    case 'access':
+                        aValue = this.getUserPermissionLevel(a);
+                        bValue = this.getUserPermissionLevel(b);
+                        break;
+                    case 'lastModified':
+                    default:
+                        aValue = new Date(a.updatedAt || a.lastModified || 0).getTime();
+                        bValue = new Date(b.updatedAt || b.lastModified || 0).getTime();
+                        break;
+                }
+                
+                if (this.sortDirection === 'asc') {
+                    return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+                } else {
+                    return bValue < aValue ? -1 : bValue > aValue ? 1 : 0;
+                }
+            });
+            
+            return sorted;
         },
 
         // ✅ CLOUD BUTTON BACKGROUND: Background colors for cloud connection button
@@ -13290,6 +13336,20 @@ export default {
         closePublishModal() {
             this.showPublishModal = false;
         },
+        
+        // ===== TABLE SORTING =====
+        sortTable(column) {
+            if (this.sortColumn === column) {
+                // If clicking the same column, toggle direction
+                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // If clicking a different column, set it as sort column with descending order
+                this.sortColumn = column;
+                this.sortDirection = 'desc';
+            }
+            
+            console.log(`📊 Sorting table by ${column} (${this.sortDirection})`);
+        },
 
         // ===== MAIN ACTION DELEGATION =====
         async publishPost() {
@@ -18095,29 +18155,19 @@ export default {
                   <!-- Table of documents -->
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="d-flex align-items-center gap-3">
-                      <h6 class="mb-0 ms-2"><i class="fas fa-list me-2 d-none"></i>All Drafts</h6>
-                      <div class="d-flex align-items-center gap-3 small text-muted">
-                        <span><span class="d-inline-block me-2"
-                                style="width: 8px; height: 0.75rem; background-color: #5C94FE; vertical-align: middle;"></span>
-                          Collaborative</span>
-                        <span><span class="d-inline-block me-2"
-                                style="width: 8px; height: 0.75rem; background-color: #6c757d; vertical-align: middle;"></span>
-                          Local</span>
-                      </div>
-                    </div>
-                    <div class="d-flex gap-2">
-                      <button @click="refreshDocumentLists" class="btn btn-sm btn-outline-primary" 
+            
+                      <button @click="refreshDocumentLists" class="btn btn-sm btn-primary bg-card" 
                           :disabled="loadingDocs" title="Refresh document list">
                         <i class="fas" :class="loadingDocs ? 'fa-spinner fa-spin' : 'fa-sync-alt'"></i>
                         <span class="d-none d-sm-inline ms-1">{{ loadingDocs ? 'Refreshing...' : 'Refresh' }}</span>
                       </button>
                       <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
-                          class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-trash me-1"></i>Clear All Local Files
+                          class="btn btn-sm btn-danger bg-card">
+                        <i class="fas fa-desktop me-1"></i>Delete All Local Drafts
                       </button>
                       <button v-if="ownedCloudFiles.length > 0" @click="clearAllCloudFiles"
-                          class="btn btn-sm btn-outline-warning">
-                        <i class="fas fa-cloud me-1"></i>Clear My Cloud Files
+                          class="btn btn-sm btn-danger bg-card">
+                        <i class="fas fa-cloud me-1"></i>Delete All Cloud Drafts
                       </button>
                     </div>
                   </div>
@@ -18130,70 +18180,57 @@ export default {
                     No documents found.
                   </div>
                   <div v-else class="table-responsive">
-                    <table class="table table-hover table-dark align-middle mb-0">
+                    <table class="table table-hover table-dark align-middle mb-0 documents-table">
                       <thead>
                         <tr>
-                          <th scope="col" style="width: 30%;">Name</th>
-                          <th scope="col" style="width: 15%;">Status</th>
-                          <th scope="col">Details</th>
-                          <th scope="col">Your Access</th>
-                          <th scope="col">Last Modified</th>
-                          <th scope="col" class="text-end">Actions</th>
+                          <th scope="col" class="col-type cursor-pointer" @click="sortTable('type')">
+                            Type
+                            <i v-if="sortColumn === 'type'" class="fas ms-1" :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+                          </th>
+                          <th scope="col" class="col-name cursor-pointer" @click="sortTable('name')">
+                            Name
+                            <i v-if="sortColumn === 'name'" class="fas ms-1" :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+                          </th>
+                          <th scope="col" class="col-owner cursor-pointer" @click="sortTable('owner')">
+                            Owner
+                            <i v-if="sortColumn === 'owner'" class="fas ms-1" :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+                          </th>
+                          <th scope="col" class="col-access cursor-pointer" @click="sortTable('access')">
+                            Access
+                            <i v-if="sortColumn === 'access'" class="fas ms-1" :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+                          </th>
+                          <th scope="col" class="col-modified cursor-pointer" @click="sortTable('lastModified')">
+                            Modified
+                            <i v-if="sortColumn === 'lastModified'" class="fas ms-1" :class="sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down'"></i>
+                          </th>
+                          <th scope="col" class="col-actions text-end">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                                                   <tr v-for="file in accessibleDocuments" :key="file.id || file.documentPath || (file.owner + '_' + file.permlink)"
                             class="unified-document-row">
+                          <!-- Type -->
+                          <td class="col-type cursor-pointer text-center" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
+                            <i v-if="file.hasCloudVersion" class="fas fa-cloud text-muted" title="Cloud document"></i>
+                            <i v-else class="fas fa-desktop text-muted" title="Local document"></i>
+                            <i v-if="isCurrentDocument(file) && hasUnsavedChanges" class="fas fa-circle fa-xs text-warning ms-1" title="Has unsaved changes"></i>
+                          </td>
+                          
                           <!-- Document Name -->
-                          <td @click="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" class="cursor-pointer">
-                            <strong class="d-block text-white">{{ file.name || file.documentName || file.permlink }}</strong>
-                            <small v-if="file.hasCloudVersion && file.documentName && file.documentName !== file.permlink" class="text-muted">{{ file.permlink }}</small>
+                          <td class="col-name cursor-pointer" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
+                            <strong class="d-block text-white text-truncate">{{ file.name || file.documentName || file.permlink }}</strong>
+                            <small v-if="file.hasCloudVersion && file.documentName && file.documentName !== file.permlink" class="text-muted text-truncate d-block">{{ file.permlink }}</small>
                           </td>
                           
-                          <!-- Unified Status Indicators -->
-                          <td @click="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" class="cursor-pointer">
-                            <div class="d-flex align-items-center gap-2">
-                              <!-- Local Status Indicator -->
-                              <div v-if="file.hasLocalVersion" class="status-indicator" :title="getLocalStatusTitle(file.localStatus)">
-                                <i class="fas fa-hdd" :class="getLocalStatusClass(file.localStatus)"></i>
-                              </div>
-                              <div v-else class="status-indicator text-muted" title="Not saved locally">
-                                <i class="fas fa-hdd opacity-25"></i>
-                              </div>
-                              
-                              <!-- Cloud Status Indicator -->
-                              <div v-if="file.hasCloudVersion" class="status-indicator" :title="getCloudStatusTitle(file.cloudStatus)">
-                                <i class="fas fa-cloud" :class="getCloudStatusClass(file.cloudStatus)"></i>
-                              </div>
-                              <div v-else class="status-indicator text-muted" title="Not in cloud">
-                                <i class="fas fa-cloud opacity-25"></i>
-                              </div>
-                              
-                              <!-- Sync Status Indicator -->
-                              <div v-if="file.hasLocalVersion && file.hasCloudVersion" class="status-indicator" :title="getSyncStatusTitle(file.syncStatus)">
-                                <i class="fas fa-sync" :class="getSyncStatusClass(file.syncStatus)"></i>
-                              </div>
-                              
-                              <!-- Unsaved Changes Indicator -->
-                              <div v-if="isCurrentDocument(file) && hasUnsavedChanges" class="status-indicator text-warning" title="Has unsaved changes">
-                                <i class="fas fa-circle fa-xs"></i>
-                              </div>
-                            </div>
-                          </td>
-                          
-                          <!-- Details -->
-                          <td @click="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" class="cursor-pointer">
-                            <small v-if="file.hasLocalVersion && !file.hasCloudVersion" class="text-muted">
-                              {{ file.size ? (file.size / 1024).toFixed(1) + ' KB' : 'Local' }}
-                            </small>
-                            <small v-else-if="file.hasCloudVersion" class="text-muted">by @{{ file.owner }}</small>
-                            <small v-else class="text-muted">Unknown</small>
+                          <!-- Owner -->
+                          <td class="col-owner cursor-pointer" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
+                            <small class="text-muted">@{{ file.owner || file.creator || username }}</small>
                           </td>
                           
                           <!-- Access Level -->
-                          <td @click="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" class="cursor-pointer">
-                            <span class="badge" 
-                                :class="'bg-' + getPermissionDisplayInfo(getUserPermissionLevel(file)).color"
+                          <td class="col-access cursor-pointer" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
+                            <span class="badge border" 
+                                :class="'border-' + getPermissionDisplayInfo(getUserPermissionLevel(file)).color + ' text-' + getPermissionDisplayInfo(getUserPermissionLevel(file)).color"
                                 :title="getPermissionDisplayInfo(getUserPermissionLevel(file)).description">
                               <i :class="getPermissionDisplayInfo(getUserPermissionLevel(file)).icon" class="me-1"></i>
                               {{ getPermissionDisplayInfo(getUserPermissionLevel(file)).label }}
@@ -18201,15 +18238,15 @@ export default {
                           </td>
                           
                           <!-- Last Modified -->
-                          <td @click="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" class="cursor-pointer">
+                          <td class="col-modified cursor-pointer text-nowrap" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
                             <small>{{ formatTime(file.lastModified || file.updatedAt) }}</small>
                           </td>
                           
                           <!-- Actions -->
-                          <td class="text-end">
+                          <td class="col-actions text-end">
                             <!-- Load Button - Always uses preferred type -->
-                            <button @click.stop="canAccessDocument(file) && (file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file))" 
-                                class="btn btn-sm btn-outline-light me-1"
+                            <button @click.stop="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())" 
+                                class="btn btn-sm btn-secondary me-1"
                                 :disabled="!canAccessDocument(file)"
                                 :title="canAccessDocument(file) ? ('Load document' + (file.preferredType === 'collaborative' ? ' (collaborative mode)' : ' (local mode)')) : 'Access denied - you do not have permission to view this document'">
                               <i class="fas fa-folder-open"></i>
@@ -18218,17 +18255,17 @@ export default {
                             <!-- Delete Button - Show for local files or owned cloud files -->
                             <button v-if="file.hasLocalVersion && !file.hasCloudVersion" 
                                 @click.stop="deleteDocument(file)"
-                                class="btn btn-sm btn-outline-danger" title="Delete local file">
+                                class="btn btn-sm btn-danger" title="Delete local file">
                               <i class="fas fa-trash"></i>
                             </button>
                             <button v-else-if="file.hasCloudVersion && file.owner === username"
                                 @click.stop="deleteDocument(file)"
-                                class="btn btn-sm btn-outline-danger"
+                                class="btn btn-sm btn-danger"
                                 title="Delete cloud document">
                               <i class="fas fa-trash"></i>
                             </button>
                             <button v-else-if="file.hasCloudVersion"
-                                class="btn btn-sm btn-outline-danger opacity-50"
+                                class="btn btn-sm btn-danger opacity-50"
                                 disabled
                                 title="Only document owner can delete">
                               <i class="fas fa-trash"></i>
