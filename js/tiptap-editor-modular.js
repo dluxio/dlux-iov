@@ -18410,7 +18410,7 @@ export default {
         <div class="d-flex bg-dark mb-3 px-2 py-1 justify-content-between align-items-center">
           <!-- File Menu -->
           <div class="btn-group me-3">
-            <button class="btn btn-primary bg-card btn-sm px-2 dropdown-toggle no-caret" data-bs-toggle="dropdown">
+            <button class="btn btn-primary bg-card dropdown-toggle no-caret" data-bs-toggle="dropdown">
                   <i class="fas fa-fw fa-file me-1"></i>File
             </button>
             <ul class="dropdown-menu bg-dark">
@@ -18428,7 +18428,7 @@ export default {
                 <li><hr class="dropdown-divider"></li>
                 <li v-if="currentFile?.type !== 'collaborative'">
                          <a class="dropdown-item" href="#" @click.prevent="convertToCollaborative">
-                             <i class="fas fa-cloud-upload me-2"></i>Turn On Cloud Collaboration
+                             <i class="fas fa-cloud-upload me-2"></i>Cloud Collaboration
                              <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
                          </a>
                      </li>
@@ -18635,7 +18635,7 @@ export default {
 
           <!-- Cloud Status Indicator   -->
           <div class="btn-group ms-2">
-            <button class="btn btn-dark btn-sm px-2 no-caret dropdown-toggle" 
+            <button class="btn btn-dark no-caret dropdown-toggle" 
                     :style="cloudButtonStyle"
                      data-bs-toggle="dropdown" aria-expanded="false">
               <span v-html="documentTitleIndicator"></span>
