@@ -1,4 +1,4 @@
-this.version = "2025.06.25.7";
+this.version = "2025.06.25.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.25.7",
-  "generated": "2025-06-25T18:08:14Z",
+  "version": "2025.06.25.8",
+  "generated": "2025-06-25T18:23:22Z",
   "files": {
-    "/img/wallets/metamask-logo.svg": {
-      "checksum": "552332e44c0c151c0d031c9509303ec8",
-      "size": 3120,
-      "priority": "important"
-    },
     "/img/wallets/metamask.svg": {
       "checksum": "7cfd65ef1830c13da772be92917819d7",
       "size": 397,
@@ -978,7 +973,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "af72f6735ea0d4e1aa0f2b9d464659a1",
+      "checksum": "2ee3868dcbf948961413adcb7380edfc",
       "size": 36523,
       "priority": "important"
     },
@@ -1058,8 +1053,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-index.js": {
-      "checksum": "d4867220ae37191c7c91a8c0f21d4b8e",
-      "size": 190625,
+      "checksum": "1e7ee27dde2b53c3c0596e8ed6d9f987",
+      "size": 191632,
       "priority": "important"
     },
     "/js/v3-nfts.js": {
@@ -1198,7 +1193,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "394d10fa8e5f8934896c849a2174f569",
+      "checksum": "098b54f3841127d10abd299ba563671b",
       "size": 7299,
       "priority": "important"
     },
@@ -1286,11 +1281,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/python/python.js": {
-      "checksum": "6ae01d191e98c27707c061d19695a8eb",
-      "size": 5239,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/qsharp/qsharp.js": {
       "checksum": "ecb49d55a198a1f00ed77b679d7b70d6",
@@ -1692,12 +1682,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
