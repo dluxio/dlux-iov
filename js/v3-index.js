@@ -193,7 +193,7 @@ const app = createApp({
       authors: {}, // Store author information for reputation calculations
       hiveprice: {
         hive: {
-          usd: 1,
+          usd: 0.25, // Will be fetched from CoinGecko or calculated from witnesses
         },
       },
       hbdprice: {
@@ -1277,7 +1277,7 @@ const app = createApp({
            if (hiveFundAccount.balance) {
              hiveBalance = parseFloat(hiveFundAccount.balance.split(' ')[0]);
              // Ninja grant: 0.05% per day of hive balance converted to HBD
-             ninjaGrant = (hiveBalance * 0.0005) * (this.hiveprice?.hive?.usd || 1);
+             ninjaGrant = (hiveBalance * 0.0005) * (this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice());
            }
          }
          
@@ -2782,7 +2782,7 @@ const app = createApp({
     },
 
     calculateProjectedValues(timeframe = 365) {
-      const currentPrice = this.hiveprice?.hive?.usd || 1;
+      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
       const growthMultiplier = 1 + (this.priceGrowthRate / 100);
       const projectedPrice = currentPrice * Math.pow(growthMultiplier, timeframe / 365);
       
@@ -3118,7 +3118,7 @@ const app = createApp({
 
     calculateDailyProjections() {
       const days = 365 * 3; // 3 years
-      const currentPrice = this.hiveprice?.hive?.usd || 1;
+      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
       const currentRewardFund = this.daoFund.dailyInflow / (currentPrice * 0.325);
       const currentHiveBalance = this.daoFund.hiveBalance;
       const currentTreasury = this.daoFund.treasury;
@@ -3204,7 +3204,7 @@ const app = createApp({
 
     generateChartData() {
       // This method generates completely plain, non-reactive data for Chart.js
-      const currentPrice = this.hiveprice?.hive?.usd || 1;
+      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
       const dailyRewardsInflow = this.daoFund?.dailyInflow || 0;
       const treasury = this.daoFund?.treasury || 0;
       const hiveBalance = this.daoFund?.hiveBalance || 0;
@@ -3324,7 +3324,8 @@ const app = createApp({
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.1)',
           tension: 0.1,
-          fill: false
+          fill: false,
+          hidden: false  // Always visible - most important
         },
         {
           label: 'Hive Balance (Ninja Fund)',
@@ -3332,7 +3333,8 @@ const app = createApp({
           borderColor: 'rgb(255, 159, 64)',
           backgroundColor: 'rgba(255, 159, 64, 0.1)',
           tension: 0.1,
-          fill: false
+          fill: false,
+          hidden: true  // Hidden by default
         },
         {
           label: 'Daily Inflow (Total)',
@@ -3341,7 +3343,8 @@ const app = createApp({
           backgroundColor: 'rgba(54, 162, 235, 0.1)',
           tension: 0.1,
           yAxisID: 'y1',
-          fill: false
+          fill: false,
+          hidden: false  // Always visible - most important
         },
         {
           label: 'Daily Ninja Grant',
@@ -3350,7 +3353,8 @@ const app = createApp({
           backgroundColor: 'rgba(153, 102, 255, 0.1)',
           tension: 0.1,
           yAxisID: 'y1',
-          fill: false
+          fill: false,
+          hidden: true  // Hidden by default
         },
         {
           label: 'Daily Beneficiary Rewards',
@@ -3359,7 +3363,8 @@ const app = createApp({
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           tension: 0.1,
           yAxisID: 'y1',
-          fill: false
+          fill: false,
+          hidden: true  // Hidden by default
         },
         {
           label: 'Daily Outflow (Current)',
@@ -3368,7 +3373,8 @@ const app = createApp({
           backgroundColor: 'rgba(255, 99, 132, 0.1)',
           tension: 0.1,
           yAxisID: 'y1',
-          fill: false
+          fill: false,
+          hidden: false  // Always visible - most important
         }
       ];
       
@@ -3946,9 +3952,31 @@ const app = createApp({
       const estimatedMinimumWeight = 0.3; // Assume 30% minimum for demo
       
       return Math.max(proportionalWeight, estimatedMinimumWeight);
+        },
+
+    getWitnessFallbackPrice() {
+      // Calculate fallback price from witness price feeds
+      if (!this.witnesses || !Array.isArray(this.witnesses)) {
+        return 0.25; // Ultimate fallback if no witness data
+      }
+      
+      const activeWitnesses = this.witnesses.filter(w => w.rank <= 20 && w.hbd_exchange_rate);
+      if (activeWitnesses.length === 0) {
+        return 0.25; // Ultimate fallback if no active witnesses with price feeds
+      }
+      
+      const totalPrice = activeWitnesses.reduce((sum, witness) => {
+        const price = parseFloat(this.getHivePrice(witness.hbd_exchange_rate));
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      
+      const averagePrice = totalPrice / activeWitnesses.length;
+      
+      // Return average or 0.25 if calculation failed
+      return averagePrice > 0 ? averagePrice : 0.25;
     },
 
-         getHFImpactForUser() {
+    getHFImpactForUser() {
        if (!this.account) return null;
        
        const currentCommitment = this.calculateVoterCommitment();
@@ -5260,6 +5288,11 @@ const app = createApp({
     this.getTickers();
     this.getHiveStats();
     this.getDluxStats();
+    
+    // Always load witness price data for better fallback pricing (lightweight call)
+    this.fetchWitnesses().catch(err => {
+      console.warn('Failed to fetch witness price data for fallback:', err);
+    });
     
     // Load proposals if we're on the proposals page
     if (window.location.pathname.includes('/proposals')) {
