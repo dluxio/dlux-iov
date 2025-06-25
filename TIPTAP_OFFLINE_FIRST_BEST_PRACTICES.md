@@ -11002,6 +11002,280 @@ const profile = {
 
 ---
 
+## 🚀 **RECOMMENDED UPGRADES**
+
+### **Quick Win Improvements (30 min - 3 hours)**
+
+#### 1. **WebSocket Provider Event Cleanup** ⏱️ 30 minutes
+**Issue**: Provider event listeners aren't explicitly removed before destruction  
+**Impact**: Potential memory leaks with long-running sessions
+
+```javascript
+// Add to cleanupWebSocketProvider() method:
+async cleanupWebSocketProvider() {
+    if (this.component.provider) {
+        // Remove all event listeners explicitly
+        this.component.provider.off('status');
+        this.component.provider.off('connection-error');
+        this.component.provider.off('destroy');
+        this.component.provider.off('synced');
+        this.component.provider.off('connection-close');
+        
+        // Then disconnect and destroy
+        this.component.provider.disconnect();
+        this.component.provider.destroy();
+        this.component.provider = null;
+    }
+}
+```
+
+#### 2. **Debounced Function Cleanup Registry** ⏱️ 1-2 hours
+**Issue**: Debounced function timeouts may not be cleared on component destroy  
+**Impact**: Prevents garbage collection and may execute after component destruction
+
+```javascript
+// Add to data():
+data() {
+    return {
+        debouncedTimeouts: new Map(),
+        // ... existing data
+    }
+},
+
+// Add helper method:
+methods: {
+    createDebouncedFunction(name, fn, delay) {
+        return (...args) => {
+            // Clear existing timeout if any
+            if (this.debouncedTimeouts.has(name)) {
+                clearTimeout(this.debouncedTimeouts.get(name));
+            }
+            
+            // Set new timeout
+            const timeoutId = setTimeout(() => {
+                this.debouncedTimeouts.delete(name);
+                fn.apply(this, args);
+            }, delay);
+            
+            this.debouncedTimeouts.set(name, timeoutId);
+        };
+    },
+    
+    clearAllDebouncedTimeouts() {
+        this.debouncedTimeouts.forEach(id => clearTimeout(id));
+        this.debouncedTimeouts.clear();
+    }
+}
+
+// Update existing debounced functions:
+created() {
+    this.debouncedUpdateContent = this.createDebouncedFunction(
+        'updateContent',
+        this.updateContent,
+        500
+    );
+    // ... other debounced functions
+}
+
+// Add to beforeUnmount():
+beforeUnmount() {
+    this.clearAllDebouncedTimeouts();
+    // ... existing cleanup
+}
+```
+
+#### 3. **Basic RangeError Recovery** ⏱️ 2-3 hours
+**Issue**: No recovery strategy for "RangeError: Applying a mismatched transaction"  
+**Impact**: Editor becomes unusable, requiring page refresh
+
+```javascript
+// Add recovery method:
+async recoverFromMismatchedTransaction(error, editorName = 'bodyEditor') {
+    console.warn('🔄 Attempting recovery from mismatched transaction');
+    
+    // Save current content if possible
+    let backup = null;
+    try {
+        backup = this[editorName]?.getJSON();
+    } catch (e) {
+        console.warn('Could not backup content:', e);
+    }
+    
+    // Destroy the broken editor
+    if (this[editorName] && !this[editorName].isDestroyed) {
+        this[editorName].destroy();
+        this[editorName] = null;
+    }
+    
+    // Wait for next tick
+    await this.$nextTick();
+    
+    // Recreate editor
+    try {
+        await this.createEditorWithRecovery(editorName, backup);
+        console.log('✅ Editor recovered successfully');
+    } catch (recoveryError) {
+        console.error('❌ Recovery failed:', recoveryError);
+        throw recoveryError;
+    }
+}
+
+// Update editor creation error handling:
+try {
+    bodyEditor = new Editor(config);
+} catch (error) {
+    if (error.message?.includes('mismatched transaction')) {
+        await this.recoverFromMismatchedTransaction(error, 'bodyEditor');
+        return;
+    }
+    throw error;
+}
+```
+
+### **Medium Effort Improvements (4-6 hours)**
+
+#### 4. **WebSocket Circuit Breaker Pattern** ⏱️ 4-6 hours
+**Issue**: No protection against WebSocket connection storms  
+**Impact**: Server overload during network issues
+
+```javascript
+// Add CircuitBreaker class:
+class WebSocketCircuitBreaker {
+    constructor(options = {}) {
+        this.maxFailures = options.maxFailures || 5;
+        this.resetTimeout = options.resetTimeout || 60000; // 1 minute
+        this.backoffMultiplier = options.backoffMultiplier || 2;
+        this.maxBackoff = options.maxBackoff || 30000; // 30 seconds
+        
+        this.failures = 0;
+        this.lastFailureTime = null;
+        this.state = 'closed'; // closed, open, half-open
+        this.nextRetryTime = 0;
+        this.currentBackoff = 1000; // Start with 1 second
+    }
+    
+    canConnect() {
+        if (this.state === 'closed') return true;
+        
+        if (this.state === 'open') {
+            const now = Date.now();
+            if (now >= this.nextRetryTime) {
+                this.state = 'half-open';
+                return true;
+            }
+            return false;
+        }
+        
+        return this.state === 'half-open';
+    }
+    
+    recordSuccess() {
+        this.failures = 0;
+        this.state = 'closed';
+        this.currentBackoff = 1000;
+        console.log('✅ Circuit breaker reset - connection successful');
+    }
+    
+    recordFailure() {
+        this.failures++;
+        this.lastFailureTime = Date.now();
+        
+        if (this.failures >= this.maxFailures) {
+            this.state = 'open';
+            this.currentBackoff = Math.min(
+                this.currentBackoff * this.backoffMultiplier,
+                this.maxBackoff
+            );
+            this.nextRetryTime = Date.now() + this.currentBackoff;
+            
+            console.warn(`⚡ Circuit breaker OPEN - retry in ${this.currentBackoff}ms`);
+        }
+    }
+    
+    getRetryDelay() {
+        if (this.state === 'open') {
+            return Math.max(0, this.nextRetryTime - Date.now());
+        }
+        return 0;
+    }
+}
+
+// Integration with WebSocket provider:
+data() {
+    return {
+        wsCircuitBreaker: null,
+        // ... existing data
+    }
+},
+
+created() {
+    this.wsCircuitBreaker = new WebSocketCircuitBreaker({
+        maxFailures: 5,
+        resetTimeout: 60000,
+        backoffMultiplier: 1.5,
+        maxBackoff: 30000
+    });
+},
+
+// Update connection logic:
+async connectToWebSocket() {
+    if (!this.wsCircuitBreaker.canConnect()) {
+        const delay = this.wsCircuitBreaker.getRetryDelay();
+        console.log(`⚡ Circuit breaker preventing connection. Retry in ${delay}ms`);
+        return;
+    }
+    
+    try {
+        // ... existing connection logic
+        this.wsCircuitBreaker.recordSuccess();
+    } catch (error) {
+        this.wsCircuitBreaker.recordFailure();
+        throw error;
+    }
+}
+```
+
+### **Major Refactoring (Not Recommended)**
+
+#### 5. **ES6 Import Pattern Migration** ⏱️ Days/Weeks
+**Current**: Uses bundled imports via `window.TiptapCollaboration`  
+**Standard**: ES6 imports from `@tiptap/vue-3`
+
+**Why it's not recommended**:
+- Current approach works reliably
+- Would require complete build system overhaul
+- Risk of introducing bundle size issues
+- No functional benefits, only aesthetic
+
+**If you must migrate**:
+```javascript
+// Current (working fine):
+const { Editor, Extension } = window.TiptapCollaboration;
+
+// Standard pattern (requires build system):
+import { Editor } from '@tiptap/vue-3';
+import StarterKit from '@tiptap/starter-kit';
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCaret from '@tiptap/extension-collaboration-cursor';
+```
+
+### **Implementation Priority**
+
+1. **High Priority** (Do immediately):
+   - WebSocket provider event cleanup
+   - Debounced function cleanup
+
+2. **Medium Priority** (Do soon):
+   - Basic RangeError recovery
+   - WebSocket circuit breaker
+
+3. **Low Priority** (Only if needed):
+   - ES6 import migration
+
+These upgrades will improve memory management, error recovery, and overall robustness without requiring architectural changes.
+
+---
+
 ## 📚 **Quick Reference Links**
 
 - **TipTap v3 Docs**: https://next.tiptap.dev/docs
