@@ -14365,6 +14365,9 @@ export default {
             // Get complete operations array
             this.jsonPreview.complete = this.completeOperations;
 
+            // Get custom JSON data
+            this.jsonPreview.customJson = this.reactiveCustomJson;
+
             // Update metadata
             this.jsonPreview.metadata = {
                 author: this.username || 'anonymous',
@@ -14373,6 +14376,7 @@ export default {
                 hasCommentOptions: !!commentOptionsOp,
                 tagsCount: this.displayTags.length,
                 beneficiariesCount: this.beneficiariesArray.length,
+                hasCustomJson: Object.keys(this.reactiveCustomJson).length > 0,
                 generatedAt: new Date().toISOString()
             };
         },
@@ -19251,6 +19255,12 @@ export default {
                         <i class="fas fa-info-circle me-2"></i>Metadata
                       </a>
                     </li>
+                    <li class="nav-item">
+                      <a class="nav-link" :class="{active: jsonPreviewModal.tab === 'customJson'}"
+                         @click="jsonPreviewModal.tab = 'customJson'" href="#" @click.prevent>
+                        <i class="fas fa-puzzle-piece me-2"></i>Custom JSON
+                      </a>
+                    </li>
                   </ul>
 
                   <!-- Tab Content -->
@@ -19312,6 +19322,28 @@ export default {
                         </button>
                       </div>
                       <pre class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(jsonPreview.metadata, null, 2) }}</pre>
+                    </div>
+
+                    <!-- Custom JSON Tab -->
+                    <div v-if="jsonPreviewModal.tab === 'customJson'" class="tab-pane active">
+                      <div v-if="Object.keys(reactiveCustomJson).length > 0">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <h6 class="text-info mb-0">Custom JSON from External Apps</h6>
+                          <button @click="copyJsonToClipboard(reactiveCustomJson)" 
+                                  class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-copy me-1"></i>Copy JSON
+                          </button>
+                        </div>
+                        <pre class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(reactiveCustomJson, null, 2) }}</pre>
+                      </div>
+                      <div v-else class="text-center py-5">
+                        <i class="fas fa-puzzle-piece fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No Custom JSON Data</h6>
+                        <p class="text-muted">External iframe apps can populate this field with custom data.</p>
+                        <small class="text-muted">
+                          This data will be included in the post's json_metadata field.
+                        </small>
+                      </div>
                     </div>
                   </div>
                 </div>
