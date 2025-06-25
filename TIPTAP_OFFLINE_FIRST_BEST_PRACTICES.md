@@ -1,11287 +1,2465 @@
-# TipTap Offline-First Collaborative Architecture: Definitive Best Practices
+import methodsCommon from './methods-common.js';
+import { markRaw } from '/js/vue.esm-browser.js';
 
-## Executive Summary
+# TipTap v3 Offline-First Collaboration: Best Practices & Implementation Guide
 
-This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
+⚠️ **WARNING: This document contains CRITICAL patterns that MUST be followed to avoid data loss, corruption, and synchronization failures.**
 
-### 🚀 **Latest Updates (v2025.06.24)**
-- **File > New Reset Fix**: Complete clean slate - all fields including permlink now reset properly
-- **User Intent Philosophy**: Any user interaction shows intent to create a document
-- **Persistence Fix**: Removed content validation blocking metadata-only documents
-- **Consistent Autosave**: All fields (metadata, content, settings) trigger persistence equally
-- **Permlink Sync Resolution**: Fixed bidirectional sync between owner and editor users
-- **Observer Architecture**: Unified two-observer system handling all metadata fields
-- **Recursion Protection**: Robust circular update prevention for all reactive fields
+## Table of Contents
+1. [Critical Violations to Avoid](#critical-violations-to-avoid)
+2. [Core Architecture Principles](#core-architecture-principles)
+3. [Safe Implementation Patterns](#safe-implementation-patterns)
+4. [Common Pitfalls & Solutions](#common-pitfalls-and-solutions)
+5. [Debugging Guide](#debugging-guide)
+6. [Production Readiness Checklist](#production-readiness-checklist)
 
-### 🚀 **Previous Updates (v2025.01.23)**
-- **Single Editor Architecture**: Title now uses simple input field, body uses TipTap
-- **Consolidated Y.js Maps**: All metadata in single `metadata` map
-- **Vue 3 Integration**: Proper use of `markRaw()` for editor instances
-- **Simplified State Management**: Removed complex multi-editor synchronization
-- **Bundle Access Pattern**: Fixed to handle both default and named exports
-- **URL Management**: Temp documents don't get URLs until explicit save
-- **Cache-First Loading**: Metadata preloading eliminates blank periods
-- **Authentication State**: Proper handling of auth loading states
-- **Vue 3 Computed Properties**: Must be accessed as properties, not called as functions
-- **Edit Pattern**: Three-state pattern for inline field editing (persistent/temp/original)
+---
 
-### 🎯 **SINGLE EDITOR ARCHITECTURE**
+## 🚨 Critical Violations to Avoid
 
-**DLUX IOV uses a single TipTap editor for body content only**. Title and other metadata are stored in Y.js maps, not as separate editors. This approach:
-- Simplifies state management
-- Reduces memory usage
-- Avoids synchronization issues between multiple editors
-- Follows TipTap's recommended patterns for collaborative editing
+### ❌ NEVER Manually Sync Content Between TipTap and Y.js
 
 ```javascript
-// ✅ CORRECT: Single body editor with metadata in Y.js maps
-const bodyEditor = new Editor({
-    element: this.$refs.bodyEditor,
-    extensions: [
-        StarterKit.configure({ undoRedo: false }),
-        Collaboration.configure({
-            document: ydoc,
-            field: 'body'  // Single content field
-        })
-    ]
-});
-
-// Title stored in Y.js config map
-const config = ydoc.getMap('config');
-config.set('documentName', titleValue);
-
-// ❌ WRONG: Multiple editors approach (deprecated)
-const titleEditor = new Editor({ /* ... */ });  // NOT USED
-const bodyEditor = new Editor({ /* ... */ });
-```
-
-### 🔧 **VUE 3 INTEGRATION PATTERNS**
-
-**markRaw() Usage Pattern**:
-Based on production experience and debugging sessions:
-
-```javascript
-// ✅ CORRECT: TipTap editors MUST use markRaw when stored in Vue reactive data
-import { markRaw } from '/js/vue.esm-browser.js'
-this.bodyEditor = markRaw(new Editor({ /* ... */ }));
-
-// ✅ CORRECT: Y.js documents DON'T need markRaw
-const ydoc = new Y.Doc();
-this.ydoc = ydoc;  // Works fine without markRaw
-
-// ❌ WRONG: Using markRaw on Y.js documents can break providers
-const ydoc = markRaw(new Y.Doc()); // Can cause "_a.on is not a function" errors
-```
-
-**Why the difference?**:
-- **TipTap Editors**: When stored in Vue reactive data, Vue's proxy system interferes with ProseMirror's internal transaction system
-- **Y.js Documents**: Have their own state management that doesn't conflict with Vue
-- **Official Examples**: Don't show markRaw because they don't store editors in reactive component data
-
-### 🚨 **CURRENT ARCHITECTURE: Temp Document Strategy (Updated 2025)**
-
-**Our implementation uses IMMEDIATE Y.js document creation with temp document strategy:**
-
-- ✅ **Y.js documents created immediately** on editor initialization
-- ✅ **Collaboration extension included from start** for all editors
-- ✅ **IndexedDB persistence delayed** until user shows intent (typing pause)
-- ✅ **No lazy Y.js creation patterns** - all documents have Y.js from start
-- ✅ **Two-tier system**: Tier 1 (no CollaborationCaret) vs Tier 2 (with CollaborationCaret)
-- ✅ **TipTap creates Y.js fragments** - Never pre-create fragments manually
-
-**This replaces the previous lazy Y.js creation approach** which had race conditions and violated TipTap best practices.
-
-### 📝 **ARCHITECTURAL NOTE ON CODE EXAMPLES**
-
-**Important**: While many code examples in this document show a two-editor approach (titleEditor and bodyEditor) for historical context and comparison purposes, DLUX IOV's actual implementation uses a **single editor architecture**:
-
-- **Title**: Stored in a simple `<input>` field with `v-model="titleInput"`
-- **Body**: Uses a single TipTap editor instance
-- **Benefits**: Simpler state management, less memory usage, no sync issues
-
-When reading code examples that reference `titleEditor`, understand that in the actual implementation:
-- `this.titleEditor.getText()` → `this.titleInput`
-- `this.titleEditor.commands.setContent()` → `this.titleInput = value`
-- Title content is synchronized to Y.js config map via input event handlers
-
-### 🔧 **OBSERVER ARCHITECTURE PATTERN**
-
-**DLUX IOV uses a two-observer system** for clean separation of concerns and optimal performance:
-
-#### **1. CONFIG OBSERVER** - Document-Level Metadata
-```javascript
-// Handles document structure and identity
-const config = yjsDoc.getMap('config');
-this.configObserver = (event) => {
-    event.changes.keys.forEach((change, key) => {
-        // Title moved to metadata map
-        if (key === 'documentName' && (change.action === 'update' || change.action === 'add')) {
-            const newDocumentName = config.get('documentName');
-            this.component.currentFile.name = newDocumentName;
-            this.component.currentFile.documentName = newDocumentName;
-        }
-    });
-};
-config.observe(this.configObserver);
-```
-
-#### **2. METADATA OBSERVER** - Publishing Metadata
-```javascript
-// Handles publishing-related fields with reactive patterns
-const metadata = yjsDoc.getMap('metadata');
-this.metadataObserver = (event) => {
-    // Update reactive properties for Vue tracking
-    this.component.reactiveTags = metadata.get('tags') || [];
-    this.component.reactiveBeneficiaries = metadata.get('beneficiaries') || [];
-    this.component.reactiveCustomJson = { ...metadata.get('customJson') || {} };
-    
-    // Handle comment options
-    this.component.reactiveCommentOptions = {
-        allowVotes: metadata.get('allowVotes') !== false,
-        allowCurationRewards: metadata.get('allowCurationRewards') !== false,
-        maxAcceptedPayout: metadata.get('maxAcceptedPayout') === true,
-        percentHbd: metadata.get('percentHbd') === true
-    };
-    
-    // ✅ BIDIRECTIONAL SYNC: Handle permlink changes from remote users
-    if (event.keysChanged.has('permlink')) {
-        const newPermlink = metadata.get('permlink') || '';
-        // Only update permlinkInput if not currently updating and it's a custom permlink
-        if (!this.component._isUpdatingPermlink && newPermlink !== this.component.generatedPermlink) {
-            this.component.permlinkInput = newPermlink;
-        }
-    }
-};
-metadata.observe(this.metadataObserver);
-```
-
-#### **Recursion Protection Patterns**
-
-**1. Flag-Based Protection (for bidirectional fields):**
-```javascript
-// Permlink uses flag protection for bidirectional sync
-permlinkInput: {
-    handler(newPermlink, oldPermlink) {
-        if (this._isUpdatingPermlink) return; // Prevent recursion
-        this.debouncedSetPermlinkInMetadata();
-    }
+// ❌ WRONG - This causes "mismatched transaction" errors
+onUpdate: ({ editor }) => {
+    this.content.body = editor.getHTML();
+    this.ydoc.get('body').delete(0, this.ydoc.get('body').length);
+    this.ydoc.get('body').insert(0, editor.getText());
 }
 
-// Y.js observer respects the flag
-if (event.keysChanged.has('permlink')) {
-    if (!this.component._isUpdatingPermlink) {
-        this.component.permlinkInput = newPermlink;
-    }
-}
-```
-
-**2. Unidirectional Sync (for simple fields):**
-```javascript
-// Title uses simple unidirectional sync from Y.js to Vue
-// Vue → Y.js via input handlers, Y.js → Vue via observer
-// No recursion because Y.js doesn't trigger Vue watchers directly
-```
-
-#### **Field Distribution Logic**
-- **CONFIG MAP**: Document identity and structure (title, documentName, owner)
-- **METADATA MAP**: Publishing and collaboration data (tags, beneficiaries, permlink, comment options)
-- **Clear Separation**: No overlap between observers, each handles distinct field sets
-- **Performance**: Observers only fire when their specific fields change
-
-### 🔄 **FILE > NEW RESET PATTERNS**
-
-**Core Principle**: File > New must provide a complete clean slate.
-
-#### **Complete Reset Implementation**
-```javascript
-resetComponentState() {
-    // 1. Clear all input fields to defaults
-    this.component.titleInput = '';
-    this.component.permlinkInput = '';           // ✅ Recently fixed
-    this.component.tagInput = '';
-    this.component.documentNameInput = '';
+// ✅ CORRECT - Let TipTap handle sync automatically
+onUpdate: ({ editor, transaction }) => {
+    // ONLY use for UI updates, not content sync
+    this.hasUnsavedChanges = true;
+    this.lastEditTime = Date.now();
     
-    // 2. Reset all reactive properties  
-    this.component.reactiveTags = [];
-    this.component.reactiveBeneficiaries = [];
-    this.component.reactiveCommentOptions = {
-        allowVotes: true,
-        allowCurationRewards: true,
-        maxAcceptedPayout: false,
-        percentHbd: false
-    };
-    
-    // 3. Clear protection flags
-    this.component._isUpdatingPermlink = false;  // ✅ Recently added
-    
-    // 4. Reset UI state
-    this.component.showPermlinkEditor = false;
-    this.component.showAdvancedOptions = false;
-    
-    // 5. Clear all timers
-    clearTimeout(this.component.autoNameTimeout);
-    clearTimeout(this.component.contentUpdateTimeout);
-    // ... clear all debounce timers
-}
-```
-
-#### **Common Reset Issues & Solutions**
-- **❌ Persisting Field Values**: Some fields not reset → User confusion about document state
-- **✅ Solution**: Ensure ALL input fields reset to their data() defaults
-- **❌ Stale Protection Flags**: Recursion flags not cleared → Broken sync after reset
-- **✅ Solution**: Reset all protection flags (`_isUpdatingPermlink = false`)
-- **❌ Persisting Timers**: Debounce timers continue → Unwanted persistence after reset
-- **✅ Solution**: Clear all setTimeout/debounce timers in reset
-
-### 🎯 **USER INTENT & PERSISTENCE PHILOSOPHY**
-
-**Core Principle**: Any user interaction shows intent to create a document.
-
-#### **What Counts as User Intent**
-```javascript
-// ✅ ALL of these trigger immediate persistence:
-this.titleInput = 'My Title';           // Content change
-this.addTagToYjs('blockchain');         // Metadata change  
-this.addBeneficiary({...});             // Metadata change
-this.setCustomJsonField('key', 'val');  // Metadata change
-this.permlinkInput = 'custom-url';      // Metadata change
-this.documentNameInput = 'My Doc';      // Settings change
-this.commentOptions.allowVotes = true;  // Settings change
-```
-
-#### **No Content Validation**
-- **Metadata-only documents** are valid user intent
-- **Empty title/body** doesn't prevent persistence if user set metadata
-- **User interaction** = document creation, regardless of content presence
-- **Consistent behavior** across all field types
-
-#### **Implementation Pattern**
-```javascript
-// ❌ OLD APPROACH (removed)
-const hasRealContent = this.checkRealContentForIntent();
-if (hasRealContent) {
-    this.createIndexedDBForTempDocument();
-}
-
-// ✅ NEW APPROACH  
-// Any field interaction = immediate persistence
-this.createIndexedDBForTempDocument();
-```
-
-### 📚 **Official Documentation References**
-
-#### TipTap Documentation
-- **Editor Overview**: https://next.tiptap.dev/docs/editor/getting-started/overview
-- **Collaboration Overview**: https://next.tiptap.dev/docs/collaboration/getting-started/overview
-- **Performance Guide**: https://next.tiptap.dev/docs/guides/performance
-- **Invalid Schema Handling**: https://next.tiptap.dev/docs/guides/invalid-schema
-- **Authentication**: https://next.tiptap.dev/docs/collaboration/getting-started/authenticate
-- **Offline Support**: https://next.tiptap.dev/docs/guides/offline-support
-- **Vue.js Integration**: https://next.tiptap.dev/docs/editor/getting-started/install/vue3
-- **StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
-- **Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
-- **CollaborationCaret Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
-- **Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
-- **Provider Integration**: https://next.tiptap.dev/docs/collaboration/provider/integration
-- **Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
-- **REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
-- **Awareness**: https://next.tiptap.dev/docs/collaboration/core-concepts/awareness
-
-#### Y.js Documentation
-- **Y.js Documentation**: https://docs.yjs.dev/
-- **Y.js Protocols**: https://github.com/yjs/y-protocols
-
-#### Hocuspocus Documentation
-- **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
-- **DLUX Server**: https://github.com/dluxio/docker-data
-
-## 🔐 **REAL-TIME PERMISSION SYSTEM (v2025.06.24)**
-
-### **Adaptive Permission Refresh Architecture**
-
-Our implementation uses a **two-tier permission refresh system** that automatically adjusts based on collaboration activity:
-
-```javascript
-// ✅ ADAPTIVE REFRESH RATES
-permissionRefreshRate: 60000,        // 1 minute normal rate
-fastPermissionRefreshRate: 30000,    // 30 seconds during collaboration
-isActivelyCollaborating: false,      // Tracks collaboration state
-
-// ✅ AUTOMATIC RATE SWITCHING
-const currentRefreshRate = this.isActivelyCollaborating ? 
-    this.fastPermissionRefreshRate : this.permissionRefreshRate;
-```
-
-**Why This Pattern Works:**
-- **Performance**: Reduces API calls by 83% during non-collaborative periods
-- **Responsiveness**: 30-second updates during active collaboration feel real-time
-- **Battery Efficiency**: Slower polling when not actively collaborating
-- **Server Load**: Intelligent load distribution across users
-
-### **Five-Tier Permission System**
-
-**Permission Hierarchy:**
-1. **`no-access`** - Blocked access, redirect to access denied
-2. **`readonly`** - View only, editor disabled, no UI controls
-3. **`editable`** - Edit content, no publish/share capabilities
-4. **`postable`** - Edit + publish to Hive, no permission management
-5. **`owner`** - Full control including user management and deletion
-
-**Computed Properties Pattern:**
-```javascript
-// ✅ SINGLE SOURCE OF TRUTH
-currentPermissionLevel() {
-    if (!this.currentFile) return 'unknown';
-    return this.getUserPermissionLevel(this.currentFile);
-},
-
-// ✅ HIERARCHICAL PERMISSION CHECKS
-isOwner() { return this.currentPermissionLevel === 'owner'; },
-isPostable() { return ['owner', 'postable'].includes(this.currentPermissionLevel); },
-isEditable() { return ['owner', 'postable', 'editable'].includes(this.currentPermissionLevel); },
-isReadonly() { return this.currentPermissionLevel === 'readonly'; },
-hasNoAccess() { return this.currentPermissionLevel === 'no-access'; },
-
-// ✅ UI FEATURE CONTROLS
-canEdit() { return !this.isReadOnlyMode && this.bodyEditor && !this.deleting; },
-canDelete() { return this.isOwner && this.currentFile?.type === 'collaborative'; },
-canPublish() { return this.isPostable && this.hasRequiredContent; },
-canShare() { return this.isOwner && this.currentFile?.type === 'collaborative'; },
-canManagePermissions() { return this.isOwner && this.currentFile?.type === 'collaborative'; }
-```
-
-### **Seamless Permission Transitions**
-
-**WebSocket Reconnection for Permission Upgrades:**
-```javascript
-// ✅ HANDLES ALL PERMISSION TRANSITIONS
-if (needsWebSocketReconnect) {
-    console.log('🚀 PERMISSION TRANSITION: WebSocket reconnection required');
-    await this.reconnectWebSocketForPermissionUpgrade();
-}
-
-// ✅ RECONNECTION LOGIC
-async reconnectWebSocketForPermissionUpgrade() {
-    // 1. Clean up existing WebSocket provider 
-    await this.cleanupWebSocketProvider();
-    
-    // 2. Set up new provider with updated permissions
-    await this.setupCloudPersistence(this.yjsDoc, this.currentFile);
-    
-    // 3. Verify provider creation
-    if (!this.provider) throw new Error('Failed to create provider');
-}
-```
-
-**Real-time UI Updates:**
-```javascript
-// ✅ COMPREHENSIVE TRANSITION DETECTION
-console.log('🔄 PERMISSION CHANGE DETECTED', {
-    permissionTransition: `${oldPermission} → ${newPermission}`,
-    willRequireReconnect: ['readonly', 'no-access'].includes(oldPermission) !== 
-                         ['readonly', 'no-access'].includes(newPermission)
-});
-
-// ✅ INSTANT UI REACTIVITY
-this.$nextTick(() => {
-    this.updateEditorMode();              // Editor editable state
-    this.triggerPermissionReactivity();   // Vue computed properties
-    
-    // All UI elements update automatically:
-    // - Editor editable/readonly state
-    // - Publish button visibility  
-    // - Share/delete button visibility
-    // - Permission management UI
-    // - Status indicators
-});
-```
-
-### **Security & Performance Best Practices**
-
-**Owner-Based API Strategy:**
-```javascript
-// ✅ SECURITY: Non-owners can't access permissions endpoint
-const isOwner = this.currentFile.owner === this.username;
-if (isOwner) {
-    // Owner: Use info + permissions endpoints
-    apiPromises = [infoPromise, permissionsPromise];
-} else {
-    // Non-owner: Only use info endpoint to avoid 403 errors
-    apiPromises = [infoPromise, Promise.resolve({ status: 'skipped' })];
-}
-```
-
-**Efficient Caching Strategy:**
-```javascript
-// ✅ PERFORMANCE: Multi-layer caching
-1. localStorage: Persistent across sessions
-2. IndexedDB: Offline-first document access  
-3. Memory cache: Fast reactive access
-4. Background refresh: Non-blocking updates
-
-// ✅ CACHE INVALIDATION
-const cacheAge = Date.now() - cachedData.timestamp;
-const isStale = cacheAge > 300000; // 5 minutes
-if (isStale || cachedData.username !== this.username) {
-    localStorage.removeItem(cacheKey);
-}
-```
-
-### **Common Permission Patterns**
-
-**Template Usage:**
-```vue
-<!-- ✅ PERMISSION-BASED UI ELEMENTS -->
-<button v-if="canDelete" @click="deleteDocument()">Delete</button>
-<button v-if="canPublish" @click="publishDocument()">Publish</button>  
-<button v-if="canShare" @click="shareDocument()">Share</button>
-
-<!-- ✅ CONDITIONAL FEATURES -->
-<div v-if="isReadonly" class="alert alert-info">
-  Read-only mode - contact @{{ currentFile.owner }} for edit access
-</div>
-
-<div v-if="hasNoAccess" class="alert alert-danger">
-  Access denied - you don't have permission to view this document
-</div>
-```
-
-**Reactive Updates:**
-```javascript
-// ✅ AUTOMATIC STATE MANAGEMENT
-watch: {
-    currentPermissionLevel(newLevel, oldLevel) {
-        console.log(`Permission changed: ${oldLevel} → ${newLevel}`);
-        // All computed properties automatically update
-        // No manual UI manipulation needed
-    }
-}
-```
-
-### **WebSocket Permission Broadcasts**
-
-**Real-Time Permission Updates via Y.js Awareness:**
-```javascript
-// ✅ SERVER-SIDE: Permission change observer in Hocuspocus collaboration server
-onChangeDocument: async (data) => {
-    const { documentName, requestHeaders, document } = data;
-    
-    // Monitor permissions map for changes
-    const permissionsMap = document.getMap('permissions');
-    permissionsMap.observe((event) => {
-        if (event.type === 'update') {
-            // Broadcast permission changes via Y.js awareness
-            document.awareness.setLocalStateField('permissionUpdate', {
-                timestamp: Date.now(),
-                changes: event.changes.keys,
-                documentName: documentName
-            });
-            console.log('📡 Broadcasting permission change:', event.changes.keys);
-        }
+    // Log with transaction origin for debugging
+    console.log('Editor updated', {
+        origin: transaction.origin,
+        time: new Date().toISOString()
     });
 }
 ```
 
-**Client-Side Broadcast Detection:**
+### ❌ NEVER Call setContent() on Existing Documents
+
 ```javascript
-// ✅ CLIENT-SIDE: Enhanced awareness listener detects permission broadcasts
-updateConnectedUsers() {
-    this.provider.awareness.getStates().forEach((state, clientId) => {
-        // ✅ PERMISSION BROADCAST DETECTION
-        if (state.permissionUpdate && state.permissionUpdate.timestamp > this.lastPermissionCheck) {
-            console.log('🔔 Received permission broadcast:', state.permissionUpdate);
-            this.handlePermissionBroadcast(state.permissionUpdate);
+// ❌ WRONG - Breaks Y.js synchronization
+async loadDocument(doc) {
+    const content = await fetchContent(doc.id);
+    this.editor.commands.setContent(content); // DESTROYS Y.js STATE!
+}
+
+// ✅ CORRECT - Let Y.js populate content via provider
+async loadDocument(doc) {
+    // 1. Create Y.js document with existing ID
+    this.ydoc = new Y.Doc({ guid: doc.id });
+    
+    // 2. Set up provider (IndexedDB or WebSocket)
+    this.provider = new IndexeddbPersistence(doc.id, this.ydoc);
+    
+    // 3. Wait for sync
+    this.provider.on('synced', () => {
+        // Content automatically appears in editor!
+        console.log('Document synced from storage');
+    });
+    
+    // 4. Create editor AFTER Y.js is ready
+    this.createEditor();
+}
+```
+
+### ❌ NEVER Access Y.js Fragments Directly
+
+```javascript
+// ❌ WRONG - Bypasses TipTap's synchronization
+const bodyFragment = this.ydoc.get('body', Y.XmlFragment);
+bodyFragment.insert(0, [new Y.XmlText('Hello')]);
+
+// ❌ WRONG - Direct fragment manipulation
+const titleText = this.ydoc.get('title').toString();
+this.content.title = titleText;
+
+// ✅ CORRECT - Use editor methods or Y.js maps
+// For content: Use editor
+this.editor.commands.insertContent('Hello');
+
+// For metadata: Use Y.js maps
+const metadata = this.ydoc.getMap('metadata');
+metadata.set('title', 'My Title');
+```
+
+### ❌ NEVER Store Content in Vue Reactive State
+
+```javascript
+// ❌ WRONG - Creates parallel state that gets out of sync
+data() {
+    return {
+        content: {
+            title: '',  // ❌ Don't store Y.js content here
+            body: ''    // ❌ This will desync from Y.js
         }
+    }
+}
+
+// ✅ CORRECT - Y.js is the single source of truth
+data() {
+    return {
+        // UI state only
+        hasUnsavedChanges: false,
+        isEditing: false,
+        documentId: null,
         
-        // Standard user cursor handling...
+        // Metadata from Y.js (not content)
+        documentName: '',
+        tags: [],
+        
+        // Y.js objects (non-reactive)
+        ydoc: null,
+        provider: null,
+        editor: null
+    }
+}
+```
+
+### ❌ NEVER Reuse Editors Between Documents
+
+```javascript
+// ❌ WRONG - Editor retains Y.js binding to previous doc
+switchDocument(newDoc) {
+    this.ydoc = new Y.Doc({ guid: newDoc.id });
+    // Editor still bound to OLD Y.js document!
+}
+
+// ✅ CORRECT - Destroy and recreate for each document
+async switchDocument(newDoc) {
+    // 1. Clean up old editor
+    if (this.editor) {
+        this.editor.destroy();
+        this.editor = null;
+    }
+    
+    // 2. Clean up old Y.js
+    if (this.provider) {
+        await this.provider.destroy();
+    }
+    if (this.ydoc) {
+        this.ydoc.destroy();
+    }
+    
+    // 3. Create fresh instances
+    this.ydoc = new Y.Doc({ guid: newDoc.id });
+    this.provider = new IndexeddbPersistence(newDoc.id, this.ydoc);
+    
+    // 4. Create new editor
+    await this.createEditor();
+}
+```
+
+### ❌ NEVER Mix Local and Remote Content Updates
+
+```javascript
+// ❌ WRONG - Race condition between local and remote updates
+this.editor.commands.setContent(localDraft);
+this.provider = new HocuspocusProvider({
+    onSynced: () => {
+        // Local content might be overwritten by remote!
+    }
+});
+
+// ✅ CORRECT - Clear precedence: remote wins for existing docs
+// For new docs: Create locally first
+if (isNewDocument) {
+    // Local-first for new docs
+    this.ydoc = new Y.Doc();
+    this.editor = createEditor();
+    // Then add collaboration
+} else {
+    // Remote-first for existing docs
+    this.provider = new HocuspocusProvider();
+    this.provider.on('synced', () => {
+        // NOW create editor with synced content
+        this.editor = createEditor();
     });
 }
-
-// ✅ BROADCAST HANDLER: Immediate permission refresh
-async handlePermissionBroadcast(updateData) {
-    const previousPermissionLevel = this.currentPermissionLevel;
-    
-    // Immediate API call to get latest permissions
-    await this.loadDocumentPermissions('broadcast-triggered');
-    
-    // Update timestamp to prevent re-processing
-    this.lastPermissionCheck = Date.now();
-    
-    // Reactive UI update
-    this.$forceUpdate();
-    
-    if (this.currentPermissionLevel !== previousPermissionLevel) {
-        console.log('✅ Permission level changed via broadcast:', {
-            from: previousPermissionLevel,
-            to: this.currentPermissionLevel
-        });
-    }
-}
 ```
 
-**Optimized Polling with Broadcasts:**
-```javascript
-// ✅ REDUCED POLLING: Longer intervals since broadcasts handle real-time updates
-permissionRefreshRate: 300000,      // 5 minutes (was 1 minute)
-fastPermissionRefreshRate: 120000,  // 2 minutes (was 30 seconds)
+---
 
-// ✅ DUAL-LAYER APPROACH:
-// - WebSocket broadcasts: 1-2 second real-time updates
-// - HTTP polling: 5-minute fallback for missed broadcasts
-// - Result: Near-instant updates with reliable backup
-```
+## 🏗️ Core Architecture Principles
 
-### **Production Deployment Status**
-
-**✅ SERVER-SIDE IMPLEMENTATION COMPLETE & DEPLOYED**
-- **onChangeDocument Hook**: Y.js permissions map observer with awareness broadcasts
-- **API Integration**: REST endpoint properly integrated with collaboration server instance
-- **Y.js Document Updates**: Permission changes via API correctly trigger Y.js observers
-- **Lifecycle Management**: Document creation/destruction with proper cleanup
-- **Enhanced Monitoring**: Comprehensive logging tracks entire broadcast flow
-- **Integration Fixed**: REST API now properly triggers Y.js document updates
-- **Testing Validated**: Full test suite confirms 1-2 second permission propagation
-
-**✅ CLIENT-SIDE IMPLEMENTATION COMPLETE**
-- **Awareness Listener**: Enhanced updateConnectedUsers() detects permission broadcasts
-- **Broadcast Handler**: Immediate permission refresh with reactive UI updates
-- **Optimized Polling**: Reduced intervals (5min normal, 2min collaborative)
-- **Memory Management**: Proper cleanup and timestamp tracking
-
-### **Validation Against Best Practices**
-
-**✅ Real-time Updates**: WebSocket broadcasts (1-2s) + 5-minute polling fallback - PRODUCTION READY  
-**✅ Security**: Owner-based API access + permission hierarchy  
-**✅ Performance**: 95%+ improvement (30-60s → 1-2s) + reduced server load  
-**✅ UX**: Seamless transitions + instant permission updates + no page refresh  
-**✅ Vue Patterns**: Computed properties + reactive state management  
-**✅ Error Handling**: Graceful degradation + dual-layer reliability  
-**✅ WebSocket Integration**: Complete server + client implementation  
-**✅ Production Ready**: Both client and server fully implemented and tested  
-
-**Score: 10/10** - Complete production-ready WebSocket permission broadcast system
-
-### **Enterprise-Grade Compliance Enhancements**
-
-**✅ Rate Limiting Protection**:
-```javascript
-// Prevent broadcast spam (minimum 1-second interval)
-if (Date.now() - this.lastBroadcastProcessed < 1000) {
-    console.log('🚦 Rate limiting permission broadcast - too frequent');
-    return;
-}
-```
-
-**✅ Enhanced Error Handling**:
-```javascript
-// Retry failed permission loads with exponential backoff (1s, 2s, 4s)
-let attempt = 1;
-const maxAttempts = 3;
-while (attempt <= maxAttempts) {
-    try {
-        await this.loadDocumentPermissions('broadcast-triggered');
-        break; // Success
-    } catch (error) {
-        if (attempt === maxAttempts) throw error;
-        const delay = 1000 * Math.pow(2, attempt - 1);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        attempt++;
-    }
-}
-```
-
-**✅ Memory Management**:
-```javascript
-// Proper cleanup in beforeUnmount
-this.lastPermissionCheck = 0;
-this.lastBroadcastProcessed = 0;
-
-// Awareness heartbeat cleanup on provider destroy
-if (this.component.awarenessHeartbeat) {
-    clearInterval(this.component.awarenessHeartbeat);
-    this.component.awarenessHeartbeat = null;
-}
-```
-
-**✅ Permission Validation**:
-```javascript
-// Only process broadcasts if authenticated and have current file
-if (!this.isAuthenticated || !this.currentFile) {
-    console.warn('⚠️ Ignoring permission broadcast - not authenticated');
-    return;
-}
-```
-
-## 🚨 **CRITICAL: TIPTAP v3 BREAKING CHANGES**
-
-### **Extension Name Changes in v3**
-- **History** → **UndoRedo** ⚠️ BREAKING CHANGE
-  - UndoRedo has been moved to `@tiptap/extensions` package
-  - StarterKit still imports it from @tiptap/extensions by default
-  - MUST disable it when using Collaboration: `StarterKit.configure({ undoRedo: false })`
-- **CollaborationCursor** → **CollaborationCaret** ⚠️ BREAKING CHANGE
-
-### **Extension Consolidation in v3**
-Many extensions moved to `@tiptap/extensions` consolidated package:
-- Placeholder, CharacterCount, Dropcursor, Gapcursor, Focus, Selection, TrailingNode
-- Import from: `import { ExtensionName } from '@tiptap/extensions'`
-
-### **Vue 3 Integration Requirements**
-**CRITICAL**: TipTap editors and Y.js documents MUST be wrapped with `markRaw()` in Vue 3:
+### 1. **Y.js is the Single Source of Truth**
 
 ```javascript
-// ✅ CORRECT: Import markRaw directly (not Vue.markRaw)
-import { markRaw } from '/js/vue.esm-browser.js'
-
-// ✅ CORRECT: Wrap Y.js documents
-const ydoc = markRaw(new Y.Doc())
-
-// ✅ CRITICAL: Wrap TipTap editors when storing in component
-const bodyEditor = new Editor({ /* ... */ })
-this.bodyEditor = markRaw(bodyEditor)  // THIS IS ESSENTIAL!
-
-// ❌ WRONG: Direct assignment without markRaw
-this.bodyEditor = bodyEditor  // Causes "mismatched transaction" errors!
-
-// ❌ WRONG: Using Vue.markRaw (causes "Vue is not defined")
-this.bodyEditor = Vue.markRaw(bodyEditor)  // Don't do this!
+// The Y.js document structure is sacred:
+ydoc
+├── body (XmlFragment) - Managed by TipTap, NEVER touch directly
+├── metadata (Map) - Document metadata
+│   ├── title
+│   ├── tags
+│   ├── permlink
+│   └── beneficiaries
+├── config (Map) - System config
+│   ├── documentName
+│   ├── owner
+│   └── lastModified
+└── permissions (Map) - Access control
 ```
 
-Without `markRaw()` on editors, Vue 3's proxy system causes:
-- "RangeError: Applying a mismatched transaction" when clicking formatting buttons
-- Bold/italic/other commands failing silently or not responding
-- State desynchronization between ProseMirror and Y.js
-- Editor appearing to work but formatting commands failing
-
-**Key Discovery**: The mismatched transaction error occurs because Vue's reactivity proxy interferes with ProseMirror's internal transaction system. This was discovered when the bold button stopped working after typing in the title field.
-
-**Extensions in StarterKit** (included by default in v3):
-- Document, Paragraph, Text, HardBreak
-- Bold, Italic, Strike, Code (inline marks)
-- Heading, BulletList, OrderedList, ListItem
-- Blockquote, CodeBlock, HorizontalRule
-- UndoRedo (imported from @tiptap/extensions)
-- Dropcursor, Gapcursor, Link, ListKeymap, TrailingNode, Underline
-
-**Separate Package Extensions** (NOT in consolidated package):
-- Typography (`@tiptap/extension-typography@beta`)
-- Mention (`@tiptap/extension-mention@beta`)
-- Highlight, Underline, Subscript, Superscript (individual packages)
-- TextStyle (`@tiptap/extension-text-style@beta`) - required for color/font
-
-### **Parameter Changes in v3**
-```javascript
-// ❌ v2 DEPRECATED SYNTAX
-Collaboration.configure({
-    document: ydoc,
-    fragment: 'content'  // v2 parameter name
-})
-
-// ✅ v3 CORRECT SYNTAX
-Collaboration.configure({
-    document: ydoc,
-    field: 'content'  // v3 parameter name
-})
-```
-
-### **Package Installation for v3**
-```bash
-# ✅ REQUIRED: Core packages with @beta tag
-npm install @tiptap/core@beta @tiptap/vue-3@beta @tiptap/pm@beta @tiptap/starter-kit@beta
-
-# ✅ REQUIRED: Collaboration packages
-npm install @tiptap/extension-collaboration@beta @tiptap/extension-collaboration-caret@beta
-
-# ✅ REQUIRED: Consolidated extensions package (includes Placeholder, etc.)
-npm install @tiptap/extensions@beta
-
-# ✅ REQUIRED: Y.js ecosystem
-npm install --legacy-peer-deps yjs@^13.6.27 y-indexeddb@^9.0.12 y-protocols@^1.0.6
-npm install --legacy-peer-deps @tiptap/y-tiptap@next  # TipTap's Y.js bindings
-
-# ✅ OPTIONAL: Cloud collaboration provider
-npm install --legacy-peer-deps @hocuspocus/provider@^3.1.3
-
-# ✅ OPTIONAL: Advanced formatting extensions (NOT in StarterKit)
-npm install --legacy-peer-deps @tiptap/extension-highlight@beta @tiptap/extension-underline@beta
-npm install --legacy-peer-deps @tiptap/extension-subscript@beta @tiptap/extension-superscript@beta
-npm install --legacy-peer-deps @tiptap/extension-text-style@beta  # Required for color/font customization
-
-# ✅ OPTIONAL: Special extensions (NOT in @tiptap/extensions consolidated package)
-npm install --legacy-peer-deps @tiptap/extension-typography@beta  # Smart typography
-npm install --legacy-peer-deps @tiptap/extension-mention@beta     # @mentions
-npm install --legacy-peer-deps @tiptap/suggestion@beta           # Required by mention
-
-# ✅ REQUIRED: Vue 3 (peer dependency of @tiptap/vue-3)
-npm install --legacy-peer-deps vue@^3.0.0
-```
-
-### **Vue.js Integration Changes in v3**
-```javascript
-// ✅ v3 CORRECT: Import from @tiptap/vue-3
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-
-// ❌ v2 DEPRECATED: Import from @tiptap/vue-2
-import { useEditor, EditorContent } from '@tiptap/vue-2'
-```
-
-### **Vue 3 Reactivity and Editor Storage**
-```javascript
-// ✅ CORRECT: Use markRaw to prevent deep reactivity on ProseMirror instances
-this.bodyEditor = markRaw(bodyEditor);
-
-// ❌ WRONG: Direct assignment causes Vue reactivity interference
-this.bodyEditor = bodyEditor;
-```
-
-**Why markRaw is Required**: Vue 3's deep reactivity system can interfere with ProseMirror's internal state management, causing issues like:
-- Editor methods returning null unexpectedly
-- State synchronization problems
-- Performance degradation from unnecessary reactivity tracking
-
-**Best Practice**: Always wrap editor instances with `markRaw()` when storing them in Vue component data.
-
-### **Vue 3 Computed Properties**
-
-Vue 3 computed properties must be accessed as properties, not called as functions:
+### 2. **Two-Tier Collaboration System**
 
 ```javascript
-// ✅ CORRECT: Access as properties
-computed: {
-    generatedPermlink() {
-        return this.titleInput?.trim().toLowerCase().replace(/\s+/g, '-');
-    }
-}
-// In template: {{ generatedPermlink }}
-// In methods: if (this.generatedPermlink) { ... }
-
-// ❌ WRONG: Calling as functions
-// In template: {{ generatedPermlink() }}
-// In methods: if (this.generatedPermlink()) { ... }
-```
-
-**Common Pitfall**: Accessing computed properties with parentheses returns the function object, leading to displays like "function () { [native code] }" in the UI.
-
-## Provider Configuration
-
-### **Hocuspocus Provider Setup (DLUX Implementation)**
-```javascript
-import { HocuspocusProvider } from '@hocuspocus/provider'
-
-const provider = new HocuspocusProvider({
-    url: `wss://data.dlux.io/collaboration/${owner}/${permlink}`,
-    name: documentId, // Y.js document name
-    document: ydoc,
-    token: '', // Not used - auth via headers
-    parameters: {
-        auth: JSON.stringify({
-            account: username,
-            challenge: timestamp,
-            pubkey: publicKey,
-            signature: signature
-        })
-    },
-    onSynced: () => console.log('Document synced'),
-    awareness: {
-        user: {
-            name: userName,
-            color: userColor
-        }
-    }
-})
-```
-
-### **Authentication with DLUX/Hive Blockchain**
-DLUX uses Hive blockchain authentication instead of JWT tokens:
-- **Headers Required**: x-account, x-challenge, x-pubkey, x-signature
-- **Validity**: 24 hours (challenge timestamp)
-- **Server**: Self-hosted Hocuspocus at data.dlux.io
-
-### **WebSocket Connection Management**
-})
-```
-
-**Note**: DLUX uses Hocuspocus server with custom blockchain authentication, not TipTap Cloud.
-
-## Available TipTap Extensions
-
-### **StarterKit Includes**
-- **Text Formatting**: Bold, Italic, Strike, Code (inline)
-- **Block Elements**: Paragraph, Heading, BlockQuote, CodeBlock
-- **Lists**: BulletList, OrderedList, ListItem
-- **Other**: HorizontalRule, HardBreak
-- **History**: UndoRedo (must be disabled when using Collaboration)
-
-### **Additional Formatting Extensions**
-```bash
-# Individual extensions available
-npm install --legacy-peer-deps @tiptap/extension-highlight@beta      # Text highlighting
-npm install --legacy-peer-deps @tiptap/extension-underline@beta     # Underlined text
-npm install --legacy-peer-deps @tiptap/extension-subscript@beta     # Subscript
-npm install --legacy-peer-deps @tiptap/extension-superscript@beta   # Superscript
-npm install --legacy-peer-deps @tiptap/extension-text-style@beta    # Required for colors
-
-# NOT in consolidated @tiptap/extensions package
-npm install --legacy-peer-deps @tiptap/extension-typography@beta    # Smart quotes
-npm install --legacy-peer-deps @tiptap/extension-mention@beta       # @mentions
-npm install --legacy-peer-deps @tiptap/suggestion@beta              # Required by mention
-```
-
-### **Extension Usage Notes**
-- Install individual extensions to override StarterKit defaults
-- Typography and Mention are NOT in the consolidated `@tiptap/extensions` package
-- TextStyle extension uses named export: `import { TextStyle } from '@tiptap/extension-text-style'`
-
-## Architecture: Y.js ↔ ProseMirror Integration
-
-Understanding how these components interact is critical for avoiding state synchronization issues:
-
-```
-User Action → ProseMirror Editor → y-tiptap → Y.js Document → IndexedDB
-                    ↑                   ↓
-                    └───────────────────┘
-```
-
-### Component Roles:
-- **Y.js Document**: CRDT-based source of truth, maintains complete change history
-- **y-tiptap**: Bidirectional binding that converts between Y.js updates and ProseMirror transactions
-- **IndexedDB Persistence**: Local storage that can cause timing issues if created after content changes
-- **ProseMirror**: The editor's state management and transaction system
-
-### Critical Insight: The "Mismatched Transaction" Problem
-When IndexedDB persistence is created after the editor already has content:
-1. IndexedDB loads historical Y.js data
-2. y-tiptap tries to sync this to ProseMirror
-3. ProseMirror's state becomes inconsistent
-4. Commands fail with "mismatched transaction" because they're based on outdated state
-
-## Core Design Principles
-
-### 1. **Offline-First with Temp Y.js Documents**
-- **Rule**: Create Y.js documents and Collaboration extension from editor creation
-- **Rationale**: Follows TipTap best practices, eliminates content syncing issues
-- **Implementation**: Use temp Y.js documents that only persist to drafts when user shows intent
-
-### 2. **Temp Document Strategy**
-- **Rule**: Create Y.js document immediately but don't add to drafts list initially
-- **Rationale**: Avoids draft clutter while providing full TipTap collaborative functionality
-- **Implementation**: Only call `ensureLocalFileEntry()` when user saves or has meaningful content
-- **Temp ID Format**: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-- **Persistence Trigger**: User shows intent through typing pause (debounced)
-
-### 3. **Two-Tier Cursor Strategy (v3 Updated)**
-- **Rule**: CollaborationCaret extension CANNOT handle null providers (TipTap v3 limitation)
-- **Rationale**: TipTap/ProseMirror runtime errors occur with null providers
-- **Solution**: Use two-tier system: Tier 1 (no CollaborationCaret) vs Tier 2 (with CollaborationCaret)
-
-### 4. **Extension Lifecycle Management (v3 Updated)**
-- **Rule**: Include Collaboration extension from editor creation, add CollaborationCaret only for cloud
-- **Rationale**: CollaborationCaret requires WebSocket provider, cannot be null
-- **Implementation**: Two distinct editor configurations based on cursor requirements
-
-### 5. **Initialization Race Condition Prevention**
-- **Rule**: Use initialization flags with proper timing to prevent premature temp document creation
-- **Rationale**: TipTap's `onUpdate` events fire asynchronously after editor creation, can trigger temp document creation during initialization
-- **Implementation**: Set `isInitializingEditors` flag during editor creation, clear after 500ms delay to allow all TipTap initialization events to complete
-
-### 6. **Y.js Document Reuse Strategy**
-- **Rule**: Create fresh Y.js documents for new editors, but reuse existing synced Y.js documents when loading existing content
-- **Rationale**: Prevents content loss when loading existing documents while maintaining TipTap best practices
-- **Implementation**: Check for existing Y.js document before creating new one in editor creation methods
-
-### 7. **Y.js Fragment Creation (TipTap v3)**
-- **Rule**: NEVER pre-create Y.js fragments - Let TipTap create them via `field` parameter
-- **Rationale**: TipTap's Collaboration extension manages fragment creation internally
-- **Implementation**: Use `field` parameter in Collaboration.configure(), not `fragment` (v2 syntax)
-
-## 🔥 **TIPTAP v3 COMPLIANCE REQUIREMENTS**
-
-### **1. StarterKit Configuration for Collaboration**
-```javascript
-// ✅ v3 CORRECT: StarterKit includes UndoRedo which must be disabled for Collaboration
-import StarterKit from '@tiptap/starter-kit'
-import Collaboration from '@tiptap/extension-collaboration'
-
-const editor = new Editor({
+// Tier 1: Local-only (no real-time collaboration)
+const tier1Editor = new Editor({
     extensions: [
-        StarterKit.configure({
-            undoRedo: false  // CRITICAL: Must disable when using Collaboration
+        StarterKit.configure({ 
+            history: false  // Y.js handles history
         }),
         Collaboration.configure({
             document: ydoc,
-            field: 'content'
+            field: 'body'  // Note: 'field' not 'fragment' in v3
         })
+        // NO CollaborationCaret - not needed for local
     ]
-})
+});
 
-// ❌ WRONG: Forgetting to disable UndoRedo with Collaboration
-const editor = new Editor({
+// Tier 2: Full collaboration
+const tier2Editor = new Editor({
     extensions: [
-        StarterKit,  // UndoRedo conflicts with Collaboration!
-        Collaboration.configure({ document: ydoc, field: 'content' })
-    ]
-})
-
-// ❌ WRONG: Importing UndoRedo with Collaboration
-import { UndoRedo } from '@tiptap/extensions'  // Conflicts with Collaboration
-```
-
-### **2. Document Extension Requirement**
-```javascript
-// ✅ v3 REQUIRED: Document extension must be explicitly imported
-import Document from '@tiptap/extension-document'
-// OR use StarterKit which includes it
-
-// ❌ v2 BEHAVIOR: Document was implicit, now explicit in v3
-```
-
-### **3. UndoRedo vs Collaboration**
-```javascript
-// ✅ v3 CORRECT: Import UndoRedo for non-collaborative editors
-import StarterKit from '@tiptap/starter-kit'
-import { UndoRedo } from '@tiptap/extensions'
-
-const localEditor = new Editor({
-    extensions: [
-        StarterKit,
-        UndoRedo.configure({
-            depth: 100,
-            newGroupDelay: 500
-        })
-    ]
-})
-
-// ✅ v3 CORRECT: Don't import UndoRedo for collaborative editors
-import StarterKit from '@tiptap/starter-kit'
-import Collaboration from '@tiptap/extension-collaboration'
-// DO NOT import UndoRedo
-
-const collaborativeEditor = new Editor({
-    element: document.querySelector('.editor'),
-    extensions: [
-        StarterKit,  // No UndoRedo configuration needed
+        StarterKit.configure({ 
+            history: false
+        }),
         Collaboration.configure({
             document: ydoc,
-            field: 'content'  // Let TipTap create the fragment
+            field: 'body'
+        }),
+        CollaborationCaret.configure({
+            provider: wsProvider,  // REQUIRES active WebSocket
+            user: {
+                name: 'User',
+                color: '#ffcc00'
+            }
         })
-        // Collaboration handles its own undo/redo
     ]
-    // NO immediatelyRender - not a valid TipTap v3 option
-    // NO content parameter - let Y.js handle initial state
-})
+});
 ```
 
-### **4. Command Execution with Safety Checks**
+### 3. **Lifecycle Management**
+
 ```javascript
-// ✅ v3 BEST PRACTICE: Always check before executing
-if (editor.can().toggleBold()) {
-    editor.commands.toggleBold()
+// Correct initialization order:
+// 1. Y.js → 2. Provider → 3. Wait for sync → 4. Editor
+
+async initializeDocument(docId) {
+    // 1. Create Y.js document
+    this.ydoc = new Y.Doc({ guid: docId });
+    
+    // 2. Set up persistence
+    this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
+    
+    // 3. Wait for initial sync
+    await new Promise(resolve => {
+        this.indexeddbProvider.on('synced', resolve);
+    });
+    
+    // 4. NOW create editor with synced content
+    await this.createEditor();
+    
+    // 5. Optional: Add WebSocket for collaboration
+    if (this.needsCollaboration) {
+        await this.upgradeToCollaborative();
+    }
 }
 
-// ✅ v3 BEST PRACTICE: Chain commands with focus
-editor.chain()
-    .focus()  // CRITICAL: Ensures proper state for transaction
-    .toggleBold()
-    .run()
+// Correct cleanup order (reverse):
+// 1. Editor → 2. Providers → 3. Y.js
 
-// ❌ WRONG: Direct commands without chain/focus
-editor.commands.toggleBold() // Can cause mismatched transaction errors
-```
-
-### **5. Content Validation and Error Handling**
-```javascript
-// ✅ v3 BEST PRACTICE: Enable content validation
-const editor = new Editor({
-    enableContentCheck: true,
-    onContentError({ editor, error, disableCollaboration }) {
-        console.error('Schema error:', error)
-        disableCollaboration()
-        editor.setEditable(false)
-        // Notify user and provide recovery options
+async cleanup() {
+    // 1. Destroy editor first
+    if (this.editor) {
+        this.editor.destroy();
+        this.editor = null;
     }
-})
-```
-
-### **6. Vue.js 3 Integration Patterns**
-```vue
-<!-- ✅ v3 CORRECT: Composition API with useEditor -->
-<template>
-  <editor-content :editor="editor" />
-</template>
-
-<script setup>
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
-
-const editor = useEditor({
-  content: '<p>Content</p>',
-  extensions: [StarterKit],
-  onUpdate: ({ editor }) => {
-    // Minimal reactive updates only
-    emit('content-changed', editor.getHTML())
-  }
-})
-// Cleanup handled automatically by useEditor
-</script>
-```
-
-### **7. Memory Management and Cleanup**
-```javascript
-// ✅ v3 CRITICAL: Proper cleanup sequence (from CLAUDE.md)
-beforeUnmount() {
-    // 1. Destroy Y.js document
+    
+    // 2. Destroy providers
+    if (this.wsProvider) {
+        this.wsProvider.disconnect();
+        await this.wsProvider.destroy();
+        this.wsProvider = null;
+    }
+    
+    if (this.indexeddbProvider) {
+        await this.indexeddbProvider.destroy();
+        this.indexeddbProvider = null;
+    }
+    
+    // 3. Finally destroy Y.js
     if (this.ydoc) {
         this.ydoc.destroy();
         this.ydoc = null;
     }
-    
-    // 2. Clean up IndexedDB provider
-    if (this.indexeddbProvider) {
-        this.indexeddbProvider.clearData();
-        this.indexeddbProvider = null;
-    }
-    
-    // 3. Disconnect WebSocket provider
-    if (this.websocketProvider) {
-        this.websocketProvider.disconnect();
-        this.websocketProvider = null;
-    }
-    
-    // 4. Destroy the single body editor
-    if (this.bodyEditor) {
-        this.bodyEditor.destroy();
-        this.bodyEditor = null;
-    }
-    }
-    
-    if (this.websocketProvider) {
-        this.websocketProvider.disconnect()
-        this.websocketProvider = null
-    }
 }
 ```
 
-### **8. Performance Configuration**
-```javascript
-// ✅ v3 PERFORMANCE: Optimal rendering settings
-const editor = new Editor({
-    shouldRerenderOnTransaction: false, // v3 default - better performance
-    enableInputRules: true,
-    enablePasteRules: true,
-    
-    editorProps: {
-        attributes: {
-            class: 'prose focus:outline-none'
-        }
-    }
-})
-```
-
-## Document Name vs Title Content: Critical Distinction
-
-### **CRITICAL: Document Name ≠ Title Content**
-
-In DLUX collaborative editing, there are **two distinct concepts** that must be handled separately:
-
-1. **Document Name** (`config.documentName`): The display name shown in file lists, tabs, and UI
-2. **Title Content** (`titleInput`): The actual title content stored in a simple input field (not a TipTap editor)
-
-#### **✅ CORRECT: Document Name Storage Pattern**
+### 4. **Content vs Metadata Separation**
 
 ```javascript
-// ✅ CORRECT: Store document name in Y.js config metadata
-setDocumentName(documentName) {
-    const config = this.ydoc.getMap('config');
-    config.set('documentName', documentName);
-    config.set('lastModified', new Date().toISOString());
-}
+// ✅ CORRECT: Clear separation of concerns
 
-// ✅ CORRECT: Retrieve document name from Y.js config
-getDocumentName() {
-    const config = this.ydoc.getMap('config');
-    return config.get('documentName') || null;
-}
+// Content (managed by TipTap via Y.js)
+// - NEVER access directly
+// - NEVER store in component state
+// - ONLY interact via editor commands
 
-// ✅ CORRECT: Update UI from Y.js config after sync
-updateDocumentNameFromConfig() {
-    const configDocumentName = this.getDocumentName();
-    if (configDocumentName) {
-        this.currentFile.name = configDocumentName;
-        this.currentFile.title = configDocumentName;
-        this.currentFile.documentName = configDocumentName;
-    }
-}
+// Metadata (managed by you via Y.js maps)
+const metadata = ydoc.getMap('metadata');
 
-// ✅ CORRECT: Extract document name from Y.js config (immediate check)
-extractDocumentNameFromConfig() {
-    if (!this.ydoc) return null;
-    
-    try {
-        const config = this.ydoc.getMap('config');
-        const documentName = config.get('documentName');
-        
-        if (documentName && documentName.trim() !== '') {
-            return documentName;
-        }
-    } catch (error) {
-        console.warn('⚠️ Could not extract document name from Y.js config:', error.message);
-    }
-    
-    return null;
-}
-```
+// Safe to read
+const title = metadata.get('title');
 
-#### **❌ WRONG: Extracting Document Name from Title Content**
+// Safe to write
+metadata.set('title', 'New Title');
 
-```javascript
-// ❌ WRONG: Don't extract document name from title content
-extractDocumentNameFromTitle() {
-    const titleText = this.titleInput; // WRONG APPROACH
-    return titleText; // Document name should come from config, not title input
-}
-```
-
-#### **✅ CORRECT: Document Lifecycle with Name Persistence**
-
-```javascript
-// Document creation: Store name in config immediately
-async createNewDocument(documentName) {
-    // 1. Create Y.js document + IndexedDB
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
-    
-    // 2. Initialize schema
-    this.initializeCollaborativeSchema();
-    
-    // 3. Store document name in config metadata
-    this.setDocumentName(documentName);
-    
-    // 4. Create editors (title content separate from document name)
-    await this.createEditors();
-}
-
-// Document loading: Extract name from config after sync
-async loadExistingDocument(file) {
-    // 1. Create Y.js document + IndexedDB
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(file.id, this.ydoc);
-    
-    // 2. Wait for sync (loads existing config)
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // 3. Extract document name from config (not title content)
-    const documentName = this.getDocumentName();
-    if (documentName) {
-        this.currentFile.name = documentName;
-    }
-    
-    // 4. Create editors (title content loads automatically)
-    await this.createEditors();
-}
-
-// Cloud publishing: Store name in config before/after server creation
-async publishToCloud(documentName) {
-    // 1. Store name in Y.js config first
-    this.setDocumentName(documentName);
-    
-    // 2. Create server document
-    const response = await fetch('/api/collaboration/documents', {
-        method: 'POST',
-        body: JSON.stringify({ documentName })
-    });
-    
-    // 3. Connect Y.js document to server (name persists in Y.js)
-    await this.connectToCollaborationServer(serverDoc);
-}
-```
-
-#### **✅ CORRECT: Real-time Name Updates**
-
-```javascript
-// Set up observer for document name changes
-setupConfigObserver() {
-    const config = this.ydoc.getMap('config');
-    config.observe((event) => {
-        event.changes.keys.forEach((change, key) => {
-            if (key === 'documentName' && change.action === 'update') {
-                const newDocumentName = config.get('documentName');
-                
-                // Update UI immediately for all connected users
-                this.currentFile.name = newDocumentName;
-                this.currentFile.title = newDocumentName;
-                this.currentFile.documentName = newDocumentName;
-                
-                console.log('📄 Document name updated from Y.js config:', newDocumentName);
-            }
-        });
-    });
-}
-```
-
-#### **✅ CORRECT: Refresh/Reload Persistence**
-
-The document name persists across page refreshes because:
-
-1. **Y.js config** is stored in IndexedDB automatically
-2. **onSynced callback** extracts name from config after reload
-3. **UI updates** immediately with persisted name
-4. **No API calls** needed - everything comes from Y.js document
-
-```javascript
-// After page refresh/reload
-onSynced: ({ synced }) => {
-    if (synced) {
-        // Document name automatically available from Y.js config
-        setTimeout(() => {
-            this.updateDocumentNameFromConfig();
-        }, 500);
-    }
-}
-```
-
-## TipTap.dev Best Practice Compliance Audit
-
-### **🎯 CRITICAL QUESTION: Why Separate Cleanup When Following Best Practices?**
-
-**Answer**: Components exist **OUTSIDE the editor scope** and require manual management per TipTap.dev architecture.
-
-### **✅ WHAT `editor.destroy()` ACTUALLY CLEANS UP**
-
-According to TipTap.dev official documentation, `editor.destroy()` only handles:
-
-1. **Editor instance itself** (ProseMirror view, DOM bindings)
-2. **Editor-specific event listeners**
-3. **ProseMirror plugins attached to that editor**
-4. **DOM element bindings**
-
-### **🔧 WHAT EXISTS OUTSIDE THE EDITOR (Requires Manual Cleanup)**
-
-Based on TipTap.dev documentation and Y.js community best practices:
-
-#### **1. Y.js Document (`this.ydoc`)**
-- **Lives independently** of the editor
-- **Contains all document data** (body content, config map, metadata)
-- **`editor.destroy()` does NOT destroy Y.js documents**
-- **Must be manually destroyed** to prevent memory leaks
-
-```javascript
-// ✅ CORRECT: Manual Y.js document cleanup
-if (this.ydoc) {
-    this.ydoc.destroy();  // Required - not handled by editor.destroy()
-    this.ydoc = null;
-}
-```
-
-#### **2. IndexedDB Provider (`this.indexeddbProvider`)**
-- **Browser storage connection** independent of editors
-- **Persists data** even when editors are destroyed
-- **Must be manually destroyed** to prevent resource leaks
-
-```javascript
-// ✅ CORRECT: Manual IndexedDB provider cleanup
-if (this.indexeddbProvider) {
-    this.indexeddbProvider.destroy();  // Required - not handled by editor.destroy()
-    this.indexeddbProvider = null;
-}
-```
-
-#### **3. WebSocket Provider (`this.provider`)**
-- **Network connection** independent of editors
-- **Maintains server connection** even without editors
-- **Must be manually disconnected** to prevent resource leaks
-
-```javascript
-// ✅ CORRECT: Manual WebSocket provider cleanup
-if (this.provider) {
-    this.provider.disconnect();  // Required - not handled by editor.destroy()
-    this.provider.destroy();
-    this.provider = null;
-}
-```
-
-#### **4. Vue Reactive Data (Framework State)**
-- **Vue component state** independent of TipTap
-- **Persists across editor recreations**
-- **Must be manually reset** for clean state transitions
-
-```javascript
-// ✅ CORRECT: Manual Vue reactive data reset
-this.customJsonString = '';
-this.customJsonError = '';
-this.tagInput = '';
-this.isUpdatingCustomJson = false;
-```
-
-### **✅ OUR IMPLEMENTATION: PERFECT TIPTAP COMPLIANCE**
-
-#### **1. Editor Destruction Order (Perfect Compliance)**
-```javascript
-// ✅ CORRECT: Following TipTap.dev recommended destruction order
-async cleanupCurrentDocumentProperOrder() {
-    // STEP 1: Disconnect WebSocket provider first
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider.destroy();
-    }
-
-    // STEP 2: Destroy the single body editor before Y.js document  
-    if (this.bodyEditor) {
-        this.bodyEditor.destroy();
-        this.bodyEditor = null;
-    }
-
-    // STEP 3: Destroy IndexedDB persistence before Y.js
-    if (this.indexeddbProvider) {
-        this.indexeddbProvider.destroy();
-        this.indexeddbProvider = null;
-    }
-
-    // STEP 4: Destroy Y.js document LAST
-    if (this.ydoc) {
-        this.ydoc.destroy();
-        this.ydoc = null;
-    }
-
-    // STEP 5: Reset Vue reactive data
-    this.customJsonString = '';
-    this.customJsonError = '';
-    // ... other Vue state resets
-}
-```
-
-#### **2. Y.js Document Creation (Perfect Compliance)**
-```javascript
-// ✅ CORRECT: Y.js document created BEFORE editors (TipTap best practice)
-async loadDocument(file) {
-    // STEP 1: Always destroy existing editors first
-    await this.cleanupCurrentDocument();
-    
-    // STEP 2: Create Y.js document + IndexedDB immediately 
-    this.ydoc = new Y.Doc();
-    const documentId = file.id || file.permlink || `temp_${Date.now()}`;
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    
-    // STEP 3: Wait for IndexedDB sync (critical for content loading)
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create single body editor with Y.js document
-    this.bodyEditor = new Editor({
-        element: this.$refs.bodyEditor,
-        extensions: [
-            StarterKit.configure({ undoRedo: false }),
-            Collaboration.configure({
-                document: this.ydoc,  // ✅ Y.js document passed to editor
-                field: 'body'
-            })
-        ]
-    });
-}
-```
-
-#### **3. Temp Document Strategy (TipTap Compliant)**
-```javascript
-// ✅ CORRECT: Y.js document exists from start (TipTap requirement)
-async createLocalEditorsWithUpgradeCapability(bundle) {
-    // Y.js document created immediately (TipTap best practice)
-    if (!this.ydoc) {
-        this.ydoc = new Y.Doc();
-        this.initializeCollaborativeSchema(Y);
-        
-        // TEMP DOCUMENT STRATEGY: Set up temp document flags (no IndexedDB yet)
-        if (!this.currentFile) {
-            this.isTemporaryDocument = true;
-            this.tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            console.log('✅ Temp document strategy enabled - IndexedDB will be created on user input');
-        }
-    }
-    
-    // Create single body editor with Y.js collaboration from start
-    this.bodyEditor = new Editor({
-        extensions: [
-            StarterKit.configure({ undoRedo: false }),  // Disable UndoRedo with Collaboration
-            Collaboration.configure({
-                document: this.ydoc,  // ✅ Y.js document available immediately
-                field: 'body'
-            })
-        ],
-        onUpdate: ({ editor }) => {
-            // ✅ CORRECT: IndexedDB created lazily (performance optimization)
-            // Only when user actually types (not just opens editor)
-            if (this.isTemporaryDocument && !this.indexeddbProvider) {
-                this.debouncedCreateIndexedDBForTempDocument();
-            }
-        }
-    });
-    
-    // Title is handled via simple input field, not TipTap editor
-}
-```
-
-#### **4. Clean URL Generation (No "temp" in URLs)**
-```javascript
-// ✅ CORRECT: Clean document ID generation for URLs
-async createIndexedDBForTempDocument() {
-    // Generate clean document ID (no "temp" in URL)
-    const cleanDocumentId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Create IndexedDB persistence with clean document ID
-    this.indexeddbProvider = new IndexeddbPersistence(cleanDocumentId, this.ydoc);
-    
-    // Update URL with clean document ID (no "temp")
-    if (this.username) {
-        const permlink = cleanDocumentId.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
-        this.updateURLWithLocalParams(this.username, permlink);
-        console.log('🔗 URL updated with clean document ID:', permlink);
-    }
-    
-    // Update the current file ID to match the clean document ID
-    if (this.currentFile) {
-        this.currentFile.id = cleanDocumentId;
-    }
-    
-    // No longer temporary
-    this.isTemporaryDocument = false;
-    this.tempDocumentId = null; // Clear temp ID since we now have a clean one
-}
-```
-
-#### **5. URL Management for Tier Transitions**
-```javascript
-// ✅ CORRECT: URL clearing for tier transitions
-async loadLocalFile(file) {
-    // Clear collaborative URL parameters when loading local documents
-    if (file.id && this.username) {
-        // Use Y.js document ID as permlink base (persistent across sessions)
-        const documentId = this.indexeddbProvider?.name || file.id;
-        const permlink = documentId.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
-        this.updateURLWithLocalParams(this.username, permlink);
-    } else {
-        // Fallback: clear collaborative parameters
-        this.clearCollabURLParams();
-    }
-}
-
-// ✅ CORRECT: URL structure for all document types
-// New documents: /new (clean slate)
-// Local drafts: /new/username/permlink 
-// Collaborative documents: /post?collab_owner=user&collab_permlink=doc123
-// Published posts: /@username/permlink
-```
-
-### **API Endpoints (Hocuspocus + Custom REST)**
-**Base URL**: `https://data.dlux.io/api`
-**WebSocket**: `wss://data.dlux.io/collaboration/{owner}/{permlink}`
-
-#### Document Management
-- `GET /collaboration/documents` - List user's collaborative documents
-- `POST /collaboration/documents` - Create new collaborative document
-- `DELETE /collaboration/documents/{owner}/{permlink}` - Delete document
-- `GET /collaboration/info/{owner}/{permlink}` - Get document metadata
-- `POST /collaboration/info/{owner}/{permlink}` - Update document metadata
-
-#### Permissions Management
-- `GET /collaboration/permissions/{owner}/{permlink}` - List permissions
-- `POST /collaboration/permissions/{owner}/{permlink}` - Grant permission
-- `DELETE /collaboration/permissions/{owner}/{permlink}/{account}` - Revoke permission
-- `GET /collaboration/permissions-detailed/{owner}/{permlink}` - Get detailed permissions
-
-#### Activity & Statistics
-- `GET /collaboration/activity/{owner}/{permlink}` - Get document activity log
-- `GET /collaboration/stats/{owner}/{permlink}` - Get document statistics
-- `POST /collaboration/cleanup/manual/{owner}/{permlink}` - Manual cleanup (owner only)
-
-#### Authentication
-All requests require DLUX/Hive blockchain authentication headers:
-- `x-account`: DLUX username
-- `x-challenge`: Unix timestamp (23hr validity)
-- `x-pubkey`: Hive public key
-- `x-signature`: Signed challenge
-
-### **Y.js Transaction Management Pattern**
-
-#### **Using Transactions with Origin Tags**
-
-To prevent conflicts between editor operations and metadata updates, use Y.js transactions with origin tags:
-
-```javascript
-// ✅ ARCHITECTURE DECISION: Individual transactions per field
-// We chose individual transactions over batched updates for better reactivity
-
-// ✅ CORRECT: Separate transaction for each metadata field
-this.ydoc.transact(() => {
-    const metadata = this.ydoc.getMap('metadata');
-    metadata.set('allowVotes', newValue);
-}, 'metadata-update');
-
-// ✅ CORRECT: Another field, another transaction
-this.ydoc.transact(() => {
-    const metadata = this.ydoc.getMap('metadata');
-    metadata.set('tags', newTags);
-}, 'metadata-update');
-
-// ❌ NOT USED: Batched transactions (we chose individual approach)
-// this.ydoc.transact(() => {
-//     const metadata = this.ydoc.getMap('metadata');
-//     metadata.set('allowVotes', value1);
-//     metadata.set('tags', value2);
-//     metadata.set('beneficiaries', value3);
-// }, 'metadata-batch');
-```
-
-#### **Individual vs Batched Transaction Architecture**
-
-**✅ Our Choice: Individual Transactions**
-- Each metadata field gets its own transaction
-- Real-time collaborative sync (each field syncs immediately)
-- Vue watcher compatibility (each watcher handles one field)
-- Granular debugging (pinpoint exact field causing issues)
-- Better multi-user experience (no large transaction conflicts)
-
-**❌ Not Used: Batched Transactions**
-- Multiple fields in single transaction
-- Delayed sync until all fields ready
-- Potential conflicts in collaborative editing
-
-```javascript
-// ✅ CORRECT: Filter transactions by origin in editor handlers
-const editor = new Editor({
-    onUpdate: ({ editor, transaction }) => {
-        // Skip non-content transactions
-        if (transaction.origin === 'metadata-update' || 
-            transaction.origin === 'title-update' ||
-            transaction.origin === 'schema-init') {
-            return;
-        }
-        // Handle editor content changes
-        this.hasUnsavedChanges = true;
-    }
+// Safe to observe
+metadata.observe(event => {
+    // Update Vue state from Y.js
+    this.documentTitle = metadata.get('title');
 });
 ```
 
-#### **Standard Origin Tags**
-- `'metadata-update'` - General metadata changes (tags, beneficiaries, custom JSON)
-- `'title-update'` - Document title updates
-- `'schema-init'` - Initial document schema setup
-- `'metadata-sync'` - Bulk metadata synchronization
-- `'auto-naming'` - Automatic document naming from content
-- `'cache-load'` - Loading cached metadata
+---
 
-#### **Benefits**
-1. **Prevents transaction conflicts** between editor and metadata operations
-2. **Enables selective processing** of different transaction types
-3. **Improves debugging** by identifying transaction sources
-4. **Follows Y.js best practices** for multi-source updates
+## ✅ Safe Implementation Patterns
 
-### **🚀 Latest Fixes and Patterns (v2025.01.23)**
-
-#### **Bundle Access Pattern**
-
-When accessing the TipTap collaboration bundle, handle both export patterns:
+### Pattern 1: Document Creation
 
 ```javascript
-// ✅ CORRECT: Handle both default and named exports
-const bundle = window.TiptapCollaboration;
-const tiptapBundle = bundle.Y ? bundle : bundle.default;
-const IndexeddbPersistence = tiptapBundle?.IndexeddbPersistence;
-const Y = tiptapBundle?.Y;
-
-// ❌ WRONG: Direct access without checking export pattern
-const IndexeddbPersistence = window.TiptapCollaboration.IndexeddbPersistence;
-```
-
-**Why**: The bundle may be exported as either `{ Y, IndexeddbPersistence }` or `{ default: { Y, IndexeddbPersistence } }`
-
-#### **State Management Patterns for Editable Fields**
-
-When implementing inline editing for metadata fields (permlink, document name, etc.), use the three-state pattern:
-
-```javascript
-// ✅ CORRECT: Three-state pattern with proper data flow
-data() {
-    return {
-        // Persistent state - synced with Y.js
-        permlinkInput: '',        // Custom permlink value
-        
-        // Temporary editing state
-        permlinkInputTemp: '',    // Edit-in-progress value
-        originalPermlinkValue: '', // For cancel restoration
-        showPermlinkEditor: false, // Edit mode flag
-    }
-},
-
-computed: {
-    // Display value computation
-    actualPermlink() {
-        if (this.permlinkInput && this.permlinkInput.trim()) {
-            return this.sanitizedCustomPermlink;
-        }
-        return this.generatedPermlink;
-    }
-}
-```
-
-**Key Implementation Steps**:
-
-1. **Starting Edit**: Initialize from display value
-```javascript
-togglePermlinkEditor() {
-    // Use computed display value, not raw input
-    const currentValue = this.actualPermlink || '';
-    this.originalPermlinkValue = currentValue;
-    this.permlinkInputTemp = currentValue;
-    this.showPermlinkEditor = true;
-}
-```
-
-2. **Saving Changes**: Commit to persistent state
-```javascript
-savePermlink() {
-    // Update persistent state first
-    this.permlinkInput = this.permlinkInputTemp.trim();
-    // Then sync to Y.js
-    this.debouncedSetPermlinkInMetadata();
-    this.showPermlinkEditor = false;
-}
-```
-
-3. **Canceling Edit**: Restore appropriate state
-```javascript
-cancelPermlinkEdit() {
-    // Distinguish between custom and generated values
-    if (this.originalPermlinkValue !== this.generatedPermlink) {
-        this.permlinkInput = this.originalPermlinkValue;  // Restore custom
-    } else {
-        this.permlinkInput = '';  // Clear for generated to show
-    }
-    this.showPermlinkEditor = false;
-}
-```
-
-4. **Loading from Y.js**: Populate only custom values
-```javascript
-loadMetadataFromYjs() {
-    const permlink = metadata.get('permlink') || '';
-    // Only populate input if it's a custom permlink
-    if (permlink && permlink !== this.generatedPermlink) {
-        this.permlinkInput = permlink;
-    } else {
-        this.permlinkInput = '';  // Let generated show
-    }
-}
-```
-
-**Benefits**:
-- Clear separation of display, edit, and persistent states
-- Proper handling of generated vs custom values
-- No UI flickering or value reversion
-- Consistent user experience across all editable fields
-
-#### **URL Management for Temporary Documents**
-
-Following offline-first principles, URLs should only be assigned when persistence is established:
-
-```javascript
-// ✅ CORRECT: No URL for auto-persisted temp documents
-if (this.isTemporaryDocument) {
-    // Create IndexedDB persistence without URL update
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    console.log('📝 Temp document auto-persisted without URL update');
-}
-
-// ✅ CORRECT: Update URL only on explicit save with name
-saveDocument(newDocumentName) {
-    if (this.currentFile.id && this.currentFile.type === 'local') {
-        this.updateLocalStorageMetadata(this.currentFile.id, { name: newDocumentName });
-        this.cacheLocalDocumentMetadata(this.currentFile.id, newDocumentName);
-        
-        // Update URL when user explicitly saves
-        this.updateURLWithLocalParams(this.username || 'anonymous', this.currentFile.id);
-    }
-}
-
-// ❌ WRONG: Assigning URLs to temp documents during auto-persistence
-if (this.isTemporaryDocument) {
-    // Don't do this - violates offline-first principles
-    this.updateURLWithLocalParams(username, tempDocId);
-}
-```
-
-#### **Cache-First Pattern for Document Loading**
-
-Implement cache-first pattern to eliminate blank loading periods:
-
-```javascript
-// ✅ CORRECT: Try cache first, then IndexedDB
-async autoConnectToLocalDocument(documentId) {
-    // 1. Try to get metadata from cache for instant display
-    const cachedMetadata = this.preloadLocalDocumentMetadata(documentId);
-    let documentName = cachedMetadata?.documentName;
+async createNewDocument() {
+    // 1. Clean up any existing document
+    await this.cleanup();
     
-    // 2. If no cached name, extract from Y.js (may take time)
-    if (!documentName) {
-        documentName = await this.extractDocumentNameFromYjs(documentId) || documentId;
-        // Cache for future loads
-        if (documentName && documentName !== documentId) {
-            this.cacheLocalDocumentMetadata(documentId, documentName);
-        }
-    }
+    // 2. Create new Y.js doc with unique ID
+    const docId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.ydoc = new Y.Doc({ guid: docId });
     
-    // 3. Load document with preloaded metadata
-    await this.loadLocalDocument(documentId, documentName);
-}
-
-// ❌ WRONG: Always waiting for IndexedDB before displaying
-async autoConnectToLocalDocument(documentId) {
-    // This causes blank loading period
-    const documentName = await this.extractDocumentNameFromYjs(documentId);
-    await this.loadLocalDocument(documentId, documentName);
-}
-```
-
-#### **Document Metadata Caching**
-
-Cache document metadata for instant loading on refresh:
-
-```javascript
-// ✅ CORRECT: Multi-layer caching strategy
-cacheLocalDocumentMetadata(documentId, documentName) {
-    const metadataCache = {
-        documentName: documentName,
-        timestamp: Date.now(),
-        documentId: documentId,
-        type: 'local'
-    };
+    // 3. Initialize metadata
+    const metadata = this.ydoc.getMap('metadata');
+    metadata.set('title', 'Untitled Document');
+    metadata.set('createdAt', new Date().toISOString());
     
-    // Layer 1: localStorage for persistence across sessions
-    localStorage.setItem(`dlux_local_doc_metadata_${documentId}`, JSON.stringify(metadataCache));
-    
-    // Layer 2: Memory cache for instant access
-    this.localDocumentMetadataCache[documentId] = metadataCache;
-}
-
-preloadLocalDocumentMetadata(documentId) {
-    // Try memory cache first
-    if (this.localDocumentMetadataCache[documentId]) {
-        return this.localDocumentMetadataCache[documentId];
-    }
-    
-    // Fall back to localStorage
-    try {
-        const cached = localStorage.getItem(`dlux_local_doc_metadata_${documentId}`);
-        if (cached) {
-            const metadata = JSON.parse(cached);
-            // Validate cache (24 hour expiry)
-            if (Date.now() - metadata.timestamp < 24 * 60 * 60 * 1000) {
-                this.localDocumentMetadataCache[documentId] = metadata;
-                return metadata;
-            }
-        }
-    } catch (e) {
-        console.error('Error loading cached metadata:', e);
-    }
-    
-    return null;
-}
-```
-
-#### **Authentication State Management**
-
-Proper handling of authentication loading states:
-
-```javascript
-// ✅ CORRECT: Track authentication state separately from logged-in status
-data() {
-    return {
-        hasReceivedInitialAuthHeaders: false,  // Tracks if we've received auth state
-        authLoading: false,  // Default to false, set true when expecting auth
-        username: null,      // null = not authenticated, string = authenticated
-    }
-}
-
-// ✅ CORRECT: Permission checks that handle loading state
-getUserPermissionLevel(fileType, owner) {
-    // Local files always accessible
-    if (fileType === 'local') {
-        return 'owner';
-    }
-    
-    // During auth loading, allow access to prevent UI lockout
-    if (!this.hasReceivedInitialAuthHeaders) {
-        return 'readonly';  // Temporary access until auth resolves
-    }
-    
-    // After auth headers received, enforce permissions
-    if (!this.username) {
-        return 'readonly';
-    }
-    
-    return owner === this.username ? 'owner' : 'readonly';
-}
-
-// ❌ WRONG: Blocking access during auth loading
-getUserPermissionLevel(fileType, owner) {
-    if (!this.username) {
-        return 'none';  // This locks out users during initial load
-    }
-}
-```
-
-### **🏆 FINAL COMPLIANCE VERDICT**
-
-Our implementation achieves **100% TipTap.dev best practice compliance**:
-
-1. **✅ Editor Lifecycle**: Perfect destruction order following official TipTap.dev patterns
-2. **✅ Y.js Management**: Proper document lifecycle with creation before editors
-3. **✅ Provider Cleanup**: Correct resource management for IndexedDB and WebSocket providers
-4. **✅ Temp Transitions**: Clean ID generation without "temp" in URLs
-5. **✅ Vue State Management**: Proper reactive data isolation between documents with markRaw()
-6. **✅ URL Management**: Clean tier transitions with appropriate URL structures
-7. **✅ Authentication**: Blockchain-based auth with Hocuspocus server
-8. **✅ Bundle Access**: Proper handling of both default and named exports
-9. **✅ Offline-First**: URLs only assigned on explicit save, not auto-persistence
-10. **✅ Cache-First**: Metadata preloading for instant document display
-11. **✅ Auth States**: Proper handling of loading vs authenticated states
-12. **✅ Single Editor**: Simplified architecture with title as input field
-13. **✅ Configuration**: Proper undoRedo: false, onCreate patterns
-
-### **🎯 KEY INSIGHT: TipTap Architecture Design**
-
-The reason we need separate cleanup is **by design** - TipTap follows a **modular architecture** where:
-
-- **Editors** handle content editing and DOM interaction
-- **Y.js documents** handle data synchronization and persistence  
-- **Providers** handle network connections and storage
-- **Framework state** (Vue/React) handles UI reactivity
-
-This separation allows for:
-- **Flexible document sharing** across multiple editors
-- **Independent provider management** (IndexedDB, WebSocket, WebRTC)
-- **Framework-agnostic implementation** (works with Vue, React, vanilla JS)
-- **Optimal performance** through selective resource management
-
-**Our architecture perfectly implements this TipTap design philosophy!** 🎉
-
-## 📋 **ESTABLISHED PATTERNS (v2025.01.23)**
-
-### **Transaction Filtering Pattern**
-Filter transactions in onUpdate to prevent conflicts and unwanted persistence:
-
-1. **Y.js Sync Transactions**: `transaction.getMeta('y-sync')`
-2. **Origin Tag Filtering**: Check `transaction.getMeta('y-origin')` for known metadata operations
-3. **Empty Transactions**: Check `transaction.docChanged` and `transaction.steps.length`
-4. **Initialization Window**: Skip updates within 500ms of editor creation
-5. **Command Execution State**: Skip updates when `isExecutingCommand` is true
-
-### **State Reset Pattern**
-Complete cleanup to prevent state leakage between documents:
-
-1. **Reset Editor Timestamp**: `this.editorCreatedAt = null`
-2. **Clear ALL Timers**: Use array of timer names for maintainability
-3. **Reset Document State**: All flags and reactive properties
-4. **Clear Permissions**: Reset access control state
-
-### **Persistence Creation Pattern**
-Safeguards to prevent duplicate or premature persistence:
-
-1. **Creation Flag**: Use `isCreatingPersistence` to prevent concurrent creation
-2. **Age Checks**: Verify editor age before creating persistence (1 second minimum)
-3. **Content Verification**: Check for real content before creating persistence
-4. **Multiple Conditions**: Check temporary status, existing persistence, and Y.js document
-
-### **Editor Initialization Pattern**
-Track editor lifecycle for proper timing:
-
-1. **Store Creation Time**: Set `editorCreatedAt` in onCreate handler
-2. **Use in Guards**: Check age before persistence operations
-3. **Reset on Cleanup**: Clear timestamp in state reset
-
-## 🚨 **TROUBLESHOOTING COMMON ERRORS**
-
-### **"RangeError: Applying a mismatched transaction"**
-
-**Root Cause**: State desynchronization between ProseMirror and Y.js
-
-**Common Scenarios**:
-1. Creating IndexedDB persistence after editor has content
-2. Y.js loading historical data that conflicts with current editor state
-3. Executing commands without proper focus/chain pattern
-4. Using incompatible versions of y-prosemirror (>1.2.3)
-5. Concurrent metadata and content updates without proper coordination
-
-**Solutions**:
-```javascript
-// ✅ Solution 1: Create persistence immediately
-const ydoc = new Y.Doc()
-const persistence = new IndexeddbPersistence(docId, ydoc)
-await persistence.whenSynced  // Wait for sync
-const editor = new Editor({ /* ... */ })
-
-// ✅ Solution 2: Use proper command pattern
-editor.chain().focus().toggleBold().run()
-
-// ✅ Solution 3: Disable commands until synced
-persistence.on('synced', () => {
-    enableEditorCommands()
-})
-
-// ✅ Solution 4: Use Y.js transactions with origin tags
-ydoc.transact(() => {
-    const metadata = ydoc.getMap('metadata');
-    metadata.set('tags', newTags);
-}, 'metadata-update'); // Origin tag identifies the source
-
-// ✅ Solution 5: Comprehensive transaction filtering in onUpdate
-onUpdate: ({ editor, transaction }) => {
-    // Skip Y.js sync transactions
-    if (transaction.getMeta('y-sync')) return;
-    
-    // Skip metadata transactions by origin
-    const origin = transaction.getMeta('y-origin');
-    if (origin === 'metadata-update' || origin === 'title-update' || 
-        origin === 'auto-naming' || origin === 'schema-init') return;
-    
-    // Skip empty initialization updates
-    if (!transaction.docChanged || transaction.steps.length === 0) return;
-    
-    // Skip updates within initialization window
-    const timeSinceCreation = Date.now() - (this.editorCreatedAt || 0);
-    if (timeSinceCreation < 500 && !editor.getText().trim()) return;
-    
-    // Handle content updates
-    this.hasUnsavedChanges = true;
-}
-
-// ✅ Solution 6: Clear all timers in state reset to prevent File > New bug
-resetComponentState() {
-    // Critical: Reset editor timestamp
-    this.editorCreatedAt = null;
-    
-    // Clear ALL debounce timers
-    const timers = ['contentUpdateTimeout', 'createPersistenceDebounceTimer', 
-                   'titleAutoSaveTimer', 'tempPersistenceTimeout'];
-    timers.forEach(timer => {
-        if (this[timer]) {
-            clearTimeout(this[timer]);
-            this[timer] = null;
-        }
-    });
-}
-```
-
-**Version-Specific Fix**: If using y-prosemirror, pin to version 1.2.3:
-```json
-"y-prosemirror": "1.2.3"
-```
-
-#### **✅ CRITICAL: Independent Loading Pattern**
-
-**RULE**: Document name should load with title/body content from Y.js config, independently of cloud connection.
-
-**When there is already a local Y.js document, ALWAYS use the Y.js config map for filename instead of waiting for cloud API.**
-
-```javascript
-// ✅ CORRECT: Independent loading - filename loads with content, cloud connects separately
-async loadDocument(file) {
-    // STEP 1: Ensure file object has document name (check collaborative docs list first)
-    const existingDoc = this.collaborativeDocs.find(doc => 
-        doc.owner === file.owner && doc.permlink === file.permlink
-    );
-    const fileWithName = existingDoc ? { ...existingDoc, type: file.type } : file;
-    
-    // STEP 2: Load document content (including filename from Y.js config)
-    await this.loadDocumentWithoutCloudConnection(fileWithName);
-    // Note: loadDocumentWithoutCloudConnection now stores file.documentName in Y.js config
-    
-    // STEP 3: Check for document name immediately (loads with title/body)
-    const documentName = this.extractDocumentNameFromConfig();
-    
-    if (documentName) {
-        // Document name available from Y.js config (previously loaded)
-        this.currentFile.name = documentName;
-        console.log('✅ Document name from Y.js config:', documentName);
-    } else {
-        // Use fallback, will be updated when server sync completes
-        this.currentFile.name = `${file.owner}/${file.permlink}`;
-        console.log('📄 Using fallback name, will update from server');
-    }
-    
-    // STEP 4: Clear loading state - content is ready
-    this.isInitializing = false;
-    
-    // STEP 5: Connect to cloud independently (non-blocking)
-    if (file.type === 'collaborative') {
-        this.connectToCloudInBackground(file); // Updates name when server sync completes
-    }
-}
-```
-
-**Key Benefits**:
-- **ALL content loads from local first**: filename, title, body from Y.js/IndexedDB
-- No timeout waiting for cloud connection
-- Content displays immediately from local storage
-- Cloud connection happens independently in background
-- Document updates automatically when server sync completes (if needed)
-
-**CRITICAL**: The Y.js document (including config map, title, and body) loads entirely from IndexedDB first. This provides immediate content display without waiting for cloud API responses. Cloud connection only provides real-time sync and updates.
-
-#### **🔧 TROUBLESHOOTING: Document Name Issues**
-
-**Problem**: Document name reverts to `owner/permlink` after refresh
-
-**Problem**: Document name briefly shows `owner/permlink` on first refresh but works correctly after
-
-**Root Causes & Solutions**:
-
-1. **Missing config storage during creation**:
-   ```javascript
-   // ❌ WRONG: Document created without storing name
-   async createDocument() {
-       this.ydoc = new Y.Doc();
-       // Missing: this.setDocumentName(documentName);
-   }
-   
-   // ✅ CORRECT: Store name immediately after creation
-   async createDocument(documentName) {
-       this.ydoc = new Y.Doc();
-       this.initializeCollaborativeSchema();
-       this.setDocumentName(documentName); // CRITICAL
-   }
-   ```
-
-2. **Missing config storage during cloud publishing**:
-   ```javascript
-   // ❌ WRONG: Publish without storing name in Y.js
-   async publishToCloud() {
-       const response = await fetch('/api/documents', { ... });
-       // Missing: this.setDocumentName(serverDoc.documentName);
-   }
-   
-   // ✅ CORRECT: Store name after successful publish
-   async publishToCloud() {
-       const response = await fetch('/api/documents', { ... });
-       const serverDoc = await response.json();
-       this.setDocumentName(serverDoc.documentName); // CRITICAL
-   }
-   ```
-
-3. **Missing config storage during collaborative load**:
-   ```javascript
-   // ❌ WRONG: Load collaborative doc without storing name
-   async loadCollaborativeDoc(doc) {
-       await this.connectToCollaborationServer(doc);
-       // Missing: this.setDocumentName(doc.documentName);
-   }
-   
-   // ✅ CORRECT: Store name after connection
-   async loadCollaborativeDoc(doc) {
-       await this.connectToCollaborationServer(doc);
-       this.setDocumentName(doc.documentName); // CRITICAL
-   }
-   ```
-
-4. **Incorrect extraction method**:
-   ```javascript
-   // ❌ WRONG: Extract from title content instead of config
-   updateDocumentName() {
-       const titleText = this.titleInput; // WRONG
-       this.currentFile.name = titleText;
-   }
-   
-   // ✅ CORRECT: Extract from Y.js config
-   updateDocumentName() {
-       const configName = this.getDocumentName(); // CORRECT
-       if (configName) {
-           this.currentFile.name = configName;
-       }
-   }
-   ```
-
-5. **Document name not stored during initial load**:
-   ```javascript
-   // ❌ WRONG: Document name not stored when loading document
-   async loadDocument(file) {
-       await this.loadDocumentWithoutCloudConnection(file);
-       // Missing: Store document name in Y.js config during load
-       const documentName = this.extractDocumentNameFromConfig(); // Will be null on first load
-   }
-   
-   // ✅ CORRECT: Store document name during load process
-   async loadDocumentWithoutCloudConnection(file) {
-       // ... create Y.js document and sync with IndexedDB ...
-       
-       // Store document name in Y.js config if available (for first-time loading)
-       if (file.documentName || file.name || file.title) {
-           const documentName = file.documentName || file.name || file.title;
-           this.setDocumentName(documentName); // CRITICAL - store before checking
-       }
-       }
-    ```
-
-6. **Auto-connect URL parameters without document name**:
-   ```javascript
-   // ❌ WRONG: Create minimal document object for auto-connect
-   async executeAutoConnect(collabOwner, collabPermlink) {
-       const docToLoad = {
-           owner: collabOwner,
-           permlink: collabPermlink,
-           type: 'collaborative'
-           // Missing: documentName property
-       };
-       await this.loadDocumentAndWaitForName(docToLoad); // Will use fallback name
-   }
-   
-   // ✅ CORRECT: Check collaborative docs list first for document name
-   async executeAutoConnect(collabOwner, collabPermlink) {
-       // Check if document exists in our collaborative documents list
-       const existingDoc = this.collaborativeDocs.find(doc => 
-           doc.owner === collabOwner && doc.permlink === collabPermlink
-       );
-       
-       const docToLoad = existingDoc ? {
-           ...existingDoc, // Includes documentName
-           type: 'collaborative'
-       } : {
-           owner: collabOwner,
-           permlink: collabPermlink,
-           type: 'collaborative'
-       };
-       
-       await this.loadDocumentAndWaitForName(docToLoad); // Will use real name immediately
-   }
-   ```
-
-**Debugging Steps**:
-
-1. **Check Y.js config after document load**:
-   ```javascript
-   console.log('Config contents:', this.ydoc.getMap('config').toJSON());
-   console.log('Document name in config:', this.getDocumentName());
-   ```
-
-2. **Verify config observer is working**:
-   ```javascript
-   // Should see this log when document name changes
-   console.log('📄 Document name changed in Y.js config:', newDocumentName);
-   ```
-
-3. **Check timing of updateDocumentNameFromConfig calls**:
-   ```javascript
-   // Should be called after Y.js sync, not before
-   onSynced: ({ synced }) => {
-       if (synced) {
-           setTimeout(() => {
-               this.updateDocumentNameFromConfig(); // Correct timing
-           }, 500);
-       }
-   }
-   ```
-
-## ❌ CRITICAL: NEVER Manipulate Y.js XML Fragments Directly
-
-### **TipTap.dev Official Guidance: Use Editor Methods Only**
-
-Based on official TipTap documentation and GitHub discussions, you should **NEVER** directly access or manipulate Y.js XML fragments. This violates TipTap's architecture and causes serious issues.
-
-#### **❌ WRONG: Direct Y.js Fragment Access**
-
-```javascript
-// ❌ NEVER DO THIS - Violates TipTap architecture
-const titleFragment = ydoc.getXmlFragment('title');
-const bodyFragment = ydoc.getXmlFragment('body');
-const titleContent = titleFragment.toString(); // WRONG
-const bodyContent = bodyFragment.toString(); // WRONG
-
-// ❌ NEVER manipulate fragments directly
-titleFragment.insert(0, 'content'); // WRONG
-bodyFragment.delete(0, 10); // WRONG
-```
-
-#### **✅ CORRECT: Use TipTap Editor Methods**
-
-```javascript
-// ✅ CORRECT: Use appropriate methods for content access
-const titleContent = this.titleInput || '';  // Title from input field
-const bodyContent = this.bodyEditor?.getHTML() || '';
-const titleText = this.titleInput || '';  // Title is plain text
-const bodyText = this.bodyEditor?.getText() || '';
-
-// ✅ CORRECT: Use appropriate methods for content setting
-this.titleInput = newTitleContent;  // Direct assignment for input field
-this.bodyEditor?.commands.setContent(newBodyContent);
-
-// ✅ CORRECT: Use appropriate methods for content checking
-const hasContent = this.titleInput?.trim() || 
-                  this.bodyEditor?.getText().trim();
-```
-
-#### **✅ CORRECT: Content Loading Pattern**
-
-The correct TipTap content loading pattern follows a strict **destroy → create → load** sequence that varies based on content type and collaboration requirements.
-
-```javascript
-// ✅ CORRECT: Universal Document Loading Pattern
-async loadDocument(file) {
-    // STEP 1: Always destroy existing editors first (TipTap best practice)
-    await this.cleanupCurrentDocument();
-    await this.$nextTick();
-    
-    // STEP 2: Determine correct tier based on content type
-    const requiresCloudTier = this.shouldUseCloudTier(file);
-    
-    // STEP 3: Create Y.js document + IndexedDB immediately 
-    this.ydoc = new Y.Doc();
-    const documentId = file.id || file.permlink || `temp_${Date.now()}`;
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    
-    // STEP 4: Wait for IndexedDB sync (critical for content loading)
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 5: Create appropriate tier editor
-    if (requiresCloudTier) {
-        await this.createCloudEditorsWithCursors(bundle); // Tier 2
-    } else {
-        await this.createOfflineFirstCollaborativeEditors(bundle); // Tier 1
-    }
-    
-    // STEP 6: TipTap automatically loads content from Y.js/IndexedDB
-    // NO manual content setting needed!
-    
-    // STEP 6.5: Store document name in Y.js config if available (for first-time loading)
-    if (file.documentName || file.name || file.title) {
-        const documentName = file.documentName || file.name || file.title;
-        this.setDocumentName(documentName);
-    }
-    
-    // STEP 6.6: Check for document name in Y.js config (loads with content)
-    const documentName = this.extractDocumentNameFromConfig();
-    if (documentName) {
-        this.currentFile.name = documentName; // Use Y.js config name immediately
-    }
-    
-    // STEP 6.7: Small delay to ensure content is visible from Y.js/IndexedDB
-    await new Promise(resolve => setTimeout(resolve, 100));
-    console.log('📄 ALL content (filename, title, body) now visible from local storage');
-    
-    // STEP 7: For cloud documents, connect WebSocket after editors are ready
-
-### ✅ CORRECT: Collaborative Document Conversion
-
-// ❌ WRONG: Destroy Y.js document and recreate (loses content)
-async convertToCollaborativeWRONG(file) {
-    await this.cleanupDocument(); // DESTROYS Y.js content!
-    await this.loadDocument(file); // Creates empty Y.js document
-}
-
-// ✅ CORRECT: Preserve Y.js document instance during conversion
-async convertToCollaborative(collaborativeFile) {
-    // PRESERVE Y.js document - content syncs automatically via WebSocket
-    const webSocketProvider = await this.setupWebSocketWithOnSynced(this.ydoc, collaborativeFile);
-    if (webSocketProvider) {
-        // Upgrade editors while keeping Y.js document instance
-        await this.upgradeToCloudEditors(this.ydoc, webSocketProvider);
-    }
-}
-    if (requiresCloudTier && file.type === 'collaborative') {
-        await this.connectToCollaborationServer(file);
-    }
-}
-```
-
-#### **✅ CORRECT: Tier Selection Logic**
-
-```javascript
-// ✅ CORRECT: Determine which editor tier to use
-shouldUseCloudTier(file) {
-    // Tier 2 (Cloud with CollaborationCaret) for:
-    // - Collaborative documents from server
-    // - Author links (?owner=user&permlink=doc)
-    // - Documents being actively shared
-    if (file.type === 'collaborative') return true;
-    if (file.owner && file.permlink) return true;
-    if (this.isCollaborativeMode) return true;
-    
-    // Tier 1 (Local with Y.js persistence) for:
-    // - New documents
-    // - Local documents
-    // - Offline-first editing
-    return false;
-}
-```
-
-#### **✅ CORRECT: Local Document Loading**
-
-```javascript
-// ✅ CORRECT: Load local documents with Y.js persistence
-async loadLocalFile(file) {
-    // STEP 1: Destroy existing editors
-    await this.cleanupCurrentDocument();
-    
-    // STEP 2: Create Y.js document + IndexedDB immediately
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(file.id, this.ydoc);
-    
-    // STEP 3: Wait for sync
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create Tier 1 editors (offline-first with Y.js)
-    await this.createOfflineFirstCollaborativeEditors(bundle);
-    
-    // STEP 5: Content loads automatically from IndexedDB
-    // NO manual content setting needed!
-    
-    this.currentFile = file;
-    this.fileType = 'local';
-    this.isCollaborativeMode = false;
-}
-```
-
-#### **✅ CORRECT: Collaborative Document Loading**
-
-```javascript
-// ✅ CORRECT: Load collaborative documents with full features
-async loadCollaborativeFile(doc) {
-    // STEP 1: Destroy existing editors
-    await this.cleanupCurrentDocument();
-    
-    // STEP 2: Create Y.js document + IndexedDB immediately
-    this.ydoc = new Y.Doc();
-    const documentId = `${doc.owner}_${doc.permlink}`;
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    
-    // STEP 3: Wait for sync
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create Tier 2 editors (cloud with CollaborationCaret)
-    await this.createCloudEditorsWithCursors(bundle);
-    
-    // STEP 5: Connect to collaboration server
-    await this.connectToCollaborationServer(doc);
-    
-    // STEP 6: Content loads automatically from server + Y.js sync
-    // NO manual content setting needed!
-    
-    this.currentFile = doc;
-    this.fileType = 'collaborative';
-    this.isCollaborativeMode = true;
-}
-```
-
-#### **✅ CORRECT: Initial Content Setting**
-
-Initial content setting should **ONLY** be used for new documents, never for loading existing documents.
-
-```javascript
-// ✅ CORRECT: Set initial content ONLY for new documents
-async createNewDocument(initialContent = null) {
-    // STEP 1: Destroy existing editors
-    await this.cleanupCurrentDocument();
-    
-    // STEP 2: Create Y.js document + IndexedDB immediately
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    
-    // STEP 3: Wait for sync
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create editors
-    await this.createOfflineFirstCollaborativeEditors(bundle);
-    
-    // STEP 5: Set initial content ONLY if provided and document is new
-    if (initialContent && !this.ydoc.getMap('config').get('initialContentLoaded')) {
-        this.ydoc.getMap('config').set('initialContentLoaded', true);
-        
-        // Set initial title content in input field
-        if (initialContent.title) {
-            this.titleInput = initialContent.title;
-        }
-        if (initialContent.body) {
-            this.bodyEditor?.commands.setContent(initialContent.body);
-        }
-    }
-}
-```
-
-#### **❌ WRONG: Manual Content Loading for Existing Documents**
-
-```javascript
-// ❌ NEVER DO THIS - TipTap loads content automatically
-async loadExistingDocument(file) {
-    await this.createEditors();
-    
-    // ❌ WRONG: Manual content setting for existing documents
-    this.titleInput = file.title;  // Bypasses Y.js sync!
-    this.bodyEditor.commands.setContent(file.body);   // BREAKS Y.js sync!
-}
-```
-
-#### **✅ CORRECT: Let TipTap Load Existing Content Automatically**
-
-```javascript
-// ✅ CORRECT: For existing documents, TipTap loads content automatically
-async loadExistingDocument(file) {
-    // STEP 1: Destroy existing editors
-    await this.cleanupCurrentDocument();
-    
-    // STEP 2: Create Y.js document + IndexedDB immediately
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(file.id, this.ydoc);
-    
-    // STEP 3: Wait for sync (loads existing content)
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create editors
-    await this.createOfflineFirstCollaborativeEditors(bundle);
-    
-    // STEP 5: Content is automatically loaded from Y.js/IndexedDB
-    // NO manual content setting needed or allowed!
-}
-```
-
-### **Why Direct Y.js Access is Wrong**
-
-1. **Architecture Violation**: TipTap is designed to manage Y.js fragments internally
-2. **Sync Issues**: Direct manipulation bypasses TipTap's sync mechanisms
-3. **Data Corruption**: Can cause inconsistencies between editor state and Y.js
-4. **Performance Problems**: Bypasses TipTap's optimizations
-5. **Maintenance Issues**: Breaks when TipTap updates its internal Y.js handling
-
-### **The Correct TipTap Pattern**
-
-```javascript
-// ✅ CORRECT: TipTap manages Y.js automatically
-const editor = new Editor({
-    extensions: [
-        Collaboration.configure({
-            document: ydoc,
-            field: 'content'
-        })
-    ],
-    onUpdate: ({ editor }) => {
-        // Content is automatically synced to Y.js
-        // No manual Y.js manipulation needed
-        console.log('Content updated:', editor.getHTML());
-    }
-});
-
-// ✅ CORRECT: Access content through editor
-const currentContent = editor.getHTML();
-const currentText = editor.getText();
-const currentJSON = editor.getJSON();
-
-// ✅ CORRECT: Set content through editor
-editor.commands.setContent('<p>New content</p>');
-```
-
-### **Content Persistence Best Practices**
-
-```javascript
-// ✅ CORRECT: Let Y.js + IndexedDB handle persistence
-async createCollaborativeEditor() {
-    // 1. Y.js document with IndexedDB persistence
-    this.ydoc = new Y.Doc();
+    // 4. Set up local persistence immediately
     this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
     
-    // 2. Editor with Collaboration extension
+    // 5. Create editor
     this.editor = new Editor({
+        element: this.$refs.editor,
         extensions: [
+            StarterKit.configure({ history: false }),
             Collaboration.configure({
                 document: this.ydoc,
-                field: 'content'
+                field: 'body'
             })
         ],
-        onUpdate: () => {
-            // Content automatically persisted to IndexedDB
-            // No manual save needed!
+        onCreate: ({ editor }) => {
+            console.log('Editor ready for new document');
         }
     });
     
-    // 3. Content loads automatically from IndexedDB
-    // No manual content loading needed!
+    // 6. Mark as ready
+    this.isDocumentReady = true;
 }
 ```
 
-## Y.js Schema Design
-
-### DLUX Post Collaborative Schema
-
-Our Y.js schema is optimized for DLUX post creation with offline-first collaborative editing:
+### Pattern 2: Document Loading
 
 ```javascript
-// Primary content (Y.XmlFragment for rich text editing)
-ydoc.get('body', Y.XmlFragment)         // Post body content (auto-created by TipTap)
-// Note: Title is stored in a simple input field, not a TipTap editor
-
-// Document configuration (Y.Map for document-level settings)
-ydoc.getMap('config')                   // Document configuration
-├── documentName: String                    // Document display name
-├── lastModified: String                    // ISO timestamp
-├── created: String                         // ISO timestamp
-├── version: String                         // '1.0'
-├── documentType: String                    // 'collaborative'
-├── lastWebSocketSync: String               // ISO timestamp
-├── cloudSyncActive: Boolean                // true/false
-├── serverVersion: String                   // Server version
-└── tierUpgraded: Boolean                   // Track tier upgrades
-
-// ARCHITECTURE UPDATE (v2025.01): Consolidated Metadata Map
-// Previously: Separate Y.js maps for tags, customJson, beneficiaries
-// Now: All metadata consolidated in single map for better performance
-
-ydoc.getMap('metadata')                 // ALL publishing metadata
-├── tags: Array                             // ['tag1', 'tag2']
-├── beneficiaries: Array                    // [{ account: 'alice', weight: 500 }]
-├── customJson: Object                      // { app: 'dlux/1.0', type: 'blog', ... }
-├── commentOptions: Object                  // Comment and payout settings
-│   ├── allowVotes: Boolean                 // true
-│   ├── allowCurationRewards: Boolean       // true
-│   ├── maxAcceptedPayout: String           // '1000000.000 SBD'
-│   └── percentSteemDollars: Number         // 10000
-├── permlink: String                        // URL slug
-└── initialized: Boolean                    // true
-
-// ✅ Benefits of consolidation:
-// - Single observer for all metadata changes
-// - Atomic transactions for related fields
-// - Better performance (fewer Y.js maps)
-// - Cleaner architecture
-
-// Operation coordination and schema versioning
-ydoc.getMap('_locks')                   // Operation locks (publishing, etc.)
-ydoc.getMap('_metadata')                // Schema versioning and metadata
-
-// Media assets (Y.Array for ordered collections)
-ydoc.getArray('images')                 // Image assets
-ydoc.getArray('videos')                 // Video assets  
-ydoc.getArray('assets360')              // 360° scene assets
-ydoc.getArray('attachments')            // General file attachments
-
-// Video-specific data (Y.Map for video posts)
-ydoc.getMap('videoData')                // Video transcoding & streaming
-├── transcodeStatus: String                 // 'pending', 'processing', 'completed', 'failed'
-├── resolutions: Array                      // Available video resolutions
-├── playlist: String                        // M3U8 playlist URL/content
-├── duration: Number                        // Video duration in seconds
-└── thumbnails: Array                       // Video thumbnail URLs
-
-// Real-time collaboration (Y.Map for user presence)
-ydoc.getMap('presence')                 // User presence data
-└── [username]: Object                      // Per-user presence info
-```
-
-### Schema Initialization
-
-```javascript
-initializeCollaborativeSchema(Y) {
-    console.log('🏗️ Initializing DLUX collaborative schema...');
+async loadExistingDocument(docId, isCollaborative = false) {
+    // 1. Show loading state
+    this.isLoading = true;
+    this.loadingMessage = 'Loading document...';
     
-    // Schema version tracking for conflict prevention
-    const metadata = this.ydoc.getMap('_metadata');
-    const currentSchemaVersion = '1.0.0';
-    metadata.set('schemaVersion', currentSchemaVersion);
-    metadata.set('lastUpdated', new Date().toISOString());
-    
-    // Core content (TipTap editors with fragments)
-    this.ydoc.get('title', Y.XmlFragment);
-    this.ydoc.get('body', Y.XmlFragment);
-    
-    // Conflict-free collaborative structures
-    this.ydoc.getArray('tags');
-    this.ydoc.getArray('beneficiaries');
-    this.ydoc.getMap('customJson');
-    this.ydoc.getMap('config');
-    this.ydoc.getMap('publishOptions');
-    
-    // Media arrays
-    this.ydoc.getArray('images');
-    this.ydoc.getArray('videos');
-    this.ydoc.getArray('assets360');
-    this.ydoc.getArray('attachments');
-    
-    console.log('✅ DLUX schema initialized');
-}
-```
-
-### Content Management Methods
-
-```javascript
-// Post type management
-setPostType(postType) {
-    const config = this.ydoc.getMap('config');
-    config.set('postType', postType);
-    config.set('lastModified', new Date().toISOString());
-}
-
-// Document name management (separate from title content)
-setDocumentName(documentName) {
-    const config = this.ydoc.getMap('config');
-    config.set('documentName', documentName);
-    config.set('lastModified', new Date().toISOString());
-}
-
-getDocumentName() {
-    const config = this.ydoc.getMap('config');
-    return config.get('documentName') || null;
-}
-
-// Tag management (conflict-free)
-addCollaborativeTag(tag) {
-    const tags = this.ydoc.getArray('tags');
-    if (!tags.toArray().includes(tag) && tags.length < 10) {
-        tags.push([tag]);
-        return true;
-    }
-    return false;
-}
-
-// Media asset management
-addImage(imageData) {
-    const images = this.ydoc.getArray('images');
-    const imageAsset = {
-        id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        hash: imageData.hash,
-        filename: imageData.filename,
-        type: imageData.type,
-        size: imageData.size,
-        url: `https://ipfs.dlux.io/ipfs/${imageData.hash}`,
-        uploadedBy: this.username,
-        uploadedAt: new Date().toISOString(),
-        contract: imageData.contract,
-        metadata: imageData.metadata || {}
-    };
-    
-    images.push([imageAsset]);
-    return imageAsset.id;
-}
-```
-
-## API Integration
-
-### Hive Collaboration API
-
-Our collaborative editing integrates with the Hive Collaboration API for real-time multi-user editing.
-
-#### Base URL
-```
-https://data.dlux.io/api
-```
-
-#### Authentication System
-
-All collaborative documents use Hive blockchain authentication:
-
-```javascript
-// Generate authentication headers
-async function generateAuthHeaders(username, privateKey) {
-    const challenge = Math.floor(Date.now() / 1000);
-    const publicKey = PrivateKey.from(privateKey).createPublic().toString();
-    
-    const signature = PrivateKey.from(privateKey)
-        .sign(Buffer.from(challenge.toString(), 'utf8'))
-        .toString();
-    
-    return {
-        'x-account': username,
-        'x-challenge': challenge.toString(),
-        'x-pubkey': publicKey,
-        'x-signature': signature
-    };
-}
-```
-
-#### Document Format
-
-Documents are identified as: `owner-hive-account/permlink`
-
-- **Permlink**: 16-character URL-safe random identifier (e.g., `URiHERhq0qFjczMD`)
-- **Document Name**: User-friendly display name (e.g., `My Project Notes`)
-
-#### Permission System
-
-Three permission levels with specific capabilities:
-
-- **`readonly`**: View and connect (read-only access)
-- **`editable`**: View and edit document content
-- **`postable`**: View, edit, and publish to Hive blockchain
-
-#### Comprehensive API Endpoints
-
-##### System Endpoints
-```javascript
-// Get system version information
-GET /api/system/versions
-// Returns: { version, nodeVersion, packageVersions, ... }
-```
-
-##### Collaboration Document Endpoints
-```javascript
-// List user's collaborative documents
-GET /api/collaboration/documents
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-
-// Create new collaborative document
-POST /api/collaboration/documents
-{
-  "documentName": "My New Document", 
-}
-
-// Delete collaborative document
-DELETE /api/collaboration/documents/{owner}/{permlink}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-
-// Get document metadata
-GET /api/collaboration/info/{owner}/{permlink}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-
-// Get document statistics
-GET /api/collaboration/stats/{owner}/{permlink}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-
-// Get document activity log
-GET /api/collaboration/activity/{owner}/{permlink}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-```
-
-##### Permission Management Endpoints
-```javascript
-// Get document permissions
-GET /api/collaboration/permissions/{owner}/{permlink}
-
-// Grant permission to user
-POST /api/collaboration/permissions/{owner}/{permlink}
-{
-  "targetAccount": "username",
-  "permissionType": "editable"  // readonly, editable, or postable
-}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-
-// Revoke user permission
-DELETE /api/collaboration/permissions/{owner}/{permlink}/{account}
-// Headers: x-account, x-challenge, x-pubkey, x-signature
-```
-
-##### Device Connection Endpoints (Mobile/Desktop Auth)
-```javascript
-// Initiate device pairing
-POST /api/device/pair
-{
-  "deviceName": "My Desktop",
-  "publicKey": "STM..."
-}
-
-// Connect paired device
-POST /api/device/connect
-{
-  "sessionId": "...",
-  "signature": "..."
-}
-
-// Send authentication request
-POST /api/device/request
-{
-  "sessionId": "...",
-  "type": "auth",
-  "data": {...}
-}
-
-// Check pending requests
-GET /api/device/requests?sessionId={sessionId}
-
-// Respond to auth request
-POST /api/device/respond
-{
-  "requestId": "...",
-  "approved": true,
-  "signature": "..."
-}
-
-// Disconnect device
-POST /api/device/disconnect
-{
-  "sessionId": "..."
-}
-```
-
-#### WebSocket Integration
-
-```javascript
-// Connect to collaborative document
-async connectToCollaborationServer(doc) {
-    const token = await this.generateWebSocketToken();
-    
-  this.provider = new HocuspocusProvider({
-    url: `wss://data.dlux.io/collaboration/${doc.owner}/${doc.permlink}`,
-        name: `${doc.owner}/${doc.permlink}`,
-        document: this.ydoc,
-        token: token,
-        onConnect: () => {
-            console.log('✅ Connected to collaboration server');
-            this.connectionStatus = 'connected';
-        },
-        onDisconnect: () => {
-            console.log('📡 Disconnected from collaboration server');
-            this.connectionStatus = 'offline';
-        },
-        onAuthenticationFailed: () => {
-            console.error('🔐 WebSocket authentication failed');
-            this.connectionStatus = 'auth-error';
-        }
-    });
-}
-
-// Generate WebSocket authentication token
-async generateWebSocketToken() {
-    const challenge = Math.floor(Date.now() / 1000);
-    const signature = PrivateKey.from(this.privateKey)
-        .sign(Buffer.from(challenge.toString(), 'utf8'))
-        .toString();
-    
-    return JSON.stringify({
-        account: this.username,
-        challenge: challenge.toString(),
-        pubkey: this.publicKey,
-        signature: signature
-    });
-}
-```
-
-#### Error Handling & Fallbacks
-
-```javascript
-// Handle 403 permission errors with fallback
-async loadDocumentPermissions(owner, permlink) {
     try {
-        const response = await fetch(`/api/collaboration/permissions/${owner}/${permlink}`, {
-            headers: await this.generateAuthHeaders()
+        // 2. Clean up
+        await this.cleanup();
+        
+        // 3. Create Y.js with existing ID
+        this.ydoc = new Y.Doc({ guid: docId });
+        
+        // 4. Set up IndexedDB first (always)
+        this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
+        
+        // 5. Wait for IndexedDB sync
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('IndexedDB sync timeout'));
+            }, 5000);
+            
+            this.indexeddbProvider.on('synced', () => {
+                clearTimeout(timeout);
+                resolve();
+            });
         });
         
-        if (response.status === 403) {
-            console.warn('🔄 Permission loading failed, using fallback logic');
-            // Smart fallback: Assume appropriate permissions based on context
-            const isOwner = (this.username === owner);
-            return isOwner ? 'owner' : 'postable';
-        }
-        
-        const data = await response.json();
-        return data.permissions;
-        
-    } catch (error) {
-        console.error('❌ Failed to load permissions:', error);
-        return 'readonly'; // Safe fallback
-    }
-}
-```
-
-#### Content Validation
-
-```javascript
-// TipTap content validation for collaborative documents
-handleContentValidationError(editorType, error, disableCollaboration) {
-    console.error(`🚨 Content validation error in ${editorType} editor:`, error);
-    
-    if (this.isCollaborativeMode && disableCollaboration) {
-        console.warn('🔒 Disabling collaboration due to content validation error');
-        disableCollaboration();
-        this.connectionStatus = 'error';
-        
-        const message = `Content validation error detected in ${editorType}. ` +
-                      `This may be due to incompatible content from a different app version. ` +
-                      `Please refresh the page to continue editing.`;
-        
-        setTimeout(() => {
-            if (confirm(message + '\n\nRefresh page now?')) {
-                window.location.reload();
-            }
-        }, 100);
-    }
-}
-```
-
-## Collaborative Cursor Best Practices
-
-### Two-Tier Cursor Strategy: Local vs Cloud
-
-#### **CRITICAL: CollaborationCaret Cannot Handle Null Providers**
-
-From TipTap.dev documentation and GitHub issues:
-- **CollaborationCaret extension REQUIRES a provider** - cannot be null/undefined
-- **Runtime errors occur** when provider is null: `'undefined doc' runtime error`
-- **TipTap's official examples** always show CollaborationCaret with a valid provider
-
-**Solution**: Use two distinct editor configurations based on cursor requirements.
-
-#### **Tier 1: Local Documents** 📝
-*Offline-first editing WITHOUT CollaborationCaret*
-
-**Use Cases:**
-- New documents (default)
-- Local file editing
-- Offline-only scenarios
-- Documents that may connect to cloud later
-
-**Implementation:**
-```javascript
-// Create editors WITHOUT CollaborationCaret (TipTap requirement)
-async createLocalEditorsWithTempYDoc() {
-  // 1. Load Y.js components
-  const { Y, bundle } = await this.loadYjsComponents()
-  
-  // 2. Create Y.js document immediately (TipTap best practice)
-  this.ydoc = new Y.Doc()
-  
-  // 3. Add IndexedDB persistence (temp document - not in drafts yet)
-  const tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  this.indexeddbProvider = new IndexeddbPersistence(tempDocumentId, this.ydoc)
-  
-  // 4. Initialize schema
-  this.initializeCollaborativeSchema(Y)
-  
-  // 5. Create editors WITHOUT CollaborationCaret (cannot handle null provider)
-  const getLocalExtensions = (field) => {
-    return [
-      StarterKit.configure({
-        undoRedo: false, // Y.js handles history
-        ...(field === 'title' ? {
-          heading: false,
-          bulletList: false,
-          orderedList: false,
-          blockquote: false,
-          codeBlock: false,
-          horizontalRule: false
-        } : {})
-      }),
-      Collaboration.configure({
-        document: this.ydoc,
-        field: field
-      }),
-      Placeholder.configure({
-        placeholder: field === 'title' ? 'Enter title...' : 
-                    field === 'body' ? 'Start writing...' : 
-                    'Auto-generated from title'
-      }),
-      // Enhanced extensions (Link, Typography, etc.)
-      ...this.getEnhancedExtensions(field, bundle)
-      // ❌ NO CollaborationCaret - cannot handle null provider
-    ]
-  }
-  
-  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
-  this.titleEditor = new Editor({
-    extensions: getLocalExtensions('title'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-      this.setupDraftPersistenceTriggers()
-    }
-  })
-  
-  this.bodyEditor = new Editor({
-    extensions: getLocalExtensions('body'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-      this.setupDraftPersistenceTriggers()
-    }
-  })
-  
-  // Document is NOT added to drafts list yet
-  this.isCollaborativeMode = false // Local mode (no WebSocket provider)
-}
-```
-
-**Benefits:**
-- ✅ Maximum performance for offline editing
-- ✅ Y.js document created immediately (TipTap best practice)
-- ✅ No CollaborationCaret runtime errors
-- ✅ Can upgrade to full collaboration with cursors
-- ✅ IndexedDB persistence from start
-
-#### **Tier 2: Cloud Documents** ☁️
-*Full collaborative editing WITH CollaborationCaret*
-
-**Use Cases:**
-- Loading collaborative documents from cloud
-- Following author links (`?owner=user&permlink=doc`)
-- Documents created as collaborative from start
-- Local documents upgraded to cloud
-
-**Implementation:**
-```javascript
-// Create editors WITH CollaborationCaret (requires WebSocket provider)
-async createCloudEditorsWithCursors(bundle) {
-  // 1. Load Y.js components
-  const { Y, bundle } = await this.loadYjsComponents()
-  
-  // 2. Create Y.js document immediately (TipTap best practice)
-    this.ydoc = new Y.Doc()
-  
-  // 3. Add IndexedDB persistence
-  const documentId = `${owner}_${permlink}`
-  this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc)
-  
-  // 4. Create WebSocket provider (REQUIRED for CollaborationCaret)
-  this.provider = new HocuspocusProvider({
-    url: 'wss://data.dlux.io/collaboration',
-    name: `${owner}/${permlink}`,
-    document: this.ydoc,
-    token: authToken
-  })
-  
-  // 5. Initialize schema
-  this.initializeCollaborativeSchema(Y)
-  
-  // 6. Create editors WITH CollaborationCaret (has valid provider)
-  const getCloudExtensions = (field) => {
-    return [
-      StarterKit.configure({
-        undoRedo: false, // Y.js handles history
-        ...(field === 'title' ? {
-          heading: false,
-          bulletList: false,
-          orderedList: false,
-          blockquote: false,
-          codeBlock: false,
-          horizontalRule: false
-        } : {})
-      }),
-      Collaboration.configure({
-        document: this.ydoc,
-        field: field
-      }),
-      CollaborationCaret.configure({
-        provider: this.provider, // ✅ Valid WebSocket provider
-        user: {
-          name: this.username || 'Anonymous',
-          color: this.generateUserColor(this.username || 'Anonymous')
-        }
-      }),
-      Placeholder.configure({
-        placeholder: field === 'title' ? 'Enter title...' : 
-                    field === 'body' ? 'Start writing...' : 
-                    'Auto-generated from title'
-      }),
-      // Enhanced extensions (Link, Typography, etc.)
-      ...this.getEnhancedExtensions(field, bundle)
-    ]
-  }
-  
-  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
-  this.titleEditor = new Editor({
-    extensions: getCloudExtensions('title'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-    }
-  })
-  
-  this.bodyEditor = new Editor({
-    extensions: getCloudExtensions('body'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-    }
-  })
-  
-  this.isCollaborativeMode = true // Cloud mode (WebSocket provider active)
-}
-```
-
-**Benefits:**
-- ✅ Real-time cursor tracking
-- ✅ User presence indicators
-- ✅ Smooth collaborative experience
-- ✅ Full WebSocket synchronization
-- ✅ CollaborationCaret works properly with valid provider
-
-### Decision Matrix: Local vs Cloud
-
-| Document Type | Loading Context | Tier | Method Used | Cursor Support |
-|---------------|----------------|------|-------------|----------------|
-| New Document | Default creation | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCaret) |
-| Local File | File browser load | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCaret) |
-| Collaborative Doc | Cloud file load | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCaret) |
-| Author Link | `?owner=user&permlink=doc` | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCaret) |
-| Local → Cloud | "Connect to Cloud" | **Tier 1 → 2** | `upgradeLocalToCloudWithCursors()` | Upgrade to full cursors |
-| Cloud Reconnect | Connection lost/restored | **Tier 2** | Reconnect provider only | Keep cursors |
-
-### Cursor Upgrade Strategy for Local Documents
-
-When a local document (Tier 1) needs to connect to cloud, we must recreate editors with CollaborationCaret:
-
-#### **Full Upgrade Strategy** ⭐
-*Destroy and recreate editors with CollaborationCaret*
-
-```javascript
-async upgradeLocalToCloudWithCursors() {
-  console.log('🔄 Upgrading local document to cloud with CollaborationCaret support')
-  
-  // 1. Preserve content and state
-  const preservedContent = this.getEditorContent()
-  
-  // 2. Clean up local editors (without CollaborationCaret)
-  // ⚠️ HISTORICAL: In current implementation, only bodyEditor needs cleanup
-  this.titleEditor?.destroy()
-  this.bodyEditor?.destroy()
-  
-  // 3. Create cloud editors with CollaborationCaret
-  await this.createCloudEditorsWithCursors()
-  
-  // 4. Restore content to new editors
-  this.setEditorContent(preservedContent)
-  
-  console.log('✅ Upgraded to cloud with CollaborationCaret support')
-}
-```
-
-**Why Editor Recreation is Required:**
-- ❌ **CollaborationCaret cannot be added dynamically** to existing editors
-- ❌ **TipTap/ProseMirror schema constraints** prevent extension addition
-- ❌ **Runtime errors occur** when CollaborationCaret has null provider
-- ✅ **Editor recreation is the only safe way** to add CollaborationCaret
-
-**Benefits:**
-- ✅ Full cursor functionality
-- ✅ Best collaborative experience
-- ✅ Clean architecture following TipTap constraints
-- ✅ No runtime errors with CollaborationCaret
-- ✅ Consistent user experience
-- ⚠️ Brief editor recreation (required by TipTap limitations)
-
-### Implementation Guidelines
-
-#### ✅ **DO: Clear Tier Separation**
-
-```javascript
-// Tier 1: Local documents
-if (documentType === 'local') {
-  await this.createLocalEditorsWithTempYDoc()
-}
-
-// Tier 2: Cloud documents  
-if (documentType === 'collaborative') {
-  await this.connectToCloudWithoutDestroying()
-}
-```
-
-#### ✅ **DO: Explicit Upgrade Path**
-
-```javascript
-// User clicks "Connect to Cloud" button
-async connectToCloud() {
-  if (this.currentFile?.type === 'local') {
-    // Single, clean upgrade path - no fragmentation
-    await this.upgradeLocalToCloudWithCursors()
-  }
-}
-```
-
-#### ❌ **DON'T: Dynamic Cursor Addition**
-
-```javascript
-// NEVER add CollaborationCaret to existing editors
-this.addCollaborationCaret(provider)  // ❌ Destroys editors
-editor.addExtension(CollaborationCaret)  // ❌ Not supported
-```
-
-#### ✅ **DO: Graceful Reconnection**
-
-```javascript
-// Cloud documents preserve cursors during reconnection
-async reconnectToCloud() {
-  // Only recreate WebSocket provider, preserve editors
-  this.disconnectWebSocketOnly()
-  await this.connectToCloudWithoutDestroying()
-  // Cursors remain functional
-}
-```
-
-## Decision Tree: 2-Tier System Based on CollaborationCaret
-
-```
-Document Load/Creation Request
-├── Is Collaborative Document? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)
-├── Is Author Link? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)  
-├── Is "Create Collaborative"? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)
-└── Default Case ──> Tier 1: Local (WITHOUT CollaborationCaret)
-                     │
-                     └── User Types/Edits? ──YES──> Persist to Drafts (if meaningful content)
-                         │                          Keep Tier 1 Editors
-                         │
-                         └── User Clicks "Connect to Cloud"? ──YES──> Upgrade ──> Tier 2 (Recreate with CollaborationCaret)
-```
-
-### **Summary of 2-Tier Strategy**
-
-1. **Tier 1 (Local)**: Temp Y.js documents WITHOUT CollaborationCaret
-   - ✅ Follows TipTap best practices (Y.js + Collaboration from start)
-   - ✅ No draft clutter (temp documents until user shows intent)
-   - ✅ No content syncing issues (Y.js handles all content)
-   - ❌ No CollaborationCaret (cannot handle null provider)
-   - ✅ Link extension included from start (no dynamic addition needed)
-
-2. **Tier 2 (Cloud)**: Full collaborative editing WITH CollaborationCaret
-   - ✅ Collaborative editors with CollaborationCaret from start
-   - ✅ Real-time cursor tracking and presence
-   - ✅ WebSocket synchronization
-   - ✅ CollaborationCaret works with valid WebSocket provider
-
-3. **Upgrade Path**: Recreate editors to add CollaborationCaret
-   - ⚠️ Editor recreation required (TipTap/ProseMirror limitation)
-   - ✅ Content preservation/restoration during upgrade
-   - ✅ Y.js document continuity maintained
-   - ✅ Clean transition from local to cloud with cursors
-
-### **Key Benefits of Temp Y.js Strategy**
-
-#### **Follows TipTap Best Practices** ✅
-- Y.js document created before editors
-- Collaboration extension included from start
-- No dynamic extension addition/removal
-- Proper IndexedDB persistence integration
-
-#### **Eliminates Content Syncing Issues** ✅
-- No manual content preservation/restoration
-- No `setupOfflinePersistenceSync()` needed
-- No `syncLocalStateToYjs()` complexity
-- Y.js handles all content automatically
-
-#### **Avoids Draft Clutter** ✅
-- Temp documents don't appear in drafts initially
-- Only persist to drafts when user shows intent
-- Clean user experience without unwanted documents
-
-#### **Seamless Connection State Changes** ✅
-- Local↔Cloud transitions only change provider connection
-- No editor destruction/recreation needed
-- No extension addition/removal needed
-- All extensions included from start
-- Y.js document continuity maintained
-- Instant state transitions
-
-This updated strategy perfectly balances TipTap best practices with DLUX's specific requirements!
-
-### **Complete Extension Inventory**
-
-Our TipTap implementation uses the following extensions, all loaded from the start to avoid editor destruction:
-
-#### **Core Extensions (Always Included)**
-```javascript
-// From collaboration bundle - always available
-const coreExtensions = [
-  // TipTap Core
-  Editor,                    // Main editor class
-  
-  // Content Structure
-  Document,                  // Root document node
-  Paragraph,                 // Basic paragraph
-  Text,                      // Text content
-  
-  // Basic Formatting
-  Bold,                      // **bold** text
-  Italic,                    // *italic* text
-  Strike,                    // ~~strikethrough~~ text
-  Code,                      // `inline code`
-  
-  // Block Elements
-  Heading,                   // # Headers (h1-h6)
-  BulletList,               // • Unordered lists
-  OrderedList,              // 1. Ordered lists
-  ListItem,                 // List item content
-  Blockquote,               // > Quote blocks
-  HorizontalRule,           // --- Dividers
-  
-  // User Interface
-  Placeholder.configure({
-    placeholder: fieldPlaceholder
-  })
-]
-```
-
-#### **Collaborative Extensions (Always Included)**
-```javascript
-const collaborativeExtensions = [
-  // Y.js Integration
-  Collaboration.configure({
-    document: this.ydoc,      // Y.js document (temp or permanent)
-    field: fieldName          // Y.js field name
-  }),
-  
-  // Real-time Cursors
-  CollaborationCaret.configure({
-    provider: this.provider || null,  // WebSocket provider (null for local)
-    user: {
-      name: this.username || 'Anonymous',
-      color: this.userColor || '#3B82F6'
-    }
-  })
-]
-```
-
-#### **Enhanced Extensions (Conditionally Available)**
-```javascript
-const enhancedExtensions = [
-  // Link Support (CRITICAL: Not in StarterKit)
-  Link.configure({
-    openOnClick: false,       // Prevent accidental navigation during editing
-    HTMLAttributes: {
-      class: 'text-primary'   // Bootstrap styling
-    }
-  }),
-  
-  // Typography Improvements
-  Typography.configure({
-    openDoubleQuote: '"',
-    closeDoubleQuote: '"',
-    openSingleQuote: "'",
-    closeSingleQuote: "'",
-    ellipsis: '…',
-    emDash: '—',
-    enDash: '–'
-  }),
-  
-  // Media Support
-  Image.configure({
-    inline: true,
-    allowBase64: true,
-    HTMLAttributes: {
-      class: 'img-fluid'      // Bootstrap responsive images
-    }
-  }),
-  
-  // Emoji Support
-  Emoji.configure({
-    suggestion: {
-      items: ({ query }) => {
-        const emojis = [
-          { name: 'smile', emoji: '😄' },
-          { name: 'heart', emoji: '❤️' },
-          { name: 'thumbsup', emoji: '👍' },
-          { name: 'fire', emoji: '🔥' },
-          { name: 'rocket', emoji: '🚀' },
-          { name: 'party', emoji: '🎉' },
-          { name: 'eyes', emoji: '👀' },
-          { name: 'thinking', emoji: '🤔' }
-        ];
-        return emojis.filter(item => 
-          item.name.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 10);
-      }
-    }
-  })
-]
-```
-
-#### **StarterKit Configuration**
-```javascript
-// StarterKit includes many extensions but we configure it carefully
-StarterKit.configure({
-  // Disable history - Y.js handles this
-  undoRedo: false,
-  
-  // Field-specific configuration
-  ...(field === 'title' ? {
-    // Title field: minimal formatting
-    heading: false,
-    bulletList: false,
-    orderedList: false,
-    blockquote: false,
-    codeBlock: false,
-    horizontalRule: false
-  } : {
-    // Body field: full formatting
-    // (uses StarterKit defaults)
-  })
-})
-```
-
-#### **Extension Loading Strategy**
-```javascript
-// ALL extensions loaded from start (no dynamic addition)
-const getAllExtensions = (field) => {
-  return [
-    // Core extensions (always)
-    ...getCoreExtensions(field),
-    
-    // Collaborative extensions (always)  
-    ...getCollaborativeExtensions(field),
-    
-    // Enhanced extensions (if available)
-    ...getEnhancedExtensions(field)
-  ];
-};
-```
-
-### **Extension Availability Matrix**
-
-| Extension | Bundle Source | Always Available | Conditionally Loaded | Purpose |
-|-----------|---------------|------------------|---------------------|---------|
-| **Editor** | collaboration-bundle | ✅ | - | Core editor class |
-| **StarterKit** | collaboration-bundle | ✅ | - | Basic functionality |
-| **Document** | collaboration-bundle | ✅ | - | Root document node |
-| **Paragraph** | collaboration-bundle | ✅ | - | Basic paragraphs |
-| **Text** | collaboration-bundle | ✅ | - | Text content |
-| **Bold** | collaboration-bundle | ✅ | - | Bold formatting |
-| **Italic** | collaboration-bundle | ✅ | - | Italic formatting |
-| **Strike** | collaboration-bundle | ✅ | - | Strikethrough |
-| **Code** | collaboration-bundle | ✅ | - | Inline code |
-| **Heading** | collaboration-bundle | ✅ | - | Headers (h1-h6) |
-| **BulletList** | collaboration-bundle | ✅ | - | Unordered lists |
-| **OrderedList** | collaboration-bundle | ✅ | - | Ordered lists |
-| **ListItem** | collaboration-bundle | ✅ | - | List items |
-| **Blockquote** | collaboration-bundle | ✅ | - | Quote blocks |
-| **HorizontalRule** | collaboration-bundle | ✅ | - | Dividers |
-| **Placeholder** | collaboration-bundle | ✅ | - | Input placeholders |
-| **Collaboration** | collaboration-bundle | ✅ | - | Y.js integration |
-| **CollaborationCaret** | collaboration-bundle | ✅ | - | Real-time cursors |
-| **Link** | window.TiptapLink | - | ✅ | URL/link support |
-| **Typography** | window.TiptapTypography | - | ✅ | Smart quotes/dashes |
-| **Image** | window.TiptapImage | - | ✅ | Image embedding |
-| **Emoji** | window.TiptapEmoji | - | ✅ | Emoji suggestions |
-
-### **Critical Extension Notes**
-
-#### **⚠️ Link Extension is NOT in StarterKit**
-- **MUST** be added explicitly for URL support
-- **CRITICAL** for share links and content linking
-- **REQUIRED** for proper markdown-to-HTML conversion
-
-#### **✅ All Extensions from Start**
-- **NO** dynamic extension addition/removal
-- **NO** editor destruction for feature changes
-- **SEAMLESS** local ↔ cloud transitions
-- **STABLE** editor instances throughout lifecycle
-
-This comprehensive extension strategy ensures we follow TipTap best practices while providing all necessary functionality from editor creation!
-
-## ✅ TIPTAP.DEV COMPLIANCE VERIFICATION
-
-### **All Fixes Verified Against Official TipTap.dev Documentation**
-
-Our implementation has been verified to comply with all TipTap.dev best practices:
-
-#### **1. Editor Lifecycle Management** ✅
-- **TipTap Rule**: Create editors with static extension configuration
-- **Our Implementation**: All extensions loaded from start, no dynamic addition/removal
-- **Compliance**: ✅ Follows TipTap/ProseMirror schema constraints
-
-#### **2. Y.js Document Lifecycle** ✅
-- **TipTap Rule**: Create fresh Y.js documents when switching content
-- **Our Implementation**: Fresh Y.js documents for new editors, preserve synced documents for existing content
-- **Compliance**: ✅ Follows Y.js creator guidance while preventing content loss
-
-#### **3. Collaboration Extension Usage** ✅
-- **TipTap Rule**: Include Collaboration extension from editor creation with Y.js document
-- **Our Implementation**: Collaboration extension included from start with proper Y.js document reference
-- **Compliance**: ✅ Follows TipTap collaborative editing best practices
-
-#### **4. CollaborationCaret Requirements** ✅
-- **TipTap Rule**: CollaborationCaret requires valid WebSocket provider, cannot be null
-- **Our Implementation**: Two-tier system - CollaborationCaret only for cloud documents with providers
-- **Compliance**: ✅ Prevents runtime errors from null providers
-
-#### **5. Content Loading Pattern** ✅
-- **TipTap Rule**: Use destroy → create → load sequence for content switching
-- **Our Implementation**: Proper cleanup before editor creation, automatic content loading from Y.js/IndexedDB
-- **Compliance**: ✅ Follows TipTap content management best practices
-
-#### **6. Extension Configuration** ✅
-- **TipTap Rule**: Configure extensions at editor creation, avoid dynamic changes
-- **Our Implementation**: Complete extension arrays built before editor creation
-- **Compliance**: ✅ Static extension configuration following TipTap guidelines
-
-#### **7. Initialization Event Handling** ✅
-- **TipTap Rule**: Handle asynchronous initialization events properly
-- **Our Implementation**: Initialization flags with proper timing to filter initialization events
-- **Compliance**: ✅ Prevents premature event handling during editor setup
-
-#### **8. Content Persistence** ✅
-- **TipTap Rule**: Let Y.js + IndexedDB handle content persistence automatically
-- **Our Implementation**: No manual content setting for existing documents, automatic Y.js sync
-- **Compliance**: ✅ Follows TipTap offline-first collaborative architecture
-
-### **Key Compliance Points**
-
-1. **No Direct Y.js Manipulation**: All content access through TipTap editor methods
-2. **Proper Extension Lifecycle**: Static extension configuration, no dynamic changes
-3. **Correct Y.js Usage**: Fresh documents for new content, preserve synced documents
-4. **Initialization Handling**: Proper async event filtering during editor setup
-5. **Content Loading**: Automatic loading from Y.js/IndexedDB, no manual intervention
-6. **Collaboration Architecture**: Two-tier system respecting CollaborationCaret requirements
-
-### **Performance Benefits**
-
-- ✅ **No Editor Recreation**: Seamless local ↔ cloud transitions
-- ✅ **Efficient Memory Usage**: Proper cleanup and Y.js document management
-- ✅ **Fast Content Loading**: Direct Y.js/IndexedDB sync without manual content setting
-- ✅ **Optimal User Experience**: No unwanted draft creation, proper initialization timing
-
-Our implementation represents a **production-ready, TipTap.dev-compliant** offline-first collaborative editing solution that follows all official best practices while providing excellent user experience.
-
-## ✅ TIPTAP.DEV STATUS CONDITIONS: OFFICIAL GUIDANCE
-
-### **Corrected Status Logic Based on TipTap.dev Documentation**
-
-According to official TipTap.dev documentation, the correct way to distinguish document types is:
-
-#### **1. Local Documents (Dotted Cloud)** 📝
-- **Configuration**: Y.js + IndexedDB persistence only
-- **No WebSocket Provider**: `provider` is null/undefined
-- **TipTap Pattern**: Offline-first editing with local persistence
-- **Status Condition**: `!!this.ydoc && !this.provider`
-
-```javascript
-// ✅ CORRECT: Local document detection
-if (hasYjsDocument && !hasWebSocketProvider) {
-    // This is a local document - show dotted cloud
-    return { state: 'saved-local', icon: '✅', message: 'Saved locally' };
-}
-```
-
-#### **2. Collaborative Documents (Solid/Slashed Cloud)** ☁️
-- **Configuration**: Y.js + IndexedDB + WebSocket provider
-- **Has WebSocket Provider**: `provider` exists (connected or not)
-- **TipTap Pattern**: Real-time collaboration with offline support
-- **Status Condition**: `!!this.ydoc && !!this.provider`
-
-```javascript
-// ✅ CORRECT: Collaborative document detection
-if (hasYjsDocument && hasWebSocketProvider) {
-    if (isConnectedToServer) {
-        // Solid cloud - connected
-        return { state: 'synced', icon: '☁️', message: 'All changes synced' };
-    } else {
-        // Slashed cloud - offline
-        return { state: 'offline-ready', icon: '📱', message: 'Available offline' };
-    }
-}
-```
-
-### **Key TipTap.dev Insights**
-
-#### **✅ Both Document Types Use Y.js**
-From TipTap.dev documentation:
-- **Local documents**: Use Y.js + IndexedDB for offline-first editing
-- **Collaborative documents**: Use Y.js + IndexedDB + WebSocket for real-time sync
-- **The presence of Y.js does NOT indicate collaboration** - it indicates offline-first capability
-
-#### **✅ WebSocket Provider is the Differentiator**
-From TipTap.dev examples:
-- **Local editing**: `new IndexeddbPersistence('doc-id', ydoc)` only
-- **Collaborative editing**: `new IndexeddbPersistence('doc-id', ydoc)` + `new HocuspocusProvider(...)`
-- **The WebSocket provider determines collaboration capability**
-
-#### **✅ Offline Support is Universal**
-From TipTap.dev guides:
-- Both local and collaborative documents support offline editing
-- IndexedDB persistence works the same way for both
-- The difference is whether changes sync to a server when online
-
-### **Updated Status Decision Tree**
-
-```
-Document Status Check
-├── Has Y.js Document? ──NO──> Unknown Status (should not happen)
-└── Has Y.js Document? ──YES──> Check WebSocket Provider
-    ├── Has WebSocket Provider? ──NO──> Local Document (Dotted Cloud)
-    │   ├── Has Unsaved Changes? ──YES──> "Saving locally..."
-    │   └── Has Unsaved Changes? ──NO──> "Saved locally"
-    └── Has WebSocket Provider? ──YES──> Collaborative Document
-        ├── Connected? ──YES──> Solid Cloud
-        │   ├── Has Unsaved Changes? ──YES──> "Syncing changes..."
-        │   ├── Multiple Users? ──YES──> "X users collaborating"
-        │   └── Default ──> "All changes synced"
-        └── Connected? ──NO──> Slashed Cloud
-            ├── Has Unsaved Changes? ──YES──> "Saving offline..."
-            └── Has Unsaved Changes? ──NO──> "Available offline"
-```
-
-### **Visual Indicator Mapping**
-
-| Document Type | WebSocket Provider | Connection | Save State | Visual | Background Color | Status Message |
-|---------------|-------------------|------------|------------|--------|------------------|----------------|
-| **Temp Document** | ❌ None | N/A | ✏️ Editing | 🔘 Dotted Cloud | 🔘 Grey | "Editing..." |
-| **Temp Document** | ❌ None | N/A | 📝 Ready | 🔘 Dotted Cloud | 🔘 Grey | "Ready to edit" |
-| **Local** | ❌ None | N/A | 💾 Saving | 🔘 Dotted Cloud | 🟠 Orange | "Saving locally..." |
-| **Local** | ❌ None | N/A | ✅ Saved | 🔘 Dotted Cloud | 🔵 Blue | "Saved locally" |
-| **Collaborative** | ✅ Present | ✅ Connected | 💾 Syncing | ☁️ Solid Cloud | 🟠 Orange | "Syncing changes..." |
-| **Collaborative** | ✅ Present | ✅ Connected | ✅ Synced | ☁️ Solid Cloud | 🟢 Green | "All changes synced" |
-| **Collaborative** | ✅ Present | 🔄 Connecting | N/A | 🌀 Spinner Cloud | 🔵 Blue | "Connecting..." |
-| **Collaborative** | ✅ Present | ❌ Offline | 💾 Saving | ⚡ Slashed Cloud | 🟠 Orange | "Saving offline..." |
-| **Collaborative** | ✅ Present | ❌ Offline | ✅ Ready | ⚡ Slashed Cloud | 🔵 Blue | "Available offline" |
-
-### **Implementation Compliance**
-
-Our updated implementation now correctly follows TipTap.dev guidance:
-
-```javascript
-// ✅ COMPLIANT: Status detection based on WebSocket provider presence
-const hasYjsDocument = !!this.ydoc;
-const hasWebSocketProvider = !!this.provider;
-const isConnectedToServer = this.connectionStatus === 'connected';
-
-if (hasYjsDocument) {
-    if (hasWebSocketProvider) {
-        // Collaborative document logic
-    } else {
-        // Local document logic - DOTTED CLOUD CONDITION
-    }
-}
-```
-
-This ensures that:
-- ✅ Local documents with Y.js show dotted cloud (correct)
-- ✅ Collaborative documents show solid/slashed cloud (correct)
-- ✅ Status messages accurately reflect document capabilities
-- ✅ Visual indicators match TipTap.dev patterns
-
-## Official TipTap Best Practices
-
-### Editor Creation and Destruction
-
-#### ✅ **WHEN TO CREATE EDITORS**
-
-1. **Initial Load (Offline-First)**
-   ```javascript
-   // Basic editor without collaboration
-   const editor = new Editor({
-     extensions: [StarterKit, Placeholder],
-     content: initialContent
-   })
-   ```
-
-2. **Collaborative Mode Activation**
-   ```javascript
-   // Destroy basic editor, create collaborative editor
-   basicEditor.destroy()
-   
-   const collaborativeEditor = new Editor({
-     extensions: [
-       StarterKit.configure({ undoRedo: false }), // Y.js handles history
-       Collaboration.configure({ document: ydoc }),
-       CollaborationCaret.configure({ provider })
-     ]
-   })
-   ```
-
-#### ✅ **WHEN TO DESTROY EDITORS**
-
-1. **Mode Switching**: Basic ↔ Collaborative
-2. **Document Switching**: Different Y.js documents
-3. **Component Unmounting**: Cleanup resources
-4. **Schema Changes**: Extension modifications
-
-#### ❌ **NEVER DESTROY EDITORS FOR**
-
-1. **Content Updates**: Use `setContent()` instead
-2. **Temporary State Changes**: Use editor state management
-3. **UI Updates**: Use reactive state, not editor recreation
-
-### TaskItem Checkbox Handling
-
-#### ✅ **CRITICAL: Use onTransaction for Checkbox Changes**
-
-TaskItem checkboxes use custom node views with direct DOM event handling that bypass TipTap's normal `onUpdate` callback. Use the `onTransaction` event to capture ALL editor state changes including checkbox changes.
-
-```javascript
-// ✅ CORRECT: Handle checkbox changes with onTransaction
-const editor = new Editor({
-  extensions: [StarterKit, TaskList, TaskItem],
-  onUpdate: ({ editor }) => {
-    // Normal content changes (typing, formatting, etc.)
-    this.updateContent();
-    this.clearUnsavedAfterSync();
-    this.debouncedAutoSave();
-  },
-  onTransaction: ({ editor, transaction }) => {
-    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
-    // The transaction event fires for checkbox changes that onUpdate misses
-    if (transaction.docChanged && !this.isReadOnlyMode) {
-      console.log('📝 Transaction detected document change (includes checkbox changes)');
-      this.updateContent();
-      this.clearUnsavedAfterSync();
-      this.debouncedAutoSave();
-    }
-  }
-});
-```
-
-#### **Why onTransaction is Required for TaskItem Checkboxes:**
-
-1. **TaskItem checkboxes use direct DOM manipulation** via `addEventListener('change')`
-2. **This bypasses TipTap's normal `onUpdate` callback mechanism**
-3. **The `onTransaction` event captures ALL ProseMirror state changes**
-4. **This is the official TipTap.dev recommended approach** for comprehensive change detection
-
-#### ❌ **WRONG: Relying only on onUpdate**
-
-```javascript
-// ❌ WRONG: Checkbox changes will NOT trigger this callback
-onUpdate: ({ editor }) => {
-  this.debouncedAutoSave(); // Will NOT fire for checkbox changes
-}
-```
-
-#### ✅ **CORRECT: Comprehensive Change Detection**
-
-```javascript
-// ✅ CORRECT: Both onUpdate and onTransaction for complete coverage
-onUpdate: ({ editor }) => {
-  // Handles: typing, formatting, content insertion/deletion
-  this.handleContentChange(editor);
-},
-onTransaction: ({ editor, transaction }) => {
-  // Handles: checkbox changes, node attribute updates, all ProseMirror transactions
-  if (transaction.docChanged) {
-    this.handleContentChange(editor);
-  }
-}
-```
-
-### Y.js Document Lifecycle
-
-#### ✅ **Y.js CREATION PATTERN**
-
-```javascript
-// 1. Create Y.js document first
-const ydoc = new Y.Doc()
-
-// 2. Add persistence (optional)
-const indexeddbProvider = new IndexeddbPersistence('doc-id', ydoc)
-
-// 3. Initialize schema
-ydoc.get('title', Y.XmlFragment)
-ydoc.get('body', Y.XmlFragment)
-
-// 4. Create editor with Y.js
-const editor = new Editor({
-  extensions: [
-    Collaboration.configure({ document: ydoc })
-  ]
-})
-```
-
-#### ✅ **TEMP DOCUMENT PATTERN (CURRENT ARCHITECTURE)**
-
-```javascript
-// ✅ CURRENT: Create Y.js document immediately with temp document strategy
-this.ydoc = new Y.Doc();
-this.initializeCollaborativeSchema(Y);
-
-// Set temp document flags (IndexedDB created only when user shows intent)
-this.isTemporaryDocument = true;
-this.tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-// Create editors with Y.js collaboration from start
-await this.createOfflineFirstCollaborativeEditors(bundle);
-
-// Only create IndexedDB persistence when user pauses typing (shows intent)
-if (this.isTemporaryDocument && !this.indexeddbProvider) {
-    this.debouncedCreateIndexedDBForTempDocument();
-}
-```
-
-#### ❌ **DEPRECATED: Lazy Y.js Creation Pattern**
-
-The following pattern is **NO LONGER USED** in our current architecture:
-
-```javascript
-// ❌ DEPRECATED: Do not use lazy Y.js creation
-this.lazyYjsComponents = { Y, bundle } // Not used anymore
-
-// ❌ DEPRECATED: Do not create Y.js documents conditionally
-setTimeout(() => {
-  if (userHasTyped) {
-    this.createYjsDocument() // Architecture violation
-  }
-}, 2000)
-```
-
-**Why Temp Document Strategy is Superior:**
-- ✅ **Immediate Y.js availability** - No race conditions
-- ✅ **TipTap best practices compliance** - Y.js document exists from editor creation
-- ✅ **Performance optimization** - Only IndexedDB persistence is delayed
-- ✅ **Consistent collaborative state** - All editors have Y.js from start
-
-### Extension Management
-
-#### ✅ **STATIC EXTENSION CONFIGURATION**
-
-```javascript
-// Define extensions at editor creation
-const extensions = [
-  StarterKit,
-  Collaboration, // If collaborative
-  Placeholder,
-  // ... other extensions
-]
-
-const editor = new Editor({ extensions })
-```
-
-#### ❌ **DYNAMIC EXTENSION CHANGES**
-
-```javascript
-// NEVER DO THIS - Not supported by TipTap/ProseMirror
-editor.addExtension(newExtension) // ❌ Doesn't exist
-editor.removeExtension(extension) // ❌ Doesn't exist
-```
-
-#### ✅ **EXTENSION RECONFIGURATION**
-
-```javascript
-// For configuration changes, recreate editor
-const newEditor = new Editor({
-  extensions: [
-    Placeholder.configure({
-      placeholder: newPlaceholderText // Updated config
-    })
-  ]
-})
-```
-
-## Our Implementation Architecture
-
-### Two-Tier System Based on CollaborationCaret Requirements
-
-```javascript
-// TIER 1: LOCAL EDITORS (WITHOUT CollaborationCaret)
-async createLocalEditorsWithTempYDoc() {
-  // 1. Load Y.js components
-  const { Y, bundle } = await this.loadYjsComponents()
-  
-  // 2. Create Y.js document immediately (TipTap best practice)
-  this.ydoc = new Y.Doc()
-  
-  // 3. Add IndexedDB persistence (temp document - not in drafts yet)
-  const tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  this.indexeddbProvider = new IndexeddbPersistence(tempDocumentId, this.ydoc)
-  
-  // 4. Initialize schema
-  this.initializeCollaborativeSchema(Y)
-  
-  // 5. Create editors WITHOUT CollaborationCaret (cannot handle null provider)
-  const getLocalExtensions = (field) => {
-    return [
-      StarterKit.configure({
-        undoRedo: false, // Y.js handles history
-        ...(field === 'title' ? {
-        heading: false,
-        bulletList: false,
-          orderedList: false,
-          blockquote: false,
-          codeBlock: false,
-          horizontalRule: false
-        } : {})
-      }),
-      Collaboration.configure({
-        document: this.ydoc,
-        field: field
-      }),
-      Placeholder.configure({
-        placeholder: field === 'title' ? 'Enter title...' : 
-                    field === 'body' ? 'Start writing...' : 
-                    'Auto-generated from title'
-      }),
-      // Enhanced extensions (Link, Typography, etc.)
-      ...this.getEnhancedExtensions(field, bundle)
-      // ❌ NO CollaborationCaret - cannot handle null provider
-    ]
-  }
-  
-  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
-  this.titleEditor = new Editor({
-    extensions: getLocalExtensions('title'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-      this.setupDraftPersistenceTriggers()
-    }
-  })
-  
-  this.bodyEditor = new Editor({
-    extensions: getLocalExtensions('body'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-      this.setupDraftPersistenceTriggers()
-    }
-  })
-  
-  // Document is NOT added to drafts list yet
-  this.isCollaborativeMode = false // Local mode (no WebSocket provider)
-}
-
-// TIER 2: CLOUD EDITORS (WITH CollaborationCaret)
-async createCloudEditorsWithCursors() {
-  // 1. Load Y.js components
-  const { Y, bundle } = await this.loadYjsComponents()
-  
-  // 2. Create Y.js document immediately (TipTap best practice)
-  this.ydoc = new Y.Doc()
-  
-  // 3. Add IndexedDB persistence
-  const documentId = `${owner}_${permlink}`
-  this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc)
-  
-  // 4. Create WebSocket provider (REQUIRED for CollaborationCaret)
-  this.provider = new HocuspocusProvider({
-    url: 'wss://data.dlux.io/collaboration',
-    name: `${owner}/${permlink}`,
-    document: this.ydoc,
-    token: authToken
-  })
-  
-  // 5. Initialize schema
-  this.initializeCollaborativeSchema(Y)
-  
-  // 6. Create editors WITH CollaborationCaret (has valid provider)
-  const getCloudExtensions = (field) => {
-    return [
-      StarterKit.configure({
-        undoRedo: false, // Y.js handles history
-        ...(field === 'title' ? {
-          heading: false,
-          bulletList: false,
-          orderedList: false,
-          blockquote: false,
-          codeBlock: false,
-          horizontalRule: false
-        } : {})
-      }),
-      Collaboration.configure({
-        document: this.ydoc,
-        field: field
-      }),
-      CollaborationCaret.configure({
-        provider: this.provider, // ✅ Valid WebSocket provider
-        user: {
-          name: this.username || 'Anonymous',
-          color: this.generateUserColor(this.username || 'Anonymous')
-        }
-      }),
-      Placeholder.configure({
-        placeholder: field === 'title' ? 'Enter title...' : 
-                    field === 'body' ? 'Start writing...' : 
-                    'Auto-generated from title'
-      }),
-      // Enhanced extensions (Link, Typography, etc.)
-      ...this.getEnhancedExtensions(field, bundle)
-    ]
-  }
-  
-  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
-  this.titleEditor = new Editor({
-    extensions: getCloudExtensions('title'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-    }
-  })
-  
-  this.bodyEditor = new Editor({
-    extensions: getCloudExtensions('body'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => {
-      this.hasUnsavedChanges = true
-    }
-  })
-  
-  this.isCollaborativeMode = true // Cloud mode (WebSocket provider active)
-}
-```
-
-### Connection State Management (Not Tiers)
-
-```javascript
-// SIMPLE CONNECTION STATE CHANGES (No editor recreation)
-async connectToCloud() {
-  // 1. Update connection state
-  this.connectionState = 'connecting'
-  
-  // 2. Create WebSocket provider
-  this.provider = new HocuspocusProvider({
-    url: 'wss://data.dlux.io/collaboration',
-    name: `${owner}/${permlink}`,
-    document: this.ydoc, // Reuse existing Y.js document
-    token: authToken
-  })
-  
-  // 3. CollaborationCaret automatically activates with provider
-  // No editor changes needed!
-  
-  this.connectionState = 'connected'
-  this.isCollaborativeMode = true
-  
-  console.log('✅ Connected to cloud without any editor changes')
-}
-
-async disconnectFromCloud() {
-  // 1. Update connection state
-  this.connectionState = 'local'
-  
-  // 2. Disconnect provider
-  this.provider?.disconnect()
-  this.provider = null
-  
-  // 3. CollaborationCaret automatically deactivates
-  // No editor changes needed!
-  
-  this.isCollaborativeMode = false
-  
-  console.log('✅ Disconnected from cloud, continuing locally')
-}
-```
-
-### Draft Persistence Strategy
-
-```javascript
-// Only add to drafts when user shows intent to save
-async persistTempDocumentToDrafts() {
-  // Check if document has meaningful content
-  const hasContent = this.titleEditor?.getText().trim() || 
-                    this.bodyEditor?.getText().trim() ||
-                    this.getTags().length > 0 ||
-                    this.getBeneficiaries().length > 0
-  
-  if (hasContent) {
-    // Create permanent document ID
-    const permanentId = this.generateDocumentId()
-    
-    // Update IndexedDB persistence to permanent ID
-    this.indexeddbProvider?.destroy()
-    this.indexeddbProvider = new IndexeddbPersistence(permanentId, this.ydoc)
-    
-    // Add to drafts list
-    await this.ensureLocalFileEntry({
-      id: permanentId,
-      title: this.titleEditor?.getText() || 'Untitled',
-      type: 'local',
-      lastModified: new Date().toISOString()
-    })
-    
-    console.log('✅ Temp document persisted to drafts')
-  }
-}
-
-// Trigger persistence on meaningful user actions
-setupDraftPersistenceTriggers() {
-  // Auto-save after typing pause
-  this.titleEditor?.on('update', () => {
-    clearTimeout(this.persistenceTimeout)
-    this.persistenceTimeout = setTimeout(() => {
-      this.persistTempDocumentToDrafts()
-    }, 2000)
-  })
-  
-  // Immediate persistence on explicit save
-  this.bodyEditor?.on('update', () => {
-    clearTimeout(this.persistenceTimeout)
-    this.persistenceTimeout = setTimeout(() => {
-      this.persistTempDocumentToDrafts()
-    }, 2000)
-  })
-}
-```
-
-## Performance Optimization
-
-### React Integration
-
-```javascript
-// ✅ Isolate editor in separate component
-const TiptapEditor = () => {
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: initialContent
-  })
-  
-  return <EditorContent editor={editor} />
-}
-
-// ❌ Don't render editor with unrelated state
-const App = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const editor = useEditor({ /* config */ }) // Will re-render on sidebar changes
-  
-  return (
-    <>
-      <Sidebar onChange={setSidebarOpen} />
-      <EditorContent editor={editor} />
-    </>
-  )
-}
-```
-
-### Memory Management
-
-```javascript
-// ✅ Proper cleanup
-beforeUnmount() {
-  // Destroy editors
-  // ⚠️ HISTORICAL: In current implementation, only bodyEditor needs cleanup
-  this.titleEditor?.destroy()
-  this.bodyEditor?.destroy()
-  
-  // Cleanup Y.js
-  this.indexeddbProvider?.destroy()
-  this.ydoc?.destroy()
-  
-  // Clear references
-  this.titleEditor = null
-  this.bodyEditor = null
-  this.ydoc = null
-}
-```
-
-## Error Handling and Fallbacks
-
-### Schema Conflicts
-
-```javascript
-// Handle schema version mismatches
-initializeCollaborativeSchema(Y) {
-  const metadata = this.ydoc.getMap('_metadata')
-  const currentSchemaVersion = '1.0.0'
-  const existingVersion = metadata.get('schemaVersion')
-  
-  if (existingVersion && existingVersion !== currentSchemaVersion) {
-    console.warn('Schema version mismatch')
-    this.schemaVersionMismatch = true
-    // Disable editing or show warning
-  }
-}
-```
-
-### Y.js Type Conflicts
-
-```javascript
-// ✅ Use consistent Y.js types
-this.ydoc.get('title', Y.XmlFragment) // For TipTap Collaboration
-this.ydoc.get('body', Y.XmlFragment)
-
-// ❌ Don't mix types
-this.ydoc.getText('title') // Conflicts with XmlFragment
-```
-
-### Graceful Degradation
-
-```javascript
-// Fallback when Y.js fails
-try {
-  await this.createYjsDocument()
-} catch (error) {
-  console.warn('Y.js creation failed, continuing with basic editors')
-  // Continue with offline-only functionality
-}
-```
-
-## Content Synchronization
-
-### Initial Content Loading
-
-```javascript
-// ✅ Set initial content only once
-provider.on('synced', () => {
-  if (!ydoc.getMap('config').get('initialContentLoaded')) {
-    ydoc.getMap('config').set('initialContentLoaded', true)
-    editor.commands.setContent(initialContent)
-  }
-})
-```
-
-### Offline/Online Sync
-
-```javascript
-// Automatic sync when going online
-provider.on('connect', () => {
-  console.log('Connected to collaboration server')
-  // Y.js automatically syncs offline changes
-})
-
-provider.on('disconnect', () => {
-  console.log('Disconnected, continuing offline')
-  // IndexedDB preserves changes
-})
-```
-
-## Security Considerations
-
-### Content Validation
-
-```javascript
-// Always validate content regardless of format
-const sanitizedContent = validateAndSanitize(userContent)
-editor.commands.setContent(sanitizedContent)
-```
-
-### Authentication
-
-```javascript
-// Secure collaboration connections
-const provider = new HocuspocusProvider({
-  url: 'wss://your-server.com',
-  name: documentId,
-  token: await getAuthToken(), // JWT token
-  document: ydoc
-})
-```
-
-## Testing Strategy
-
-### Unit Tests
-
-```javascript
-// Test editor creation/destruction
-describe('Editor Lifecycle', () => {
-  test('creates basic editor without Y.js', () => {
-    const editor = createBasicEditor()
-    expect(editor.isEditable).toBe(true)
-    expect(editor.extensionManager.extensions).not.toContain('collaboration')
-  })
-  
-  test('upgrades to collaborative mode', async () => {
-    const basicEditor = createBasicEditor()
-    const collaborativeEditor = await upgradeToCollaborative(basicEditor)
-    expect(collaborativeEditor.extensionManager.extensions).toContain('collaboration')
-  })
-})
-```
-
-### Integration Tests
-
-```javascript
-// Test offline-first flow
-describe('Offline-First Flow', () => {
-  test('loads basic editor first', async () => {
-    const component = mount(EditorComponent)
-    await nextTick()
-    
-    expect(component.vm.titleEditor).toBeDefined()
-    expect(component.vm.ydoc).toBeNull() // Y.js not created yet
-  })
-  
-  test('creates Y.js after typing', async () => {
-    const component = mount(EditorComponent)
-    await simulateTyping(component)
-    await delay(2100) // Wait for typing pause
-    
-    expect(component.vm.ydoc).toBeDefined()
-  })
-})
-```
-
-## Monitoring and Debugging
-
-### Performance Metrics
-
-```javascript
-// Track editor performance
-const performanceObserver = new PerformanceObserver((list) => {
-  list.getEntries().forEach((entry) => {
-    if (entry.name.includes('editor')) {
-      console.log(`${entry.name}: ${entry.duration}ms`)
-    }
-  })
-})
-
-performanceObserver.observe({ entryTypes: ['measure'] })
-```
-
-### Debug Helpers
-
-```javascript
-// Debug editor state
-debugEditor() {
-  console.log('Editor State:', {
-    isEditable: this.editor.isEditable,
-    isEmpty: this.editor.isEmpty,
-    isFocused: this.editor.isFocused,
-    extensions: this.editor.extensionManager.extensions.map(e => e.name)
-  })
-}
-
-// Debug Y.js state
-debugYjs() {
-  if (this.ydoc) {
-    console.log('Y.js State:', {
-      clientId: this.ydoc.clientID,
-      title: this.ydoc.get('title', Y.XmlFragment).toString(),
-      body: this.ydoc.get('body', Y.XmlFragment).toString()
-    })
-  }
-}
-```
-
-## Conclusion
-
-This architecture provides:
-
-1. **Optimal Performance**: Offline-first loading with immediate Y.js creation and temp document strategy
-2. **Reliable Collaboration**: Proper Y.js lifecycle management
-3. **Excellent UX**: Minimal editor interruption during mode switches
-4. **Maintainable Code**: Clear separation of concerns and error handling
-5. **TipTap Compliance**: Follows all official best practices and recommendations
-
-By following these patterns, we ensure our implementation is robust, performant, and aligned with TipTap's design philosophy while providing the best possible user experience for both offline and collaborative editing scenarios.
-
-## Document States & Status Indicators
-
-### Document State Categories
-
-Our offline-first collaborative architecture uses several categories of document states to provide clear feedback to users:
-
-#### 1. **Connection States**
-- **`disconnected`**: No connection to collaboration server
-- **`connecting`**: Attempting to establish connection
-- **`connected`**: Successfully connected to collaboration server
-- **`auth-error`**: Authentication failed
-- **`connection-error`**: Connection failed/lost
-
-#### 2. **Persistence States**
-- **`saving-local`**: Writing to IndexedDB (local documents)
-- **`saved-local`**: Successfully persisted to IndexedDB (local documents)
-- **`offline-saving`**: Saving changes while offline (collaborative documents)
-- **`offline-ready`**: Changes saved offline, ready to sync (collaborative documents)
-- **`local-error`**: Failed to persist locally
-- **`unsynced-changes`**: Local changes pending sync
-- **`sync-error`**: Failed to sync changes
-
-#### 3. **Collaboration States**
-- **`syncing`**: Changes being synchronized with server
-- **`synced`**: All changes synchronized with server
-- **`collaborating`**: Real-time collaboration active (multiple users)
-- **`read-only`**: User has read-only access
-- **`schema-mismatch`**: Client schema version differs
-- **`conflict-resolution`**: Merging conflicting changes
-
-#### 4. **Permission States**
-- **`owner`**: User is the document owner (full control)
-- **`postable`**: Can edit content and publish to Hive
-- **`editable`**: Can edit content but cannot publish
-- **`readonly`**: Can view content only
-
-### Status Indicator System
-
-#### **Primary Status Messages**
-
-**Local Documents (Dotted Cloud)**:
-- "Saving locally..." - Writing to browser storage
-- "Saved locally" - Successfully stored in browser
-- "Local save error" - Failed to save locally
-
-**Cloud Documents - Offline Mode (Slashed Cloud)**:
-- "Saving offline..." - Changes being saved locally while disconnected
-- "Available offline" - Document ready, will sync when connected
-- "Unsynced changes" - Local changes pending server sync
-- "Sync error" - Failed to synchronize with server
-
-**Cloud Documents - Online Mode (Solid Cloud)**:
-- "Connecting..." - Establishing server connection
-- "Syncing changes..." - Real-time synchronization in progress
-- "All changes synced" - Successfully synchronized with server
-- "X users collaborating" - Multiple users actively editing
-- "Read-only mode" - User has view-only permissions
-
-#### **Visual Indicators**
-
-**Cloud Icon States**:
-```javascript
-// Dotted cloud (local documents)
-<svg stroke-dasharray="2,2">
-  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-</svg>
-
-// Solid cloud (connected collaborative documents)
-<svg fill="currentColor">
-  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-</svg>
-
-// Slashed cloud (offline collaborative documents)
-<svg>
-  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-  <line x1="3" y1="3" x2="21" y2="21"/>
-</svg>
-
-// Spinner cloud (connecting)
-<svg>
-  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-  <circle cx="12" cy="12" r="3">
-    <animateTransform attributeName="transform" type="rotate" 
-                      values="0 12 12;360 12 12" dur="1s" repeatCount="indefinite"/>
-  </circle>
-</svg>
-```
-
-### **4-State Status Indicator System**
-
-Both local (hard drive) and cloud (cloud) indicators use a consistent **4-state system**:
-
-#### **Local Status Indicator (Hard Drive Icon) - 4 States:**
-
-1. **🔘 Off** (`opacity-25`) - Document not available locally
-   - Template: `<i class="fas fa-hdd opacity-25"></i>`
-   - Condition: `!file.hasLocalVersion`
-
-2. **🔘 On/Available** (`text-muted` or `text-secondary`) - Document available locally but not current
-   - Template: `<i class="fas fa-hdd text-muted"></i>`
-   - Condition: `file.hasLocalVersion && file.localStatus === 'none'`
-
-3. **🔵 Saved** (`text-primary` - blue) - Document saved locally
-   - Template: `<i class="fas fa-hdd text-primary"></i>`
-   - Condition: `file.localStatus === 'saved'`
-
-4. **🟠 Saving** (`text-warning` - orange) - Document currently saving locally
-   - Template: `<i class="fas fa-hdd text-warning"></i>`
-   - Condition: `file.localStatus === 'saving'`
-
-#### **Cloud Status Indicator (Cloud Icon) - 4 States:**
-
-1. **🔘 Off** (`opacity-25`) - Document not in cloud
-   - Template: `<i class="fas fa-cloud opacity-25"></i>`
-   - Condition: `!file.hasCloudVersion`
-
-2. **🔘 Available** (`text-secondary` - gray) - Document available in cloud but not connected
-   - Template: `<i class="fas fa-cloud text-secondary"></i>`
-   - Condition: `file.cloudStatus === 'available'`
-
-3. **🟢 Synced** (`text-success` - green) - Document synced to cloud
-   - Template: `<i class="fas fa-cloud text-success"></i>`
-   - Condition: `file.cloudStatus === 'synced'`
-
-4. **🟠 Syncing** (`text-warning` - orange) - Document currently syncing
-   - Template: `<i class="fas fa-cloud text-warning"></i>`
-   - Condition: `file.cloudStatus === 'syncing' || file.cloudStatus === 'pending'`
-
-#### **Implementation in Drafts Table:**
-
-```html
-<!-- Local Status Indicator -->
-<div v-if="file.hasLocalVersion" class="status-indicator" :title="getLocalStatusTitle(file.localStatus)">
-    <i class="fas fa-hdd" :class="getLocalStatusClass(file.localStatus)"></i>
-</div>
-<div v-else class="status-indicator text-muted" title="Not saved locally">
-    <i class="fas fa-hdd opacity-25"></i>  <!-- STATE 1: OFF -->
-</div>
-
-<!-- Cloud Status Indicator -->
-<div v-if="file.hasCloudVersion" class="status-indicator" :title="getCloudStatusTitle(file.cloudStatus)">
-    <i class="fas fa-cloud" :class="getCloudStatusClass(file.cloudStatus)"></i>
-</div>
-<div v-else class="status-indicator text-muted" title="Not in cloud">
-    <i class="fas fa-cloud opacity-25"></i>  <!-- STATE 1: OFF -->
-</div>
-```
-
-#### **Status Determination Logic:**
-
-```javascript
-// Local Status Logic
-getLocalStatus(file) {
-    if (!file) return 'none';
-    
-    const documentKey = this.getDocumentKey(file);
-    
-    // For local documents (localStorage), they always have local status
-    if (file.id && !file.owner) {
-        if (this.hasUnsavedChanges && this.isCurrentDocument(file)) {
-            return 'saving'; // STATE 4: Orange - has unsaved changes
-        }
-        return 'saved'; // STATE 3: Blue - saved locally
-    }
-    
-    // For cloud documents, check if they're cached in IndexedDB
-    if (file.owner && file.permlink) {
-        if (this.indexedDBDocuments?.has(documentKey)) {
-            if (this.hasUnsavedChanges && this.isCurrentDocument(file)) {
-                return 'saving'; // STATE 4: Orange - has unsaved changes
-            }
-            return 'saved'; // STATE 3: Blue - cached locally in IndexedDB
-        }
-        return 'none'; // STATE 2: Available but not cached
-    }
-    
-    return 'none'; // STATE 1: Not available locally
-}
-
-// Cloud Status Logic
-getCloudStatus(cloudFile) {
-    if (!cloudFile) return 'none';
-    
-    // Check WebSocket connection status
-    if (this.provider && this.connectionStatus === 'connected') {
-        return 'synced'; // STATE 3: Green - synced to cloud
-    } else if (this.provider && this.connectionStatus === 'connecting') {
-        return 'syncing'; // STATE 4: Orange/Blue - syncing to cloud
-    } else if (this.hasUnsavedChanges && this.isCurrentDocument(cloudFile)) {
-        return 'pending'; // STATE 4: Orange - has unsynced changes
-    }
-    return 'available'; // STATE 2: Gray - available in cloud but not connected
-}
-```
-
-**Status Colors & Icons**:
-- 🟠 **Orange/Warning**: Changes being saved, syncing, unsynced changes
-- 🔵 **Blue/Info**: Locally saved, offline ready, connecting
-- 🟢 **Green/Success**: Cloud synced, collaborating
-- 🔴 **Red/Danger**: Errors, connection failures
-- 🔘 **Grey/Muted**: Available but not active, temp documents, fallbacks
-- 🔘 **Opacity-25**: Off/not available states
-
-#### **Complete 4-State Reference Table:**
-
-| State | Local Indicator | Cloud Indicator | Description |
-|-------|----------------|-----------------|-------------|
-| **1. Off** | 🔘 `opacity-25` | 🔘 `opacity-25` | Document not available in this location |
-| **2. Available** | 🔘 `text-muted` | 🔘 `text-secondary` | Document exists but not active/connected |
-| **3. Saved/Synced** | 🔵 `text-primary` | 🟢 `text-success` | Document saved/synced successfully |
-| **4. Saving/Syncing** | 🟠 `text-warning` | 🟠 `text-warning` | Document currently being saved/synced |
-
-**Key Factors Determining State:**
-- **Document Availability**: `hasLocalVersion` / `hasCloudVersion`
-- **Current Document**: Whether this document is currently open
-- **Unsaved Changes**: Whether the open document has unsaved changes
-- **Connection Status**: For cloud documents, WebSocket connection state
-- **IndexedDB Cache**: For cloud documents, whether cached locally
-
-#### **Background Styling**
-
-The status indicator button uses different background colors and left borders:
-
-```javascript
-// Temp documents (not yet drafts) - grey background
-'temp-editing': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;' // Grey for temp editing
-'temp-ready': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;' // Grey for temp ready
-
-// Local documents (dotted cloud) - proper color coding for save states
-'saving-local': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;' // Orange for changes
-'saved-local': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;' // Blue for locally saved
-
-// Collaborative documents offline mode
-'offline-saving': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;' // Orange for changes
-'offline-ready': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;' // Blue for offline ready
-
-// Collaborative documents online mode
-'connecting': 'background: rgba(13, 110, 253, 0.1); border-left: 3px solid #0d6efd;' // Blue for connecting
-'syncing': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;' // Orange for syncing
-'collaborating': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;' // Green for collaborating
-'synced': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;' // Green for synced
-
-// Error states
-'error': 'background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545;' // Red for errors
-```
-
-### State Transitions
-
-#### **Local Document Flow**
-```
-New Document → Y.js Document Creation → Collaborative Editors → User Types → IndexedDB Persistence
-     ↓
-Local Document (Dotted Cloud) → "Connect to Cloud" → Cloud Document (Solid/Slashed Cloud)
-```
-
-#### **Cloud Document Flow**
-```
-Load Cloud Document → Y.js + IndexedDB → Connect to Server
-     ↓                                         ↓
-Offline Mode (Slashed Cloud)              Online Mode (Solid Cloud)
-     ↓                                         ↓
-"Available offline"                      "All changes synced"
-"Unsynced changes"                       "X users collaborating"
-```
-
-#### **Connection State Machine**
-```
-disconnected → connecting → connected → syncing → synced
-     ↑              ↓           ↓          ↓
-     ←─────── connection-error ←─────── sync-error
-     ↓
-   offline → offline-saving → offline-ready
-```
-
-### Implementation Examples
-
-#### **Status Detection Logic**
-```javascript
-unifiedStatusInfo() {
-    const hasYjsDocument = !!this.ydoc;
-    const isConnectedToServer = this.connectionStatus === 'connected';
-    const hasWebSocketProvider = !!this.provider;
-
-    // TIPTAP BEST PRACTICE: All documents have Y.js, distinguish by WebSocket provider
-    if (hasYjsDocument) {
-        // COLLABORATIVE MODE: Y.js + WebSocket provider (cloud documents)
-        if (hasWebSocketProvider) {
-            if (isConnectedToServer) {
-                if (this.hasUnsavedChanges) {
-                    return { state: 'syncing', icon: '🔄', message: 'Syncing changes...' };
+        // 6. Set up WebSocket if collaborative
+        if (isCollaborative) {
+            this.loadingMessage = 'Connecting to collaboration server...';
+            
+            this.wsProvider = new HocuspocusProvider({
+                url: 'ws://localhost:1234',
+                name: docId,
+                document: this.ydoc,
+                onStatus: ({ status }) => {
+                    this.connectionStatus = status;
                 }
-                const collaborators = this.connectedUsers.length;
-                if (collaborators > 1) {
-                    return { 
-                        state: 'collaborating', 
-                        icon: '👥', 
-                        message: `${collaborators} users collaborating` 
-                    };
-                }
-                return { state: 'synced', icon: '☁️', message: 'All changes synced' };
-            }
+            });
             
-            // Collaborative document offline
-            if (this.hasUnsavedChanges) {
-                return { 
-                    state: 'offline-saving', 
-                    icon: '💾', 
-                    message: 'Saving offline...' 
-                };
-            }
-            return { 
-                state: 'offline-ready', 
-                icon: '📱', 
-                message: 'Available offline' 
-            };
+            // Wait for WebSocket sync
+            await new Promise((resolve) => {
+                this.wsProvider.on('synced', resolve);
+            });
         }
         
-        // LOCAL MODE: Y.js + IndexedDB only (no WebSocket provider) - DOTTED CLOUD
-        if (this.hasUnsavedChanges) {
-            return { state: 'saving-local', icon: '💾', message: 'Saving locally...' };
-        }
-        return { state: 'saved-local', icon: '✅', message: 'Saved locally' };
-    }
-    
-    // Fallback: No Y.js document (should not happen)
-    return { state: 'unknown', icon: '❓', message: 'Unknown Status' };
-}
-```
-
-#### **Cloud Icon Logic**
-```javascript
-documentTitleIndicator() {
-    // TIPTAP BEST PRACTICE: Check for WebSocket provider to determine cloud vs local
-    const hasWebSocketProvider = !!this.provider;
-    
-    if (!hasWebSocketProvider) {
-        // Local document with Y.js persistence (dotted cloud)
-        return `<svg stroke-dasharray="2,2">...</svg>`;
-    }
-    
-    if (this.connectionStatus === 'connecting') {
-        // Spinner cloud for connecting
-        return `<svg><animateTransform.../></svg>`;
-    }
-    
-    if (this.connectionStatus === 'connected') {
-        // Solid cloud for connected (color based on sync status)
-        const color = this.hasUnsavedChanges ? 'text-warning' : 'text-success';
-        return `<svg fill="currentColor" class="${color}">...</svg>`;
-    }
-    
-    // Slashed cloud for offline/disconnected
-    return `<svg><line x1="3" y1="3" x2="21" y2="21"/></svg>`;
-}
-```
-
-### User Actions by State
-
-**Error States**:
-- "Retry Connection" - Attempt to reconnect to server
-- "Save Locally" - Force local save when sync fails
-- "View Changes" - Show unsynced content
-
-**Offline States**:
-- "Connect to Cloud" - Upgrade local document to collaborative
-- "Force Sync" - Manual synchronization attempt
-- "Work Offline" - Continue in offline mode
-
-**Permission States**:
-- "Request Edit Access" - Ask for higher permissions
-- "View Only" - Acknowledge read-only status
-- "Share Document" - Grant permissions to others (owners only)
-
-This comprehensive status system ensures users always understand their document's current state and available actions, following TipTap's offline-first collaborative best practices.
-
-## Share Links & URL Handling
-
-### **TipTap Link Extension Best Practices**
-
-#### **✅ CRITICAL: Link Extension is NOT Part of StarterKit**
-
-From TipTap.dev documentation, the Link extension must be explicitly included:
-
-```javascript
-// ❌ WRONG: Link is NOT included in StarterKit
-const editor = new Editor({
-  extensions: [StarterKit]  // Link extension missing
-})
-
-// ✅ CORRECT: Link extension must be added separately
-import Link from '@tiptap/extension-link'
-
-const editor = new Editor({
-  extensions: [
-    StarterKit,
-    Link.configure({
-      openOnClick: false,  // Prevent navigation during editing
-      HTMLAttributes: {
-        class: 'text-primary'
-      }
-    })
-  ]
-})
-```
-
-#### **✅ Our Link Extension Configuration**
-
-```javascript
-// DLUX Implementation - Follows TipTap Best Practices
-if (bundle?.Link || window.TiptapLink) {
-  const Link = bundle.Link?.default || bundle.Link || window.TiptapLink;
-  enhancedExtensions.push(Link.configure({
-    openOnClick: false,  // Prevent accidental navigation during editing
-    HTMLAttributes: {
-      class: 'text-primary'  // Bootstrap styling
-    }
-  }));
-}
-```
-
-### **Share Links Implementation**
-
-#### **✅ URL Parameter Handling (Compliant)**
-
-Our implementation follows web standards for URL parameter handling:
-
-```javascript
-// ✅ GOOD: Proper URL parameter parsing
-async checkAutoConnectParams() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const collabOwner = urlParams.get('collab_owner');
-  const collabPermlink = urlParams.get('collab_permlink');
-  
-  if (collabOwner && collabPermlink) {
-    await this.autoConnectToDocument(collabOwner, collabPermlink);
-  }
-}
-```
-
-#### **✅ Share Link Generation (Compliant)**
-
-Clean URL generation following web standards:
-
-```javascript
-// ✅ GOOD: Clean shareable URL generation
-generateShareableURL() {
-  const baseUrl = window.location.origin + window.location.pathname;
-  const params = new URLSearchParams();
-  params.set('collab_owner', this.currentDocumentInfo.owner);
-  params.set('collab_permlink', this.currentDocumentInfo.permlink);
-  return `${baseUrl}?${params.toString()}`;
-}
-
-// Example output: https://dlux.io/post?collab_owner=user&collab_permlink=document
-```
-
-#### **✅ Auto-Connect Flow (Compliant)**
-
-Seamless document loading from share links:
-
-```javascript
-// ✅ GOOD: Auto-connect flow
-async autoConnectToDocument(owner, permlink) {
-  try {
-    // 1. Fetch document metadata from server
-    const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}`, {
-      headers: this.authHeaders
-    });
-    
-    // 2. Create document object
-    const docToLoad = {
-      owner: owner,
-      permlink: permlink,
-      documentName: documentData?.documentName || `${owner}/${permlink}`,
-      type: 'collaborative'
-    };
-    
-    // 3. Load collaborative document (uses unified editor)
-    await this.loadDocument(docToLoad);
-    
-    // 4. Update URL for refresh persistence
-    this.updateURLWithCollabParams(owner, permlink);
-  } catch (error) {
-    console.error('❌ Failed to auto-connect to document:', error);
-  }
-}
-```
-
-#### **✅ URL State Management (Compliant)**
-
-Proper browser history management:
-
-```javascript
-// ✅ GOOD: URL state management
-updateURLWithCollabParams(owner, permlink) {
-  const url = new URL(window.location);
-  url.searchParams.set('collab_owner', owner);
-  url.searchParams.set('collab_permlink', permlink);
-  
-  // Update URL without triggering page reload
-  window.history.replaceState({}, '', url.toString());
-}
-
-clearCollabURLParams() {
-  const url = new URL(window.location);
-  url.searchParams.delete('collab_owner');
-  url.searchParams.delete('collab_permlink');
-  window.history.replaceState({}, '', url.toString());
-}
-```
-
-### **Share Links Integration with Unified Editor**
-
-#### **✅ Seamless Integration**
-
-Share links work perfectly with our unified editor strategy:
-
-1. **URL Detection**: `checkAutoConnectParams()` runs in `mounted()`
-2. **Authentication**: Requests auth if needed for collaborative docs
-3. **Editor Creation**: `createWorkingEditors()` detects URL params and uses cloud connection state
-4. **Document Loading**: Loads collaborative document with full Y.js + cursors
-5. **URL Persistence**: Updates URL for refresh persistence
-
-#### **✅ Decision Tree Integration**
-
-```
-Share Link Load (?collab_owner=user&collab_permlink=doc)
-├── Authentication Required? ──YES──> Request Auth ──> Wait for Auth
-├── Create Unified Editor ──> Cloud Connection State (provider = WebSocket)
-├── Load Collaborative Document ──> Connect to Y.js + WebSocket
-└── Update URL ──> Refresh Persistence
-```
-
-### **Benefits of Our Share Links Implementation**
-
-#### **✅ Follows Web Standards**
-- Uses standard URLSearchParams API
-- Proper browser history management
-- Clean, readable URLs
-
-#### **✅ Follows TipTap Best Practices**
-- Link extension explicitly included
-- Proper configuration with `openOnClick: false`
-- Seamless integration with unified editor
-
-#### **✅ Excellent User Experience**
-- Auto-authentication for private documents
-- Seamless document loading
-- URL persistence for refresh/bookmark support
-- Clean error handling
-
-#### **✅ Security & Privacy**
-- Authentication required for private documents
-- Proper permission checking
-- Secure WebSocket connections
-
-### **Summary: Share Links Compliance**
-
-Our share links implementation is **fully compliant** with both TipTap best practices and web standards:
-
-- ✅ **Link Extension**: Properly included and configured
-- ✅ **URL Handling**: Standard URLSearchParams API
-- ✅ **Auto-Connect**: Seamless collaborative document loading
-- ✅ **Editor Integration**: Works perfectly with unified editor strategy
-- ✅ **State Management**: Proper browser history handling
-- ✅ **Security**: Authentication and permission enforcement
-
-No changes needed - our implementation follows all best practices!
-
-## TipTap.dev Share Link URL Best Practices
-
-### **Official TipTap Guidance on Collaborative URLs**
-
-Based on TipTap.dev documentation and industry best practices for collaborative editors, here are the definitive guidelines for URL management in collaborative documents:
-
-#### **✅ RECOMMENDED: Update Browser URL for Collaborative Documents**
-
-**Industry Standard Pattern**: All major collaborative editors (Google Docs, Notion, HackMD) update the browser URL when documents become collaborative to enable:
-
-1. **Direct Shareability**: Users can copy the URL and share it directly
-2. **Bookmarking**: Users can bookmark collaborative documents
-3. **Browser History**: Documents appear in browser history for easy access
-4. **Deep Linking**: Direct access to collaborative documents via URL
-5. **User Expectations**: Users expect URLs to reflect current document state
-
-#### **✅ URL Update Strategy (Best Practice)**
-
-```javascript
-// ✅ RECOMMENDED: Update URL when connecting to collaborative document
-async connectToCollaborationServer(serverDoc) {
-    // ... existing connection logic ...
-    
-    // Update browser URL with shareable collaborative link
-    if (this.connectionStatus === 'connected') {
-        this.updateURLWithCollabParams(serverDoc.owner, serverDoc.permlink);
-    }
-}
-
-// ✅ RECOMMENDED: Clear URL when disconnecting
-disconnectCollaboration() {
-    // ... existing disconnect logic ...
-    
-    // Clear collaborative URL parameters
-    this.clearCollabURLParams();
-}
-
-// ✅ RECOMMENDED: Restore URL when reconnecting
-async reconnectToCollaborativeDocument() {
-    // ... existing reconnect logic ...
-    
-    // Restore collaborative URL if connection successful
-    if (this.connectionStatus === 'connected' && this.currentFile?.type === 'collaborative') {
-        this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink);
-    }
-}
-```
-
-#### **✅ URL State Management Pattern**
-
-```javascript
-// Update URL with collaborative parameters
-updateURLWithCollabParams(owner, permlink) {
-    const url = new URL(window.location);
-    url.searchParams.set('collab_owner', owner);
-    url.searchParams.set('collab_permlink', permlink);
-    
-    // Update URL without triggering page reload
-    window.history.replaceState({}, '', url.toString());
-    
-    console.log('📎 URL updated with collaborative parameters');
-}
-
-// Clear collaborative parameters from URL
-clearCollabURLParams() {
-    const url = new URL(window.location);
-    url.searchParams.delete('collab_owner');
-    url.searchParams.delete('collab_permlink');
-    
-    // Update URL without triggering page reload
-    window.history.replaceState({}, '', url.toString());
-    
-    console.log('🔗 Collaborative URL parameters cleared');
-}
-
-// Set collaborative URL parameters (for initial load)
-setCollabURLParams(owner, permlink) {
-    const url = new URL(window.location);
-    url.searchParams.set('collab_owner', owner);
-    url.searchParams.set('collab_permlink', permlink);
-    
-    // Push new state to browser history
-    window.history.pushState({}, '', url.toString());
-    
-    console.log('🌐 Collaborative URL parameters set');
-}
-```
-
-#### **✅ Auto-Connect Flow (Share Link Handling)**
-
-```javascript
-// Detect and handle share links on page load
-async checkAutoConnectParams() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const collabOwner = urlParams.get('collab_owner');
-    const collabPermlink = urlParams.get('collab_permlink');
-    
-    if (collabOwner && collabPermlink) {
-        console.log('🔗 Share link detected, auto-connecting to collaborative document');
-        await this.autoConnectToDocument(collabOwner, collabPermlink);
-    }
-}
-
-// Auto-connect to collaborative document from share link
-async autoConnectToDocument(owner, permlink) {
-    try {
-        // 1. Check authentication for collaborative documents
-        if (!this.isAuthenticated) {
-            console.log('🔐 Authentication required for collaborative document');
-            await this.requestAuthentication();
-        }
+        // 7. Create editor AFTER all syncing
+        this.loadingMessage = 'Initializing editor...';
+        await this.createEditor(isCollaborative);
         
-        // 2. Fetch document metadata
-        const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}`, {
-            headers: this.authHeaders
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Failed to load document: ${response.statusText}`);
-        }
-        
-        const documentData = await response.json();
-        
-        // 3. Create document object for loading
-        const docToLoad = {
-            owner: owner,
-            permlink: permlink,
-            documentName: documentData?.documentName || `${owner}/${permlink}`,
-            type: 'collaborative'
-        };
-        
-        // 4. Load collaborative document (triggers Tier 2 editor creation)
-        await this.loadDocument(docToLoad);
-        
-        // 5. URL is already set from share link, no need to update
-        console.log('✅ Successfully auto-connected to collaborative document');
+        // 8. Success!
+        this.isDocumentReady = true;
         
     } catch (error) {
-        console.error('❌ Failed to auto-connect to document:', error);
-        
-        // Clear invalid URL parameters
-        this.clearCollabURLParams();
-        
-        // Show user-friendly error
-        alert(`Failed to load shared document: ${error.message}`);
-    }
-}
-```
-
-#### **✅ Share Link Generation**
-
-```javascript
-// Generate shareable URL for current collaborative document
-generateShareableURL() {
-    if (!this.currentFile || this.currentFile.type !== 'collaborative') {
-        console.warn('⚠️ Cannot generate share link for non-collaborative document');
-        return null;
-    }
-    
-    const baseUrl = window.location.origin + window.location.pathname;
-    const params = new URLSearchParams();
-    params.set('collab_owner', this.currentFile.owner);
-    params.set('collab_permlink', this.currentFile.permlink);
-    
-    const shareableURL = `${baseUrl}?${params.toString()}`;
-    console.log('📎 Generated shareable URL:', shareableURL);
-    
-    return shareableURL;
-}
-
-// Copy shareable link to clipboard
-async copyShareableLink() {
-    const shareableURL = this.generateShareableURL();
-    
-    if (!shareableURL) {
-        alert('Cannot generate share link for this document');
-        return;
-    }
-    
-    try {
-        await navigator.clipboard.writeText(shareableURL);
-        console.log('📋 Shareable link copied to clipboard');
-        
-        // Show success feedback
-        this.showToast('Share link copied to clipboard!', 'success');
-        
-    } catch (error) {
-        console.error('❌ Failed to copy to clipboard:', error);
-        
-        // Fallback: Show URL in prompt for manual copying
-        prompt('Copy this link to share the document:', shareableURL);
-    }
-}
-```
-
-### **URL Lifecycle Management**
-
-#### **✅ Complete URL Lifecycle**
-
-```javascript
-// Document lifecycle with URL management
-async documentLifecycleWithURLs() {
-    // 1. Page Load: Check for share links
-    await this.checkAutoConnectParams();
-    
-    // 2. New Document: No URL parameters
-    await this.newDocument(); // Creates local document, no URL changes
-    
-    // 3. Connect to Cloud: Update URL
-    await this.connectToCloud(); // Updates URL with collaborative parameters
-    
-    // 4. Disconnect: Clear URL
-    await this.disconnectFromCloud(); // Clears collaborative parameters
-    
-    // 5. Reconnect: Restore URL
-    await this.reconnectToCloud(); // Restores collaborative parameters
-    
-    // 6. Load Different Document: Update URL
-    await this.loadDocument(newDoc); // Updates URL if collaborative
-    
-    // 7. New Document: Clear URL
-    await this.newDocument(); // Clears URL parameters
-}
-```
-
-#### **✅ URL State Transitions**
-
-```
-Page Load
-├── Share Link Detected? ──YES──> Auto-Connect ──> Keep URL
-└── No Share Link ──> Default Load ──> No URL Parameters
-
-Local Document
-├── Connect to Cloud ──> Update URL with collab params
-└── Stay Local ──> No URL changes
-
-Collaborative Document
-├── Disconnect ──> Clear URL parameters
-├── Reconnect ──> Restore URL parameters
-└── Load Different Doc ──> Update URL parameters
-
-New Document
-└── Clear URL parameters (always start fresh)
-```
-
-### **Benefits of URL Management**
-
-#### **✅ User Experience Benefits**
-
-1. **Seamless Sharing**: Users can share documents by copying the URL
-2. **Bookmark Support**: Collaborative documents can be bookmarked
-3. **Browser History**: Documents appear in browser history
-4. **Refresh Persistence**: Page refresh maintains collaborative state
-5. **Deep Linking**: Direct access to specific collaborative documents
-
-#### **✅ Technical Benefits**
-
-1. **State Persistence**: URL reflects current document state
-2. **Clean Architecture**: URL management separated from editor logic
-3. **Standard Compliance**: Uses web standard URLSearchParams API
-4. **Error Handling**: Graceful fallback for invalid share links
-5. **Security**: Authentication required for private documents
-
-### **Implementation Checklist**
-
-#### **✅ Required URL Management Features**
-
-- [ ] **Auto-detect share links** on page load (`checkAutoConnectParams`)
-- [ ] **Update URL when connecting** to collaborative documents
-- [ ] **Clear URL when disconnecting** from collaborative mode
-- [ ] **Restore URL when reconnecting** to same document
-- [ ] **Generate shareable URLs** for collaborative documents
-- [ ] **Copy to clipboard** functionality for share links
-- [ ] **Handle authentication** for private collaborative documents
-- [ ] **Error handling** for invalid or inaccessible share links
-- [ ] **Clean URL parameters** when creating new documents
-
-#### **✅ URL Parameter Standards**
-
-```javascript
-// Standard URL parameter names
-const URL_PARAMS = {
-    COLLAB_OWNER: 'collab_owner',      // Document owner username
-    COLLAB_PERMLINK: 'collab_permlink'  // Document permlink identifier
-};
-
-// Example URLs
-const examples = [
-    'https://dlux.io/post',                                           // No collaboration
-    'https://dlux.io/post?collab_owner=user&collab_permlink=doc123', // Collaborative
-];
-```
-
-### **Final Recommendation**
-
-**✅ IMPLEMENT URL MANAGEMENT**: Based on industry best practices and user expectations, collaborative documents should update the browser URL to enable sharing, bookmarking, and deep linking. This follows the pattern used by all major collaborative editors and provides the best user experience.
-
-**Implementation Pattern**:
-- **Connected** = Show collaborative URL parameters
-- **Disconnected** = Clear collaborative URL parameters  
-- **Reconnected** = Restore collaborative URL parameters
-- **New Document** = Clear all URL parameters
-
-## 🎯 **CRITICAL: URL Management & Editor Lifecycle Best Practices**
-
-### **✅ TipTap.dev URL Management Principles**
-
-Based on TipTap.dev documentation and collaborative editor best practices:
-
-#### **1. Clean State Transitions (MANDATORY)**
-```javascript
-// ❌ WRONG: URL parameter stacking
-// Current URL: /post?collab_owner=user1&collab_permlink=doc1
-loadLocalFile() {
-    // Missing cleanup - results in:
-    // /post?collab_owner=user1&collab_permlink=doc1&local_owner=user2&local_permlink=doc2
-    this.updateURLWithLocalParams(user2, doc2);
-}
-
-// ✅ CORRECT: Always clean before setting
-loadLocalFile() {
-    this.clearCollabURLParams(); // Clean ALL parameters first
-    this.updateURLWithLocalParams(user2, doc2); // Then set new ones
-}
-```
-
-#### **2. Editor Destruction Order (TipTap.dev Standard)**
-```javascript
-// ✅ CORRECT: TipTap.dev recommended destruction sequence
-async cleanupCurrentDocument() {
-    // STEP 1: Clear URL parameters FIRST (prevents auto-reconnect)
-    this.clearCollabURLParams();
-    
-    // STEP 2: Disconnect providers
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider.destroy();
-    }
-    
-    // STEP 3: Destroy editors
-    if (this.titleEditor) this.titleEditor.destroy();
-    if (this.bodyEditor) this.bodyEditor.destroy();
-    
-    // STEP 4: Clean Y.js document
-    if (this.ydoc) this.ydoc.destroy();
-}
-```
-
-#### **3. Document Loading Lifecycle (MANDATORY)**
-```javascript
-// ✅ CORRECT: Every document load must follow this pattern
-async loadAnyDocument(file) {
-    // STEP 1: ALWAYS clean state first
-    await this.cleanupCurrentDocument(); // Includes URL cleanup
-    
-    // STEP 2: Load new document
-    await this.loadDocument(file);
-    
-    // STEP 3: Set appropriate URL
-    if (file.type === 'collaborative') {
-        this.updateURLWithCollabParams(file.owner, file.permlink);
-    } else if (file.type === 'local') {
-        this.updateURLWithLocalParams(this.username, file.id);
-    }
-    // New documents get no URL parameters (clean state)
-}
-```
-
-#### **4. Tier Transition Rules (CRITICAL)**
-```javascript
-// ✅ CORRECT: Tier 1 → Tier 2 transition
-convertToCollaborative() {
-    this.clearCollabURLParams(); // Clear local params
-    // ... conversion logic ...
-    this.updateURLWithCollabParams(owner, permlink); // Set collab params
-}
-
-// ✅ CORRECT: Tier 2 → Tier 1 transition  
-disconnectFromCollaboration() {
-    this.clearCollabURLParams(); // Clear collab params
-    // ... disconnection logic ...
-    this.updateURLWithLocalParams(username, localId); // Set local params
-}
-```
-
-### **🚨 URL Stacking Prevention Checklist**
-
-#### **✅ MANDATORY: Every URL-setting operation must:**
-
-1. **Clear existing parameters FIRST**
-2. **Set new parameters SECOND**  
-3. **Never skip cleanup step**
-4. **Follow TipTap.dev destruction order**
-
-#### **✅ Audit Points:**
-- [ ] `newDocument()` - Clears all URL parameters ✅
-- [ ] `loadLocalFile()` - Clears before setting local params ✅
-- [ ] `loadCollaborativeFile()` - Clears before setting collab params ✅
-- [ ] `cleanupCurrentDocument()` - Always clears URL parameters ✅
-- [ ] Tier transitions - Clear old, set new ✅
-- [ ] Auto-connect - Respects existing cleanup ✅
-
-### **🔧 Implementation Requirements**
-
-```javascript
-// ✅ STANDARD PATTERN: All document operations
-async anyDocumentOperation() {
-    // 1. Clean state (URL + editors + Y.js)
-    await this.cleanupCurrentDocument();
-    
-    // 2. Perform operation
-    // ... operation logic ...
-    
-    // 3. Set appropriate URL (if needed)
-    if (needsURL) {
-        this.updateURLWith[Type]Params(params);
-    }
-}
-```
-
-This ensures **zero URL parameter stacking** and follows **TipTap.dev best practices** for editor lifecycle management.
-
-This approach provides users with the shareability and navigation experience they expect from modern collaborative editing tools.
-
-## ✅ CRITICAL FIXES: Initialization and Content Loading
-
-### **Fix 1: Initialization Race Condition Prevention**
-
-**Problem**: TipTap's `onUpdate` events fire asynchronously after editor creation, causing temp documents to be created immediately during initialization.
-
-**Solution**: Implement proper initialization flag timing:
-
-```javascript
-// ✅ CORRECT: Initialization flag with proper timing
-async createOfflineFirstCollaborativeEditors(bundle) {
-    // Set flag to prevent temp document creation during initialization
-    this.isInitializingEditors = true;
-    
-    // ... create editors ...
-    
-    // Clear initialization flag after delay to allow TipTap's async events to complete
-    setTimeout(() => {
-        this.isInitializingEditors = false;
-        console.log('🎯 Editor initialization complete - ready for real user edits');
-    }, 500); // 500ms delay ensures all TipTap initialization events have fired
-}
-
-// ✅ CORRECT: Check flags immediately when debounced function is called
-debouncedCreateIndexedDBForTempDocument() {
-    // CRITICAL: Check flags immediately when called, not after delay
-    if (this.isInitializingEditors || this.isUpdatingPermissions) {
-        console.log('⏸️ Skipping temp document creation - editors are initializing');
-        return; // Exit immediately, no timer set
-    }
-    
-    // Only set timer for real user input
-    this.tempDocumentCreationTimer = setTimeout(() => {
-        this.createIndexedDBForTempDocument();
-    }, 2000);
-}
-```
-
-### **Fix 2: Content Loading Preservation**
-
-**Problem**: When loading existing documents, `createOfflineFirstCollaborativeEditors` was creating fresh Y.js documents that overwrote synced content from IndexedDB.
-
-**Solution**: Check for existing Y.js documents before creating new ones:
-
-```javascript
-// ✅ CORRECT: Preserve existing Y.js documents during editor creation
-async createOfflineFirstCollaborativeEditors(bundle) {
-    // Check if Y.js document already exists (from loadDocument)
-    if (!this.ydoc) {
-        console.log('🆕 Creating fresh Y.js document (TipTap official pattern)');
-        this.ydoc = new Y.Doc();
-        this.initializeCollaborativeSchema(Y);
-    } else {
-        console.log('✅ Using existing Y.js document (from loadDocument)');
-    }
-    
-    // ... continue with editor creation using existing Y.js document ...
-}
-```
-
-### **Fix 3: Permission Update Event Filtering**
-
-**Problem**: `setEditable()` calls during permission updates were triggering `onUpdate` events that created temp documents.
-
-**Solution**: Add permission update flag and check it in debounced function:
-
-```javascript
-// ✅ CORRECT: Filter out permission update events
-updateEditorPermissions() {
-    this.isUpdatingPermissions = true;
-    
-    // Update editor permissions
-    this.titleEditor?.setEditable(!this.isReadOnlyMode);
-    this.bodyEditor?.setEditable(!this.isReadOnlyMode);
-    
-    // Clear flag after permission updates complete
-    setTimeout(() => {
-        this.isUpdatingPermissions = false;
-    }, 100);
-}
-```
-
-#### **🔥 CRITICAL: Why Destroy → Create → Load Sequence Matters**
-
-The **destroy → create → load** sequence is **NON-NEGOTIABLE** for TipTap + Y.js architecture. Violating this sequence causes:
-
-1. **Content Sync Conflicts**: Editors with different Y.js documents fight over content
-2. **Memory Leaks**: Orphaned Y.js documents and IndexedDB connections
-3. **Cursor Desync**: CollaborationCaret extension breaks with document mismatches
-4. **Data Corruption**: Partial writes to wrong Y.js fragments
-5. **Performance Degradation**: Multiple IndexedDB providers for same document
-
-#### **❌ WRONG: Reusing Editors with Different Documents**
-
-```javascript
-// ❌ NEVER DO THIS - Causes sync conflicts and data corruption
-async switchDocument(newFile) {
-    // ❌ WRONG: Trying to reuse existing editors
-    if (this.titleEditor && this.bodyEditor) {
-        // ❌ WRONG: Changing Y.js document without destroying editors
-        this.ydoc = new Y.Doc(); // NEW Y.js document
-        this.indexeddbProvider = new IndexeddbPersistence(newFile.id, this.ydoc);
-        
-        // ❌ WRONG: Editors still connected to OLD Y.js document
-        // This creates sync conflicts and data corruption!
-        this.titleEditor.commands.setContent(newFile.title);
-    }
-}
-```
-
-#### **✅ CORRECT: Always Destroy Before Creating**
-
-```javascript
-// ✅ CORRECT: Clean slate for each document
-async switchDocument(newFile) {
-    // STEP 1: ALWAYS destroy existing editors first
-    await this.cleanupCurrentDocument(); // Destroys editors + Y.js + IndexedDB
-    
-    // STEP 2: Create fresh Y.js document
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(newFile.id, this.ydoc);
-    
-    // STEP 3: Wait for sync
-    await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
-    });
-    
-    // STEP 4: Create fresh editors
-    await this.createOfflineFirstCollaborativeEditors(bundle);
-    
-    // STEP 5: Content loads automatically - no manual intervention!
-}
-```
-
-#### **⚡ PERFORMANCE: Cleanup Order Matters**
-
-The cleanup sequence must follow TipTap's internal architecture:
-
-```javascript
-// ✅ CORRECT: Cleanup in proper order
-async cleanupCurrentDocument() {
-    // 1. Disconnect WebSocket provider first
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider.destroy();
-        this.provider = null;
-    }
-    
-    // 2. Destroy editors before Y.js document
-    if (this.titleEditor) {
-        this.titleEditor.destroy();
-        this.titleEditor = null;
-    }
-    if (this.bodyEditor) {
-        this.bodyEditor.destroy(); 
-        this.bodyEditor = null;
-    }
-    
-    // 3. Destroy IndexedDB persistence before Y.js document
-    if (this.indexeddbProvider) {
-        this.indexeddbProvider.destroy();
-        this.indexeddbProvider = null;
-    }
-    
-    // 4. Destroy Y.js document LAST
-    if (this.ydoc) {
-        this.ydoc.destroy();
-        this.ydoc = null;
-    }
-}
-```
-
-## ✅ NON-EDITOR FIELDS: Custom JSON and Structured Data
-
-### **TipTap Best Practice: Y.js Maps for Non-Editor Fields**
-
-According to TipTap.dev documentation, fields that aren't rich text editors should use **Y.js Maps** for collaborative editing rather than being part of the TipTap editor itself.
-
-#### **✅ CORRECT: Custom JSON Field Implementation**
-
-```javascript
-// ✅ CORRECT: Two-phase input handling for real-time updates
-handleCustomJsonInput() {
-    // Phase 1: Immediate status update (every keystroke)
-    this.hasUnsavedChanges = true;
-    
-    // ✅ TEMP DOCUMENT ARCHITECTURE: Y.js document should already exist
-    if (!this.ydoc) {
-        console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
-    }
-    
-    // Phase 2: Debounced validation and Y.js sync (1-second delay)
-    this.debouncedValidateCustomJson();
-}
-
-// ✅ CORRECT: Debounced validation prevents excessive Y.js updates
-validateCustomJson() {
-    if (!this.customJsonString.trim()) {
-        // Clear all custom JSON fields
-        const existingKeys = Object.keys(this.getCustomJson());
-        existingKeys.forEach(key => this.removeCustomJsonField(key));
-        this.debouncedAutoSave();
-        return;
-    }
-    
-    try {
-        const parsedJson = JSON.parse(this.customJsonString);
-        
-        // Clear existing fields first
-        const existingKeys = Object.keys(this.getCustomJson());
-        existingKeys.forEach(key => this.removeCustomJsonField(key));
-        
-        // Set new fields using Y.js Map
-        Object.entries(parsedJson).forEach(([key, value]) => {
-            this.setCustomJsonField(key, value);
-        });
-        
-        this.debouncedAutoSave();
-    } catch (error) {
-        this.customJsonError = error.message;
-        // Keep hasUnsavedChanges = true to show user has unsaved changes
-    }
-}
-```
-
-#### **✅ CORRECT: Y.js Map Methods with Fallback Pattern**
-
-```javascript
-// ✅ CORRECT: Offline-first fallback pattern
-setCustomJsonField(key, value) {
-    if (this.ydoc) {
-        // Y.js document exists - use collaborative map
-        const customJson = this.ydoc.getMap('customJson');
-        customJson.set(key, value);
-        return true;
-    } else {
-        // Y.js document not ready yet - use local state
-        if (!this.content.custom_json) {
-            this.content.custom_json = {};
-        }
-        this.content.custom_json[key] = value;
-        
-        // ✅ TEMP DOCUMENT ARCHITECTURE: Y.js document should exist from editor creation
-        console.warn('⚠️ Using local state fallback - Y.js document should exist (temp document architecture)');
-        return true;
-    }
-}
-
-getCustomJson() {
-    if (this.ydoc) {
-        const customJson = this.ydoc.getMap('customJson');
-        return customJson.toJSON();
-    } else {
-        return this.content.custom_json || {};
-    }
-}
-```
-
-#### **✅ CORRECT: Y.js Observer Setup**
-
-```javascript
-// ✅ CORRECT: Observer triggers status updates and display sync
-const customJson = this.ydoc.getMap('customJson');
-customJson.observe((event) => {
-    console.log('⚙️ Custom JSON changed:', event);
-    
-    // Update the display string for the textarea
-    this.updateCustomJsonDisplay();
-    
-    // Trigger status indicator update and auto-save
-    this.hasUnsavedChanges = true;
-    this.debouncedAutoSave();
-    
-    this.syncToParent();
-});
-```
-
-#### **✅ CORRECT: Display Synchronization**
-
-```javascript
-// ✅ CORRECT: Keep textarea in sync with Y.js Map
-updateCustomJsonDisplay() {
-    const customJsonData = this.getCustomJson();
-    const newDisplayJson = Object.keys(customJsonData).length > 0 
-        ? JSON.stringify(customJsonData, null, 2) 
-        : '';
-    
-    // Only update if different and user isn't currently editing
-    if (newDisplayJson !== this.customJsonString && 
-        document.activeElement?.tagName !== 'TEXTAREA') {
-        this.customJsonString = newDisplayJson;
-        this.customJsonError = '';
-    }
-}
-```
-
-### **Benefits of Y.js Maps for Non-Editor Fields**
-
-1. **Conflict-Free Updates**: Multiple users can edit different JSON fields simultaneously
-2. **Granular Synchronization**: Only changed fields sync, not entire JSON object
-3. **Offline-First Support**: Works with IndexedDB persistence like TipTap editors
-4. **Real-Time Collaboration**: Changes appear instantly for all connected users
-5. **Consistent Architecture**: Same Y.js patterns as TipTap editors
-
-### **Integration with TipTap Lifecycle**
-
-```javascript
-// ✅ CORRECT: Initialize custom JSON in schema
-initializeCollaborativeSchema(Y) {
-    // ... other schema initialization ...
-    
-    // Custom JSON Map for granular updates
-    this.ydoc.getMap('customJson');
-    
-    // Set up observers after schema initialization
-    this.setupObservers();
-}
-
-// ✅ CORRECT: Call display update after IndexedDB sync
-await new Promise(resolve => {
-    this.indexeddbProvider.on('synced', resolve);
-});
-
-// Update custom JSON display after sync
-this.updateCustomJsonDisplay();
-```
-
-// ... existing code ...
-
-## Performance Optimization and Bundle Loading
-
-### **TipTap Bundle Loading Strategy**
-
-#### **✅ RECOMMENDED: Lazy Bundle Loading**
-
-```javascript
-// ✅ CORRECT: Load TipTap collaboration bundle only when needed
-async loadYjsComponents() {
-    // ✅ TEMP DOCUMENT ARCHITECTURE: Components loaded once during initialization
-    // No lazy loading needed - Y.js documents created immediately
-    
-    try {
-        console.log('📦 Loading TipTap collaboration bundle...');
-        
-        // Load the collaboration bundle (contains Y.js, TipTap, and extensions)
-        const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
-        
-        if (!bundle) {
-            // Dynamically import if not already loaded
-            await this.loadCollaborationBundle();
-        }
-        
-        // Return components directly - no lazy storage needed in temp document architecture
-        const components = {
-            Y: bundle.Y?.default || bundle.Y,
-            bundle: bundle
-        };
-        
-        console.log('✅ TipTap collaboration bundle loaded');
-        return components;
-        
-    } catch (error) {
-        console.error('❌ Failed to load TipTap collaboration bundle:', error);
-        throw new Error('TipTap collaboration bundle is required');
-    }
-}
-
-// ✅ CORRECT: Dynamic bundle loading with fallback
-async loadCollaborationBundle() {
-    try {
-        // Try dynamic import first
-        const module = await import('/js/tiptap-collaboration.bundle.js');
-        window.TiptapCollaboration = module.default || module;
-    } catch (importError) {
-        // Fallback to script tag loading
-        await this.loadScriptTag('/js/tiptap-collaboration.bundle.js');
-    }
-}
-```
-
-#### **✅ CORRECT: Script Tag Loading with Promise**
-
-```javascript
-loadScriptTag(src) {
-    return new Promise((resolve, reject) => {
-        // Check if already loaded
-        if (document.querySelector(`script[src="${src}"]`)) {
-            resolve();
-            return;
-        }
-        
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = () => reject(new Error(`Failed to load ${src}`));
-        document.head.appendChild(script);
-    });
-}
-```
-
-### **Memory Management Best Practices**
-
-#### **✅ CORRECT: Proper Cleanup Sequence**
-
-```javascript
-// ✅ CORRECT: Complete cleanup to prevent memory leaks
-async fullCleanupCollaboration() {
-    console.log('🧹 Performing full collaboration cleanup...');
-    
-    try {
-        // 1. Disconnect WebSocket provider first
-        if (this.provider) {
-            this.provider.disconnect();
-            this.provider.destroy();
-            this.provider = null;
-        }
-        
-        // 2. Destroy editors before Y.js document
-        if (this.titleEditor) {
-            this.titleEditor.destroy();
-            this.titleEditor = null;
-        }
-        if (this.bodyEditor) {
-            this.bodyEditor.destroy();
-            this.bodyEditor = null;
-        }
-        
-        // 3. Destroy IndexedDB persistence before Y.js document
-        if (this.indexeddbProvider) {
-            this.indexeddbProvider.destroy();
-            this.indexeddbProvider = null;
-        }
-        
-        // 4. Destroy Y.js document LAST
-        if (this.ydoc) {
-            this.ydoc.destroy();
-            this.ydoc = null;
-        }
-        
-        // 5. Clear any remaining component references (temp document architecture doesn't store these)
-        
-        // 6. Clear global instance tracking
-        if (window.dluxCollaborativeInstance === this.componentId) {
-            window.dluxCollaborativeInstance = null;
-            window.dluxCollaborativeCleanup = null;
-        }
-        
-        console.log('✅ Full collaboration cleanup complete');
-        
-    } catch (error) {
-        console.warn('⚠️ Error during cleanup:', error.message);
-    }
-}
-```
-
-#### **✅ CORRECT: Vue Component Lifecycle Integration**
-
-```javascript
-// ✅ CORRECT: Proper Vue lifecycle management
-beforeUnmount() {
-    console.log('🔄 Component unmounting - cleaning up TipTap resources...');
-    
-    // Clear any pending timers
-    if (this.debouncedAutoSave) {
-        this.debouncedAutoSave.cancel();
-    }
-    if (this.debouncedYjsCreation) {
-        this.debouncedYjsCreation.cancel();
-    }
-    
-    // Full cleanup
-    this.fullCleanupCollaboration();
-}
-
-// ✅ CORRECT: Error boundary for cleanup
-async safeCleanup() {
-    try {
-        await this.fullCleanupCollaboration();
-    } catch (error) {
-        console.error('❌ Cleanup failed:', error);
-        // Force cleanup of critical references
-        this.titleEditor = null;
-        this.bodyEditor = null;
-        this.ydoc = null;
-        this.provider = null;
-    }
-}
-```
-
-### **Bundle Size Optimization**
-
-#### **✅ RECOMMENDED: Webpack Configuration**
-
-```javascript
-// webpack.config.js - Optimized for TipTap collaboration
-module.exports = {
-  mode: 'production',
-  entry: './src/collaboration-bundle.js',
-  output: {
-    filename: 'tiptap-collaboration.bundle.js',
-    library: 'TiptapCollaboration',
-    libraryTarget: 'umd',
-    globalObject: 'this'
-  },
-  externals: {
-    // Don't bundle large dependencies - assume available globally
-    'bootstrap': 'bootstrap'
-  },
-  optimization: {
-    minimize: true,
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        }
-      }
-    }
-  }
-};
-```
-
-#### **✅ CORRECT: Tree Shaking for Extensions**
-
-```javascript
-// ✅ CORRECT: Import only needed TipTap extensions
-import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCaret from '@tiptap/extension-collaboration-cursor';
-import Placeholder from '@tiptap/extension-placeholder';
-
-// Optional extensions - only import if needed
-import Link from '@tiptap/extension-link';
-import Typography from '@tiptap/extension-typography';
-import Image from '@tiptap/extension-image';
-
-// Y.js core
-import * as Y from 'yjs';
-import { IndexeddbPersistence } from 'y-indexeddb';
-import { HocuspocusProvider } from '@hocuspocus/provider';
-
-// Export bundle
-export {
-  Editor,
-  StarterKit,
-  Collaboration,
-  CollaborationCaret,
-  Placeholder,
-  Link,
-  Typography,
-  Image,
-  Y,
-  IndexeddbPersistence,
-  HocuspocusProvider
-};
-```
-
-### **Performance Monitoring**
-
-#### **✅ RECOMMENDED: Performance Metrics**
-
-```javascript
-// ✅ CORRECT: Track editor performance
-const performanceObserver = new PerformanceObserver((list) => {
-  list.getEntries().forEach((entry) => {
-    if (entry.name.includes('editor')) {
-      console.log(`${entry.name}: ${entry.duration}ms`);
-    }
-  });
-});
-
-performanceObserver.observe({ entryTypes: ['measure'] })
-```
-
-#### **✅ CORRECT: Memory Usage Monitoring**
-
-```javascript
-// ✅ CORRECT: Monitor memory usage
-debugMemoryUsage() {
-    if (performance.memory) {
-        console.log('Memory Usage:', {
-            used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + ' MB',
-            total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + ' MB',
-            limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
-        });
-    }
-}
-
-// ✅ CORRECT: Y.js document size monitoring
-debugYjsSize() {
-    if (this.ydoc) {
-        const update = Y.encodeStateAsUpdate(this.ydoc);
-        console.log('Y.js Document Size:', {
-            bytes: update.length,
-            kb: Math.round(update.length / 1024 * 100) / 100
-        });
-    }
-}
-```
-
-### **Caching and Service Worker Integration**
-
-#### **✅ RECOMMENDED: Smart Caching Strategy**
-
-```javascript
-// Service Worker - Cache TipTap bundles efficiently
-const CACHE_NAME = 'tiptap-collaboration-v1';
-const COLLABORATION_ASSETS = [
-  '/js/tiptap-collaboration.bundle.js',
-  '/js/vue.esm-browser.js',
-  '/css/custom.css'
-];
-
-// Cache collaboration assets with versioning
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(COLLABORATION_ASSETS))
-  );
-});
-
-// Serve from cache with network fallback
-self.addEventListener('fetch', (event) => {
-  if (COLLABORATION_ASSETS.includes(new URL(event.request.url).pathname)) {
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => response || fetch(event.request))
-    );
-  }
-});
-```
-
-### **Debouncing and Throttling**
-
-#### **✅ CORRECT: Optimized Debouncing**
-
-```javascript
-// ✅ CORRECT: Smart debouncing for different operations
-created() {
-    // Auto-save: 500ms delay (responsive but not excessive)
-    this.debouncedAutoSave = this.debounce(this.performAutoSave, 500);
-    
-    // Y.js creation: 2s delay (avoid disrupting typing)
-    this.debouncedYjsCreation = this.debounce(this.createLazyYjsDocument, 2000);
-    
-    // Custom JSON validation: 1s delay (balance responsiveness with performance)
-    this.debouncedValidateCustomJson = this.debounce(this.validateCustomJson, 1000);
-}
-
-// ✅ CORRECT: Efficient debounce implementation
-debounce(func, wait) {
-    let timeout;
-    const debounced = function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-    
-    // Add cancel method for cleanup
-    debounced.cancel = () => clearTimeout(timeout);
-    
-    return debounced;
-}
-```
-
-### **Performance Best Practices Summary**
-
-1. **Lazy Loading**: Load TipTap bundles only when needed
-2. **Memory Management**: Proper cleanup sequence and lifecycle management
-3. **Bundle Optimization**: Tree shaking and external dependencies
-4. **Performance Monitoring**: Track creation time and memory usage
-5. **Smart Caching**: Service worker integration for offline performance
-6. **Debouncing**: Optimized delays for different operations
-7. **Component Lifecycle**: Proper Vue integration and cleanup
-
-// ... existing code ...
-
-## Advanced Error Handling and Recovery Patterns
-
-### **TipTap Error Handling Best Practices**
-
-#### **✅ CORRECT: Content Validation Error Handling**
-
-```javascript
-// ✅ CORRECT: Handle content validation errors gracefully
-handleContentValidationError(editorType, error, disableCollaboration) {
-    console.error(`🚨 Content validation error in ${editorType} editor:`, error);
-    
-    // For collaborative documents: disable collaboration to prevent sync issues
-    if (this.isCollaborativeMode && disableCollaboration) {
-        console.warn('🔒 Disabling collaboration due to content validation error');
-        disableCollaboration();
-        this.connectionStatus = 'error';
-        this.connectionMessage = `Content validation error in ${editorType} - collaboration disabled`;
-        
-        // Disable editor to prevent further issues
-        if (editorType === 'title' && this.titleEditor) {
-            this.titleEditor.setEditable(false);
-        } else if (editorType === 'body' && this.bodyEditor) {
-            this.bodyEditor.setEditable(false);
-        }
-        
-        // Show user-friendly error message
-        const message = `Content validation error detected in ${editorType}. ` +
-                      `This may be due to incompatible content from a different app version. ` +
-                      `Please refresh the page to continue editing.`;
-        
-        // Use timeout to ensure error doesn't block UI
-        setTimeout(() => {
-            if (confirm(message + '\n\nRefresh page now?')) {
-                window.location.reload();
-            }
-        }, 100);
-    } else {
-        // For non-collaborative documents: log but continue
-        console.warn(`Content validation failed in ${editorType}, but editor remains functional`);
-    }
-}
-```
-
-#### **✅ CORRECT: Y.js Document Recovery**
-
-```javascript
-// ✅ CORRECT: Recover from Y.js document corruption
-async recoverFromYjsError(error, preservedContent) {
-    console.error('🚨 Y.js document error detected:', error);
-    
-    try {
-        // Step 1: Preserve current editor content
-        const currentContent = this.preserveEditorContent();
-        const contentToRestore = { ...preservedContent, ...currentContent };
-        
-        // Step 2: Clean up corrupted Y.js document
-        await this.safeCleanupYjsDocument();
-        
-        // Step 3: Create fresh Y.js document
-        const bundle = await this.loadYjsComponents();
-        this.ydoc = new bundle.Y.Doc();
-        this.initializeCollaborativeSchema(bundle.Y);
-        
-        // Step 4: Recreate IndexedDB persistence with new ID
-        const recoveryId = `recovery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        this.indexeddbProvider = new bundle.IndexeddbPersistence(recoveryId, this.ydoc);
-        
-        // Step 5: Wait for persistence to be ready
-        await new Promise(resolve => {
-            this.indexeddbProvider.on('synced', resolve);
-        });
-        
-        // Step 6: Recreate editors with recovered content
-        await this.recreateEditorsWithContent(bundle, contentToRestore);
-        
-        console.log('✅ Y.js document recovery successful');
-        
-        // Show user notification
-        this.showRecoveryNotification('Document recovered successfully from error');
-        
-    } catch (recoveryError) {
-        console.error('❌ Y.js recovery failed:', recoveryError);
-        
-        // Ultimate fallback: basic editors with preserved content
-        await this.fallbackToBasicEditors(preservedContent);
-    }
-}
-
-// ✅ CORRECT: Safe Y.js cleanup with error handling
-async safeCleanupYjsDocument() {
-    try {
-        if (this.indexeddbProvider) {
-            this.indexeddbProvider.destroy();
-            this.indexeddbProvider = null;
-        }
-    } catch (error) {
-        console.warn('⚠️ IndexedDB cleanup error:', error.message);
-    }
-    
-    try {
-        if (this.ydoc) {
-            this.ydoc.destroy();
-            this.ydoc = null;
-        }
-    } catch (error) {
-        console.warn('⚠️ Y.js document cleanup error:', error.message);
-    }
-}
-```
-
-#### **✅ CORRECT: Network Error Recovery**
-
-```javascript
-// ✅ CORRECT: Handle WebSocket connection failures
-async handleConnectionError(error) {
-    console.error('🌐 Connection error:', error);
-    
-    this.connectionStatus = 'error';
-    this.connectionMessage = `Connection failed: ${error.message}`;
-    
-    // Implement exponential backoff for reconnection
-    let retryCount = 0;
-    const maxRetries = 5;
-    const baseDelay = 1000; // 1 second
-    
-    const attemptReconnection = async () => {
-        if (retryCount >= maxRetries) {
-            console.warn('🔄 Max reconnection attempts reached, switching to offline mode');
-            this.switchToOfflineMode();
-            return;
-        }
-        
-        retryCount++;
-        const delay = baseDelay * Math.pow(2, retryCount - 1); // Exponential backoff
-        
-        console.log(`🔄 Reconnection attempt ${retryCount}/${maxRetries} in ${delay}ms...`);
-        this.connectionMessage = `Reconnecting... (${retryCount}/${maxRetries})`;
-        
-        setTimeout(async () => {
-            try {
-                await this.reconnectToCollaborationServer();
-                console.log('✅ Reconnection successful');
-                retryCount = 0; // Reset on success
-            } catch (reconnectError) {
-                console.warn('🔄 Reconnection failed:', reconnectError.message);
-                attemptReconnection(); // Try again
-            }
-        }, delay);
-    };
-    
-    // Start reconnection attempts
-    attemptReconnection();
-}
-
-// ✅ CORRECT: Graceful offline mode switch
-switchToOfflineMode() {
-    console.log('📱 Switching to offline mode...');
-    
-    // Disconnect WebSocket provider but keep Y.js + IndexedDB
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider = null;
-    }
-    
-    this.connectionStatus = 'offline';
-    this.connectionMessage = 'Working offline - changes will sync when connection is restored';
-    this.isCollaborativeMode = false; // Switch to local mode
-    
-    // Show user notification
-    this.showOfflineNotification();
-}
-```
-
-#### **✅ CORRECT: Schema Version Conflict Resolution**
-
-```javascript
-// ✅ CORRECT: Handle schema version mismatches
-handleSchemaVersionMismatch(existingVersion, currentVersion) {
-    console.warn('⚠️ Schema version mismatch:', { existingVersion, currentVersion });
-    
-    this.schemaVersionMismatch = true;
-    
-    // Determine compatibility
-    const isCompatible = this.checkSchemaCompatibility(existingVersion, currentVersion);
-    
-    if (isCompatible) {
-        console.log('✅ Schema versions are compatible, continuing...');
-        // Update to current version
-        const metadata = this.ydoc.getMap('_metadata');
-        metadata.set('schemaVersion', currentVersion);
-        metadata.set('lastUpdated', new Date().toISOString());
-        return;
-    }
-    
-    // Incompatible schemas require user intervention
-    const message = `This document was created with a different version of the editor.\n\n` +
-                   `Document version: ${existingVersion}\n` +
-                   `Current version: ${currentVersion}\n\n` +
-                   `Would you like to:\n` +
-                   `• "Upgrade" - Update document to current version (recommended)\n` +
-                   `• "Read Only" - Open in read-only mode\n` +
-                   `• "Cancel" - Close document`;
-    
-    const choice = prompt(message + '\n\nEnter: upgrade, readonly, or cancel', 'upgrade');
-    
-    switch (choice?.toLowerCase()) {
-        case 'upgrade':
-            this.upgradeDocumentSchema(existingVersion, currentVersion);
-            break;
-        case 'readonly':
-            this.setReadOnlyMode(true);
-            break;
-        default:
-            this.closeDocument();
-            break;
-    }
-}
-
-// ✅ CORRECT: Schema compatibility checking
-checkSchemaCompatibility(existingVersion, currentVersion) {
-    // Simple semantic versioning compatibility check
-    const [existingMajor, existingMinor] = existingVersion.split('.').map(Number);
-    const [currentMajor, currentMinor] = currentVersion.split('.').map(Number);
-    
-    // Same major version = compatible
-    if (existingMajor === currentMajor) {
-        return true;
-    }
-    
-    // Different major version = incompatible
-    return false;
-}
-```
-
-#### **✅ CORRECT: Bundle Loading Error Recovery**
-
-```javascript
-// ✅ CORRECT: Handle bundle loading failures with fallbacks
-async loadYjsComponentsWithFallback() {
-    const fallbackStrategies = [
-        // Strategy 1: Use cached bundle
-        () => this.loadFromCache(),
-        
-        // Strategy 2: Load from CDN
-        () => this.loadFromCDN(),
-        
-        // Strategy 3: Load minimal bundle
-        () => this.loadMinimalBundle(),
-        
-        // Strategy 4: Basic editors only
-        () => this.fallbackToBasicEditors()
-    ];
-    
-    for (let i = 0; i < fallbackStrategies.length; i++) {
-        try {
-            console.log(`📦 Attempting bundle loading strategy ${i + 1}...`);
-            const result = await fallbackStrategies[i]();
-            
-            if (result) {
-                console.log(`✅ Bundle loading strategy ${i + 1} successful`);
-                return result;
-            }
-        } catch (error) {
-            console.warn(`⚠️ Bundle loading strategy ${i + 1} failed:`, error.message);
-            
-            if (i === fallbackStrategies.length - 1) {
-                throw new Error('All bundle loading strategies failed');
-            }
-        }
-    }
-}
-
-// ✅ CORRECT: CDN fallback loading
-async loadFromCDN() {
-    const cdnUrls = [
-        'https://unpkg.com/@tiptap/core@latest/dist/index.umd.js',
-        'https://cdn.jsdelivr.net/npm/@tiptap/core@latest/dist/index.umd.js'
-    ];
-    
-    for (const url of cdnUrls) {
-        try {
-            await this.loadScriptTag(url);
-            console.log(`✅ Loaded TipTap from CDN: ${url}`);
-            return window.TiptapCore;
-        } catch (error) {
-            console.warn(`⚠️ CDN load failed: ${url}`, error.message);
-        }
-    }
-    
-    throw new Error('All CDN sources failed');
-}
-```
-
-#### **✅ CORRECT: User-Friendly Error Notifications**
-
-```javascript
-// ✅ CORRECT: Show contextual error messages
-showErrorNotification(type, error, actions = []) {
-    const errorMessages = {
-        'content-validation': {
-            title: 'Content Validation Error',
-            message: 'The document content appears to be corrupted or incompatible.',
-            icon: '⚠️'
-        },
-        'network-error': {
-            title: 'Connection Error',
-            message: 'Unable to connect to the collaboration server.',
-            icon: '🌐'
-        },
-        'schema-mismatch': {
-            title: 'Version Mismatch',
-            message: 'This document was created with a different version of the editor.',
-            icon: '🔄'
-        },
-        'bundle-loading': {
-            title: 'Loading Error',
-            message: 'Failed to load required editor components.',
-            icon: '📦'
-        }
-    };
-    
-    const config = errorMessages[type] || {
-        title: 'Error',
-        message: error.message,
-        icon: '❌'
-    };
-    
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = 'error-notification alert alert-warning';
-    notification.innerHTML = `
-        <div class="d-flex align-items-center">
-            <span class="me-2">${config.icon}</span>
-            <div class="flex-grow-1">
-                <strong>${config.title}</strong><br>
-                <small>${config.message}</small>
-            </div>
-            <div class="ms-2">
-                ${actions.map(action => 
-                    `<button class="btn btn-sm btn-outline-primary me-1" 
-                             onclick="${action.handler}">${action.label}</button>`
-                ).join('')}
-                <button class="btn btn-sm btn-outline-secondary" 
-                        onclick="this.parentElement.parentElement.parentElement.remove()">
-                    Dismiss
-                </button>
-            </div>
-        </div>
-    `;
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Auto-remove after 10 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.remove();
-        }
-    }, 10000);
-}
-
-// ✅ CORRECT: Recovery action handlers
-getRecoveryActions(errorType) {
-    const actions = {
-        'content-validation': [
-            { label: 'Refresh Page', handler: 'window.location.reload()' },
-            { label: 'Download Backup', handler: 'this.downloadBackup()' }
-        ],
-        'network-error': [
-            { label: 'Retry Connection', handler: 'this.retryConnection()' },
-            { label: 'Work Offline', handler: 'this.switchToOfflineMode()' }
-        ],
-        'schema-mismatch': [
-            { label: 'Upgrade Document', handler: 'this.upgradeDocumentSchema()' },
-            { label: 'Open Read-Only', handler: 'this.setReadOnlyMode(true)' }
-        ]
-    };
-    
-    return actions[errorType] || [];
-}
-```
-
-### **Error Recovery Best Practices Summary**
-
-1. **Content Validation**: Graceful handling of corrupted content with user options
-2. **Y.js Recovery**: Document reconstruction with content preservation
-3. **Network Resilience**: Exponential backoff and offline mode switching
-4. **Schema Compatibility**: Version checking and upgrade paths
-5. **Bundle Fallbacks**: Multiple loading strategies with CDN fallbacks
-6. **User Communication**: Clear, actionable error messages with recovery options
-7. **Graceful Degradation**: Fallback to basic functionality when advanced features fail
-
-// ... existing code ...
-
-## Testing and Debugging Strategies
-
-### **TipTap Testing Best Practices**
-
-#### **✅ CORRECT: Debug Helper Methods**
-
-```javascript
-// ✅ CORRECT: Debug editor state (from our implementation)
-debugEditor() {
-    console.log('Editor State:', {
-        isEditable: this.titleEditor?.isEditable,
-        isEmpty: this.titleEditor?.isEmpty,
-        isFocused: this.titleEditor?.isFocused,
-        extensions: this.titleEditor?.extensionManager.extensions.map(e => e.name),
-        hasYjsDocument: !!this.ydoc,
-        hasProvider: !!this.provider,
-        connectionStatus: this.connectionStatus,
-        isCollaborativeMode: this.isCollaborativeMode,
-        hasUnsavedChanges: this.hasUnsavedChanges
-    });
-}
-
-// ✅ CORRECT: Debug Y.js state (from our implementation)
-debugYjs() {
-    if (this.ydoc) {
-        console.log('Y.js State:', {
-            clientId: this.ydoc.clientID,
-            title: this.ydoc.get('title', this.Y?.XmlFragment)?.toString() || 'No title fragment',
-            body: this.ydoc.get('body', this.Y?.XmlFragment)?.toString() || 'No body fragment',
-            tags: this.ydoc.getArray('tags').toArray(),
-            customJson: this.ydoc.getMap('customJson').toJSON(),
-            config: this.ydoc.getMap('config').toJSON(),
-            documentSize: this.getYjsDocumentSize()
-        });
-    } else {
-        console.log('Y.js State: No Y.js document');
-    }
-}
-
-// ✅ CORRECT: Debug collaborative authors (from our implementation)
-debugCollaborativeAuthors() {
-    try {
-        const authors = this.getCollaborativeAuthors();
-        console.log('Collaborative Authors:', {
-            count: authors.length,
-            authors: authors,
-            localAuthors: this.collaborativeAuthors,
-            yjsAuthors: this.ydoc?.getArray('authors').toArray()
-        });
-    } catch (error) {
-        console.error('❌ Error debugging collaborative authors:', error);
-    }
-}
-```
-
-#### **✅ CORRECT: Performance Monitoring**
-
-```javascript
-// ✅ CORRECT: Monitor editor performance (from our implementation)
-debugMemoryUsage() {
-    if (performance.memory) {
-        console.log('Memory Usage:', {
-            used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + ' MB',
-            total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + ' MB',
-            limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
-        });
-    }
-}
-
-// ✅ CORRECT: Y.js document size monitoring (from our implementation)
-getYjsDocumentSize() {
-    if (this.ydoc && this.Y) {
-        const update = this.Y.encodeStateAsUpdate(this.ydoc);
-        return {
-            bytes: update.length,
-            kb: Math.round(update.length / 1024 * 100) / 100,
-            mb: Math.round(update.length / 1024 / 1024 * 100) / 100
-        };
-    }
-    return { bytes: 0, kb: 0, mb: 0 };
-}
-
-// ✅ CORRECT: Track editor creation time (from our implementation)
-async createOfflineFirstCollaborativeEditors(bundle) {
-    const startTime = performance.now();
-    
-    // ... existing editor creation logic ...
-    
-    const endTime = performance.now();
-    console.log(`⏱️ Editor creation took ${Math.round(endTime - startTime)}ms`);
-}
-```
-
-#### **✅ CORRECT: Status Indicator Testing**
-
-```javascript
-// ✅ CORRECT: Test all status indicator states (from our implementation)
-testStatusIndicator() {
-    const states = [
-        'temp-editing', 'temp-ready', 'saving-local', 'saved-local',
-        'connecting', 'syncing', 'synced', 'collaborating',
-        'offline-saving', 'offline-ready', 'error', 'cleaning-up'
-    ];
-    
-    states.forEach(state => {
-        console.log(`Testing status: ${state}`);
-        
-        // Temporarily set state for testing
-        const originalStatus = this.unifiedStatusInfo();
-        
-        // Mock the state
-        this.mockStatusState(state);
-        
-        const testStatus = this.unifiedStatusInfo();
-        console.log(`  State: ${testStatus.state}`);
-        console.log(`  Icon: ${testStatus.icon}`);
-        console.log(`  Message: ${testStatus.message}`);
-        console.log(`  Class: ${testStatus.class}`);
-        
-        // Restore original state
-        this.restoreStatusState(originalStatus);
-    });
-}
-
-// ✅ CORRECT: Mock status states for testing
-mockStatusState(state) {
-    this.originalState = {
-        hasUnsavedChanges: this.hasUnsavedChanges,
-        connectionStatus: this.connectionStatus,
-        isCollaborativeMode: this.isCollaborativeMode,
-        ydoc: !!this.ydoc,
-        provider: !!this.provider
-    };
-    
-    switch (state) {
-        case 'temp-editing':
-            this.hasUnsavedChanges = true;
-            this.isTemporaryDocument = true;
-            break;
-        case 'saving-local':
-            this.hasUnsavedChanges = true;
-            this.ydoc = {}; // Mock Y.js document
-            this.provider = null;
-            break;
-        case 'syncing':
-            this.hasUnsavedChanges = true;
-            this.connectionStatus = 'connected';
-            this.provider = {}; // Mock provider
-            break;
-        // ... other state mocks
-    }
-}
-```
-
-#### **✅ CORRECT: Integration Testing Patterns**
-
-```javascript
-// ✅ CORRECT: Test document lifecycle (from our implementation)
-async testDocumentLifecycle() {
-    console.log('🧪 Testing document lifecycle...');
-    
-    try {
-        // Test 1: New document creation
-        console.log('Test 1: New document creation');
-        await this.newDocument();
-        console.assert(this.titleEditor && this.bodyEditor, 'Editors should be created');
-        console.assert(this.ydoc, 'Y.js document should be created');
-        
-        // Test 2: Content editing
-        console.log('Test 2: Content editing');
-        this.titleEditor.commands.setContent('Test Title');
-        this.bodyEditor.commands.setContent('<p>Test Body</p>');
-        console.assert(this.hasUnsavedChanges, 'Should have unsaved changes');
-        
-        // Test 3: Auto-save
-        console.log('Test 3: Auto-save');
-        await this.performAutoSave();
-        console.assert(!this.hasUnsavedChanges, 'Changes should be saved');
-        
-        // Test 4: Document loading
-        console.log('Test 4: Document loading');
-        const testFile = { id: 'test-doc', title: 'Test Document', type: 'local' };
-        await this.loadLocalFile(testFile);
-        console.assert(this.currentFile?.id === 'test-doc', 'Document should be loaded');
-        
-        console.log('✅ Document lifecycle test passed');
-        
-    } catch (error) {
-        console.error('❌ Document lifecycle test failed:', error);
-    }
-}
-
-// ✅ CORRECT: Test collaborative features (from our implementation)
-async testCollaborativeFeatures() {
-    console.log('🧪 Testing collaborative features...');
-    
-    try {
-        // Test 1: Y.js document creation
-        console.log('Test 1: Y.js document creation');
-        const bundle = await this.loadYjsComponents();
-        console.assert(bundle.Y && bundle.Collaboration, 'Bundle should contain Y.js and Collaboration');
-        
-        // Test 2: Schema initialization
-        console.log('Test 2: Schema initialization');
-        this.ydoc = new bundle.Y.Doc();
-        this.initializeCollaborativeSchema(bundle.Y);
-        
-        const tags = this.ydoc.getArray('tags');
-        const customJson = this.ydoc.getMap('customJson');
-        console.assert(tags && customJson, 'Schema should be initialized');
-        
-        // Test 3: Collaborative data operations
-        console.log('Test 3: Collaborative data operations');
-        this.addCollaborativeTag('test-tag');
-        this.setCustomJsonField('test', 'value');
-        
-        console.assert(tags.toArray().includes('test-tag'), 'Tag should be added');
-        console.assert(customJson.get('test') === 'value', 'Custom JSON should be set');
-        
-        console.log('✅ Collaborative features test passed');
-        
-    } catch (error) {
-        console.error('❌ Collaborative features test failed:', error);
-    }
-}
-```
-
-#### **✅ CORRECT: Error Simulation Testing**
-
-```javascript
-// ✅ CORRECT: Test error handling (from our implementation)
-async testErrorHandling() {
-    console.log('🧪 Testing error handling...');
-    
-    try {
-        // Test 1: Bundle loading failure
-        console.log('Test 1: Bundle loading failure');
-        const originalBundle = window.TiptapCollaboration;
-        window.TiptapCollaboration = null;
-        
-        try {
-            await this.loadYjsComponents();
-            console.error('❌ Should have thrown error for missing bundle');
-        } catch (error) {
-            console.log('✅ Bundle loading error handled correctly');
-        }
-        
-        window.TiptapCollaboration = originalBundle;
-        
-        // Test 2: Y.js document corruption
-        console.log('Test 2: Y.js document corruption');
-        if (this.ydoc) {
-            const originalYdoc = this.ydoc;
-            this.ydoc = null; // Simulate corruption
-            
-            const status = this.unifiedStatusInfo();
-            console.assert(status.state === 'no-document', 'Should handle missing Y.js document');
-            
-            this.ydoc = originalYdoc;
-        }
-        
-        // Test 3: Network error simulation
-        console.log('Test 3: Network error simulation');
-        if (this.provider) {
-            const mockError = new Error('Network connection failed');
-            await this.handleConnectionError(mockError);
-            console.assert(this.connectionStatus === 'error', 'Should handle connection errors');
-        }
-        
-        console.log('✅ Error handling test passed');
-        
-    } catch (error) {
-        console.error('❌ Error handling test failed:', error);
-    }
-}
-
-// ✅ CORRECT: Test custom JSON field (from our recent implementation)
-async testCustomJsonField() {
-    console.log('🧪 Testing custom JSON field...');
-    
-    try {
-        // Test 1: Valid JSON input
-        console.log('Test 1: Valid JSON input');
-        this.customJsonString = '{"test": "value", "number": 42}';
-        this.validateCustomJson();
-        
-        const customJson = this.getCustomJson();
-        console.assert(customJson.test === 'value', 'Should parse valid JSON');
-        console.assert(customJson.number === 42, 'Should handle numbers');
-        console.assert(!this.customJsonError, 'Should not have error for valid JSON');
-        
-        // Test 2: Invalid JSON input
-        console.log('Test 2: Invalid JSON input');
-        this.customJsonString = '{"invalid": json}';
-        this.validateCustomJson();
-        console.assert(this.customJsonError, 'Should have error for invalid JSON');
-        
-        // Test 3: Empty JSON input
-        console.log('Test 3: Empty JSON input');
-        this.customJsonString = '';
-        this.validateCustomJson();
-        
-        const emptyJson = this.getCustomJson();
-        console.assert(Object.keys(emptyJson).length === 0, 'Should clear JSON for empty input');
-        
-        console.log('✅ Custom JSON field test passed');
-        
-    } catch (error) {
-        console.error('❌ Custom JSON field test failed:', error);
-    }
-}
-```
-
-#### **✅ CORRECT: Browser DevTools Integration**
-
-```javascript
-// ✅ CORRECT: Expose debug methods globally (from our implementation)
-mounted() {
-    // ... existing mounted logic ...
-    
-    // Expose debug methods for browser console testing
-    if (process.env.NODE_ENV === 'development') {
-        window.dluxDebug = {
-            editor: this,
-            debugEditor: () => this.debugEditor(),
-            debugYjs: () => this.debugYjs(),
-            debugMemory: () => this.debugMemoryUsage(),
-            testLifecycle: () => this.testDocumentLifecycle(),
-            testCollaboration: () => this.testCollaborativeFeatures(),
-            testErrors: () => this.testErrorHandling(),
-            testCustomJson: () => this.testCustomJsonField(),
-            
-            // Quick status checks
-            status: () => this.unifiedStatusInfo(),
-            content: () => this.getEditorContent(),
-            yjsSize: () => this.getYjsDocumentSize(),
-            
-            // Force state changes for testing
-            forceError: () => this.handleContentValidationError('test', new Error('Test error')),
-            forceOffline: () => this.switchToOfflineMode(),
-            forceCleanup: () => this.fullCleanupCollaboration()
-        };
-        
-        console.log('🛠️ Debug tools available at window.dluxDebug');
-    }
-}
-```
-
-#### **✅ CORRECT: Automated Testing Helpers**
-
-```javascript
-// ✅ CORRECT: Test runner for CI/CD (from our implementation patterns)
-async runAllTests() {
-    console.log('🧪 Running all TipTap tests...');
-    
-    const tests = [
-        { name: 'Document Lifecycle', fn: () => this.testDocumentLifecycle() },
-        { name: 'Collaborative Features', fn: () => this.testCollaborativeFeatures() },
-        { name: 'Error Handling', fn: () => this.testErrorHandling() },
-        { name: 'Custom JSON Field', fn: () => this.testCustomJsonField() },
-        { name: 'Status Indicator', fn: () => this.testStatusIndicator() }
-    ];
-    
-    const results = [];
-    
-    for (const test of tests) {
-        try {
-            console.log(`\n🧪 Running ${test.name}...`);
-            await test.fn();
-            results.push({ name: test.name, status: 'PASS' });
-            console.log(`✅ ${test.name} PASSED`);
-        } catch (error) {
-            results.push({ name: test.name, status: 'FAIL', error: error.message });
-            console.error(`❌ ${test.name} FAILED:`, error.message);
-        }
-    }
-    
-    // Summary
-    const passed = results.filter(r => r.status === 'PASS').length;
-    const failed = results.filter(r => r.status === 'FAIL').length;
-    
-    console.log(`\n📊 Test Results: ${passed} passed, ${failed} failed`);
-    
-    if (failed > 0) {
-        console.log('\n❌ Failed tests:');
-        results.filter(r => r.status === 'FAIL').forEach(r => {
-            console.log(`  - ${r.name}: ${r.error}`);
-        });
-    }
-    
-    return { passed, failed, results };
-}
-```
-
-### **Testing Best Practices Summary**
-
-1. **Debug Helpers**: Comprehensive state inspection methods
-2. **Performance Monitoring**: Memory usage and timing measurements
-3. **Status Testing**: All indicator states and transitions
-4. **Integration Testing**: Complete document lifecycle testing
-5. **Error Simulation**: Controlled error condition testing
-6. **DevTools Integration**: Browser console debugging interface
-7. **Automated Testing**: CI/CD compatible test runners
-
-### **Browser Console Testing Commands**
-
-```javascript
-// Available in development mode:
-window.dluxDebug.debugEditor()     // Show editor state
-window.dluxDebug.debugYjs()        // Show Y.js document state
-window.dluxDebug.status()          // Current status indicator
-window.dluxDebug.testLifecycle()   // Run lifecycle tests
-window.dluxDebug.forceError()      // Simulate error condition
-```
-
-// ... existing code ...
-
-## ✅ IMPLEMENTATION AUDIT: VERIFIED TIPTAP.DEV COMPLIANCE
-
-### **Comprehensive Audit Results (January 2025)**
-
-Our implementation has been thoroughly audited against official TipTap.dev documentation and best practices. All fixes are **VERIFIED COMPLIANT** with TipTap's recommended patterns.
-
-#### **✅ CRITICAL FIX: Custom JSON Validation Hang (VERIFIED COMPLIANT)**
-
-**Issue**: Custom JSON validation appeared to hang, but investigation revealed it was working correctly. The real issue was missing autosave calls for invalid JSON.
-
-**Root Cause Analysis**: 
-1. **Initial assumption**: Feedback loops between Y.js observers and Vue input handlers
-2. **Actual Issue**: When JSON parsing failed, `debouncedAutoSave()` wasn't called in the catch block
-3. **Result**: Invalid JSON didn't trigger the autosave indicator to show unsaved changes
-4. **User perception**: Validation appeared to "hang" because no UI feedback was provided
-
-**TipTap-Compliant Solution**:
-```javascript
-// ✅ CORRECT: Feedback loop prevention (defensive programming)
-isUpdatingCustomJson: false,
-
-// ✅ CORRECT: Autosave for ALL validation outcomes
-validateCustomJson() {
-    this.isUpdatingCustomJson = true;
-    
-    if (!this.customJsonString.trim()) {
-        // Clear existing custom JSON
-        const existingKeys = Object.keys(this.getCustomJson());
-        existingKeys.forEach(key => this.removeCustomJsonField(key));
-        
-        this.isUpdatingCustomJson = false;
-        this.debouncedAutoSave(); // ✅ Autosave for empty JSON
-        return;
-    }
-    
-    try {
-        const parsedJson = JSON.parse(this.customJsonString);
-        this.customJsonError = '';
-        
-        // Clear existing and set new custom JSON fields
-        const existingKeys = Object.keys(this.getCustomJson());
-        existingKeys.forEach(key => this.removeCustomJsonField(key));
-        Object.entries(parsedJson).forEach(([key, value]) => {
-            this.setCustomJsonField(key, value);
-        });
-        
-        this.isUpdatingCustomJson = false;
-        this.debouncedAutoSave(); // ✅ Autosave for valid JSON
-        
-    } catch (error) {
-        this.customJsonError = error.message;
-        this.isUpdatingCustomJson = false;
-        this.debouncedAutoSave(); // ✅ FIX: Autosave for invalid JSON too
-    }
-}
-
-// ✅ CORRECT: Observer with feedback protection
-customJson.observe((event) => {
-    this.updateCustomJsonDisplay();
-    
-    if (!this.isUpdatingCustomJson) {
-        this.hasUnsavedChanges = true;
-        this.debouncedAutoSave();
-    }
-});
-
-// ✅ CORRECT: Display update with feedback protection
-updateCustomJsonDisplay() {
-    if (this.isUpdatingCustomJson) {
-        console.log('🔄 Skipping display update to prevent feedback loop');
-        return;
-    }
-    // ... update logic ...
-}
-```
-
-**Critical Fix**: Custom JSON persistence on refresh was missing because the main `loadDocument()` method wasn't calling `loadCustomJsonFromYjs()`.
-
-**Root Cause**: Multiple document loading paths existed, but only some had the custom JSON loading calls:
-- ✅ `loadDocumentWithoutCloudConnection()` - Had the call
-- ✅ `connectToCollaborationServer()` onSynced - Had the call  
-- ❌ `loadDocument()` - **MISSING** the call (main loading path)
-- ❌ `loadDocumentWithoutUIUpdate()` - **MISSING** the call
-
-**Solution**: Added `loadCustomJsonFromYjs()` method and called it in the same places as `loadPublishOptionsFromYjs()`:
-```javascript
-// ✅ CORRECT: Load custom JSON from Y.js during document loading
-loadCustomJsonFromYjs() {
-    if (!this.ydoc) return;
-    
-    this.isUpdatingCustomJson = true;
-    try {
-        const customJsonData = this.getCustomJson();
-        const newDisplayJson = Object.keys(customJsonData).length > 0 
-            ? JSON.stringify(customJsonData, null, 2) : '';
-        
-        this.customJsonString = newDisplayJson;
-        this.customJsonError = '';
+        console.error('Failed to load document:', error);
+        this.showError = true;
+        this.errorMessage = error.message;
     } finally {
-        this.isUpdatingCustomJson = false;
+        this.isLoading = false;
     }
 }
-
-// ✅ CORRECT: Added to ALL document loading methods
-loadDocument() {
-    // ... after schema initialization ...
-    this.loadPublishOptionsFromYjs();
-    this.loadCustomJsonFromYjs(); // ✅ FIXED: Added to main loading path
-}
-
-loadDocumentWithoutCloudConnection() {
-    // ... after IndexedDB sync ...
-    this.loadPublishOptionsFromYjs();
-    this.loadCustomJsonFromYjs(); // ✅ Already had this
-}
-
-loadDocumentWithoutUIUpdate() {
-    // ... after schema initialization ...
-    this.loadPublishOptionsFromYjs();
-    this.loadCustomJsonFromYjs(); // ✅ FIXED: Added to this path too
-}
-
-// ✅ CORRECT: Enhanced observer for remote changes
-customJson.observe((event) => {
-    if (event.transaction.origin !== this.ydoc.clientID) {
-        // Remote change - reload from Y.js into textarea
-        this.loadCustomJsonFromYjs();
-    } else {
-        // Local change - just update display
-        this.updateCustomJsonDisplay();
-    }
-});
 ```
 
-**Key Learning**: Always call autosave for ALL validation outcomes to maintain proper UI state indicators.
-
-**Compliance Verification**: ✅ **FULLY COMPLIANT**
-- Uses proper state management flags (TipTap pattern)
-- Prevents observer feedback loops (ProseMirror best practice)
-- Maintains Y.js transaction integrity
-- Follows offline-first architecture
-- Provides consistent UI feedback for all validation states
-
-#### **✅ ENHANCEMENT: Permission Validation & User-Friendly Error Messages (VERIFIED COMPLIANT)**
-
-**Issue**: Custom JSON operations had permission validation gaps and cryptic error messages.
-
-**Root Cause Analysis**:
-1. **Permission Mismatch**: `setCustomJsonField` called `validatePermission('setCustomJsonField')` but permission logic only checked for `'setCustomJson'`
-2. **Missing Operations**: `'setCustomJsonField'` and `'removeCustomJsonField'` weren't in the permission validation list
-3. **Cryptic Error Messages**: Raw JSON parsing errors like `"Unexpected token 'a', "tabe" is not valid JSON"` weren't user-friendly
-
-**TipTap-Compliant Solution**:
+### Pattern 3: Tier Transitions (Local ↔ Collaborative)
 
 ```javascript
-// ✅ CORRECT: Complete permission validation coverage
-validatePermission(operation) {
-    // ... existing permission checks ...
+async upgradeToCollaborative() {
+    if (this.wsProvider) return; // Already collaborative
     
-    // Enhanced operation list includes all custom JSON operations
-    if (['edit', 'addTag', 'addBeneficiary', 'setCustomJson', 'setCustomJsonField', 'removeCustomJsonField'].includes(operation) && 
-        userPermission.permissionType === 'readonly') {
-        console.warn(`🚫 Blocked ${operation}: requires edit permissions, user has 'readonly'`);
-        return false;
+    try {
+        // 1. Don't destroy editor! Just add provider
+        this.wsProvider = new HocuspocusProvider({
+            url: 'ws://localhost:1234',
+            name: this.ydoc.guid,
+            document: this.ydoc,
+            onAuthenticated: () => {
+                console.log('Authenticated with collaboration server');
+            }
+        });
+        
+        // 2. Wait for sync
+        await new Promise(resolve => {
+            this.wsProvider.on('synced', resolve);
+        });
+        
+        // 3. Add CollaborationCaret extension
+        this.editor.extensionManager.extensions.push(
+            CollaborationCaret.configure({
+                provider: this.wsProvider,
+                user: {
+                    name: this.username,
+                    color: this.userColor
+                }
+            })
+        );
+        
+        // 4. Update UI
+        this.isCollaborative = true;
+        
+    } catch (error) {
+        console.error('Failed to upgrade to collaborative:', error);
+        // Rollback
+        if (this.wsProvider) {
+            this.wsProvider.destroy();
+            this.wsProvider = null;
+        }
+    }
+}
+
+async downgradeToLocal() {
+    if (!this.wsProvider) return; // Already local
+    
+    // 1. Remove CollaborationCaret
+    const caretIndex = this.editor.extensionManager.extensions
+        .findIndex(ext => ext.name === 'collaborationCaret');
+    if (caretIndex > -1) {
+        this.editor.extensionManager.extensions.splice(caretIndex, 1);
+    }
+    
+    // 2. Disconnect WebSocket
+    this.wsProvider.disconnect();
+    await this.wsProvider.destroy();
+    this.wsProvider = null;
+    
+    // 3. Update UI
+    this.isCollaborative = false;
+    
+    // Note: IndexedDB provider continues working
+    console.log('Downgraded to local-only mode');
+}
+```
+
+### Pattern 4: Reactive Metadata Updates
+
+```javascript
+// Safe pattern for reactive metadata updates
+data() {
+    return {
+        // Reactive copies for Vue
+        documentTitle: '',
+        documentTags: [],
+        lastModified: null,
+        
+        // Observers
+        metadataObserver: null
+    }
+},
+
+methods: {
+    setupMetadataSync() {
+        const metadata = this.ydoc.getMap('metadata');
+        
+        // Initial sync from Y.js to Vue
+        this.documentTitle = metadata.get('title') || '';
+        this.documentTags = metadata.get('tags') || [];
+        
+        // Observe Y.js changes
+        this.metadataObserver = metadata.observe(event => {
+            // Update Vue state when Y.js changes
+            event.keysChanged.forEach(key => {
+                const value = metadata.get(key);
+                
+                switch(key) {
+                    case 'title':
+                        this.documentTitle = value || '';
+                        break;
+                    case 'tags':
+                        this.documentTags = [...(value || [])];
+                        break;
+                    case 'lastModified':
+                        this.lastModified = value;
+                        break;
+                }
+            });
+        });
+    },
+    
+    // Safe update from Vue to Y.js
+    updateTitle(newTitle) {
+        const metadata = this.ydoc.getMap('metadata');
+        metadata.set('title', newTitle);
+        // Y.js observer will update Vue state
+    },
+    
+    cleanup() {
+        // Don't forget to clean up observer!
+        if (this.metadataObserver) {
+            const metadata = this.ydoc.getMap('metadata');
+            metadata.unobserve(this.metadataObserver);
+            this.metadataObserver = null;
+        }
+    }
+},
+
+// Watch for Vue state changes
+watch: {
+    documentTitle(newTitle) {
+        // Debounce to avoid update loops
+        this.debouncedUpdateTitle(newTitle);
+    }
+},
+
+created() {
+    this.debouncedUpdateTitle = debounce((title) => {
+        this.updateTitle(title);
+    }, 500);
+}
+```
+
+### Pattern 5: Error Recovery
+
+```javascript
+// Comprehensive error handling
+async initializeWithRecovery(docId) {
+    const maxRetries = 3;
+    let lastError;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Initialization attempt ${attempt}/${maxRetries}`);
+            
+            // Clean up any partial state
+            await this.cleanup();
+            
+            // Try initialization
+            await this.initializeDocument(docId);
+            
+            // Success!
+            return;
+            
+        } catch (error) {
+            lastError = error;
+            console.error(`Attempt ${attempt} failed:`, error);
+            
+            // Specific recovery strategies
+            if (error.message.includes('mismatched transaction')) {
+                // Y.js state corruption - full reset needed
+                await this.hardReset(docId);
+                
+            } else if (error.message.includes('WebSocket')) {
+                // Connection issue - try local-only
+                this.isCollaborative = false;
+                
+            } else if (error.message.includes('IndexedDB')) {
+                // Storage issue - clear and retry
+                await this.clearLocalStorage(docId);
+            }
+            
+            // Wait before retry
+            if (attempt < maxRetries) {
+                await new Promise(resolve => 
+                    setTimeout(resolve, 1000 * attempt)
+                );
+            }
+        }
+    }
+    
+    // All attempts failed
+    throw new Error(`Failed to initialize after ${maxRetries} attempts: ${lastError.message}`);
+}
+
+async hardReset(docId) {
+    console.warn('Performing hard reset for document:', docId);
+    
+    // 1. Force cleanup
+    try {
+        if (this.editor) this.editor.destroy();
+        if (this.wsProvider) await this.wsProvider.destroy();
+        if (this.indexeddbProvider) await this.indexeddbProvider.destroy();
+        if (this.ydoc) this.ydoc.destroy();
+    } catch (e) {
+        console.error('Cleanup error during hard reset:', e);
+    }
+    
+    // 2. Clear all references
+    this.editor = null;
+    this.wsProvider = null;
+    this.indexeddbProvider = null;
+    this.ydoc = null;
+    
+    // 3. Clear IndexedDB
+    const dbs = await indexedDB.databases();
+    for (const db of dbs) {
+        if (db.name.includes(docId)) {
+            await indexedDB.deleteDatabase(db.name);
+        }
+    }
+    
+    // 4. Clear memory
+    if (global.gc) global.gc();
+}
+```
+
+---
+
+## 🪤 Common Pitfalls & Solutions
+
+### Pitfall 1: "RangeError: Applying a mismatched transaction"
+
+**Cause**: Y.js and TipTap state mismatch, usually from:
+- Calling `setContent()` after Y.js is initialized
+- Multiple editors bound to same Y.js doc
+- Modifying Y.js during TipTap transaction
+
+**Solution**:
+```javascript
+// Add transaction origin tracking
+const editor = new Editor({
+    onUpdate: ({ transaction }) => {
+        // Track where updates come from
+        console.log('Update origin:', transaction.origin);
+        
+        if (transaction.origin === 'y-sync') {
+            // Update from Y.js - normal
+        } else if (transaction.origin === null) {
+            // Local edit - normal
+        } else {
+            // Custom origin - be careful!
+            console.warn('Unusual transaction origin:', transaction.origin);
+        }
+    }
+});
+
+// Use origins when making Y.js updates
+ydoc.transact(() => {
+    metadata.set('title', 'New Title');
+}, 'metadata-update'); // Custom origin for debugging
+```
+
+### Pitfall 2: Content Not Saving
+
+**Cause**: Provider not properly initialized or destroyed too early
+
+**Solution**:
+```javascript
+// Ensure provider is ready before editing
+async ensureProviderReady() {
+    if (!this.indexeddbProvider) {
+        throw new Error('No persistence provider');
+    }
+    
+    // Check if synced
+    if (!this.indexeddbProvider.synced) {
+        await new Promise(resolve => {
+            this.indexeddbProvider.once('synced', resolve);
+        });
     }
     
     return true;
 }
 
-// ✅ CORRECT: Enhanced debugging for permission validation
-setCustomJsonField(key, value) {
-    console.log('🔧 setCustomJsonField called:', key, 'value:', value);
-    const hasPermission = this.validatePermission('setCustomJsonField');
-    console.log('🔐 setCustomJsonField permission check result:', hasPermission);
-    if (!hasPermission) {
-        console.warn('❌ setCustomJsonField blocked by permission validation');
-        return false;
-    }
+// Verify saves are working
+async verifySave() {
+    const beforeContent = this.editor.getHTML();
     
-    // ... rest of implementation ...
-}
-
-// ✅ CORRECT: User-friendly error messages with guidance
-validateCustomJson() {
-    // ... validation logic ...
+    // Force a sync
+    await this.indexeddbProvider.whenSynced;
     
-    try {
-        const parsedJson = JSON.parse(this.customJsonString);
-        // ... success handling ...
-    } catch (error) {
-        console.log('❌ JSON parsing failed:', error.message);
-        
-        // Provide clear, helpful error message
-        let userFriendlyError = 'Invalid JSON format. ';
-        
-        if (error.message.includes('Unexpected token')) {
-            userFriendlyError += 'Check for missing quotes, commas, or brackets. ';
-        } else if (error.message.includes('Unexpected end')) {
-            userFriendlyError += 'JSON appears incomplete - check for missing closing brackets or quotes. ';
-        }
-        
-        userFriendlyError += 'Example: {"key": "value", "number": 123}';
-        
-        this.customJsonError = userFriendlyError;
-        
-        // ... rest of error handling ...
-    }
-}
-```
-
-**Key Improvements**:
-1. **Complete Permission Coverage**: All custom JSON operations now properly validated
-2. **Enhanced Debugging**: Comprehensive logging for permission validation flow
-3. **User-Friendly Error Messages**: Clear guidance instead of cryptic parsing errors
-4. **Consistent UX**: Follows TipTap's principle of helpful user feedback
-
-**TipTap Best Practice Alignment**:
-- **Data Integrity**: Only valid JSON saved to collaborative state (maintains clean Y.js documents)
-- **User Experience**: Clear error messages guide users toward success
-- **Permission Model**: Consistent with TipTap's collaborative permission patterns
-- **Debugging Support**: Comprehensive logging for troubleshooting
-
-**Error Message Examples**:
-- **Before**: `"Unexpected token 'a', "tabe" is not valid JSON"`
-- **After**: `"Invalid JSON format. Check for missing quotes, commas, or brackets. Example: {"key": "value", "number": 123}"`
-
-**Compliance Verification**: ✅ **FULLY COMPLIANT**
-- Maintains TipTap's data integrity principles (only valid JSON in collaborative state)
-- Follows collaborative permission validation patterns
-- Provides user-friendly feedback (TipTap UX best practice)
-- Uses proper debugging and logging patterns
-
-#### **✅ COMPLETE CUSTOM JSON SOLUTION: TipTap Best Practices Validation**
-
-Our custom JSON implementation has been validated against all TipTap.dev best practices:
-
-**✅ Architecture Compliance**:
-- **Y.js Maps for Non-Editor Fields**: Uses `ydoc.getMap('customJson')` instead of TipTap editor content
-- **Offline-First Pattern**: Y.js document available immediately with temp document strategy
-- **Collaborative State Management**: Granular field updates prevent conflicts between users
-- **Observer Pattern**: Proper Y.js observer setup with feedback loop prevention
-
-**✅ Data Integrity**:
-- **Valid JSON Only**: Invalid JSON never saved to collaborative state (maintains clean Y.js documents)
-- **Atomic Operations**: Clear existing fields before setting new ones (prevents partial updates)
-- **Transaction Safety**: Uses Y.js transaction patterns for consistent state updates
-- **Permission Validation**: Complete coverage of all custom JSON operations
-
-**✅ User Experience**:
-- **Real-Time Feedback**: Immediate status updates on every keystroke
-- **Debounced Validation**: 1-second delay prevents excessive Y.js updates
-- **User-Friendly Errors**: Clear guidance instead of cryptic JSON parsing errors
-- **Visual Indicators**: Proper autosave indicators for all validation outcomes
-
-**✅ Performance Optimization**:
-- **Debounced Updates**: Prevents excessive Y.js synchronization
-- **Temp Document Strategy**: Y.js document created immediately, IndexedDB persistence only when needed
-- **Granular Sync**: Only changed fields synchronize, not entire JSON object
-- **Efficient Display Updates**: Smart textarea synchronization with user input detection
-
-**✅ Collaborative Features**:
-- **Multi-User Editing**: Different users can edit different JSON fields simultaneously
-- **Conflict Resolution**: Y.js CRDT automatically resolves conflicts
-- **Real-Time Sync**: Changes appear instantly for all connected users
-- **Persistence**: Automatic IndexedDB storage with Y.js integration
-
-**✅ Error Handling & Debugging**:
-- **Comprehensive Logging**: Full debug trail for troubleshooting
-- **Permission Debugging**: Clear logs for permission validation failures
-- **Feedback Loop Prevention**: Proper flags to prevent observer loops
-- **Graceful Degradation**: Works offline and online with consistent behavior
-
-**Final Validation**: Our custom JSON solution is **100% compliant** with TipTap.dev best practices and follows the official patterns for collaborative non-editor field management.
-
-#### **✅ CRITICAL ARCHITECTURE COMPLIANCE FIX: Lazy Y.js → Temp Document Migration (VERIFIED COMPLIANT)**
-
-**Issue**: Custom JSON and other collaborative methods were still using outdated **lazy Y.js creation patterns** that violated our current **temp document architecture**.
-
-**Root Cause Analysis**:
-1. **Architecture Evolution**: Our implementation evolved from lazy Y.js creation to immediate temp Y.js document creation
-2. **Compliance Gap**: Custom JSON methods still had fallback code for `!this.ydoc` scenarios with lazy creation triggers
-3. **Violation Pattern**: Methods were calling `this.debouncedYjsCreation()` when Y.js documents should already exist
-
-**Current Architecture (Temp Document Strategy)**:
-- **Rule**: All editors have Y.js documents from creation (temp documents)
-- **Implementation**: Y.js documents exist immediately, no lazy creation needed
-- **Benefit**: Eliminates race conditions and ensures consistent collaborative state
-
-**TipTap-Compliant Solution**:
-
-```javascript
-// ❌ OLD: Lazy Y.js creation pattern (ARCHITECTURE VIOLATION)
-setCustomJsonField(key, value) {
-    if (this.ydoc) {
-        // Use Y.js collaborative map
-        const customJson = this.ydoc.getMap('customJson');
-        customJson.set(key, value);
-        return true;
-    } else {
-        // Y.js not ready - use local state and trigger creation
-        this.content.custom_json[key] = value;
-        if (this.lazyYjsComponents) {
-            this.debouncedYjsCreation(); // ❌ VIOLATION
-        }
-        return true;
-    }
-}
-
-// ✅ NEW: Temp document architecture compliance
-setCustomJsonField(key, value) {
-    if (this.ydoc) {
-        // Y.js document exists - use collaborative map
-        const customJson = this.ydoc.getMap('customJson');
-        customJson.set(key, value);
-        return true;
-    } else {
-        // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
-        console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
-        console.error('🔍 DEBUG: This should not happen with temp Y.js document strategy');
-        
-        // Fallback to local state but log the violation
-        this.content.custom_json[key] = value;
-        console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
-        
-        return false; // Return false to indicate architecture violation
-    }
-}
-```
-
-**Methods Updated for Architecture Compliance**:
-- `setCustomJsonField()` - Custom JSON field management
-- `removeCustomJsonField()` - Custom JSON field removal
-- `handleCustomJsonInput()` - Custom JSON input handling
-- `addCollaborativeTag()` - Tag addition
-- `removeCollaborativeTag()` - Tag removal
-- `addCollaborativeBeneficiary()` - Beneficiary addition
-- `removeCollaborativeBeneficiary()` - Beneficiary removal
-- `setPublishOption()` - Publish options management
-
-**Key Changes**:
-1. **Removed Lazy Creation**: Eliminated all `this.debouncedYjsCreation()` calls
-2. **Added Architecture Validation**: Clear error logging when Y.js documents are missing
-3. **Violation Detection**: Methods return `false` when architecture violations occur
-4. **Debugging Enhancement**: Comprehensive logging for troubleshooting architecture issues
-
-**Architecture Benefits**:
-- **Consistent State**: All editors have Y.js documents from creation
-- **No Race Conditions**: Eliminates timing issues with lazy creation
-- **Clear Violations**: Immediate detection of architecture compliance issues
-- **Better Debugging**: Clear error messages for troubleshooting
-
-**Compliance Verification**: ✅ **FULLY COMPLIANT**
-- Follows temp document architecture (Y.js documents exist from editor creation)
-- Eliminates lazy Y.js creation patterns (outdated approach)
-- Provides clear violation detection and logging
-- Maintains TipTap best practices for collaborative state management
-
-#### **✅ CRITICAL FIX: TaskItem Checkbox Autosave (VERIFIED COMPLIANT)**
-
-**Issue**: TaskItem checkboxes were not triggering autosave because they bypass TipTap's normal `onUpdate` callback mechanism.
-
-**Official TipTap Solution**: Use `onTransaction` event to capture ALL ProseMirror state changes, including TaskItem checkbox changes.
-
-**Our Implementation** (VERIFIED COMPLIANT):
-```javascript
-// ✅ CORRECT: Both onUpdate and onTransaction for comprehensive coverage
-onUpdate: ({ editor }) => {
-    // Handles: typing, formatting, content insertion/deletion
-    if (this.validatePermission('edit')) {
-        this.content.body = editor.getHTML();
-        this.hasUnsavedChanges = true;
-        this.debouncedAutoSave();
-    }
-},
-onTransaction: ({ editor, transaction }) => {
-    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
-    // The transaction event fires for checkbox changes that onUpdate misses
-    if (transaction.docChanged && this.validatePermission('edit')) {
-        console.log('📝 Transaction detected document change (includes checkbox changes)');
-        this.content.body = editor.getHTML();
-        this.hasUnsavedChanges = true;
-        this.debouncedAutoSave();
-    }
-}
-```
-
-**Why This is the Official TipTap Pattern**:
-1. **TaskItem checkboxes use direct DOM manipulation** via `addEventListener('change')`
-2. **This bypasses TipTap's normal `onUpdate` callback mechanism** by design
-3. **The `onTransaction` event captures ALL ProseMirror state changes**
-4. **This is the official TipTap.dev recommended approach** for comprehensive change detection
-
-**Evidence from TipTap.dev Documentation**:
-- Official Events API: "transaction - When the editor state changes due to any operation"
-- GitHub Issue #3676: Multiple developers confirmed `onUpdate` doesn't fire for TaskItem checkboxes
-- TipTap maintainer recommendation: Use `onTransaction` for comprehensive state change detection
-
-#### **✅ OFFLINE-FIRST ARCHITECTURE (VERIFIED COMPLIANT)**
-
-**Our Implementation Pattern**:
-```javascript
-// ✅ CORRECT: Offline-first document loading
-async loadDocumentWithoutCloudConnection(file) {
-    // STEP 1: Clean up existing resources
-    await this.cleanupCurrentDocument();
+    // Reload and compare
+    const testDoc = new Y.Doc({ guid: this.ydoc.guid });
+    const testProvider = new IndexeddbPersistence(this.ydoc.guid, testDoc);
     
-    // STEP 2: Create Y.js document + IndexedDB immediately
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-    
-    // STEP 3: Wait for IndexedDB sync (loads existing content)
     await new Promise(resolve => {
-        this.indexeddbProvider.on('synced', resolve);
+        testProvider.once('synced', resolve);
     });
     
-    // STEP 4: Store document name in Y.js config
-    if (file.documentName || file.name || file.title) {
-        this.setDocumentName(file.documentName || file.name || file.title);
-    }
-    
-    // STEP 5: Create editors (content loads automatically from Y.js/IndexedDB)
-    await this.createOfflineFirstCollaborativeEditors(bundle);
-    
-    // STEP 6: Content is now visible from local storage
-    console.log('📄 ALL content (filename, title, body) now visible from local storage');
-}
-
-// ✅ CORRECT: Separate cloud connection (non-blocking)
-async connectToCloudInBackground(file) {
-    // Connect to collaboration server AFTER content is loaded
-    await this.connectToCollaborationServer(file);
-}
-```
-
-**Key Compliance Points**:
-- ✅ **Y.js + IndexedDB created immediately** (TipTap best practice)
-- ✅ **Content loads from local storage first** (offline-first)
-- ✅ **Cloud connection is separate and non-blocking** (performance)
-- ✅ **Document name stored in Y.js config** (persistence)
-- ✅ **No manual content setting for existing documents** (TipTap handles automatically)
-
-#### **✅ PUBLISH OPTIONS PERSISTENCE (VERIFIED COMPLIANT)**
-
-**Issue**: Publish options checkboxes were saving but not persisting on page refresh.
-
-**Our Solution** (VERIFIED COMPLIANT):
-```javascript
-// ✅ CORRECT: Y.js Map for atomic publish options
-handleCommentOptionChange() {
-    // Skip if loading from Y.js to prevent feedback loops
-    if (this.isLoadingPublishOptions) return;
-    
-    // Set flag to prevent Y.js observer from clearing unsaved flag
-    this.isUpdatingPublishOptions = true;
-    
-    // Store in Y.js with proper format conversion
-    this.setPublishOption('allowVotes', this.commentOptions.allowVotes);
-    this.setPublishOption('percentHbd', this.commentOptions.percentHbd ? 10000 : 5000);
-    
-    // Clear flag and trigger autosave
-    setTimeout(() => { this.isUpdatingPublishOptions = false; }, 200);
-    this.debouncedAutoSave();
-}
-
-// ✅ CORRECT: Load from Y.js on document load
-loadPublishOptionsFromYjs() {
-    if (!this.ydoc) return;
-    
-    this.isLoadingPublishOptions = true;
-    const publishOptions = this.ydoc.getMap('publishOptions');
-    
-    // Convert Y.js format to Vue checkbox format
-    this.commentOptions.allowVotes = Boolean(publishOptions.get('allowVotes'));
-    this.commentOptions.percentHbd = (publishOptions.get('percentHbd') === 10000);
-    
-    this.isLoadingPublishOptions = false;
-}
-
-// ✅ CORRECT: Y.js observer for real-time updates
-publishOptions.observe((event) => {
-    // Only update for remote changes (prevent feedback loops)
-    if (event.transaction.origin !== this.ydoc.clientID) {
-        this.isLoadingPublishOptions = true;
-        
-        // Update Vue data with format conversion
-        event.changes.keys.forEach((change, key) => {
-            const newValue = publishOptions.get(key);
-            if (key === 'percentHbd') {
-                this.commentOptions.percentHbd = (newValue === 10000);
-            }
-        });
-        
-        this.isLoadingPublishOptions = false;
-    }
-});
-```
-
-**Why This is TipTap Best Practice**:
-- ✅ **Y.js Maps for non-editor fields** (official TipTap pattern)
-- ✅ **Atomic updates prevent conflicts** (collaborative editing)
-- ✅ **Format conversion between Y.js and Vue** (data consistency)
-- ✅ **Feedback loop prevention** (proper observer patterns)
-- ✅ **Offline-first persistence** (IndexedDB automatic)
-
-#### **✅ EXTENSION LIFECYCLE MANAGEMENT (VERIFIED COMPLIANT)**
-
-**Our Implementation**:
-```javascript
-// ✅ CORRECT: Static extension configuration
-const getLocalExtensions = (field) => {
-    return [
-        StarterKit.configure({
-            undoRedo: false, // Y.js handles history
-            ...(field === 'title' ? {
-                heading: false,
-                bulletList: false,
-                orderedList: false
-            } : {})
-        }),
-        Collaboration.configure({
-            document: this.ydoc,
-            field: field
-        }),
-        Placeholder.configure({
-            placeholder: field === 'title' ? 'Enter title...' : 'Start writing...'
-        }),
-        // Enhanced extensions loaded from start
-        ...this.getEnhancedExtensions(field, bundle, { includeEnhanced: true })
-    ];
-};
-
-// ✅ CORRECT: All extensions included from editor creation
-this.titleEditor = new Editor({
-    extensions: getLocalExtensions('title'),
-    editable: !this.isReadOnlyMode,
-    onUpdate: ({ editor }) => { /* ... */ },
-    onTransaction: ({ editor, transaction }) => { /* ... */ }
-});
-```
-
-**Compliance Points**:
-- ✅ **Static extension configuration** (no dynamic addition/removal)
-- ✅ **All extensions loaded from start** (including Link, Typography, TaskList, TaskItem)
-- ✅ **Proper Y.js integration** (Collaboration extension from creation)
-- ✅ **Field-specific configuration** (title vs body differences)
-
-#### **✅ MEMORY MANAGEMENT (VERIFIED COMPLIANT)**
-
-**Our Cleanup Pattern**:
-```javascript
-// ✅ CORRECT: Proper cleanup sequence
-async cleanupCurrentDocument() {
-    // 1. Disconnect WebSocket provider first
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider.destroy();
-        this.provider = null;
-    }
-    
-    // 2. Destroy editors before Y.js document
-    if (this.titleEditor) {
-        this.titleEditor.destroy();
-        this.titleEditor = null;
-    }
-    if (this.bodyEditor) {
-        this.bodyEditor.destroy();
-        this.bodyEditor = null;
-    }
-    
-    // 3. Destroy IndexedDB persistence before Y.js document
-    if (this.indexeddbProvider) {
-        this.indexeddbProvider.destroy();
-        this.indexeddbProvider = null;
-    }
-    
-    // 4. Destroy Y.js document LAST
-    if (this.ydoc) {
-        this.ydoc.destroy();
-        this.ydoc = null;
-    }
-}
-```
-
-**Why This Order Matters**:
-- ✅ **WebSocket first** (prevents network errors)
-- ✅ **Editors before Y.js** (prevents reference errors)
-- ✅ **IndexedDB before Y.js** (proper persistence cleanup)
-- ✅ **Y.js document last** (prevents orphaned references)
-
-### **Performance Optimizations (VERIFIED)**
-
-#### **✅ Debouncing Strategy**
-```javascript
-// ✅ CORRECT: Optimized debouncing for different operations
-created() {
-    // Auto-save: 500ms delay (responsive but not excessive)
-    this.debouncedAutoSave = this.debounce(this.performAutoSave, 500);
-    
-    // Y.js creation: 2s delay (avoid disrupting typing)
-    this.debouncedYjsCreation = this.debounce(this.createLazyYjsDocument, 2000);
-    
-    // Custom JSON validation: 1s delay (balance responsiveness with performance)
-    this.debouncedValidateCustomJson = this.debounce(this.validateCustomJson, 1000);
-}
-```
-
-#### **✅ Initialization Race Condition Prevention**
-```javascript
-// ✅ CORRECT: Prevent temp document creation during initialization
-async createOfflineFirstCollaborativeEditors(bundle) {
-    // Set flag to prevent temp document creation during initialization
-    this.isInitializingEditors = true;
-    
-    // ... create editors ...
-    
-    // Clear initialization flag after delay to allow TipTap's async events to complete
-    setTimeout(() => {
-        this.isInitializingEditors = false;
-        console.log('🎯 Editor initialization complete - ready for real user edits');
-    }, 500); // 500ms delay ensures all TipTap initialization events have fired
-}
-```
-
-### **Error Handling (VERIFIED COMPLIANT)**
-
-#### **✅ Content Validation Error Handling**
-```javascript
-// ✅ CORRECT: Handle content validation errors gracefully
-handleContentValidationError(editorType, error, disableCollaboration) {
-    console.error(`🚨 Content validation error in ${editorType} editor:`, error);
-    
-    if (this.isCollaborativeMode && disableCollaboration) {
-        console.warn('🔒 Disabling collaboration due to content validation error');
-        disableCollaboration();
-        this.connectionStatus = 'error';
-        
-        // Show user-friendly error message
-        const message = `Content validation error detected in ${editorType}. ` +
-                      `This may be due to incompatible content from a different app version. ` +
-                      `Please refresh the page to continue editing.`;
-        
-        setTimeout(() => {
-            if (confirm(message + '\n\nRefresh page now?')) {
-                window.location.reload();
-            }
-        }, 100);
-    }
-}
-```
-
-### **FINAL COMPLIANCE VERIFICATION**
-
-#### **✅ ALL TIPTAP.DEV BEST PRACTICES FOLLOWED**
-
-1. **Editor Lifecycle**: ✅ Static extension configuration, proper destroy → create → load sequence
-2. **Y.js Integration**: ✅ Fresh documents for new content, preserve synced documents for existing
-3. **TaskItem Handling**: ✅ `onTransaction` event for comprehensive change detection
-4. **Collaboration**: ✅ Two-tier system respecting CollaborationCaret requirements
-5. **Content Loading**: ✅ Automatic loading from Y.js/IndexedDB, no manual intervention
-6. **Extension Management**: ✅ All extensions loaded from start, no dynamic changes
-7. **Memory Management**: ✅ Proper cleanup sequence following TipTap architecture
-8. **Error Handling**: ✅ Graceful degradation and user-friendly error messages
-9. **Performance**: ✅ Optimized debouncing, initialization handling, memory usage
-10. **Offline-First**: ✅ Y.js + IndexedDB before cloud, content loads locally first
-
-#### **✅ OFFLINE-FIRST ARCHITECTURE VERIFIED**
-
-Our implementation is **100% offline-first compliant**:
-
-1. **Content Loads Locally First**: Y.js + IndexedDB sync before any cloud connection
-2. **Cloud Connection is Optional**: Documents work fully offline with Y.js persistence
-3. **No Blocking Operations**: Cloud connection happens in background after content loads
-4. **Graceful Degradation**: Falls back to local mode if cloud connection fails
-5. **Persistent Storage**: IndexedDB ensures content survives page refreshes
-6. **Real-time Sync**: Y.js provides conflict-free collaborative editing when online
-
-#### **✅ PRODUCTION READY STATUS**
-
-Our TipTap implementation is **production-ready** and follows all official best practices:
-
-- ✅ **TipTap.dev Compliant**: All patterns verified against official documentation
-- ✅ **Offline-First**: Content always available locally, cloud enhances experience
-- ✅ **Performance Optimized**: Efficient memory usage, proper debouncing, fast loading
-- ✅ **Error Resilient**: Graceful handling of all error conditions
-- ✅ **User Experience**: Seamless transitions, clear status indicators, responsive UI
-- ✅ **Collaborative**: Real-time editing with conflict resolution when online
-- ✅ **Maintainable**: Clean architecture, comprehensive documentation, debugging tools
-
-### **IMPLEMENTATION SUMMARY**
-
-Our DLUX TipTap implementation represents a **best-in-class offline-first collaborative editor** that:
-
-1. **Follows ALL TipTap.dev best practices** without exception
-2. **Provides seamless offline-first experience** with Y.js + IndexedDB
-3. **Handles TaskItem checkboxes correctly** using `onTransaction` event
-4. **Persists all data reliably** including publish options and document metadata
-5. **Offers excellent performance** with optimized loading and memory management
-6. **Provides robust error handling** with graceful degradation
-7. **Supports real-time collaboration** when online with conflict-free editing
-
-**No changes needed** - our implementation is fully compliant and production-ready!
-
-## 🔌 **WebSocket Disconnection Patterns & URL Management**
-
-### **Core Principle: WebSocket-Only vs. Full Cleanup**
-
-#### **✅ `disconnectWebSocketOnly()` - Preserves Document State**
-
-**Purpose**: Disconnect from cloud while preserving the collaborative document for offline editing.
-
-**What it preserves**:
-- ✅ Y.js document and IndexedDB persistence
-- ✅ TipTap editors and collaborative extensions
-- ✅ Document content and metadata
-- ✅ Offline editing capability
-
-**What it disconnects**:
-- ❌ WebSocket provider only
-- ❌ Cloud real-time synchronization
-
-```javascript
-// ✅ CORRECT: WebSocket-only disconnect pattern
-disconnectWebSocketOnly() {
-    console.log('🔌 Disconnecting WebSocket only (preserving Y.js document and editors)...');
-    
-    // Only disconnect WebSocket provider, keep everything else intact
-    if (this.provider) {
-        this.provider.disconnect();
-        this.provider.destroy();
-        this.provider = null;
-    }
-    
-    // Keep Y.js document intact for offline editing
-    // Keep IndexedDB persistence active  
-    // Keep editors running for continued editing
-    
-    this.connectionStatus = 'offline';
-    this.connectionMessage = 'Working offline - changes saved locally';
-}
-```
-
-### **✅ URL Management Decision Matrix**
-
-| Scenario | Clear URLs? | Rationale | Implementation |
-|----------|-------------|-----------|----------------|
-| **Document Switching** | ✅ Yes | Replace with new document parameters | `loadCollaborativeFile()` |
-| **Intentional Offline** | ✅ Yes | Prevent auto-reconnect on refresh | `disconnectCollaboration()` |
-| **Cloud → Local Conversion** | ✅ Yes | Document no longer collaborative | `disableCloudCollaboration()` |
-| **Reconnection Prep** | ❌ No | Same document, restore after success | `reconnectToCollaborativeDocument()` |
-| **Network Disconnection** | ❓ Consider Intent | Preserve for UX vs prevent auto-reconnect | `onDisconnect()` handler |
-
-### **✅ Four Main Usage Patterns**
-
-#### **Pattern 1: Document Switching (URL Replacement)**
-```javascript
-// Context: Loading different collaborative document
-// Location: loadCollaborativeFile() line 3190
-this.disconnectWebSocketOnly(); // Preserve editors, disconnect WebSocket
-// ... reset Vue data ...
-this.updateURLWithCollabParams(doc.owner, doc.permlink); // Replace URL params
-```
-
-#### **Pattern 2: Intentional Offline Mode (URL Clearing)**
-```javascript
-// Context: User explicitly disconnects from collaboration
-// Location: disconnectCollaboration() line 8473
-this.disconnectWebSocketOnly(); // Preserve document for offline editing
-this.updateEditorPermissions(); // Enable offline editing
-this.clearCollabURLParams(); // Prevent auto-reconnect on refresh
-```
-
-#### **Pattern 3: Reconnection Preparation (URL Preservation)**
-```javascript
-// Context: Reconnecting to same document
-// Location: reconnectToCollaborativeDocument() line 8580
-this.disconnectWebSocketOnly(); // Clean disconnect before reconnect
-await this.connectToCollaborationServer(this.currentFile); // Reconnect
-this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink); // Restore URL
-```
-
-#### **Pattern 4: Cloud-to-Local Conversion (URL Clearing)**
-```javascript
-// Context: Converting collaborative document to local-only
-// Location: disableCloudCollaboration() line 9836
-this.disconnectWebSocketOnly(); // Keep content, disconnect cloud
-this.currentFile.type = 'local'; // Change document type
-this.isCollaborativeMode = false; // Update mode
-this.clearCollabURLParams(); // Clear collaborative URL params
-```
-
-### **✅ Enhanced URL Management Best Practices**
-
-#### **Clean State Transitions (MANDATORY)**
-```javascript
-// ❌ WRONG: URL parameter stacking
-loadLocalFile() {
-    // Missing cleanup results in:
-    // /post?collab_owner=user1&collab_permlink=doc1&local_owner=user2&local_permlink=doc2
-    this.updateURLWithLocalParams(user2, doc2);
-}
-
-// ✅ CORRECT: Always clean before setting
-loadLocalFile() {
-    this.clearCollabURLParams(); // Clean ALL parameters first
-    this.updateURLWithLocalParams(user2, doc2); // Then set new ones
-}
-```
-
-#### **URL Lifecycle Management**
-```javascript
-// ✅ CORRECT: Complete URL lifecycle pattern
-async documentLifecycleWithURLs() {
-    // 1. Page Load: Check for share links
-    await this.checkAutoConnectParams();
-    
-    // 2. New Document: No URL parameters
-    await this.newDocument(); // Clean state
-    
-    // 3. Connect to Cloud: Update URL
-    await this.connectToCloud(); // Set collaborative parameters
-    
-    // 4. Disconnect: Clear URL (if intentional)
-    await this.disconnectFromCloud(); // Clear parameters
-    
-    // 5. Reconnect: Restore URL
-    await this.reconnectToCloud(); // Restore parameters
-    
-    // 6. Load Different Document: Update URL
-    await this.loadDocument(newDoc); // Replace parameters
-}
-```
-
-### **✅ Edge Case: Network Disconnection Handling**
-
-#### **Current Implementation**
-```javascript
-// Current onDisconnect() handler - may be too aggressive
-onDisconnect() {
-    this.connectionStatus = 'disconnected';
-    
-    // Clears URLs for ALL disconnections (including network issues)
-    if (this.connectionStatus !== 'offline') {
-        this.clearCollabURLParams();
-    }
-}
-```
-
-#### **Recommended Enhancement**
-```javascript
-// ✅ IMPROVED: Distinguish intentional vs unintentional disconnection
-onDisconnect() {
-    this.connectionStatus = 'disconnected';
-    
-    if (this.intentionalDisconnect) {
-        // User explicitly disconnected - clear URLs
-        this.clearCollabURLParams();
-        console.log('🔗 URL cleared due to intentional disconnection');
-    } else {
-        // Network/server issue - preserve URLs for easy reconnection
-        console.log('🔗 URL preserved for reconnection after network issue');
-        this.showReconnectOption = true;
-    }
-    
-    this.intentionalDisconnect = false;
-}
-
-// Set flag when user explicitly disconnects
-disconnectCollaboration() {
-    this.intentionalDisconnect = true; // Flag for onDisconnect handler
-    this.disconnectWebSocketOnly();
-    this.clearCollabURLParams();
-}
-```
-
-### **✅ Key Principles**
-
-1. **WebSocket disconnection ≠ URL clearing** - They serve different purposes
-2. **User intent matters** - Intentional vs. unintentional disconnection
-3. **Document identity preservation** - Same document should maintain same URL
-4. **Shareability consideration** - URLs enable sharing and bookmarking
-5. **Auto-reconnect control** - Clear URLs only when auto-reconnect is undesired
-6. **Clean state transitions** - Always clear before setting new parameters
-7. **TipTap.dev compliance** - Follow proper editor lifecycle patterns
-
-### **✅ Implementation Guidelines**
-
-#### **Always Use `disconnectWebSocketOnly()` When:**
-- Switching between collaborative documents
-- Preparing for reconnection to same document
-- Converting document types while preserving content
-- User explicitly goes offline but wants to continue editing
-
-#### **Clear URLs When:**
-- Loading different document (replace parameters)
-- User explicitly disconnects (prevent auto-reconnect)
-- Converting collaborative → local (no longer collaborative)
-- Document switching requires parameter changes
-
-#### **Preserve URLs When:**
-- Reconnecting to same document
-- Temporary network issues (consider user intent)
-- WebSocket provider recreation for same document
-- Maintaining shareability during brief disconnections
-
-### **✅ URL Parameter Standards**
-
-```javascript
-// Standard URL parameter names
-const URL_PARAMS = {
-    COLLAB_OWNER: 'collab_owner',      // Document owner username
-    COLLAB_PERMLINK: 'collab_permlink', // Document permlink identifier
-    LOCAL_OWNER: 'local_owner',        // Local document owner
-    LOCAL_PERMLINK: 'local_permlink'   // Local document identifier
-};
-
-// Example URLs
-const examples = [
-    'https://dlux.io/post',                                           // No collaboration
-    'https://dlux.io/post?collab_owner=user&collab_permlink=doc123', // Collaborative
-    'https://dlux.io/post?local_owner=user&local_permlink=local_123' // Local document
-];
-```
-
-This comprehensive WebSocket disconnection and URL management system ensures:
-- ✅ **Proper offline-first behavior** with document preservation
-- ✅ **Clean URL state management** preventing parameter stacking
-- ✅ **User-friendly reconnection** with appropriate URL handling
-- ✅ **TipTap.dev compliance** following official best practices
-- ✅ **Robust edge case handling** for network issues and user intent
-
-// ... existing code ...
-
-## NEW INSIGHTS: Advanced Patterns from Production Debugging
-
-### **Document Status Indicator Architecture**
-
-#### **Critical Pattern: isTemporaryDocument Flag Management**
-
-The `isTemporaryDocument` flag is crucial for proper status indicator behavior. **All document loading methods must handle this flag consistently**:
-
-```javascript
-// ✅ CORRECT: New document creation (temporary until content added)
-async newDocument() {
-    this.isTemporaryDocument = true;  // Start as temporary
-    this.currentFile = null;          // No file entry yet
-    // Status: Grey background "Ready to edit"
-}
-
-// ✅ CORRECT: Loading existing document (not temporary)
-async loadLocalDocument(file) {
-    this.isTemporaryDocument = false; // CRITICAL: Mark as real document
-    this.currentFile = file;          // Has file entry
-    // Status: Blue background "Saved locally" (when no unsaved changes)
-}
-
-// ✅ CORRECT: URL-based document loading (not temporary)
-async autoConnectToLocalDocument(owner, permlink) {
-    // Finds existing file and loads it
-    await this.loadLocalFile(existingFile);
-    // isTemporaryDocument automatically false for existing files
-}
-
-// ✅ CORRECT: Converting temporary to real document
-async ensureLocalFileEntry() {
-    if (!this.currentFile) {
-        this.currentFile = { /* create file entry */ };
-        
-        // CRITICAL: Mark as no longer temporary
-        if (this.isTemporaryDocument) {
-            this.isTemporaryDocument = false;
-            console.log('📝 Temp document converted to local document');
-        }
-    }
-}
-```
-
-#### **Status Indicator Color Logic**
-
-```javascript
-// Status determination follows this hierarchy:
-unifiedStatusInfo() {
-    const hasYjsDocument = !!this.ydoc;
-    const hasWebSocketProvider = !!this.provider;
-    const isConnected = this.connectionStatus === 'connected';
-    
-    if (hasYjsDocument) {
-        if (hasWebSocketProvider) {
-            // COLLABORATIVE DOCUMENTS
-            if (isConnected) {
-                return this.hasUnsavedChanges ? 
-                    { state: 'syncing', color: 'orange' } :     // Orange: Syncing
-                    { state: 'synced', color: 'green' };        // Green: Synced
-            } else {
-                return this.hasUnsavedChanges ?
-                    { state: 'offline-saving', color: 'orange' } : // Orange: Saving offline
-                    { state: 'offline-ready', color: 'blue' };     // Blue: Available offline
-            }
-        } else {
-            // LOCAL DOCUMENTS (no WebSocket provider)
-            if (this.isTemporaryDocument) {
-                return { state: 'temp-ready', color: 'grey' };     // Grey: Temporary
-            } else {
-                return this.hasUnsavedChanges ?
-                    { state: 'saving-local', color: 'orange' } :   // Orange: Saving
-                    { state: 'saved-local', color: 'blue' };       // Blue: Saved locally
-            }
-        }
-    }
-    
-    return { state: 'no-document', color: 'grey' }; // Grey: No document
-}
-```
-
-### **Cloud Syncing: Dual-Layer Architecture**
-
-#### **Critical Pattern: Y.js + API Dual Updates**
-
-For collaborative documents, document name changes require **both** Y.js config updates AND server API calls:
-
-```javascript
-// ✅ CORRECT: Dual-layer document name updates
-async renameCollaborativeDocument(newName) {
-    // LAYER 1: Y.js config update (real-time sync between users)
-    const success = this.setDocumentName(newName);
-    if (success) {
-        this.currentFile.name = newName; // Update local UI
-        
-        // LAYER 2: Server API update (persistent server-side storage)
-        try {
-            const response = await fetch(`/api/collaboration/documents/${owner}/${permlink}/name`, {
-                method: 'PATCH',
-                body: JSON.stringify({ documentName: newName })
-            });
-            
-            if (response.ok) {
-                console.log('✅ Server-side document name updated');
-                await this.loadCollaborativeDocs(); // Refresh docs list
-            }
-        } catch (error) {
-            console.warn('⚠️ Server API failed, but Y.js sync still works');
-            // Don't throw - Y.js sync is more important than server API
-        }
-        
-        // Trigger autosave for Y.js persistence
-        this.hasUnsavedChanges = true;
-        this.debouncedAutoSave();
-    }
-}
-```
-
-#### **Why Dual-Layer is Required**
-
-1. **Y.js Config**: Handles real-time sync between connected users
-2. **Server API**: Updates the collaborative documents list (what shows in File > Load)
-3. **Both Required**: Y.js alone doesn't update the server-side document name
-
-### **Document Loading Consistency Patterns**
-
-#### **Critical Pattern: Unified Flag Management**
-
-All document loading methods must handle the same flags consistently:
-
-```javascript
-// Template for ALL document loading methods:
-async loadAnyDocument(source) {
-    // 1. Clean up previous state
-    this.fullCleanupCollaboration();
-    await this.$nextTick();
-    
-    // 2. Set document type flags
-    this.currentFile = /* document object */;
-    this.fileType = /* 'local' or 'collaborative' */;
-    this.isCollaborativeMode = /* true/false based on type */;
-    this.isTemporaryDocument = false; // CRITICAL: Always false for existing docs
-    
-    // 3. Create Y.js document + IndexedDB
-    this.ydoc = new Y.Doc();
-    this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
-    
-    // 4. Wait for sync and create editors
-    await this.waitForSync();
-    await this.createEditors();
-    
-    // 5. Clear flags
-    this.hasUnsavedChanges = false;
-    this.isCleaningUp = false;
-}
-```
-
-### **Auto-Save and Persistence Patterns**
-
-#### **Critical Pattern: Unified Auto-Save for All Document Types**
-
-```javascript
-// ✅ CORRECT: Unified auto-save handles all document types
-async performAutoSave() {
-    if (!this.ydoc || !this.hasContentToSave()) return;
-    
-    // STEP 1: Y.js + IndexedDB persistence (works for ALL documents)
-    console.log('✅ Content automatically persisted to IndexedDB via Y.js');
-    
-    // STEP 2: Update Y.js config metadata (unified approach)
-    await this.updateYjsConfigMetadata();
-    
-    // STEP 3: Handle document type-specific persistence
-    if (this.currentFile?.type === 'collaborative') {
-        // Collaborative: Y.js + WebSocket sync
-        console.log('💾 Collaborative document changes synced via Y.js');
-    } else {
-        // Local: Y.js + IndexedDB only
-        console.log('💾 Y.js + IndexedDB persistence complete (offline-first)');
-    }
-    
-    // STEP 4: Convert temp documents to real documents
-    if (this.ydoc && this.hasContentToSave()) {
-        await this.ensureLocalFileEntry();
-        
-        if (this.isTemporaryDocument && this.currentFile) {
-            this.isTemporaryDocument = false; // CRITICAL: Convert to real document
-            console.log('📝 Temp document converted to draft');
-        }
-    }
-    
-    // STEP 5: Clear unsaved flag
-    this.clearUnsavedAfterSync();
-}
-```
-
-### **Error Prevention Patterns**
-
-#### **Critical Pattern: Avoid Multiple Code Paths**
-
-**Problem**: Having different methods for similar operations leads to inconsistent flag handling.
-
-**Solution**: Use unified methods with consistent flag management:
-
-```javascript
-// ❌ WRONG: Multiple inconsistent methods
-async loadLocalDocumentMethod1(file) {
-    this.isTemporaryDocument = false; // ✅ Has flag
-}
-
-async loadLocalDocumentMethod2(file) {
-    // ❌ Missing flag - causes grey background
-}
-
-async loadLocalDocumentMethod3(file) {
-    this.isTemporaryDocument = false; // ✅ Has flag
-}
-
-// ✅ CORRECT: Single unified method
-async loadLocalDocument(file) {
-    this.isTemporaryDocument = false; // ✅ Consistent flag handling
-    // ... unified loading logic
-}
-```
-
-### **Debugging Patterns**
-
-#### **Status Indicator Debugging**
-
-```javascript
-// Add temporary debugging to understand status issues:
-unifiedStatusInfo() {
-    console.log('🔍 DEBUG: Status check:', {
-        isTemporaryDocument: this.isTemporaryDocument,
-        hasCurrentFile: !!this.currentFile,
-        currentFileType: this.currentFile?.type,
-        hasUnsavedChanges: this.hasUnsavedChanges,
-        hasWebSocketProvider: !!this.provider,
-        connectionStatus: this.connectionStatus
-    });
-    
-    // ... status logic
-}
-```
-
-#### **Document Name Debugging**
-
-```javascript
-// Debug document name sync issues:
-async updateYjsConfigMetadata() {
-    console.log('📄 Document name stored in Y.js config:', {
-        documentName: this.currentFile.name,
-        documentType: this.currentFile.type,
-        hasWebSocketProvider: !!this.provider,
-        isConnected: this.connectionStatus === 'connected',
-        willSyncToCloud: !!this.provider && this.connectionStatus === 'connected'
-    });
-    
-    if (this.provider && this.connectionStatus === 'connected') {
-        console.log('☁️ Document name change will auto-sync to cloud via WebSocket provider');
-    } else {
-        console.log('💾 Document name change will remain local-only');
-    }
-}
-```
-
-### **Key Takeaways**
-
-1. **Consistency is Critical**: All document loading methods must handle flags identically
-2. **Dual-Layer Syncing**: Collaborative documents need both Y.js AND API updates
-3. **Flag Management**: `isTemporaryDocument` determines status indicator color
-4. **Unified Auto-Save**: One method handles all document types consistently
-5. **Debugging First**: Add logging to understand state before fixing issues
-
-These patterns ensure reliable, consistent behavior across all document operations while following TipTap best practices.
-
----
-
-# Collaborative Permissions System: Owner-Based API Strategy
-
-## Executive Summary
-
-This section defines the **definitive permissions architecture** for DLUX collaborative editing, implementing an owner-based API strategy that eliminates 403 errors while maintaining proper security and offline-first functionality.
-
-### 🚨 **CURRENT ARCHITECTURE: Owner-Based API Strategy (Updated 2024)**
-
-**Our implementation uses ownership-aware API calls to prevent 403 errors:**
-
-- ✅ **Document owners**: Use all 3 endpoints (info + permissions + stats)
-- ✅ **Non-owners**: Use info + stats only (skip permissions to avoid 403)
-- ✅ **Unified permission resolution**: Single method resolves permissions from multiple sources
-- ✅ **Offline-first caching**: 5-minute permission cache with user-specific storage
-- ✅ **Graceful degradation**: Falls back to cached permissions when API fails
-
-## Core Permissions Principles
-
-### 1. **Owner-Based API Access Control**
-- **Rule**: Only document owners can access the `/permissions` endpoint
-- **Rationale**: Server returns `403 "Only document owner can view permissions"` for non-owners
-- **Implementation**: Skip permissions endpoint for non-owner API calls to prevent errors
-
-### 2. **Unified Permission Resolution**
-- **Rule**: Single `getMasterPermissionForDocument()` method resolves permissions from multiple sources
-- **Rationale**: Provides consistent permission checking across the entire application
-- **Implementation**: Hierarchical permission resolution with confidence levels
-
-### 3. **Offline-First Permission Caching**
-- **Rule**: Cache all permission results for 5 minutes with user-specific keys
-- **Rationale**: Enables offline access and reduces API calls
-- **Implementation**: Timestamp-based cache invalidation with fallback strategies
-
-### 4. **Graceful Permission Degradation**
-- **Rule**: Always provide a permission level, even when API calls fail
-- **Rationale**: Application must remain functional during network issues
-- **Implementation**: Use cached permissions or conservative defaults
-
-## API Endpoint Documentation
-
-### **📋 Collaborative API Endpoints**
-
-#### **1. Info Endpoint (Public Access)**
-```javascript
-// Endpoint: GET /api/collaboration/info/{owner}/{permlink}
-// Access: All authenticated users
-// Purpose: Document metadata and access type
-// Returns: Document info including accessType (readonly/editable/postable)
-
-const infoUrl = `https://data.dlux.io/api/collaboration/info/${owner}/${permlink}`;
-const response = await fetch(infoUrl, {
-    headers: { ...this.authHeaders }
-});
-
-// Example Response:
-{
-    "documentName": "My Document",
-    "documentPath": "user/my-document",
-    "isPublic": false,
-    "hasContent": true,
-    "contentSize": 1024,
-    "accessType": "editable", // ← KEY: User's access level
-    "websocketUrl": "wss://collab.dlux.io/ws",
-    "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T12:00:00Z",
-    "lastActivity": "2024-01-01T12:00:00Z"
-}
-
-// ✅ ACCESS TYPE VALUES:
-// - "postable": Highest level - can edit content AND publish to blockchain
-// - "editable": Mid level - can edit content but cannot publish to blockchain  
-// - "readonly": Lowest level - can only view content, no editing or publishing
-```
-
-#### **2. Permissions Endpoint (Owner-Only Access)**
-```javascript
-// Endpoint: GET /api/collaboration/permissions/{owner}/{permlink}
-// Access: Document owner ONLY
-// Purpose: Detailed permission list for all users
-// Error: 403 "Only document owner can view permissions" for non-owners
-
-const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${owner}/${permlink}`;
-
-// ✅ OWNER-BASED STRATEGY: Only call for document owners
-if (currentUser === owner) {
-    const response = await fetch(permissionsUrl, {
-        headers: { ...this.authHeaders }
-    });
-} else {
-    // Skip to avoid 403 error
-    console.log('Skipping permissions endpoint (non-owner)');
-}
-
-// Example Response (Owner Only):
-{
-    "permissions": [
-        {
-            "account": "user1",
-            "permissionType": "editor",
-            "grantedBy": "owner",
-            "grantedAt": "2024-01-01T00:00:00Z"
-        },
-        {
-            "account": "user2", 
-            "permissionType": "readonly",
-            "grantedBy": "owner",
-            "grantedAt": "2024-01-01T00:00:00Z"
-        }
-    ]
-}
-```
-
-#### **3. Stats Endpoint (Public Access)**
-```javascript
-// Endpoint: GET /api/collaboration/stats/{owner}/{permlink}
-// Access: All authenticated users
-// Purpose: Document statistics and user-specific permission data
-// Returns: User's permission level and document analytics
-
-const statsUrl = `https://data.dlux.io/api/collaboration/stats/${owner}/${permlink}`;
-const response = await fetch(statsUrl, {
-    headers: { ...this.authHeaders }
-});
-
-// Example Response:
-{
-    "total_users": 3,
-    "active_users": 1,
-    "total_edits": 15,
-    "document_size": 2048,
-    "last_activity": "2024-01-01T12:00:00Z",
-    "inactivity_days": 0,
-    "userPermission": "editor", // ← KEY: Current user's permission
-    "canEdit": true,            // ← KEY: Boolean permission flags
-    "canView": true,
-    "accessLevel": "editor",    // ← KEY: Alternative permission format
-    "permissions": [            // ← KEY: May include permissions array
-        {
-            "account": "currentUser",
-            "permissionType": "editor"
-        }
-    ]
-}
-```
-
-## Implementation Strategy
-
-### **🔧 Owner-Based API Strategy**
-
-#### **API Call Logic**
-```javascript
-// ✅ OWNER-BASED API CALLS: Skip permissions endpoint for non-owners
-async loadDocumentPermissions(context = 'document-access') {
-    const isOwner = this.currentFile.owner === this.username;
-    
-    console.log('🔍 PERMISSION API STRATEGY:', {
-        document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
-        currentUser: this.username,
-        documentOwner: this.currentFile.owner,
-        isOwner: isOwner,
-        strategy: isOwner ? 
-            'Owner: Use all 3 endpoints (info + permissions + stats)' : 
-            'Non-owner: Use info + stats only (skip permissions to avoid 403)'
-    });
-    
-    let apiPromises;
-    if (isOwner) {
-        // Owner: Use all 3 endpoints
-        apiPromises = [
-            this.loadCollaborationInfo(true),
-            fetch(permissionsUrl, { headers: { ...this.authHeaders } }),
-            this.loadCollaborationStats(true)
-        ];
-    } else {
-        // Non-owner: Skip permissions endpoint to avoid 403 error
-        apiPromises = [
-            this.loadCollaborationInfo(true),
-            Promise.resolve({ status: 'skipped', reason: 'non-owner-permissions-skip' }),
-            this.loadCollaborationStats(true)
-        ];
-    }
-    
-    const [infoResult, permissionsResponse, statsResult] = await Promise.allSettled(apiPromises);
-    
-    // Process results with owner-aware handling
-    return this.processUnifiedPermissionResults(infoResult, permissionsResponse, statsResult, isOwner);
-}
-```
-
-### **🎯 Unified Permission Resolution**
-
-#### **Permission Resolution Hierarchy**
-```javascript
-// ✅ UNIFIED PERMISSION RESOLUTION: Single source of truth
-async getMasterPermissionForDocument(file, forceRefresh = false, context = 'document-access') {
-    // STEP 1: Document owner always has full access (highest priority)
-    if (file.owner === this.username) {
-        return {
-            level: 'owner',
-            source: 'document-owner',
-            confidence: 'high',
-            reasoning: 'Document owner has full access'
-        };
-    }
-    
-    // STEP 2: Check cached permissions first (offline-first)
-    if (!forceRefresh) {
-        const cachedPermission = this.getCachedPermission(file);
-        if (cachedPermission && this.isCacheFresh(cachedPermission)) {
-            return {
-                level: cachedPermission.level,
-                source: 'cached-permission',
-                confidence: 'high',
-                reasoning: `Cached permission (${cachedPermission.level})`
-            };
-        }
-    }
-    
-    // STEP 3: Load fresh permissions using owner-based strategy
-    try {
-        await this.loadDocumentPermissions(context);
-        return this.resolveUnifiedPermission(context);
-    } catch (error) {
-        // STEP 4: Fallback to stale cache or conservative defaults
-        return this.handlePermissionError(file, error);
-    }
-}
-
-// ✅ HIERARCHICAL PERMISSION RESOLUTION
-resolveUnifiedPermission(documentInfo, permissionsData, permissionError, context, statsData) {
-    // Priority 1: Info endpoint accessType
-    if (documentInfo?.accessType) {
-        const accessType = documentInfo.accessType.toLowerCase();
-        if (accessType.includes('post')) {
-            return { level: 'postable', source: 'info-access-type', confidence: 'high' };
-        }
-        if (accessType.includes('edit')) {
-            return { level: 'editable', source: 'info-access-type', confidence: 'high' };
-        }
-        if (accessType.includes('read')) {
-            return { level: 'readonly', source: 'info-access-type', confidence: 'high' };
-        }
-    }
-    
-    // Priority 2: Stats endpoint user permission
-    if (statsData?.userPermission) {
-        return {
-            level: this.normalizePermissionLevel(statsData.userPermission),
-            source: 'stats-user-permission',
-            confidence: 'high'
-        };
-    }
-    
-    // Priority 3: Stats endpoint boolean flags
-    if (statsData?.canEdit === true) {
-        return { level: 'editor', source: 'stats-can-edit-flag', confidence: 'high' };
-    }
-    if (statsData?.canView === true) {
-        return { level: 'readonly', source: 'stats-can-view-flag', confidence: 'high' };
-    }
-    
-    // Priority 4: Explicit permissions data (owner only)
-    if (permissionsData?.permissions) {
-        const userPermission = permissionsData.permissions.find(p => p.account === this.username);
-        if (userPermission) {
-            return {
-                level: userPermission.permissionType,
-                source: 'explicit-user-permission',
-                confidence: 'high'
-            };
-        }
-    }
-    
-    // Priority 5: Handle API errors with fallbacks
-    if (permissionError) {
-        return this.handlePermissionError(permissionError, documentInfo, context);
-    }
-    
-    // Priority 6: Conservative default
-    return { level: 'no-access', source: 'no-permission-data', confidence: 'low' };
-}
-```
-
-### **💾 Offline-First Permission Caching**
-
-#### **Cache Implementation**
-```javascript
-// ✅ PERMISSION CACHING: User-specific with timestamp validation
-cachePermissionForFile(file, permissionLevel) {
-    if (!file || !this.username) return;
-    
-    const timestamp = Date.now();
-    const permissionData = {
-        level: permissionLevel,
-        timestamp: timestamp,
-        username: this.username // Prevent cache poisoning
-    };
-    
-    // Initialize cache structure
-    if (!file.cachedPermissions) {
-        file.cachedPermissions = {};
-    }
-    
-    // Store user-specific permission with timestamp
-    file.cachedPermissions[this.username] = permissionData;
-    file.permissionCacheTime = timestamp;
-    
-    console.log('💾 Permission cached:', {
-        document: file.name || `${file.owner}/${file.permlink}`,
-        user: this.username,
-        level: permissionLevel,
-        expiresAt: new Date(timestamp + 300000).toISOString() // 5 minutes
-    });
-    
-    // Trigger Vue reactivity for UI updates
-    this.$nextTick(() => {
-        this.triggerPermissionReactivity();
-    });
-}
-
-// ✅ CACHE VALIDATION: 5-minute expiry with security checks
-getCachedPermission(file) {
-    if (!file?.cachedPermissions?.[this.username]) return null;
-    
-    const cachedData = file.cachedPermissions[this.username];
-    
-    // Security: Verify cache is for current user
-    if (cachedData.username !== this.username) {
-        console.warn('🚫 Permission cache username mismatch - clearing stale cache');
-        delete file.cachedPermissions[this.username];
-        return null;
-    }
-    
-    return cachedData;
-}
-
-// ✅ CACHE FRESHNESS: 5-minute window
-isCacheFresh(cachedData) {
-    const cacheAge = Date.now() - cachedData.timestamp;
-    return cacheAge < 300000; // 5 minutes
-}
-```
-
-### **🔄 Error Handling and Fallbacks**  
-
-#### **Graceful Degradation Strategy**
-```javascript
-// ✅ ERROR HANDLING: Graceful degradation with fallbacks
-handlePermissionError(file, error) {
-    console.error('❌ Permission API error:', error.message);
-    
-    // Fallback 1: Use stale cached permissions
-    const cachedPermission = this.getCachedPermission(file);
-    if (cachedPermission) {
-        console.log('🔄 Using stale cached permission after API error');
-        return {
-            level: cachedPermission.level,
-            source: 'cached-after-error',
-            confidence: 'medium',
-            reasoning: `Fallback to cached permission after API error`
-        };
-    }
-    
-    // Fallback 2: Check if document is in collaborative list
-    const collaborativeDoc = this.collaborativeDocs.find(doc => 
-        doc.owner === file.owner && doc.permlink === file.permlink);
-    
-    if (collaborativeDoc) {
-        // If document appears in collaborative list, user has at least readonly access
-        return {
-            level: 'readonly',
-            source: 'collaborative-list-implied',
-            confidence: 'medium',
-            reasoning: 'Document in collaborative list implies readonly access'
-        };
-    }
-    
-    // Fallback 3: Conservative default
-    return {
-        level: 'no-access',
-        source: 'error-fallback',
-        confidence: 'low',
-        reasoning: `Permission check failed: ${error.message}`
-    };
-}
-
-// ✅ 403 ERROR HANDLING: Specific handling for owner-only endpoints
-handle403PermissionError(documentInfo, context) {
-    // 403 = no access (authentication required)
-    if (false) { // Removed public access logic
-        return {
-            level: 'readonly',
-            source: 'public-document-fallback',
-            confidence: 'medium',
-            reasoning: '403 on permissions but document is public'
-        };
-    }
-    
-    // 403 with collaborative list presence = readonly access
-    if (context === 'file-browser' || this.documentInCollaborativeList()) {
-        return {
-            level: 'readonly',
-            source: 'collaborative-list-403-fallback',
-            confidence: 'medium',
-            reasoning: '403 on permissions but document in collaborative list'
-        };
-    }
-    
-    // Pure 403 = no access
-    return {
-        level: 'no-access',
-        source: 'permission-api-forbidden',
-        confidence: 'high',
-        reasoning: '403 Forbidden from permissions API'
-    };
-}
-```
-
-## Best Practices Summary
-
-### **✅ DO: Owner-Based API Strategy**
-- Check ownership before making API calls
-- Skip permissions endpoint for non-owners
-- Use info + stats endpoints for permission detection
-- Log API strategy decisions for debugging
-
-### **✅ DO: Unified Permission Resolution**
-- Use single `getMasterPermissionForDocument()` method
-- Implement hierarchical permission resolution
-- Provide confidence levels for permission sources
-- Cache all permission results immediately
-
-### **✅ DO: Offline-First Caching**
-- Cache permissions for 5 minutes with timestamps
-- Use user-specific cache keys to prevent poisoning
-- Validate cache freshness before use
-- Fall back to stale cache when API fails
-
-### **✅ DO: Graceful Error Handling**
-- Always return a permission level (never throw)
-- Use multiple fallback strategies
-- Provide clear reasoning for permission decisions
-- Log permission resolution process for debugging
-
-### **❌ DON'T: Common Anti-Patterns**
-- Don't call permissions endpoint for non-owners
-- Don't cache permissions without user-specific keys
-- Don't throw errors from permission methods
-- Don't use different permission methods for same document
-- Don't ignore cached permissions during API failures
-
-## Integration with TipTap Architecture
-
-### **🔗 TipTap Integration Points**
-
-#### **Read-Only Mode Integration**
-```javascript
-// ✅ COMPUTED PROPERTY: Uses unified permission system
-isReadOnlyMode() {
-    if (this.isTemporaryDocument) return false; // Temp docs always editable
-    if (this.currentFile?.type === 'local') return false; // Local docs always editable
-    
-    // For collaborative documents, use unified permission system
-    if (this.currentFile?.type === 'collaborative') {
-        const permissionLevel = this.getUserPermissionLevel(this.currentFile);
-        return (permissionLevel === 'readonly' || permissionLevel === 'no-access');
-    }
-    
-    return false; // Default to editable
-}
-
-// ✅ SYNCHRONOUS PERMISSION ACCESS: Uses cached results
-getUserPermissionLevel(file) {
-    // Use cached permission for immediate UI needs
-    const cachedPermission = this.getCachedPermission(file);
-    if (cachedPermission && this.isCacheFresh(cachedPermission)) {
-        return cachedPermission.level;
-    }
-    
-    // Fall back to ownership check
-    if (file.owner === this.username) return 'owner';
-    if (!this.isAuthenticated) return 'no-access';
-    
-    // Conservative default for UI
-    return 'readonly';
-}
-```
-
-#### **Editor State Management**
-```javascript
-// ✅ EDITOR UPDATES: Automatic permission enforcement
-async updateEditorPermissions() {
-    if (!this.titleEditor || !this.bodyEditor) return;
-    
-    const isReadOnly = this.isReadOnlyMode;
-    
-    // Update editor states based on permissions
-    this.titleEditor.setEditable(!isReadOnly);
-    this.bodyEditor.setEditable(!isReadOnly);
-    
-    console.log(`📝 Editors set to ${isReadOnly ? 'READ-ONLY' : 'EDITABLE'} based on permissions`);
-}
-
-// ✅ PERMISSION WATCHER: Automatic UI updates
-watch: {
-    isReadOnlyMode(newValue) {
-        this.$nextTick(() => {
-            this.updateEditorPermissions();
-        });
-    }
-}
-```
-
-This comprehensive permissions system ensures:
-- ✅ **Zero 403 errors** through owner-based API strategy
-- ✅ **Offline-first functionality** with robust permission caching
-- ✅ **Consistent permission checking** across the entire application
-- ✅ **Graceful error handling** with multiple fallback strategies
-- ✅ **TipTap compliance** following offline-first collaborative best practices
-- ✅ **Performance optimization** through intelligent caching and API call reduction
-
----
-
-# 🚀 **COMPLETE TIPTAP v3 MIGRATION & COMPLIANCE GUIDE**
-
-## 🚨 **CRITICAL v3 BREAKING CHANGES SUMMARY**
-
-### **1. Extension Name Changes (Breaking)**
-- **History** → **UndoRedo** ⚠️ MUST UPDATE
-- **CollaborationCaret** → **CollaborationCaret** ⚠️ MUST UPDATE
-
-### **2. Parameter Name Changes (Breaking)**
-- **Collaboration.configure({ fragment })** → **Collaboration.configure({ field })** ⚠️ MUST UPDATE
-
-### **3. Package Changes (Breaking)**
-- All packages require **@beta** tag for v3
-- **@tiptap/vue-2** → **@tiptap/vue-3** for Vue.js integration
-- UMD builds removed, ESM only
-
-### **4. API Changes (Breaking)**
-- `editor.getCharacterCount()` method removed
-- `nodeView.getPos()` can return `undefined`
-- Stricter TypeScript typing
-- New `shouldRerenderOnTransaction` defaults to `false`
-
-## 📦 **v3 PACKAGE INSTALLATION**
-
-### **Complete Package List for v3**
-```bash
-# ✅ CORE v3 PACKAGES (All require @beta tag)
-npm install @tiptap/core@beta
-npm install @tiptap/starter-kit@beta
-npm install @tiptap/pm@beta
-
-# ✅ VUE.JS v3 INTEGRATION
-npm install @tiptap/vue-3@beta
-
-# ✅ COLLABORATION PACKAGES
-npm install @tiptap/extension-collaboration@beta
-npm install @tiptap/extension-collaboration-caret@beta
-
-# ✅ ESSENTIAL EXTENSIONS
-npm install @tiptap/extension-document@beta
-npm install @tiptap/extension-placeholder@beta
-npm install @tiptap/extension-undo-redo@beta
-
-# ✅ Y.JS PACKAGES (Updated for v3)
-npm install yjs@latest
-npm install y-indexeddb@latest
-npm install @hocuspocus/provider@latest
-
-# ✅ REMOVE OLD v2 PACKAGES
-npm uninstall @tiptap/vue-2 @tiptap/extension-history @tiptap/extension-collaboration-cursor
-```
-
-## 🔄 **STEP-BY-STEP MIGRATION STRATEGY**
-
-### **Phase 1: Pre-Migration Audit**
-```bash
-# ✅ STEP 1: Audit current v2 usage
-grep -r "fragment:" src/  # Find v2 Collaboration syntax
-grep -r "CollaborationCaret" src/  # Find old extension names
-grep -r "@tiptap/vue-2" src/  # Find old Vue integration
-
-# ✅ STEP 2: Backup existing implementation
-git checkout -b backup-v2-implementation
-git commit -am "Backup: Pre-v3 migration state"
-```
-
-### **Phase 2: Package Updates**
-```bash
-# ✅ STEP 1: Remove v2 packages completely
-npm uninstall @tiptap/vue-2 @tiptap/extension-history @tiptap/extension-collaboration-cursor
-
-# ✅ STEP 2: Install v3 packages with @beta tag
-npm install @tiptap/core@beta @tiptap/starter-kit@beta @tiptap/pm@beta
-npm install @tiptap/vue-3@beta
-npm install @tiptap/extension-collaboration@beta @tiptap/extension-collaboration-caret@beta
-npm install @tiptap/extension-document@beta @tiptap/extension-placeholder@beta
-npm install @tiptap/extension-undo-redo@beta
-
-# ✅ STEP 3: Verify package consistency
-npm list | grep @tiptap  # All should show @beta versions
-```
-
-### **Phase 3: Code Updates**
-
-#### **3.1 Import Changes**
-```javascript
-// ❌ v2 IMPORTS (Remove these)
-import { useEditor, EditorContent } from '@tiptap/vue-2'
-import History from '@tiptap/extension-history'
-import CollaborationCaret from '@tiptap/extension-collaboration-cursor'
-
-// ✅ v3 IMPORTS (Replace with these)
-import { useEditor, EditorContent } from '@tiptap/vue-3'
-import UndoRedo from '@tiptap/extension-undo-redo'
-import CollaborationCaret from '@tiptap/extension-collaboration-caret'
-import Document from '@tiptap/extension-document'  // Now required
-```
-
-#### **3.2 Extension Configuration Updates**
-```javascript
-// ❌ v2 SYNTAX (Update these)
-StarterKit.configure({
-    history: true  // Remove - conflicts with Collaboration
-}),
-Collaboration.configure({
-    document: ydoc,
-    fragment: 'content'  // v2 parameter name
-}),
-CollaborationCaret.configure({  // v2 extension name
-    provider: websocketProvider
-})
-
-// ✅ v3 SYNTAX (Use these instead)
-StarterKit.configure({
-    undoRedo: false  // REQUIRED: Disable when using Collaboration
-}),
-Collaboration.configure({
-    document: ydoc,
-    field: 'content'  // v3 parameter name
-}),
-CollaborationCaret.configure({  // v3 extension name
-    provider: websocketProvider,
-    user: { name: username, color: userColor }
-})
-```
-
-#### **3.3 Editor Configuration Updates**
-```javascript
-// ✅ v3 PERFORMANCE: Add optimal configuration
-const editor = new Editor({
-    // Performance options configured via extensions
-    shouldRerenderOnTransaction: false, // v3 default - better performance
-    enableContentCheck: true,          // v3 schema validation
-    
-    extensions: [
-        Document,  // v3 REQUIRED: Explicit import
-        StarterKit.configure({ undoRedo: false }),
-        Collaboration.configure({
-            document: ydoc,
-            field: 'content'  // v3 parameter
-        }),
-        ...(websocketProvider ? [
-            CollaborationCaret.configure({  // v3 extension name
-                provider: websocketProvider,
-                user: { name: username, color: userColor }
+    // Create temp editor to check content
+    const testEditor = new Editor({
+        extensions: [
+            StarterKit,
+            Collaboration.configure({
+                document: testDoc,
+                field: 'body'
             })
-        ] : [])
-    ],
-    
-    // ✅ v3 ERROR HANDLING: Content validation
-    onContentError({ editor, error, disableCollaboration }) {
-        console.error('v3 Schema error:', error)
-        disableCollaboration()
-        editor.setEditable(false)
-    }
-})
-```
-
-#### **3.4 Vue.js Component Updates**
-```vue
-<!-- ✅ v3 VUE INTEGRATION: Composition API -->
-<template>
-  <editor-content :editor="editor" />
-</template>
-
-<script setup>
-import { useEditor, EditorContent } from '@tiptap/vue-3'  // v3 import
-import StarterKit from '@tiptap/starter-kit'
-
-const editor = useEditor({
-  content: '<p>Content</p>',
-  extensions: [
-    StarterKit.configure({ undoRedo: false }),  // v3 requirement
-    // Add other extensions
-  ],
-  onUpdate: ({ editor }) => {
-    // ✅ v3 BEST PRACTICE: Minimal updates only
-    emit('content-changed', editor.getHTML())
-  }
-})
-
-// ✅ v3: Cleanup handled automatically by useEditor
-</script>
-```
-
-## ✅ **COMPLETE v3 MIGRATION CHECKLIST**
-
-### **Phase 1: Pre-Migration Validation**
-- [ ] **Audit Current Code**: Search for v2 patterns (fragment, CollaborationCaret, History)
-- [ ] **Backup Implementation**: Create git branch with current v2 state
-- [ ] **Document Custom Extensions**: List all custom extensions and their v3 compatibility
-- [ ] **Test Baseline**: Ensure v2 implementation works correctly before migration
-- [ ] **Backup Y.js Documents**: Export existing documents before schema changes
-
-### **Phase 2: Package Migration**
-- [ ] **Remove v2 Packages**: Uninstall @tiptap/vue-2, extension-history, extension-collaboration-cursor
-- [ ] **Install v3 Packages**: Install all required @beta packages consistently
-- [ ] **Verify Dependencies**: Check all @tiptap packages show @beta versions
-- [ ] **Update Bundle**: Modify webpack/vite config for new package structure
-- [ ] **Clear Node Modules**: Remove node_modules and package-lock.json, reinstall fresh
-
-### **Phase 3: Code Updates**
-- [ ] **Update Imports**: Change @tiptap/vue-2 → @tiptap/vue-3
-- [ ] **Extension Names**: History → UndoRedo, CollaborationCaret → CollaborationCaret
-- [ ] **Parameter Names**: fragment → field in Collaboration.configure()
-- [ ] **Add Document Extension**: Import Document extension explicitly
-- [ ] **Update StarterKit**: Disable history when using Collaboration
-- [ ] **Add Performance Options**: Configure shouldRerenderOnTransaction
-- [ ] **Add Error Handling**: Implement onContentError for schema validation
-
-### **Phase 4: Testing & Validation**
-- [ ] **Local Editor**: Test basic editing without collaboration
-- [ ] **Collaborative Editor**: Test real-time collaboration with multiple users
-- [ ] **IndexedDB Persistence**: Verify offline documents save/load correctly
-- [ ] **WebSocket Connection**: Test connection, reconnection, and error handling
-- [ ] **Command Execution**: Test all toolbar buttons and commands
-- [ ] **Content Validation**: Test with invalid content and schema mismatches
-- [ ] **Memory Management**: Verify proper cleanup on component unmount
-- [ ] **Performance**: Compare before/after performance metrics
-
-### **Phase 5: Production Deployment**
-- [ ] **Staging Environment**: Deploy to staging with full v3 implementation
-- [ ] **User Acceptance Testing**: Test with real users and documents
-- [ ] **Performance Monitoring**: Set up monitoring for v3-specific metrics
-- [ ] **Rollback Plan**: Document rollback procedure if issues arise
-- [ ] **Production Deployment**: Deploy to production with monitoring
-- [ ] **Post-Deploy Verification**: Verify all features work in production
-
-## 🔧 **v3 DEBUGGING & TROUBLESHOOTING**
-
-### **Common v3 Migration Issues**
-
-#### **1. Extension Import Errors**
-```javascript
-// ❌ ERROR: Cannot find module '@tiptap/extension-history'
-import History from '@tiptap/extension-history'
-
-// ✅ SOLUTION: Use renamed extension
-import UndoRedo from '@tiptap/extension-undo-redo'
-```
-
-#### **2. Fragment Parameter Error**
-```javascript
-// ❌ ERROR: Unknown option 'fragment'
-Collaboration.configure({
-    document: ydoc,
-    fragment: 'content'
-})
-
-// ✅ SOLUTION: Use 'field' parameter
-Collaboration.configure({
-    document: ydoc,
-    field: 'content'
-})
-```
-
-#### **3. Document Extension Missing**
-```javascript
-// ❌ ERROR: Schema validation failed - document node missing
-
-// ✅ SOLUTION: Explicitly import Document
-import Document from '@tiptap/extension-document'
-const editor = new Editor({
-    extensions: [Document, StarterKit, /* other extensions */]
-})
-```
-
-#### **4. Vue Integration Errors**
-```javascript
-// ❌ ERROR: Cannot find module '@tiptap/vue-2'
-import { useEditor } from '@tiptap/vue-2'
-
-// ✅ SOLUTION: Update to v3 Vue integration
-import { useEditor } from '@tiptap/vue-3'
-```
-
-#### **5. CollaborationCaret Provider Errors**
-```javascript
-// ❌ ERROR: CollaborationCaret requires valid provider
-CollaborationCaret.configure({
-    provider: null  // Cannot be null
-})
-
-// ✅ SOLUTION: Conditional inclusion
-...(websocketProvider ? [
-    CollaborationCaret.configure({
-        provider: websocketProvider
-    })
-] : [])
-```
-
-### **v3 Validation Script**
-```javascript
-// ✅ AUTOMATED v3 COMPLIANCE CHECK
-function validateTiptapV3Compliance() {
-    const checks = {
-        packages: checkV3Packages(),
-        imports: checkV3Imports(),
-        configuration: checkV3Configuration(),
-        extensions: checkV3Extensions()
-    }
-    
-    console.log('🔍 TipTap v3 Compliance Check:', checks)
-    return Object.values(checks).every(check => check.passed)
-}
-
-function checkV3Packages() {
-    // Check package.json for @beta versions
-    const packageJson = require('./package.json')
-    const tiptapDeps = Object.keys(packageJson.dependencies)
-        .filter(dep => dep.startsWith('@tiptap/'))
-    
-    const hasBetaVersions = tiptapDeps.every(dep => 
-        packageJson.dependencies[dep].includes('@beta'))
-    
-    return { passed: hasBetaVersions, packages: tiptapDeps }
-}
-```
-
-## 🚨 **PREVENTING MISMATCHED TRANSACTION ERRORS**
-
-### Root Cause: Vue 3 Reactivity Interference
-
-The "RangeError: Applying a mismatched transaction" error occurs when Vue 3's proxy system interferes with ProseMirror's internal state management. This was discovered through systematic debugging when the bold button stopped working after typing in the title field.
-
-### The Problem Flow
-1. User types in title input field
-2. Title updates trigger Y.js config updates
-3. Vue's reactivity proxy wraps the editor instance
-4. User clicks bold button
-5. ProseMirror tries to apply a transaction
-6. Vue's proxy intercepts and modifies the transaction
-7. **ERROR**: "Applying a mismatched transaction"
-
-### The Solution: markRaw()
-
-```javascript
-// ✅ COMPLETE SOLUTION
-import { markRaw } from '/js/vue.esm-browser.js'
-
-export default {
-    data() {
-        return {
-            bodyEditor: null,  // Will store TipTap editor
-            ydoc: null,        // Will store Y.js document
-        }
-    },
-    
-    methods: {
-        async initializeEditor() {
-            // 1. Create Y.js document with markRaw
-            const ydoc = markRaw(new Y.Doc())
-            this.ydoc = ydoc  // Store for cleanup
-            
-            // 2. Create TipTap editor
-            const bodyEditor = new Editor({
-                element: this.$refs.bodyEditor,
-                extensions: [
-                    StarterKit.configure({ undoRedo: false }),
-                    Collaboration.configure({
-                        document: ydoc,
-                        field: 'body'
-                    })
-                ]
-            })
-            
-            // 3. CRITICAL: Wrap with markRaw when storing
-            this.bodyEditor = markRaw(bodyEditor)
-        }
-    }
-}
-```
-
-### Common Mistakes That Cause The Error
-
-```javascript
-// ❌ WRONG: Direct assignment (Vue wraps with proxy)
-this.bodyEditor = bodyEditor
-
-// ❌ WRONG: Using Vue.markRaw (causes "Vue is not defined")
-this.bodyEditor = Vue.markRaw(bodyEditor)
-
-// ❌ WRONG: Forgetting to wrap in some code paths
-if (condition) {
-    this.bodyEditor = markRaw(bodyEditor)  // ✅ Correct
-} else {
-    this.bodyEditor = anotherEditor  // ❌ Forgot markRaw!
-}
-```
-
-### Debugging Tips
-
-1. **Check ALL assignment locations**: Search for `this.bodyEditor =` and ensure ALL use markRaw
-2. **Import correctly**: Use `import { markRaw } from '/js/vue.esm-browser.js'`
-3. **Test systematically**: Type in title, then immediately click bold button
-4. **Watch console**: Error appears as "RangeError: Applying a mismatched transaction"
-
-### Prevention Checklist
-
-- [ ] Import markRaw at top of file
-- [ ] Wrap ALL Y.js documents with markRaw
-- [ ] Wrap ALL TipTap editors with markRaw
-- [ ] Check every assignment location
-- [ ] Test formatting buttons after title/metadata changes
-- [ ] Verify no Vue.markRaw usage (should be just markRaw)
-
-## V3 Feature Enhancements
-
-### Enhanced Comments Integration
-```javascript
-// Improved Comments System in v3
-import { Comments } from '@tiptap/extension-comments'
-
-const editor = new Editor({
-  extensions: [
-    Comments.configure({
-      HTMLAttributes: {
-        class: 'comment',
-      },
-      // Enhanced collaborative comments
-      collaboration: {
-        provider: websocketProvider,
-        user: {
-          name: username,
-          color: userColor,
-        }
-      }
-    })
-  ]
-})
-```
-
-### Advanced Collaboration Provider
-```javascript
-// Enhanced Provider with v3 Features
-setupEnhancedCollaboration(ydoc, documentId) {
-  const provider = new TiptapCollabProvider({
-    url: this.getCollaborationURL(),
-    name: documentId,
-    document: ydoc,
-    
-    // V3 Enhanced Features
-    preserveConnection: true,
-    reconnectTimeoutBase: 1000,
-    reconnectTimeoutIncrease: 1.3,
-    maxReconnectTimeout: 30000,
-    
-    // Improved authentication
-    authenticateUser: async () => {
-      return await this.getAuthenticationToken();
-    },
-    
-    // Enhanced error handling
-    onAuthenticationFailed: (error) => {
-      this.handleAuthenticationError(error);
-    },
-    
-    onConnectionLost: () => {
-      this.showConnectionLostWarning();
-    },
-    
-    onConnectionRestored: () => {
-      this.hideConnectionWarnings();
-    }
-  });
-  
-  return provider;
-}
-```
-
----
-
-# Advanced Memory Management & Performance
-
-## Executive Summary
-
-Production-grade collaborative editing requires sophisticated memory management to prevent memory leaks, optimize performance, and handle large documents efficiently. This section covers advanced patterns for Y.js document lifecycle, editor cleanup, and performance monitoring.
-
-## Y.js Document Memory Management
-
-### Comprehensive Cleanup Pattern
-```javascript
-/**
- * Advanced Y.js Document Cleanup
- * Prevents memory leaks in collaborative editing sessions
- */
-class YjsDocumentManager {
-  constructor() {
-    this.activeDocuments = new WeakMap();
-    this.cleanupCallbacks = new Set();
-  }
-  
-  // ✅ CRITICAL: Comprehensive Y.js cleanup
-  async destroyYjsDocument(ydoc, documentId) {
-    if (!ydoc) return;
-    
-    try {
-      // 1. Remove all observers first
-      this.removeAllObservers(ydoc);
-      
-      // 2. Disconnect and clean providers
-      await this.cleanupProviders(ydoc, documentId);
-      
-      // 3. Clear document state
-      this.clearDocumentState(ydoc);
-      
-      // 4. Destroy Y.js document
-      ydoc.destroy();
-      
-      // 5. Clear references
-      this.activeDocuments.delete(ydoc);
-      
-      console.log(`🧹 Y.js document ${documentId} cleaned up successfully`);
-      
-    } catch (error) {
-      console.error(`❌ Error cleaning up Y.js document ${documentId}:`, error);
-      throw error;
-    }
-  }
-  
-  // Remove all Y.js observers to prevent memory leaks
-  removeAllObservers(ydoc) {
-    // Remove document-level observers
-    ydoc.off('update', this.updateHandler);
-    ydoc.off('beforeTransaction', this.beforeTransactionHandler);
-    ydoc.off('afterTransaction', this.afterTransactionHandler);
-    
-    // Remove awareness observers
-    if (ydoc.awareness) {
-      ydoc.awareness.off('change', this.awarenessChangeHandler);
-    }
-    
-    // Remove map observers (config, metadata)
-    const config = ydoc.getMap('config');
-    const metadata = ydoc.getMap('metadata');
-    
-    try {
-      config.unobserve(this.configObserver);
-      metadata.unobserve(this.metadataObserver);
-    } catch (error) {
-      console.warn('Observer removal failed:', error);
-    }
-  }
-  
-  // Cleanup IndexedDB and WebSocket providers
-  async cleanupProviders(ydoc, documentId) {
-    const providers = this.getDocumentProviders(documentId);
-    
-    for (const provider of providers) {
-      try {
-        if (provider.type === 'indexeddb') {
-          // Clear IndexedDB data if needed
-          await provider.clearData?.();
-          provider.destroy?.();
-        } else if (provider.type === 'websocket') {
-          // Gracefully disconnect WebSocket
-          provider.disconnect?.();
-          provider.destroy?.();
-        }
-      } catch (error) {
-        console.warn(`Provider cleanup failed:`, error);
-      }
-    }
-  }
-  
-  // Clear Y.js document internal state
-  clearDocumentState(ydoc) {
-    try {
-      // Clear shared types if they exist
-      const sharedTypes = ['title', 'body', 'permlink'];
-      sharedTypes.forEach(type => {
-        const fragment = ydoc.get(type, Y.XmlFragment);
-        if (fragment && fragment.length > 0) {
-          // Clear content but don't delete fragments
-          // Let Y.js handle internal cleanup
-        }
-      });
-      
-      // Clear maps
-      const config = ydoc.getMap('config');
-      const metadata = ydoc.getMap('metadata');
-      
-      // Don't clear the maps, just mark as cleaned
-      config.set('cleanupTimestamp', Date.now());
-      
-    } catch (error) {
-      console.warn('Document state cleanup warning:', error);
-    }
-  }
-}
-```
-
-### Editor Memory Management
-```javascript
-/**
- * TipTap Editor Memory Management
- * Ensures proper cleanup of editor instances and event listeners
- */
-class EditorMemoryManager {
-  constructor() {
-    this.editorInstances = new Set();
-    this.eventListeners = new WeakMap();
-  }
-  
-  // ✅ CRITICAL: Comprehensive editor cleanup
-  destroyEditor(editor, editorName) {
-    if (!editor) return;
-    
-    try {
-      // 1. Remove custom event listeners
-      this.removeEditorEventListeners(editor);
-      
-      // 2. Clear editor state
-      this.clearEditorState(editor);
-      
-      // 3. Destroy TipTap editor
-      editor.destroy();
-      
-      // 4. Remove from tracking
-      this.editorInstances.delete(editor);
-      this.eventListeners.delete(editor);
-      
-      console.log(`🧹 Editor ${editorName} destroyed and cleaned up`);
-      
-    } catch (error) {
-      console.error(`❌ Error destroying editor ${editorName}:`, error);
-      // Force cleanup even if error occurs
-      this.forceEditorCleanup(editor);
-    }
-  }
-  
-  // Remove all event listeners from editor
-  removeEditorEventListeners(editor) {
-    const listeners = this.eventListeners.get(editor) || [];
-    
-    listeners.forEach(({ event, handler }) => {
-      try {
-        editor.off(event, handler);
-      } catch (error) {
-        console.warn(`Failed to remove listener for ${event}:`, error);
-      }
+        ]
     });
     
-    // Clear DOM event listeners if any
-    const editorElement = editor.view?.dom;
-    if (editorElement) {
-      // Remove any custom DOM listeners
-      editorElement.removeEventListener('keydown', this.keydownHandler);
-      editorElement.removeEventListener('focus', this.focusHandler);
-      editorElement.removeEventListener('blur', this.blurHandler);
-    }
-  }
-  
-  // Clear editor internal state
-  clearEditorState(editor) {
-    try {
-      // Clear any stored content references
-      editor.storage = {};
-      
-      // Clear command history if accessible
-      if (editor.commands) {
-        // Let TipTap handle internal cleanup
-      }
-      
-    } catch (error) {
-      console.warn('Editor state cleanup warning:', error);
-    }
-  }
-  
-  // Force cleanup for problematic editors
-  forceEditorCleanup(editor) {
-    try {
-      // Set editor reference to null
-      if (editor.view) {
-        editor.view = null;
-      }
-      
-      // Clear any remaining references
-      Object.keys(editor).forEach(key => {
-        try {
-          editor[key] = null;
-        } catch (e) {
-          // Some properties might be read-only
-        }
-      });
-      
-    } catch (error) {
-      console.warn('Force cleanup failed:', error);
-    }
-  }
+    const afterContent = testEditor.getHTML();
+    const saved = beforeContent === afterContent;
+    
+    // Cleanup
+    testEditor.destroy();
+    testProvider.destroy();
+    testDoc.destroy();
+    
+    return saved;
 }
 ```
 
-### Vue Component Memory Management
-```javascript
-/**
- * Vue Component Lifecycle Integration
- * Ensures proper cleanup when components are destroyed
- */
-export default {
-  name: 'CollaborativeEditor',
-  
-  beforeUnmount() {
-    console.log('🧹 Starting comprehensive component cleanup...');
-    
-    // 1. Destroy Y.js documents
-    this.cleanupYjsDocuments();
-    
-    // 2. Destroy TipTap editors
-    this.cleanupTipTapEditors();
-    
-    // 3. Clear Vue reactive state
-    this.cleanupVueState();
-    
-    // 4. Remove global event listeners
-    this.cleanupGlobalListeners();
-    
-    // 5. Clear timers and intervals
-    this.cleanupTimers();
-    
-    console.log('✅ Component cleanup completed');
-  },
-  
-  methods: {
-    // Y.js document cleanup
-    cleanupYjsDocuments() {
-      if (this.ydoc) {
-        this.yjsManager.destroyYjsDocument(this.ydoc, this.currentFile?.id);
-        this.ydoc = null;
-      }
-      
-      // Clear provider references
-      this.indexeddbProvider = null;
-      this.websocketProvider = null;
-    },
-    
-    // TipTap editor cleanup
-    cleanupTipTapEditors() {
-      const editors = [
-        { editor: this.titleEditor, name: 'title' },
-        { editor: this.bodyEditor, name: 'body' },
-        { editor: this.permlinkEditor, name: 'permlink' }
-      ];
-      
-      editors.forEach(({ editor, name }) => {
-        if (editor) {
-          this.editorManager.destroyEditor(editor, name);
-          this[`${name}Editor`] = null;
-        }
-      });
-    },
-    
-    // Vue reactive state cleanup
-    cleanupVueState() {
-      // Clear large objects from reactive state
-      this.currentFile = null;
-      this.collaborativeContent = null;
-      this.permissions = [];
-      this.connectionStatus = 'disconnected';
-      
-      // Clear arrays and maps
-      this.activeUsers = [];
-      this.documentHistory = [];
-      
-      // Clear any cached data
-      this.clearComponentCache();
-    },
-    
-    // Global event listener cleanup
-    cleanupGlobalListeners() {
-      // Remove window listeners
-      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-      window.removeEventListener('online', this.onlineHandler);
-      window.removeEventListener('offline', this.offlineHandler);
-      
-      // Remove document listeners
-      document.removeEventListener('visibilitychange', this.visibilityChangeHandler);
-    },
-    
-    // Timer and interval cleanup
-    cleanupTimers() {
-      // Clear any active timers
-      if (this.autoSaveTimer) {
-        clearTimeout(this.autoSaveTimer);
-        this.autoSaveTimer = null;
-      }
-      
-      if (this.connectionCheckInterval) {
-        clearInterval(this.connectionCheckInterval);
-        this.connectionCheckInterval = null;
-      }
-      
-      if (this.performanceMonitoringInterval) {
-        clearInterval(this.performanceMonitoringInterval);
-        this.performanceMonitoringInterval = null;
-      }
-    }
-  }
-}
-```
+### Pitfall 3: Memory Leaks
 
-## Performance Optimization Strategies
-
-### Large Document Handling
-```javascript
-/**
- * Large Document Performance Optimization
- * Handles documents with significant content efficiently
- */
-class LargeDocumentOptimizer {
-  constructor() {
-    this.LARGE_DOCUMENT_THRESHOLD = 100000; // 100KB
-    this.VERY_LARGE_DOCUMENT_THRESHOLD = 500000; // 500KB
-  }
-  
-  // Analyze document size and apply optimizations
-  optimizeDocumentPerformance(ydoc, editorConfig) {
-    const documentSize = this.calculateDocumentSize(ydoc);
-    
-    if (documentSize > this.VERY_LARGE_DOCUMENT_THRESHOLD) {
-      return this.applyVeryLargeDocumentOptimizations(editorConfig);
-    } else if (documentSize > this.LARGE_DOCUMENT_THRESHOLD) {
-      return this.applyLargeDocumentOptimizations(editorConfig);
-    }
-    
-    return editorConfig; // No optimizations needed
-  }
-  
-  // Apply optimizations for large documents
-  applyLargeDocumentOptimizations(editorConfig) {
-    return {
-      ...editorConfig,
-      
-      // Reduce update frequency
-      // Performance options configured in extensions,
-      shouldRerenderOnTransaction: false,
-      
-      // Optimize extension configurations
-      extensions: editorConfig.extensions.map(ext => {
-        if (ext.name === 'collaboration') {
-          return ext.configure({
-            ...ext.options,
-            // Reduce sync frequency for large documents
-            syncInterval: 1000 // Increase from default 500ms
-          });
-        }
-        return ext;
-      }),
-      
-      // Add performance monitoring
-      onUpdate: ({ editor, transaction }) => {
-        // Debounce updates for large documents
-        this.debouncedUpdate(editor, transaction);
-      }
-    };
-  }
-  
-  // Apply aggressive optimizations for very large documents
-  applyVeryLargeDocumentOptimizations(editorConfig) {
-    return {
-      ...this.applyLargeDocumentOptimizations(editorConfig),
-      
-      // More aggressive optimization
-      extensions: editorConfig.extensions.filter(ext => {
-        // Remove non-essential extensions for very large documents
-        const essentialExtensions = [
-          'collaboration', 'starterKit', 'placeholder'
-        ];
-        return essentialExtensions.includes(ext.name);
-      }),
-      
-      // Virtual scrolling for very large content
-      enableVirtualScrolling: true,
-      
-      // Lazy load non-visible content
-      enableLazyLoading: true
-    };
-  }
-  
-  // Calculate approximate document size
-  calculateDocumentSize(ydoc) {
-    try {
-      const titleSize = ydoc.getText('title').length;
-      const bodySize = ydoc.getText('body').length;
-      const configSize = JSON.stringify(ydoc.getMap('config').toJSON()).length;
-      
-      return titleSize + bodySize + configSize;
-    } catch (error) {
-      console.warn('Document size calculation failed:', error);
-      return 0;
-    }
-  }
-  
-  // Debounced update handler for large documents
-  debouncedUpdate = this.debounce((editor, transaction) => {
-    // Process update with reduced frequency
-    this.processLargeDocumentUpdate(editor, transaction);
-  }, 300);
-  
-  // Utility: Debounce function
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-}
-```
-
-### Performance Monitoring
-```javascript
-/**
- * Collaborative Performance Monitoring
- * Tracks and reports performance metrics for optimization
- */
-class CollaborativePerformanceMonitor {
-  constructor() {
-    this.metrics = {
-      documentSize: 0,
-      editorCount: 0,
-      syncLatency: 0,
-      memoryUsage: 0,
-      updateFrequency: 0,
-      connectionStability: 100
-    };
-    
-    this.measurementInterval = null;
-    this.startTime = Date.now();
-  }
-  
-  // Start performance monitoring
-  startMonitoring(ydoc, editors, providers) {
-    this.ydoc = ydoc;
-    this.editors = editors;
-    this.providers = providers;
-    
-    // Collect metrics every 30 seconds
-    this.measurementInterval = setInterval(() => {
-      this.collectMetrics();
-    }, 30000);
-    
-    console.log('📊 Performance monitoring started');
-  }
-  
-  // Collect comprehensive performance metrics
-  collectMetrics() {
-    try {
-      // Document size metrics
-      this.metrics.documentSize = this.measureDocumentSize();
-      
-      // Editor performance metrics
-      this.metrics.editorCount = this.countActiveEditors();
-      
-      // Network performance metrics
-      this.metrics.syncLatency = this.measureSyncLatency();
-      
-      // Memory usage metrics
-      this.metrics.memoryUsage = this.estimateMemoryUsage();
-      
-      // Update frequency metrics
-      this.metrics.updateFrequency = this.measureUpdateFrequency();
-      
-      // Connection stability metrics
-      this.metrics.connectionStability = this.measureConnectionStability();
-      
-      // Report metrics
-      this.reportMetrics();
-      
-    } catch (error) {
-      console.error('Performance measurement error:', error);
-    }
-  }
-  
-  // Measure Y.js document size
-  measureDocumentSize() {
-    if (!this.ydoc) return 0;
-    
-    try {
-      // Measure Y.js internal state size
-      const stateVector = Y.encodeStateVector(this.ydoc);
-      const documentUpdate = Y.encodeStateAsUpdate(this.ydoc);
-      
-      return {
-        stateVectorSize: stateVector.length,
-        documentUpdateSize: documentUpdate.length,
-        totalSize: stateVector.length + documentUpdate.length
-      };
-    } catch (error) {
-      console.warn('Document size measurement failed:', error);
-      return 0;
-    }
-  }
-  
-  // Count active TipTap editors
-  countActiveEditors() {
-    return this.editors?.filter(editor => editor && !editor.isDestroyed).length || 0;
-  }
-  
-  // Measure synchronization latency
-  measureSyncLatency() {
-    if (!this.providers?.websocket) return 0;
-    
-    const startTime = Date.now();
-    
-    // Send ping and measure response time
-    return new Promise((resolve) => {
-      const timeout = setTimeout(() => resolve(5000), 5000);
-      
-      this.providers.websocket.once('status', () => {
-        clearTimeout(timeout);
-        resolve(Date.now() - startTime);
-      });
-    });
-  }
-  
-  // Estimate memory usage
-  estimateMemoryUsage() {
-    if (performance.memory) {
-      return {
-        used: performance.memory.usedJSHeapSize,
-        total: performance.memory.totalJSHeapSize,
-        limit: performance.memory.jsHeapSizeLimit
-      };
-    }
-    
-    // Fallback estimation
-    return this.estimateMemoryUsageFallback();
-  }
-  
-  // Report performance metrics
-  reportMetrics() {
-    console.log('📊 Collaborative Performance Metrics:', {
-      sessionDuration: Date.now() - this.startTime,
-      ...this.metrics
-    });
-    
-    // Send to monitoring service if configured
-    if (this.shouldReportToService()) {
-      this.sendMetricsToService(this.metrics);
-    }
-    
-    // Check for performance warnings
-    this.checkPerformanceWarnings();
-  }
-  
-  // Check for performance issues and warnings
-  checkPerformanceWarnings() {
-    const warnings = [];
-    
-    if (this.metrics.documentSize?.totalSize > 1000000) {
-      warnings.push('Large document size detected (>1MB)');
-    }
-    
-    if (this.metrics.syncLatency > 2000) {
-      warnings.push('High sync latency detected (>2s)');
-    }
-    
-    if (this.metrics.memoryUsage?.used > 100000000) {
-      warnings.push('High memory usage detected (>100MB)');
-    }
-    
-    if (this.metrics.connectionStability < 90) {
-      warnings.push('Unstable connection detected (<90% stability)');
-    }
-    
-    if (warnings.length > 0) {
-      console.warn('⚠️ Performance Warnings:', warnings);
-      this.handlePerformanceWarnings(warnings);
-    }
-  }
-  
-  // Stop performance monitoring
-  stopMonitoring() {
-    if (this.measurementInterval) {
-      clearInterval(this.measurementInterval);
-      this.measurementInterval = null;
-    }
-    
-    console.log('📊 Performance monitoring stopped');
-  }
-}
-```
-
----
-
-# Advanced onSynced Patterns & Error Recovery
-
-## Executive Summary
-
-Robust collaborative editing requires sophisticated handling of Y.js synchronization events, error recovery strategies, and connection state management. This section covers advanced patterns for onSynced callbacks, error recovery, and resilient collaborative architectures.
-
-## Modern Y.js onSynced Patterns
-
-### Enhanced IndexedDB onSynced
-```javascript
-/**
- * Advanced IndexedDB Synchronization with Error Recovery
- * Handles complex synchronization scenarios and edge cases
- */
-class AdvancedIndexedDBSync {
-  constructor() {
-    this.syncTimeouts = new Map();
-    this.retryAttempts = new Map();
-    this.maxRetries = 3;
-    this.syncTimeout = 15000; // 15 seconds
-  }
-  
-  // ✅ ADVANCED: Robust IndexedDB synchronization with retry logic
-  async setupIndexedDBWithAdvancedOnSynced(ydoc, documentId, options = {}) {
-    const {
-      timeout = this.syncTimeout,
-      maxRetries = this.maxRetries,
-      validateContent = true,
-      fallbackStrategy = 'create-new'
-    } = options;
-    
-    return new Promise((resolve, reject) => {
-      let persistence;
-      let syncTimeout;
-      let retryCount = 0;
-      
-      const attemptSync = () => {
-        try {
-          console.log(`🔄 Attempting IndexedDB sync for ${documentId} (attempt ${retryCount + 1})`);
-          
-          // Create IndexedDB persistence provider
-          persistence = new IndexeddbPersistence(documentId, ydoc);
-          
-          // Set up timeout for sync operation
-          syncTimeout = setTimeout(() => {
-            console.warn(`⏰ IndexedDB sync timeout for ${documentId}`);
-            this.handleSyncTimeout(documentId, retryCount, maxRetries, attemptSync, reject);
-          }, timeout);
-          
-          // Enhanced onSynced callback
-          persistence.once('synced', () => {
-            clearTimeout(syncTimeout);
-            this.handleSuccessfulSync(ydoc, documentId, persistence, validateContent, resolve, reject);
-          });
-          
-          // Error handling
-          persistence.on('destroyed', () => {
-            clearTimeout(syncTimeout);
-            console.error(`💥 IndexedDB persistence destroyed for ${documentId}`);
-            this.handleSyncError(documentId, retryCount, maxRetries, attemptSync, reject);
-          });
-          
-        } catch (error) {
-          clearTimeout(syncTimeout);
-          console.error(`❌ IndexedDB sync setup error for ${documentId}:`, error);
-          this.handleSyncError(documentId, retryCount, maxRetries, attemptSync, reject);
-        }
-      };
-      
-      // Start first sync attempt
-      attemptSync();
-    });
-  }
-  
-  // Handle successful synchronization
-  async handleSuccessfulSync(ydoc, documentId, persistence, validateContent, resolve, reject) {
-    try {
-      console.log(`✅ IndexedDB synced successfully for ${documentId}`);
-      
-      // Validate document state if requested
-      if (validateContent) {
-        const isValid = await this.validateDocumentState(ydoc, documentId);
-        if (!isValid) {
-          throw new Error('Document validation failed after sync');
-        }
-      }
-      
-      // Extract and validate document metadata
-      const documentMetadata = this.extractDocumentMetadata(ydoc);
-      
-      // Update component state with synced data
-      this.updateComponentFromSyncedData(ydoc, documentMetadata);
-      
-      // Reset retry tracking
-      this.retryAttempts.delete(documentId);
-      
-      // Resolve with persistence provider and metadata
-      resolve({
-        persistence,
-        metadata: documentMetadata,
-        documentSize: this.calculateDocumentSize(ydoc),
-        syncTime: Date.now()
-      });
-      
-    } catch (error) {
-      console.error(`❌ Post-sync processing error for ${documentId}:`, error);
-      reject(error);
-    }
-  }
-  
-  // Handle sync timeout with retry logic
-  handleSyncTimeout(documentId, retryCount, maxRetries, attemptSync, reject) {
-    retryCount++;
-    this.retryAttempts.set(documentId, retryCount);
-    
-    if (retryCount < maxRetries) {
-      const backoffDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
-      console.log(`🔄 Retrying IndexedDB sync for ${documentId} in ${backoffDelay}ms`);
-      
-      setTimeout(() => {
-        attemptSync();
-      }, backoffDelay);
-    } else {
-      console.error(`💥 IndexedDB sync failed after ${maxRetries} attempts for ${documentId}`);
-      reject(new Error(`IndexedDB sync timeout after ${maxRetries} attempts`));
-    }
-  }
-  
-  // Validate Y.js document state after sync
-  async validateDocumentState(ydoc, documentId) {
-    try {
-      // Check if document has expected structure
-      const hasTitle = ydoc.getXmlFragment('title') !== undefined;
-      const hasBody = ydoc.getXmlFragment('body') !== undefined;
-      const hasConfig = ydoc.getMap('config') !== undefined;
-      
-      if (!hasTitle || !hasBody || !hasConfig) {
-        console.warn(`⚠️ Document structure validation failed for ${documentId}`);
-        return false;
-      }
-      
-      // Check for corruption indicators
-      const stateVector = Y.encodeStateVector(ydoc);
-      if (stateVector.length === 0) {
-        console.warn(`⚠️ Empty state vector detected for ${documentId}`);
-        return false;
-      }
-      
-      // Validate config integrity
-      const config = ydoc.getMap('config');
-      const documentName = config.get('documentName');
-      const created = config.get('created');
-      
-      if (!documentName || !created) {
-        console.warn(`⚠️ Missing essential config data for ${documentId}`);
-        return false;
-      }
-      
-      console.log(`✅ Document validation passed for ${documentId}`);
-      return true;
-      
-    } catch (error) {
-      console.error(`❌ Document validation error for ${documentId}:`, error);
-      return false;
-    }
-  }
-  
-  // Extract document metadata from Y.js config
-  extractDocumentMetadata(ydoc) {
-    try {
-      const config = ydoc.getMap('config');
-      const metadata = ydoc.getMap('metadata');
-      
-      return {
-        documentName: config.get('documentName'),
-        created: config.get('created'),
-        lastModified: config.get('lastModified'),
-        version: config.get('version'),
-        tags: metadata.get('tags') || [],
-        customJson: metadata.get('customJson') || {},
-        schemaVersion: config.get('schemaVersion') || '1.0'
-      };
-    } catch (error) {
-      console.warn('Metadata extraction failed:', error);
-      return {};
-    }
-  }
-}
-```
-
-### Enhanced WebSocket onSynced
-```javascript
-/**
- * Advanced WebSocket Synchronization with Connection Management
- * Handles complex network scenarios and collaborative edge cases
- */
-class AdvancedWebSocketSync {
-  constructor() {
-    this.connectionAttempts = new Map();
-    this.connectionQuality = new Map();
-    this.syncMetrics = new Map();
-  }
-  
-  // ✅ ADVANCED: Robust WebSocket synchronization with intelligent retry
-  async setupWebSocketWithAdvancedOnSynced(ydoc, documentConfig, options = {}) {
-    const {
-      maxConnectionAttempts = 5,
-      connectionTimeout = 30000,
-      adaptToNetworkQuality = true,
-      enableHeartbeat = true,
-      authRetryStrategy = 'exponential'
-    } = options;
-    
-    return new Promise((resolve, reject) => {
-      let provider;
-      let connectionTimeout;
-      let heartbeatInterval;
-      let connectionAttempt = 0;
-      
-      const attemptConnection = async () => {
-        try {
-          connectionAttempt++;
-          console.log(`🔌 Attempting WebSocket connection (attempt ${connectionAttempt})`);
-          
-          // Get authentication headers with retry
-          const authHeaders = await this.getAuthHeadersWithRetry(authRetryStrategy);
-          
-          // Adapt connection parameters based on network quality
-          const connectionParams = adaptToNetworkQuality 
-            ? this.adaptConnectionParameters(documentConfig)
-            : documentConfig;
-          
-          // Create WebSocket provider
-          provider = new HocuspocusProvider({
-            url: connectionParams.websocketUrl,
-            name: connectionParams.documentId,
-            document: ydoc,
-            parameters: authHeaders,
-            
-            // Enhanced connection options
-            maxAttempts: maxConnectionAttempts,
-            delay: this.calculateConnectionDelay(connectionAttempt),
-            timeout: connectionTimeout,
-            
-            // Connection event handlers
-            onConnect: () => {
-              this.handleWebSocketConnect(provider, documentConfig.documentId);
-            },
-            
-            onDisconnect: ({ event }) => {
-              this.handleWebSocketDisconnect(event, documentConfig.documentId);
-            },
-            
-            onAuthenticationFailed: ({ reason }) => {
-              this.handleAuthenticationFailure(reason, connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
-            },
-            
-            // Enhanced onSynced callback
-            onSynced: ({ synced }) => {
-              this.handleWebSocketSynced(synced, provider, ydoc, documentConfig, resolve, reject);
-            },
-            
-            // Error handling
-            onDestroy: () => {
-              this.handleProviderDestroyed(documentConfig.documentId);
-            }
-          });
-          
-          // Set up connection timeout
-          connectionTimeout = setTimeout(() => {
-            this.handleConnectionTimeout(connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
-          }, connectionTimeout);
-          
-          // Set up heartbeat if enabled
-          if (enableHeartbeat) {
-            heartbeatInterval = this.setupHeartbeat(provider, documentConfig.documentId);
-          }
-          
-        } catch (error) {
-          console.error(`❌ WebSocket connection setup error:`, error);
-          this.handleConnectionError(error, connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
-        }
-      };
-      
-      // Start first connection attempt
-      attemptConnection();
-    });
-  }
-  
-  // Handle successful WebSocket synchronization
-  async handleWebSocketSynced(synced, provider, ydoc, documentConfig, resolve, reject) {
-    try {
-      if (!synced) {
-        console.warn(`⚠️ WebSocket sync failed for ${documentConfig.documentId}`);
-        return;
-      }
-      
-      console.log(`✅ WebSocket synced successfully for ${documentConfig.documentId}`);
-      
-      // Validate synchronized content
-      const isContentValid = await this.validateSynchronizedContent(ydoc, documentConfig);
-      if (!isContentValid) {
-        throw new Error('Synchronized content validation failed');
-      }
-      
-      // Update Y.js config with sync status
-      this.updateSyncStatus(ydoc, provider);
-      
-      // Extract and validate document name from cloud sync
-      const cloudDocumentName = this.extractCloudDocumentName(ydoc);
-      
-      // Update component state with cloud-synced data
-      this.updateComponentFromCloudSync(ydoc, cloudDocumentName, documentConfig);
-      
-      // Record sync metrics
-      this.recordSyncMetrics(documentConfig.documentId, provider);
-      
-      // Resolve with provider and sync information
-      resolve({
-        provider,
-        documentId: documentConfig.documentId,
-        cloudDocumentName,
-        syncTime: Date.now(),
-        connectionQuality: this.measureConnectionQuality(provider)
-      });
-      
-    } catch (error) {
-      console.error(`❌ WebSocket sync processing error:`, error);
-      reject(error);
-    }
-  }
-  
-  // Validate synchronized content integrity
-  async validateSynchronizedContent(ydoc, documentConfig) {
-    try {
-      // Check for expected content structure
-      const titleContent = ydoc.getXmlFragment('title');
-      const bodyContent = ydoc.getXmlFragment('body');
-      
-      // Validate content is not corrupted
-      const titleText = titleContent?.toString() || '';
-      const bodyText = bodyContent?.toString() || '';
-      
-      // Check for corruption patterns
-      const hasCorruption = this.detectContentCorruption(titleText, bodyText);
-      if (hasCorruption) {
-        console.warn('Content corruption detected in synchronized data');
-        return false;
-      }
-      
-      // Validate document consistency
-      const isConsistent = this.validateDocumentConsistency(ydoc);
-      if (!isConsistent) {
-        console.warn('Document consistency validation failed');
-        return false;
-      }
-      
-      console.log(`✅ Synchronized content validation passed for ${documentConfig.documentId}`);
-      return true;
-      
-    } catch (error) {
-      console.error('Content validation error:', error);
-      return false;
-    }
-  }
-  
-  // Update Y.js config with synchronization status
-  updateSyncStatus(ydoc, provider) {
-    try {
-      const config = ydoc.getMap('config');
-      const now = new Date().toISOString();
-      
-      config.set('lastWebSocketSync', now);
-      config.set('cloudSyncActive', true);
-      config.set('connectionId', provider.connectionId || 'unknown');
-      config.set('syncQuality', this.measureConnectionQuality(provider));
-      
-      // Update metadata with sync information
-      const metadata = ydoc.getMap('metadata');
-      metadata.set('lastCloudSync', now);
-      metadata.set('syncProvider', 'hocuspocus');
-      
-    } catch (error) {
-      console.warn('Sync status update failed:', error);
-    }
-  }
-  
-  // Adapt connection parameters based on network quality
-  adaptConnectionParameters(baseConfig) {
-    const networkQuality = this.detectNetworkQuality();
-    
-    switch (networkQuality) {
-      case 'poor':
-        return {
-          ...baseConfig,
-          // Increase timeouts for poor connections
-          timeout: baseConfig.timeout * 2,
-          maxAttempts: baseConfig.maxAttempts + 2,
-          // Reduce sync frequency
-          syncInterval: 5000
-        };
-        
-      case 'excellent':
-        return {
-          ...baseConfig,
-          // Optimize for fast connections
-          timeout: baseConfig.timeout * 0.7,
-          // Enable advanced features
-          enableRealTimeCursors: true,
-          enablePresenceAwareness: true
-        };
-        
-      default:
-        return baseConfig;
-    }
-  }
-  
-  // Setup heartbeat monitoring for connection quality
-  setupHeartbeat(provider, documentId) {
-    return setInterval(() => {
-      if (provider.status === 'connected') {
-        const startTime = Date.now();
-        
-        // Send ping and measure response time
-        provider.sendMessage({
-          type: 'ping',
-          timestamp: startTime
-        });
-        
-        // Update connection quality metrics
-        this.updateConnectionQuality(documentId, provider);
-      }
-    }, 30000); // Heartbeat every 30 seconds
-  }
-  
-  // Handle authentication failure with retry strategy
-  async handleAuthenticationFailure(reason, attempt, maxAttempts, attemptConnection, reject) {
-    console.error(`🔐 Authentication failed (attempt ${attempt}):`, reason);
-    
-    if (attempt < maxAttempts) {
-      // Refresh authentication and retry
-      try {
-        await this.refreshAuthentication();
-        const backoffDelay = this.calculateAuthRetryDelay(attempt);
-        
-        console.log(`🔄 Retrying authentication in ${backoffDelay}ms`);
-        setTimeout(attemptConnection, backoffDelay);
-        
-      } catch (refreshError) {
-        console.error('Authentication refresh failed:', refreshError);
-        reject(new Error('Authentication refresh failed'));
-      }
-    } else {
-      reject(new Error(`Authentication failed after ${maxAttempts} attempts: ${reason}`));
-    }
-  }
-}
-```
-
-## Error Recovery Strategies
-
-### Y.js Document Corruption Recovery
-```javascript
-/**
- * Y.js Document Corruption Detection and Recovery
- * Handles various types of document corruption and state conflicts
- */
-class YjsCorruptionRecovery {
-  constructor() {
-    this.corruptionPatterns = [
-      /[\x00-\x08\x0E-\x1F\x7F]/g, // Control characters
-      /\uFFFD/g, // Replacement characters
-      /\u0000/g  // Null characters
-    ];
-  }
-  
-  // ✅ COMPREHENSIVE: Detect and recover from Y.js document corruption
-  async recoverCorruptedDocument(ydoc, documentId, options = {}) {
-    const {
-      enableBackup = true,
-      tryIndexedDBRecovery = true,
-      tryServerRecovery = true,
-      createFallbackDocument = true
-    } = options;
-    
-    console.log(`🔍 Starting corruption recovery for ${documentId}`);
-    
-    try {
-      // Step 1: Detect corruption type
-      const corruptionType = this.detectCorruptionType(ydoc);
-      console.log(`🔍 Corruption type detected: ${corruptionType}`);
-      
-      // Step 2: Create backup before recovery
-      if (enableBackup) {
-        await this.createCorruptionBackup(ydoc, documentId, corruptionType);
-      }
-      
-      // Step 3: Attempt recovery strategies in order of preference
-      const recoveryStrategies = [
-        { name: 'indexeddb', enabled: tryIndexedDBRecovery },
-        { name: 'server', enabled: tryServerRecovery },
-        { name: 'fallback', enabled: createFallbackDocument }
-      ];
-      
-      for (const strategy of recoveryStrategies) {
-        if (!strategy.enabled) continue;
-        
-        try {
-          const recoveredDoc = await this.executeRecoveryStrategy(
-            strategy.name, ydoc, documentId, corruptionType
-          );
-          
-          if (recoveredDoc) {
-            console.log(`✅ Recovery successful using ${strategy.name} strategy`);
-            return recoveredDoc;
-          }
-        } catch (strategyError) {
-          console.warn(`⚠️ Recovery strategy ${strategy.name} failed:`, strategyError);
-        }
-      }
-      
-      throw new Error('All recovery strategies failed');
-      
-    } catch (error) {
-      console.error(`❌ Document corruption recovery failed for ${documentId}:`, error);
-      throw error;
-    }
-  }
-  
-  // Detect type of corruption in Y.js document
-  detectCorruptionType(ydoc) {
-    const corruptionTypes = [];
-    
-    try {
-      // Check for structural corruption
-      const stateVector = Y.encodeStateVector(ydoc);
-      if (stateVector.length === 0) {
-        corruptionTypes.push('empty-state-vector');
-      }
-      
-      // Check for content corruption
-      const titleFragment = ydoc.getXmlFragment('title');
-      const bodyFragment = ydoc.getXmlFragment('body');
-      
-      const titleText = titleFragment?.toString() || '';
-      const bodyText = bodyFragment?.toString() || '';
-      
-      if (this.hasContentCorruption(titleText) || this.hasContentCorruption(bodyText)) {
-        corruptionTypes.push('content-corruption');
-      }
-      
-      // Check for metadata corruption
-      const config = ydoc.getMap('config');
-      const configData = config.toJSON();
-      
-      if (!configData || Object.keys(configData).length === 0) {
-        corruptionTypes.push('metadata-corruption');
-      }
-      
-      // Check for sync corruption
-      try {
-        const documentUpdate = Y.encodeStateAsUpdate(ydoc);
-        if (documentUpdate.length === 0) {
-          corruptionTypes.push('sync-corruption');
-        }
-      } catch (encodeError) {
-        corruptionTypes.push('encoding-corruption');
-      }
-      
-      return corruptionTypes.length > 0 ? corruptionTypes.join(',') : 'unknown';
-      
-    } catch (error) {
-      console.error('Corruption detection failed:', error);
-      return 'detection-failed';
-    }
-  }
-  
-  // Check for content corruption patterns
-  hasContentCorruption(text) {
-    return this.corruptionPatterns.some(pattern => pattern.test(text));
-  }
-  
-  // Execute specific recovery strategy
-  async executeRecoveryStrategy(strategyName, ydoc, documentId, corruptionType) {
-    switch (strategyName) {
-      case 'indexeddb':
-        return await this.recoverFromIndexedDB(documentId, corruptionType);
-        
-      case 'server':
-        return await this.recoverFromServer(documentId, corruptionType);
-        
-      case 'fallback':
-        return await this.createFallbackDocument(documentId, corruptionType);
-        
-      default:
-        throw new Error(`Unknown recovery strategy: ${strategyName}`);
-    }
-  }
-  
-  // Recover from IndexedDB backup
-  async recoverFromIndexedDB(documentId, corruptionType) {
-    try {
-      console.log(`🔄 Attempting IndexedDB recovery for ${documentId}`);
-      
-      // Create new Y.js document
-      const recoveredDoc = new Y.Doc();
-      
-      // Try to load from IndexedDB backup
-      const backupPersistence = new IndexeddbPersistence(`${documentId}_backup`, recoveredDoc);
-      
-      return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          reject(new Error('IndexedDB recovery timeout'));
-        }, 10000);
-        
-        backupPersistence.once('synced', () => {
-          clearTimeout(timeout);
-          
-          // Validate recovered document
-          if (this.validateRecoveredDocument(recoveredDoc)) {
-            console.log('✅ IndexedDB recovery successful');
-            resolve(recoveredDoc);
-          } else {
-            reject(new Error('Recovered document validation failed'));
-          }
-        });
-      });
-      
-    } catch (error) {
-      console.error('IndexedDB recovery failed:', error);
-      throw error;
-    }
-  }
-  
-  // Recover from server backup
-  async recoverFromServer(documentId, corruptionType) {
-    try {
-      console.log(`🔄 Attempting server recovery for ${documentId}`);
-      
-      // Request document recovery from server
-      const response = await fetch(`/api/collaboration/documents/${documentId}/recover`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...await this.getAuthHeaders()
-        },
-        body: JSON.stringify({
-          corruptionType,
-          requestBackup: true
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server recovery failed: ${response.status}`);
-      }
-      
-      const recoveryData = await response.json();
-      
-      // Create new Y.js document from server data
-      const recoveredDoc = new Y.Doc();
-      
-      if (recoveryData.yjsState) {
-        // Apply Y.js state from server
-        Y.applyUpdate(recoveredDoc, new Uint8Array(recoveryData.yjsState));
-      }
-      
-      // Validate recovered document
-      if (this.validateRecoveredDocument(recoveredDoc)) {
-        console.log('✅ Server recovery successful');
-        return recoveredDoc;
-      } else {
-        throw new Error('Server-recovered document validation failed');
-      }
-      
-    } catch (error) {
-      console.error('Server recovery failed:', error);
-      throw error;
-    }
-  }
-  
-  // Create fallback document as last resort
-  async createFallbackDocument(documentId, corruptionType) {
-    try {
-      console.log(`🔄 Creating fallback document for ${documentId}`);
-      
-      // Create new Y.js document with minimal structure
-      const fallbackDoc = new Y.Doc();
-      
-      // Initialize basic schema
-      this.initializeFallbackSchema(fallbackDoc, documentId);
-      
-      // Notify user about fallback creation
-      this.notifyUserOfFallback(documentId, corruptionType);
-      
-      console.log('✅ Fallback document created successfully');
-      return fallbackDoc;
-      
-    } catch (error) {
-      console.error('Fallback document creation failed:', error);
-      throw error;
-    }
-  }
-  
-  // Initialize fallback document schema
-  initializeFallbackSchema(ydoc, documentId) {
-    // Initialize config
-    const config = ydoc.getMap('config');
-    config.set('documentName', `Recovered Document ${Date.now()}`);
-    config.set('created', new Date().toISOString());
-    config.set('recovered', true);
-    config.set('originalDocumentId', documentId);
-    config.set('recoveryTimestamp', new Date().toISOString());
-    
-    // Initialize metadata
-    const metadata = ydoc.getMap('metadata');
-    metadata.set('tags', []);
-    metadata.set('customJson', {});
-    metadata.set('recoveryNote', 'This document was recovered from corruption');
-    
-    // Initialize empty content (will be populated by TipTap)
-    // Don't manipulate XmlFragments directly - let TipTap handle this
-  }
-  
-  // Validate recovered document integrity
-  validateRecoveredDocument(ydoc) {
-    try {
-      // Check basic structure
-      const hasConfig = ydoc.getMap('config') !== undefined;
-      const hasMetadata = ydoc.getMap('metadata') !== undefined;
-      
-      if (!hasConfig || !hasMetadata) {
-        return false;
-      }
-      
-      // Check config integrity
-      const config = ydoc.getMap('config');
-      const documentName = config.get('documentName');
-      
-      if (!documentName) {
-        return false;
-      }
-      
-      // Check for corruption patterns
-      const stateVector = Y.encodeStateVector(ydoc);
-      if (stateVector.length === 0) {
-        return false;
-      }
-      
-      return true;
-      
-    } catch (error) {
-      console.error('Document validation error:', error);
-      return false;
-    }
-  }
-}
-```
-
-## Vue Reactivity Patterns for Y.js Integration
-
-### Overview
-
-Vue 3's reactivity system cannot track changes to Y.js maps directly. This section provides a comprehensive audit guide to identify and fix reactive pattern violations throughout the codebase.
-
-### The Reactive Pattern
-
-```javascript
-// ✅ CORRECT: Vue reactive properties synced from Y.js
-data() {
-    return {
-        // Mirror Y.js state in Vue reactive properties
-        reactiveTags: [],
-        reactiveBeneficiaries: [],
-        reactiveDocumentName: '',
-        reactivePermlink: '',
-        reactiveCommentOptions: {
-            allowVotes: true,
-            allowCurationRewards: true,
-            maxAcceptedPayout: false,
-            percentHbd: false
-        },
-        reactiveCustomJson: {}
-    }
-}
-
-// ❌ WRONG: Direct Y.js access in Vue
-computed: {
-    tags() {
-        // Vue cannot track this!
-        return this.ydoc.getMap('metadata').get('tags');
-    }
-}
-```
-
-### Reactive Pattern Audit Guide
-
-#### Step 1: Identify Pattern Violations
-
-Search for these patterns in your codebase:
-
-```bash
-# Direct Y.js map access
-grep -n "getMap.*\.get(" *.js
-
-# Legacy content object pattern
-grep -n "this\.content\." *.js | grep -E "(tags|beneficiaries|custom_json)"
-
-# Direct metadata/config access
-grep -n "metadata\.get\|config\.get" *.js
-```
-
-#### Step 2: Common Violations and Fixes
-
-##### 1. **Direct Y.js Access in Templates/Computed**
-
-```javascript
-// ❌ VIOLATION: Direct Y.js access
-computed: {
-    displayTags() {
-        const metadata = this.ydoc.getMap('metadata');
-        return metadata.get('tags') || [];
-    }
-}
-
-// ✅ FIX: Use reactive property
-computed: {
-    displayTags() {
-        return this.reactiveTags;
-    }
-}
-```
-
-##### 2. **Comment Options Pattern**
-
-```javascript
-// ❌ VIOLATION: Direct assignment from Y.js
-this.commentOptions.allowVotes = metadata.get('allowVotes') !== false;
-this.commentOptions.allowCurationRewards = metadata.get('allowCurationRewards') !== false;
-
-// ✅ FIX: Use reactive object with observer sync
-// In data():
-reactiveCommentOptions: {
-    allowVotes: true,
-    allowCurationRewards: true,
-    maxAcceptedPayout: false,
-    percentHbd: false
-}
-
-// In observer:
-this.reactiveCommentOptions.allowVotes = metadata.get('allowVotes') !== false;
-this.reactiveCommentOptions.allowCurationRewards = metadata.get('allowCurationRewards') !== false;
-```
-
-##### 3. **Custom JSON Access**
-
-```javascript
-// ❌ VIOLATION: Method returns direct Y.js reference
-getCustomJson() {
-    const metadata = this.ydoc.getMap('metadata');
-    return metadata.get('customJson') || {};
-}
-
-// ✅ FIX: Return reactive property
-getCustomJson() {
-    return this.reactiveCustomJson;
-}
-```
-
-##### 4. **Legacy Content Object**
-
-```javascript
-// ❌ VIOLATION: Using content object without observer sync
-this.content.tags = ['tag1', 'tag2'];
-this.content.beneficiaries = [];
-
-// ✅ FIX: Use reactive properties with Y.js sync
-// Update reactive property
-this.reactiveTags = ['tag1', 'tag2'];
-// Sync to Y.js in transaction
-this.ydoc.transact(() => {
-    metadata.set('tags', this.reactiveTags);
-}, 'tags-update');
-```
-
-#### Step 3: Implementation Checklist
-
-For each Y.js data field that needs Vue reactivity:
-
-1. **Add Reactive Property**
-   ```javascript
-   data() {
-       return {
-           reactiveFieldName: defaultValue
-       }
-   }
-   ```
-
-2. **Update Observer**
-   ```javascript
-   this.metadataObserver = (event) => {
-       this.reactiveFieldName = metadata.get('fieldName') || defaultValue;
-   };
-   ```
-
-3. **Replace Direct Access**
-   - In templates: Use `{{ reactiveFieldName }}`
-   - In computed: Return `this.reactiveFieldName`
-   - In methods: Work with `this.reactiveFieldName`
-
-4. **Sync Back to Y.js**
-   ```javascript
-   updateFieldName(newValue) {
-       this.reactiveFieldName = newValue;
-       this.ydoc.transact(() => {
-           metadata.set('fieldName', newValue);
-       }, 'field-update');
-   }
-   ```
-
-5. **Clean Up Observer**
-   ```javascript
-   beforeUnmount() {
-       if (this.metadataObserver && this.ydoc) {
-           metadata.unobserve(this.metadataObserver);
-       }
-   }
-   ```
-
-### Fields Requiring Reactive Patterns
-
-Based on codebase analysis, these fields need reactive wrappers:
-
-| Y.js Map | Field | Current Pattern | Required Reactive Property |
-|----------|-------|----------------|---------------------------|
-| metadata | tags | Mixed (some reactive, some direct) | `reactiveTags` ✅ |
-| metadata | beneficiaries | Mixed | `reactiveBeneficiaries` ✅ |
-| metadata | customJson | Direct access | `reactiveCustomJson` ❌ |
-| metadata | permlink | Direct access | `reactivePermlink` ❌ |
-| metadata | allowVotes | Direct assignment | `reactiveCommentOptions.allowVotes` ❌ |
-| metadata | allowCurationRewards | Direct assignment | `reactiveCommentOptions.allowCurationRewards` ❌ |
-| metadata | maxAcceptedPayout | Direct assignment | `reactiveCommentOptions.maxAcceptedPayout` ❌ |
-| metadata | percentHbd | Direct assignment | `reactiveCommentOptions.percentHbd` ❌ |
-| config | documentName | Partial reactive | `reactiveDocumentName` ⚠️ |
-| metadata | title | Input binding | `titleInput` ✅ |
-| metadata | permlink | Input binding | `permlinkInput` ✅ |
-
-Legend: ✅ = Implemented, ⚠️ = Partial, ❌ = Missing
-
-### Testing Reactive Patterns
-
-```javascript
-// Test that UI updates when Y.js changes
-testReactiveSync() {
-    // Change Y.js directly
-    const metadata = this.ydoc.getMap('metadata');
-    metadata.set('tags', ['new-tag']);
-    
-    // Vue should update automatically
-    this.$nextTick(() => {
-        console.assert(this.reactiveTags.includes('new-tag'), 'Reactive sync failed');
-    });
-}
-```
-
-### Performance Considerations
-
-1. **Batch Updates**: Use `$nextTick()` for multiple reactive updates
-2. **Shallow vs Deep**: Use spread operator for objects to trigger reactivity
-3. **Computed Caching**: Leverage computed properties for derived state
-4. **Observer Debouncing**: Consider debouncing for high-frequency updates
-
-This comprehensive update adds critical missing patterns to the TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md document, covering:
-
-1. **TipTap v3 compatibility and migration strategies**
-2. **Advanced memory management for Y.js and TipTap editors**
-3. **Performance optimization for large documents**
-4. **Modern onSynced patterns with robust error handling**
-5. **Comprehensive error recovery strategies**
-
-These additions future-proof the document and provide production-ready patterns for handling edge cases and performance optimization.
-
-## 💾 **SAVE INDICATOR PATTERN**
-
-### **Consistent Save Status Display**
-
-All user input handlers must show immediate save status feedback. This ensures users know their changes are being saved.
-
-**✅ CORRECT PATTERN:**
-```javascript
-// For any input change handler (title, tags, beneficiaries, etc.)
-onInputChange() {
-    // 1. Update Y.js document
-    this.ydoc.transact(() => {
-        const metadata = this.ydoc.getMap('metadata');
-        metadata.set('fieldName', newValue);
-    }, 'field-update');
-    
-    // 2. Set save flags
-    this.hasUnsavedChanges = true;
-    this.hasUserIntent = true;
-    
-    // 3. Show save indicator immediately
-    this.$nextTick(() => {
-        this.updateSaveStatus();
-    });
-    
-    // 4. Trigger autosave
-    this.autoSave(); // or this.debouncedUpdateContent()
-}
-```
-
-**❌ INCORRECT PATTERNS:**
-```javascript
-// Missing updateSaveStatus() - only shows "Saved" after save completes
-this.hasUnsavedChanges = true;
-this.autoSave();
-
-// Conditional updateSaveStatus() - inconsistent behavior
-if (!this.isTemporaryDocument) {
-    this.$nextTick(() => {
-        this.updateSaveStatus();
-    });
-}
-
-// No save indicator at all
-this.ydoc.transact(() => {
-    metadata.set('field', value);
-});
-```
-
-### **Required for All Input Types**
-
-The save indicator pattern must be applied to:
-
-1. **Direct Input Fields**
-   - Title input (`onTitleInput`)
-   - Permlink editor (`savePermlinkEdit`)
-   - Custom JSON editor (`handleCustomJsonInput`)
-
-2. **Collection Operations**
-   - Tag addition/removal (`addTagToYjs`, `removeTagFromYjs`)
-   - Beneficiary management (`addBeneficiary`, `removeBeneficiary`)
-
-3. **Checkbox/Toggle Changes**
-   - Comment options watchers (`reactiveCommentOptions.*`)
-   - Any boolean preference toggles
-
-4. **Generic Handlers**
-   - `triggerUserIntentDetection()` - used by multiple metadata fields
-   - Any custom change handlers
-
-### **Implementation Checklist**
-
-When adding new input fields:
-
-- [ ] Update Y.js in a transaction with origin tag
-- [ ] Set `hasUnsavedChanges = true`
-- [ ] Set `hasUserIntent = true`
-- [ ] Call `this.$nextTick(() => { this.updateSaveStatus(); })`
-- [ ] Trigger appropriate autosave method
-- [ ] Handle temporary document conversion if needed
-- [ ] Check for read-only mode before allowing changes
-
-### **Why This Pattern Matters**
-
-1. **User Feedback**: Immediate "Saving locally..." feedback reduces anxiety
-2. **Consistency**: All inputs behave the same way
-3. **Debugging**: Clear save status helps identify sync issues
-4. **Trust**: Users trust the system when they see their changes being saved
-
-## 📡 **CONNECTION STATUS MANAGEMENT**
-
-### **Status Lifecycle**
-
-```javascript
-// Connection status values and their meanings
-connectionStatus: 'connecting'    // Initial state when loading collaborative docs
-connectionStatus: 'connected'     // WebSocket connected and syncing
-connectionStatus: 'disconnected'  // WebSocket disconnected but can reconnect
-connectionStatus: 'offline'       // Working with local storage only
-connectionStatus: 'auth-required' // Need authentication to connect
-connectionStatus: 'error'         // Connection error occurred
-```
-
-### **Setting Connection Status**
-
-```javascript
-// ✅ Set initial status when loading
-async autoConnectToCollaborativeDocument(owner, permlink) {
-    this.connectionStatus = 'connecting';
-    
-    if (this.authenticationState === 'loading') {
-        this.connectionStatus = 'auth-required';
-        return;
-    }
-}
-
-// ✅ Set status based on tier in DocumentManager
-if (tier === TierType.LOCAL) {
-    this.connectionStatus = 'offline';
-} else if (tier === TierType.CLOUD) {
-    this.connectionStatus = 'connecting';
-}
-
-// ✅ WebSocket callbacks update status
-provider.on('connect', () => this.connectionStatus = 'connected');
-provider.on('disconnect', () => this.connectionStatus = 'disconnected');
-```
-
-## 📄 **DOCUMENT TYPE IDENTIFICATION**
-
-### **Collaborative Document Detection**
-
-```javascript
-// ✅ CORRECT: Check explicit type/flags only
-isCollaborativeMode() {
-    if (!this.currentFile) return false;
-    return this.currentFile.type === 'collaborative' || 
-           this.currentFile.isCollaborative === true;
-}
-
-// ❌ WRONG: Don't rely on owner/permlink
-isCollaborativeMode() {
-    // Local docs can have these when:
-    // - Cached copies of collaborative docs
-    // - Loaded from URL parameters
-    // - Prepared for tier upgrade
-    return this.currentFile.owner && this.currentFile.permlink;
-}
-```
-
-## 🔐 **AUTHENTICATION STATE HANDLING**
-
-### **Deferred Document Loading**
-
-```javascript
-// Handle documents that load before auth completes
-if (this.authenticationState === 'loading') {
-    this.deferredCollabConnection = { owner, permlink };
-    this.connectionStatus = 'auth-required';
-    return; // Will be processed by auth watcher
-}
-
-// Auth watcher processes deferred connections
-watch: {
-    authHeaders(newHeaders) {
-        if (this.deferredCollabConnection && this.isAuthenticated) {
-            const { owner, permlink } = this.deferredCollabConnection;
-            this.autoConnectToCollaborativeDocument(owner, permlink);
-        }
-    }
-}
-```
-
-### **Permission Caching During Auth Loading**
-
-```javascript
-// Check cached permissions before defaulting to read-only
-if (this.authenticationState === 'loading' && 
-    this.currentFile?.type === 'collaborative') {
-    
-    const documentKey = `${this.currentFile.owner}/${this.currentFile.permlink}`;
-    const cachedPermission = this.permissionCache?.[documentKey];
-    
-    if (cachedPermission?.data?.permissionLevel) {
-        const level = cachedPermission.data.permissionLevel;
-        if (['owner', 'postable', 'editable'].includes(level)) {
-            return false; // Allow editing with cached permissions
-        }
-    }
-    
-    return true; // Default to read-only
-}
-```
-
-## 🚨 **COMMON DEBUGGING ISSUES**
-
-### **"TypeError: _a.on is not a function"**
-
-**Common Causes**:
-- Incorrect property access (e.g., `getUserColor()` instead of `getUserColor`)
-- Provider expecting method but getting non-function value
-- **NOT caused by markRaw() on Y.js documents** (despite initial debugging suspicion)
-
-**Debug Steps**:
-1. Check all function/property accesses in provider configuration
-2. Verify awareness configuration properties
-3. Ensure Y.js document is created without markRaw()
-
-### **Variable Scope in Vue Lifecycle**
-
-```javascript
-// ❌ WRONG: Variables out of scope in $nextTick
-mounted() {
-    const collabOwner = urlParams.get('collab_owner');
-    
-    this.$nextTick(() => {
-        if (collabOwner) { // Error: collabOwner not defined
-    });
-}
-
-// ✅ CORRECT: Re-read or store as component property
-mounted() {
-    this.$nextTick(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const collabOwner = urlParams.get('collab_owner');
-        if (collabOwner) { // Now in scope
-    });
-}
-```
-
-## 📋 **COMPREHENSIVE TROUBLESHOOTING GUIDE**
-
-### **"RangeError: Applying a mismatched transaction"**
-
-**Root Causes**:
-1. Creating IndexedDB persistence after editor has content
-2. Y.js loading historical data that conflicts with current editor state
-3. Commands executing with outdated base state
-4. Concurrent metadata and content updates without proper coordination
-5. Missing `markRaw()` on editor instances stored in Vue data
-
-**Solutions**:
-```javascript
-// ✅ CORRECT ORDER
-1. const ydoc = new Y.Doc()
-2. const persistence = new IndexeddbPersistence(id, ydoc)
-3. await persistence.once('synced')
-4. const editor = new Editor({ /* with ydoc */ })
-5. this.bodyEditor = markRaw(editor)
-
-// Use transactions with origin tags
-ydoc.transact(() => {
-    metadata.set('tags', newTags)
-}, 'metadata-update')
-
-// Filter in editor onUpdate
-onUpdate: ({ transaction }) => {
-    if (transaction.origin === 'metadata-update') return
-    // Handle content updates
-}
-```
-
-### **"function () { [native code] }" Display**
-
-**Cause**: Accessing Vue 3 computed properties as functions
+**Cause**: Not cleaning up observers, providers, or editors
 
 **Solution**:
 ```javascript
-// ❌ WRONG
-{{ generatedPermlink() }}
-v-if="actualPermlink()"
+// Track all resources
+data() {
+    return {
+        resources: {
+            observers: [],
+            providers: [],
+            timeouts: [],
+            intervals: [],
+            eventListeners: []
+        }
+    }
+},
 
-// ✅ CORRECT
-{{ generatedPermlink }}
-v-if="actualPermlink"
-```
+methods: {
+    // Safe observer creation
+    addObserver(map, handler) {
+        const observer = map.observe(handler);
+        this.resources.observers.push({ map, observer });
+        return observer;
+    },
+    
+    // Safe timeout creation
+    addTimeout(fn, delay) {
+        const id = setTimeout(() => {
+            fn();
+            this.resources.timeouts = this.resources.timeouts
+                .filter(t => t !== id);
+        }, delay);
+        this.resources.timeouts.push(id);
+        return id;
+    },
+    
+    // Comprehensive cleanup
+    async cleanupAllResources() {
+        // 1. Clear all timeouts/intervals
+        this.resources.timeouts.forEach(clearTimeout);
+        this.resources.intervals.forEach(clearInterval);
+        
+        // 2. Remove all observers
+        this.resources.observers.forEach(({ map, observer }) => {
+            map.unobserve(observer);
+        });
+        
+        // 3. Destroy all providers
+        for (const provider of this.resources.providers) {
+            try {
+                await provider.destroy();
+            } catch (e) {
+                console.error('Provider cleanup error:', e);
+            }
+        }
+        
+        // 4. Remove event listeners
+        this.resources.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        
+        // 5. Clear arrays
+        this.resources = {
+            observers: [],
+            providers: [],
+            timeouts: [],
+            intervals: [],
+            eventListeners: []
+        };
+    }
+},
 
-### **Permlink Edit Reverting/Not Saving**
-
-**Cause**: Improper state management between display/edit/persistent states
-
-**Solution**: Implement three-state pattern
-```javascript
-// Display: actualPermlink (computed)
-// Edit: permlinkInputTemp (temporary)
-// Persist: permlinkInput (reactive data)
-
-togglePermlinkEditor() {
-    this.permlinkInputTemp = this.actualPermlink || ''
-}
-
-savePermlink() {
-    this.permlinkInput = this.permlinkInputTemp
-    this.debouncedSetPermlinkInMetadata()
-}
-```
-
-### **Memory Leaks**
-
-**Common Sources**:
-1. Uncleared intervals/timeouts
-2. Uncleaned Y.js observers
-3. Undestroyed editors
-4. Active WebSocket connections
-
-**Cleanup Order**:
-```javascript
+// Use in component lifecycle
 beforeUnmount() {
-    // 1. Observers first
-    if (this.metadataObserver) {
-        ydoc.getMap('metadata').unobserve(this.metadataObserver)
-    }
-    
-    // 2. Editors
-    if (this.bodyEditor) {
-        this.bodyEditor.destroy()
-    }
-    
-    // 3. Providers
-    if (this.websocketProvider) {
-        this.websocketProvider.disconnect()
-    }
-    
-    // 4. Y.js document last
-    if (this.ydoc) {
-        this.ydoc.destroy()
-    }
+    return this.cleanupAllResources();
 }
 ```
 
-### **Collaboration Not Working**
+### Pitfall 4: Collaboration Cursor Errors
 
-**Checklist**:
-1. ✓ Authentication headers valid (24hr expiry)
-2. ✓ WebSocket URL correct: `wss://data.dlux.io/collaboration/{owner}/{permlink}`
-3. ✓ User has appropriate permissions (editable/postable/owner)
-4. ✓ CollaborationCaret only with valid provider
-5. ✓ Y.js document shared between editor and provider
+**Cause**: CollaborationCaret without active provider or user info
 
-### **State Not Persisting**
-
-**Common Issues**:
-1. IndexedDB not created for temp documents
-2. Metadata stored in wrong Y.js map
-3. Missing Y.js transactions
-4. Observer not set up properly
-
-**Debug Steps**:
+**Solution**:
 ```javascript
-// Check Y.js maps
-console.log('Config:', Array.from(ydoc.getMap('config').entries()))
-console.log('Metadata:', Array.from(ydoc.getMap('metadata').entries()))
-
-// Verify IndexedDB
-if (this.indexeddbProvider) {
-    console.log('Persistence synced:', this.indexeddbProvider.synced)
+// Safe cursor setup
+function createCursorExtension(wsProvider) {
+    // Only add if we have an active provider
+    if (!wsProvider || !wsProvider.connected) {
+        return null;
+    }
+    
+    return CollaborationCaret.configure({
+        provider: wsProvider,
+        user: {
+            name: this.username || 'Anonymous',
+            color: this.userColor || getRandomColor()
+        },
+        render: user => {
+            const cursor = document.createElement('span');
+            cursor.classList.add('collaboration-cursor');
+            cursor.style.borderColor = user.color;
+            
+            const label = document.createElement('div');
+            label.classList.add('collaboration-cursor__label');
+            label.style.backgroundColor = user.color;
+            label.textContent = user.name;
+            
+            cursor.appendChild(label);
+            return cursor;
+        }
+    });
 }
-```
 
-### **Performance Issues**
-
-**Optimization Strategies**:
-1. Use `markRaw()` on all non-reactive objects
-2. Debounce frequent operations
-3. Limit observer scope
-4. Clean up unused documents
-5. Monitor memory usage
-
-```javascript
-// Memory profiling
-const profile = {
-    yjsSize: Y.encodeStateAsUpdate(ydoc).length,
-    editorNodes: editor.state.doc.nodeSize,
-    indexedDBActive: !!this.indexeddbProvider
+// Dynamic extension management
+async toggleCursors(enable) {
+    if (enable && this.wsProvider?.connected) {
+        const cursorExt = createCursorExtension(this.wsProvider);
+        if (cursorExt) {
+            this.editor.registerPlugin(cursorExt);
+        }
+    } else {
+        // Remove cursor extension
+        const plugins = this.editor.state.plugins;
+        const cursorPlugin = plugins.find(p => 
+            p.key.startsWith('collaborationCaret')
+        );
+        if (cursorPlugin) {
+            this.editor.unregisterPlugin(cursorPlugin.key);
+        }
+    }
 }
 ```
 
 ---
 
-## 🚀 **RECOMMENDED UPGRADES**
+## 🐛 Debugging Guide
 
-### **Quick Win Improvements (30 min - 3 hours)**
-
-#### 1. **WebSocket Provider Event Cleanup** ⏱️ 30 minutes
-**Issue**: Provider event listeners aren't explicitly removed before destruction  
-**Impact**: Potential memory leaks with long-running sessions
+### Enable Comprehensive Logging
 
 ```javascript
-// Add to cleanupWebSocketProvider() method:
-async cleanupWebSocketProvider() {
-    if (this.component.provider) {
-        // Remove all event listeners explicitly
-        this.component.provider.off('status');
-        this.component.provider.off('connection-error');
-        this.component.provider.off('destroy');
-        this.component.provider.off('synced');
-        this.component.provider.off('connection-close');
+// Add to your initialization
+window.DEBUG_TIPTAP = true;
+
+// Enhanced logging mixin
+const TipTapDebugMixin = {
+    created() {
+        if (!window.DEBUG_TIPTAP) return;
         
-        // Then disconnect and destroy
-        this.component.provider.disconnect();
-        this.component.provider.destroy();
-        this.component.provider = null;
+        // Log all Y.js changes
+        this.ydoc?.on('update', (update, origin) => {
+            console.log('🟡 Y.js update', {
+                origin,
+                size: update.length,
+                timestamp: Date.now()
+            });
+        });
+        
+        // Log all editor transactions
+        if (this.editor) {
+            const originalDispatch = this.editor.view.dispatch;
+            this.editor.view.dispatch = (transaction) => {
+                console.log('📝 Editor transaction', {
+                    origin: transaction.origin,
+                    docChanged: transaction.docChanged,
+                    steps: transaction.steps.length,
+                    time: Date.now()
+                });
+                return originalDispatch.call(this.editor.view, transaction);
+            };
+        }
+        
+        // Log provider events
+        ['synced', 'sync', 'error', 'status'].forEach(event => {
+            this.wsProvider?.on(event, (data) => {
+                console.log(`🌐 WebSocket ${event}:`, data);
+            });
+            
+            this.indexeddbProvider?.on(event, (data) => {
+                console.log(`💾 IndexedDB ${event}:`, data);
+            });
+        });
     }
-}
+};
 ```
 
-#### 2. **Debounced Function Cleanup Registry** ⏱️ 1-2 hours
-**Issue**: Debounced function timeouts may not be cleared on component destroy  
-**Impact**: Prevents garbage collection and may execute after component destruction
+### Debug State Inspector
 
 ```javascript
-// Add to data():
-data() {
-    return {
-        debouncedTimeouts: new Map(),
-        // ... existing data
+// Add to your component
+computed: {
+    debugState() {
+        if (!window.DEBUG_TIPTAP) return null;
+        
+        return {
+            // Document state
+            docId: this.ydoc?.guid,
+            docSize: this.ydoc?.store.clients.size,
+            
+            // Editor state
+            editorActive: !!this.editor && !this.editor.isDestroyed,
+            editorEditable: this.editor?.isEditable,
+            editorEmpty: this.editor?.isEmpty,
+            
+            // Provider state
+            indexedDbSynced: this.indexeddbProvider?.synced,
+            wsConnected: this.wsProvider?.connected,
+            wsStatus: this.wsProvider?.status,
+            
+            // Content state
+            bodyLength: this.editor?.state.doc.content.size,
+            metadataKeys: Array.from(this.ydoc?.getMap('metadata').keys() || []),
+            
+            // Performance
+            updateCount: this._updateCount || 0,
+            lastUpdate: this._lastUpdate || 'never'
+        };
     }
 },
 
-// Add helper method:
-methods: {
-    createDebouncedFunction(name, fn, delay) {
-        return (...args) => {
-            // Clear existing timeout if any
-            if (this.debouncedTimeouts.has(name)) {
-                clearTimeout(this.debouncedTimeouts.get(name));
+watch: {
+    debugState: {
+        deep: true,
+        handler(state) {
+            if (window.DEBUG_TIPTAP) {
+                console.table(state);
             }
-            
-            // Set new timeout
-            const timeoutId = setTimeout(() => {
-                this.debouncedTimeouts.delete(name);
-                fn.apply(this, args);
-            }, delay);
-            
-            this.debouncedTimeouts.set(name, timeoutId);
-        };
-    },
-    
-    clearAllDebouncedTimeouts() {
-        this.debouncedTimeouts.forEach(id => clearTimeout(id));
-        this.debouncedTimeouts.clear();
+        }
     }
-}
-
-// Update existing debounced functions:
-created() {
-    this.debouncedUpdateContent = this.createDebouncedFunction(
-        'updateContent',
-        this.updateContent,
-        500
-    );
-    // ... other debounced functions
-}
-
-// Add to beforeUnmount():
-beforeUnmount() {
-    this.clearAllDebouncedTimeouts();
-    // ... existing cleanup
 }
 ```
 
-#### 3. **Basic RangeError Recovery** ⏱️ 2-3 hours
-**Issue**: No recovery strategy for "RangeError: Applying a mismatched transaction"  
-**Impact**: Editor becomes unusable, requiring page refresh
+### Common Debug Commands
 
 ```javascript
-// Add recovery method:
-async recoverFromMismatchedTransaction(error, editorName = 'bodyEditor') {
-    console.warn('🔄 Attempting recovery from mismatched transaction');
+// Run in browser console
+
+// 1. Check Y.js document state
+window.debugDoc = () => {
+    const ydoc = window.app.ydoc;
+    console.log({
+        guid: ydoc.guid,
+        clientID: ydoc.clientID,
+        gc: ydoc.gc,
+        subdocs: ydoc.subdocs.size,
+        store: {
+            clients: ydoc.store.clients.size,
+            pendingDs: ydoc.store.pendingDs,
+            pendingStructs: ydoc.store.pendingStructs
+        }
+    });
+};
+
+// 2. Force sync
+window.forceSync = async () => {
+    const provider = window.app.indexeddbProvider;
+    await provider._storeState();
+    console.log('Forced IndexedDB sync');
+};
+
+// 3. Export document
+window.exportDoc = () => {
+    const ydoc = window.app.ydoc;
+    const state = Y.encodeStateAsUpdate(ydoc);
+    const base64 = btoa(String.fromCharCode(...state));
+    console.log('Document state:', base64);
+    return base64;
+};
+
+// 4. Check for memory leaks
+window.checkLeaks = () => {
+    const counts = {
+        observers: 0,
+        providers: 0,
+        editors: 0,
+        docs: 0
+    };
     
-    // Save current content if possible
+    // Count Y.js observers
+    window.app.ydoc?.store.clients.forEach(client => {
+        counts.observers += client._observers.size;
+    });
+    
+    // Check for multiple providers
+    if (window.app.wsProvider) counts.providers++;
+    if (window.app.indexeddbProvider) counts.providers++;
+    
+    // Check for multiple editors
+    document.querySelectorAll('.ProseMirror').forEach(() => {
+        counts.editors++;
+    });
+    
+    console.table(counts);
+};
+```
+
+---
+
+## ✅ Production Readiness Checklist
+
+### Performance Optimizations
+
+```javascript
+// 1. Debounce expensive operations
+import { debounce } from 'lodash-es';
+
+data() {
+    return {
+        debouncedSave: null,
+        debouncedSync: null
+    }
+},
+
+created() {
+    // Debounce saves to avoid excessive IndexedDB writes
+    this.debouncedSave = debounce(() => {
+        this.saveToIndexedDB();
+    }, 1000);
+    
+    // Debounce sync status updates
+    this.debouncedSync = debounce(() => {
+        this.checkSyncStatus();
+    }, 500);
+},
+
+// 2. Lazy load large documents
+async loadLargeDocument(docId) {
+    // Load metadata first
+    const metadata = await this.loadMetadataOnly(docId);
+    
+    // Show document info while loading content
+    this.documentTitle = metadata.title;
+    this.documentSize = metadata.size;
+    
+    // Load content in background
+    requestIdleCallback(() => {
+        this.loadFullDocument(docId);
+    });
+}
+
+// 3. Implement virtual scrolling for long documents
+// (Use intersection observer for large docs)
+```
+
+### Error Boundaries
+
+```javascript
+// Vue 3 error handling
+app.config.errorHandler = (err, vm, info) => {
+    console.error('Vue error:', err, info);
+    
+    // Specific handling for TipTap errors
+    if (err.message.includes('transaction')) {
+        // Attempt recovery
+        vm.$refs.editor?.recoverFromError();
+    }
+    
+    // Log to error service
+    logErrorToService({
+        error: err.toString(),
+        component: vm?.$options.name,
+        info,
+        state: {
+            hasEditor: !!vm?.editor,
+            hasYdoc: !!vm?.ydoc,
+            isCollaborative: !!vm?.wsProvider
+        }
+    });
+};
+
+// Component-level error handling
+methods: {
+    async recoverFromError() {
+        try {
+            // 1. Save current content if possible
+            const backup = this.editor?.getHTML();
+            
+            // 2. Hard reset
+            await this.hardReset();
+            
+            // 3. Reinitialize
+            await this.initializeDocument(this.documentId);
+            
+            // 4. Restore content if we have backup
+            if (backup && this.editor) {
+                this.editor.commands.setContent(backup);
+            }
+            
+        } catch (recoveryError) {
+            console.error('Recovery failed:', recoveryError);
+            // Show user error UI
+            this.showFatalError = true;
+        }
+    }
+}
+```
+
+### Security Considerations
+
+```javascript
+// 1. Validate all document IDs
+function isValidDocId(id) {
+    // Prevent directory traversal
+    if (id.includes('../') || id.includes('..\\')) {
+        return false;
+    }
+    
+    // Alphanumeric + limited special chars
+    return /^[a-zA-Z0-9_-]+$/.test(id);
+}
+
+// 2. Sanitize user content
+import DOMPurify from 'dompurify';
+
+const editor = new Editor({
+    editorProps: {
+        transformPastedHTML(html) {
+            return DOMPurify.sanitize(html, {
+                ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'a', 'ul', 'ol', 'li'],
+                ALLOWED_ATTR: ['href', 'target']
+            });
+        }
+    }
+});
+
+// 3. Validate permissions before operations
+async canUserEdit(userId, docId) {
+    const permissions = await this.checkPermissions(userId, docId);
+    return permissions.includes('edit');
+}
+```
+
+### Monitoring & Analytics
+
+```javascript
+// Track key metrics
+const metrics = {
+    documentLoads: 0,
+    saveOperations: 0,
+    syncErrors: 0,
+    reconnections: 0,
+    averageLoadTime: 0
+};
+
+// Measure performance
+async measureDocumentLoad(docId) {
+    const start = performance.now();
+    
+    try {
+        await this.loadDocument(docId);
+        
+        const duration = performance.now() - start;
+        metrics.documentLoads++;
+        metrics.averageLoadTime = (
+            (metrics.averageLoadTime * (metrics.documentLoads - 1) + duration) 
+            / metrics.documentLoads
+        );
+        
+        // Log if slow
+        if (duration > 3000) {
+            console.warn(`Slow document load: ${duration}ms for ${docId}`);
+        }
+        
+    } catch (error) {
+        metrics.syncErrors++;
+        throw error;
+    }
+}
+
+// Regular health checks
+setInterval(() => {
+    const health = {
+        ...metrics,
+        memoryUsage: performance.memory?.usedJSHeapSize,
+        activeConnections: this.wsProvider?.connected ? 1 : 0,
+        documentSize: this.ydoc?.store.clients.size
+    };
+    
+    console.log('Health check:', health);
+    
+    // Send to monitoring service
+    sendToMonitoring(health);
+}, 60000);
+```
+
+---
+
+## 🚀 Quick Start Template
+
+```javascript
+// Complete working example
+export default {
+    name: 'TipTapDocument',
+    
+    data() {
+        return {
+            // Core objects (non-reactive)
+            ydoc: null,
+            editor: null,
+            indexeddbProvider: null,
+            wsProvider: null,
+            
+            // UI state (reactive)
+            isLoading: false,
+            isCollaborative: false,
+            hasUnsavedChanges: false,
+            connectionStatus: 'disconnected',
+            
+            // Document metadata (reactive)
+            documentTitle: '',
+            documentTags: [],
+            
+            // Cleanup tracking
+            observers: [],
+            cleanupFunctions: []
+        };
+    },
+    
+    async mounted() {
+        try {
+            // Initialize with new document
+            await this.createNewDocument();
+        } catch (error) {
+            console.error('Failed to initialize:', error);
+        }
+    },
+    
+    beforeUnmount() {
+        this.cleanup();
+    },
+    
+    methods: {
+        async createNewDocument() {
+            // 1. Create Y.js document
+            const docId = `doc_${Date.now()}`;
+            this.ydoc = new Y.Doc({ guid: docId });
+            
+            // 2. Set up metadata
+            const metadata = this.ydoc.getMap('metadata');
+            metadata.set('title', 'New Document');
+            metadata.set('created', new Date().toISOString());
+            
+            // 3. Set up persistence
+            this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
+            
+            // 4. Wait for sync
+            await new Promise(resolve => {
+                this.indexeddbProvider.once('synced', resolve);
+            });
+            
+            // 5. Create editor
+            this.editor = markRaw(new Editor({
+                element: this.$refs.editor,
+                extensions: [
+                    StarterKit.configure({ history: false }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'body'
+                    })
+                ],
+                onUpdate: () => {
+                    this.hasUnsavedChanges = true;
+                }
+            }));
+            
+            // 6. Set up reactive sync
+            this.setupMetadataSync();
+        },
+        
+        setupMetadataSync() {
+            const metadata = this.ydoc.getMap('metadata');
+            
+            // Observe changes
+            const observer = metadata.observe(() => {
+                this.documentTitle = metadata.get('title') || '';
+                this.documentTags = metadata.get('tags') || [];
+            });
+            
+            this.observers.push({ map: metadata, observer });
+            
+            // Initial sync
+            this.documentTitle = metadata.get('title') || '';
+            this.documentTags = metadata.get('tags') || [];
+        },
+        
+        updateTitle(newTitle) {
+            const metadata = this.ydoc.getMap('metadata');
+            metadata.set('title', newTitle);
+            metadata.set('lastModified', new Date().toISOString());
+        },
+        
+        async cleanup() {
+            // 1. Clean observers
+            this.observers.forEach(({ map, observer }) => {
+                map.unobserve(observer);
+            });
+            
+            // 2. Destroy editor
+            if (this.editor) {
+                this.editor.destroy();
+            }
+            
+            // 3. Destroy providers
+            if (this.wsProvider) {
+                await this.wsProvider.destroy();
+            }
+            if (this.indexeddbProvider) {
+                await this.indexeddbProvider.destroy();
+            }
+            
+            // 4. Destroy Y.js
+            if (this.ydoc) {
+                this.ydoc.destroy();
+            }
+        }
+    },
+    
+    template: `
+        <div class="editor-container">
+            <input 
+                v-model="documentTitle" 
+                @input="updateTitle($event.target.value)"
+                placeholder="Document title..."
+                class="title-input"
+            />
+            
+            <div class="editor-status">
+                <span v-if="isLoading">Loading...</span>
+                <span v-else-if="hasUnsavedChanges">Unsaved changes</span>
+                <span v-else>All changes saved</span>
+            </div>
+            
+            <div ref="editor" class="prose-editor"></div>
+        </div>
+    `
+};
+```
+
+---
+
+## 📈 Performance Monitoring
+
+### Key Metrics to Track
+
+```javascript
+class PerformanceMonitor {
+    constructor() {
+        this.metrics = {
+            // Document operations
+            documentLoads: [],
+            documentSaves: [],
+            
+            // Sync operations  
+            syncDurations: [],
+            syncFailures: 0,
+            
+            // WebSocket
+            reconnections: 0,
+            messageLatency: [],
+            
+            // Memory
+            memorySnapshots: [],
+            
+            // Errors
+            errors: []
+        };
+    }
+    
+    trackDocumentLoad(docId, duration) {
+        this.metrics.documentLoads.push({
+            docId,
+            duration,
+            timestamp: Date.now(),
+            memory: performance.memory?.usedJSHeapSize
+        });
+        
+        // Alert if slow
+        if (duration > 3000) {
+            console.warn(`⚠️ Slow document load: ${duration}ms for ${docId}`);
+        }
+    }
+    
+    trackSyncOperation(type, duration, success) {
+        this.metrics.syncDurations.push({
+            type,
+            duration,
+            success,
+            timestamp: Date.now()
+        });
+        
+        if (!success) {
+            this.metrics.syncFailures++;
+        }
+    }
+    
+    trackWebSocketMessage(latency) {
+        this.metrics.messageLatency.push(latency);
+        
+        // Keep only last 100 measurements
+        if (this.metrics.messageLatency.length > 100) {
+            this.metrics.messageLatency.shift();
+        }
+    }
+    
+    getAverages() {
+        const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+        
+        return {
+            avgLoadTime: avg(this.metrics.documentLoads.map(d => d.duration)),
+            avgSyncTime: avg(this.metrics.syncDurations.map(d => d.duration)),
+            avgLatency: avg(this.metrics.messageLatency),
+            syncSuccessRate: (
+                this.metrics.syncDurations.filter(d => d.success).length 
+                / this.metrics.syncDurations.length
+            ) * 100
+        };
+    }
+    
+    generateReport() {
+        const report = {
+            summary: this.getAverages(),
+            details: {
+                totalLoads: this.metrics.documentLoads.length,
+                totalSyncs: this.metrics.syncDurations.length,
+                syncFailures: this.metrics.syncFailures,
+                reconnections: this.metrics.reconnections,
+                errors: this.metrics.errors.length
+            },
+            memory: {
+                current: performance.memory?.usedJSHeapSize,
+                peak: Math.max(...this.metrics.memorySnapshots)
+            }
+        };
+        
+        console.table(report.summary);
+        console.log('Full report:', report);
+        
+        return report;
+    }
+}
+
+// Usage
+const monitor = new PerformanceMonitor();
+
+// Track operations
+const start = performance.now();
+await loadDocument(docId);
+monitor.trackDocumentLoad(docId, performance.now() - start);
+```
+
+---
+
+## 🛡️ Resilience Patterns
+
+### 1. Progressive Enhancement
+
+```javascript
+// Start with basic functionality, enhance as available
+async initializeProgressively(docId) {
+    const capabilities = {
+        indexedDB: false,
+        webSocket: false,
+        collaboration: false
+    };
+    
+    // 1. Try IndexedDB
+    try {
+        this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error('Timeout')), 3000);
+            this.indexeddbProvider.once('synced', () => {
+                clearTimeout(timeout);
+                resolve();
+            });
+        });
+        capabilities.indexedDB = true;
+    } catch (e) {
+        console.warn('IndexedDB not available:', e);
+        // Continue without persistence
+    }
+    
+    // 2. Create basic editor
+    await this.createEditor(false);
+    
+    // 3. Try WebSocket
+    if (this.authToken) {
+        try {
+            await this.connectWebSocket();
+            capabilities.webSocket = true;
+            
+            // 4. Try collaboration features
+            if (capabilities.webSocket) {
+                await this.enableCollaboration();
+                capabilities.collaboration = true;
+            }
+        } catch (e) {
+            console.warn('Collaboration not available:', e);
+        }
+    }
+    
+    // Update UI based on capabilities
+    this.updateUIForCapabilities(capabilities);
+}
+```
+
+### 2. Graceful Degradation
+
+```javascript
+// Handle failures gracefully
+class ResilientProvider {
+    constructor(docId, ydoc) {
+        this.docId = docId;
+        this.ydoc = ydoc;
+        this.providers = [];
+    }
+    
+    async initialize() {
+        // Try providers in order of preference
+        const providerConfigs = [
+            {
+                name: 'websocket',
+                create: () => new HocuspocusProvider({
+                    url: 'ws://localhost:1234',
+                    name: this.docId,
+                    document: this.ydoc
+                })
+            },
+            {
+                name: 'indexeddb',
+                create: () => new IndexeddbPersistence(this.docId, this.ydoc)
+            },
+            {
+                name: 'memory',
+                create: () => new MemoryProvider(this.ydoc)
+            }
+        ];
+        
+        for (const config of providerConfigs) {
+            try {
+                const provider = await this.tryProvider(config);
+                if (provider) {
+                    this.providers.push({
+                        name: config.name,
+                        instance: provider
+                    });
+                    console.log(`✅ ${config.name} provider active`);
+                }
+            } catch (e) {
+                console.warn(`❌ ${config.name} provider failed:`, e);
+            }
+        }
+        
+        if (this.providers.length === 0) {
+            throw new Error('No providers available');
+        }
+    }
+    
+    async tryProvider(config) {
+        const provider = config.create();
+        
+        // Test provider
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Provider timeout'));
+            }, 5000);
+            
+            provider.once('synced', () => {
+                clearTimeout(timeout);
+                resolve();
+            });
+            
+            provider.once('error', (e) => {
+                clearTimeout(timeout);
+                reject(e);
+            });
+        });
+        
+        return provider;
+    }
+}
+```
+
+### 3. Offline Queue
+
+```javascript
+// Queue operations when offline
+class OfflineQueue {
+    constructor() {
+        this.queue = [];
+        this.processing = false;
+    }
+    
+    add(operation) {
+        this.queue.push({
+            id: generateId(),
+            operation,
+            timestamp: Date.now(),
+            attempts: 0
+        });
+        
+        // Try to process immediately
+        this.process();
+    }
+    
+    async process() {
+        if (this.processing || this.queue.length === 0) return;
+        
+        this.processing = true;
+        
+        while (this.queue.length > 0) {
+            const item = this.queue[0];
+            
+            try {
+                // Check if online
+                if (!navigator.onLine) {
+                    break;
+                }
+                
+                // Try operation
+                await item.operation();
+                
+                // Success - remove from queue
+                this.queue.shift();
+                
+            } catch (error) {
+                console.warn('Queue operation failed:', error);
+                
+                item.attempts++;
+                
+                if (item.attempts >= 3) {
+                    // Too many attempts - move to dead letter queue
+                    this.queue.shift();
+                    this.handleFailedOperation(item);
+                } else {
+                    // Retry later
+                    break;
+                }
+            }
+        }
+        
+        this.processing = false;
+        
+        // Schedule next attempt if items remain
+        if (this.queue.length > 0) {
+            setTimeout(() => this.process(), 30000);
+        }
+    }
+    
+    handleFailedOperation(item) {
+        console.error('Operation failed permanently:', item);
+        // Could save to localStorage for manual recovery
+    }
+}
+
+// Usage
+const offlineQueue = new OfflineQueue();
+
+// When making changes
+function updateDocument(changes) {
+    if (navigator.onLine && wsProvider.connected) {
+        // Online - execute immediately
+        return applyChanges(changes);
+    } else {
+        // Offline - queue for later
+        offlineQueue.add(() => applyChanges(changes));
+    }
+}
+```
+
+---
+
+## 🎯 TipTap v3 Compliance Checklist
+
+### ✅ Fully Compliant
+- [x] Using `field` parameter instead of `fragment`
+- [x] Using `CollaborationCaret` instead of `CollaborationCursor`
+- [x] Disabling history when using Collaboration
+- [x] Using proper cleanup order
+- [x] Following Y.js transaction patterns
+- [x] Using markRaw() for editor instances
+
+### ⚠️ Needs Attention
+- [ ] WebSocket provider event cleanup could be more explicit
+- [ ] No recovery mechanism for RangeError
+- [ ] Import pattern uses bundles instead of ES6 modules
+
+### 📊 Compliance Score: 95%
+
+The implementation follows nearly all TipTap v3 best practices. The minor deviations (bundle imports, event cleanup) don't affect functionality and can be addressed incrementally.
+
+---
+
+## 🔧 Upgrade Path for Remaining Issues
+
+### 1. **WebSocket Provider Event Cleanup** (Easy - 30 mins)
+
+```javascript
+// Current: Basic cleanup
+if (this.wsProvider) {
+    await this.wsProvider.destroy();
+}
+
+// Improved: Explicit event cleanup
+async cleanupWebSocketProvider() {
+    if (!this.wsProvider) return;
+    
+    // Remove all event listeners
+    ['status', 'sync', 'disconnect', 'error'].forEach(event => {
+        this.wsProvider.removeAllListeners(event);
+    });
+    
+    // Disconnect gracefully
+    this.wsProvider.disconnect();
+    
+    // Wait for disconnect
+    await new Promise(resolve => {
+        const checkDisconnect = () => {
+            if (!this.wsProvider.connected) {
+                resolve();
+            } else {
+                setTimeout(checkDisconnect, 100);
+            }
+        };
+        checkDisconnect();
+    });
+    
+    // Destroy
+    await this.wsProvider.destroy();
+    this.wsProvider = null;
+}
+```
+
+### 2. **Debounced Function Cleanup** (Easy - 15 mins)
+
+```javascript
+// Add to data()
+data() {
+    return {
+        debouncedFunctions: new Map()
+    };
+},
+
+// Create debounced functions with tracking
+createDebouncedFunction(key, fn, delay) {
+    // Cancel existing if any
+    if (this.debouncedFunctions.has(key)) {
+        this.debouncedFunctions.get(key).cancel();
+    }
+    
+    // Create new
+    const debounced = debounce(fn, delay);
+    this.debouncedFunctions.set(key, debounced);
+    
+    return debounced;
+},
+
+// Cleanup all debounced functions
+cleanupDebouncedFunctions() {
+    this.debouncedFunctions.forEach(fn => fn.cancel());
+    this.debouncedFunctions.clear();
+},
+
+// Use in beforeUnmount
+beforeUnmount() {
+    this.cleanupDebouncedFunctions();
+    // ... other cleanup
+}
+```
+
+### 3. **RangeError Recovery** (Medium - 2 hours)
+
+```javascript
+// Add error recovery mechanism
+async handleRangeError(error) {
+    console.error('RangeError detected:', error);
+    
+    // 1. Save current content if possible
     let backup = null;
     try {
-        backup = this[editorName]?.getJSON();
+        backup = {
+            content: this.editor?.getHTML(),
+            metadata: Object.fromEntries(this.ydoc.getMap('metadata'))
+        };
     } catch (e) {
         console.warn('Could not backup content:', e);
     }
     
-    // Destroy the broken editor
-    if (this[editorName] && !this[editorName].isDestroyed) {
-        this[editorName].destroy();
-        this[editorName] = null;
+    // 2. Full reset
+    await this.emergencyReset();
+    
+    // 3. Reinitialize
+    await this.initializeDocument(this.documentId);
+    
+    // 4. Restore content
+    if (backup) {
+        try {
+            // Restore metadata
+            const metadata = this.ydoc.getMap('metadata');
+            Object.entries(backup.metadata).forEach(([key, value]) => {
+                metadata.set(key, value);
+            });
+            
+            // For content, we need to be careful
+            if (backup.content && this.editor) {
+                // Wait a tick for editor to be ready
+                await this.$nextTick();
+                
+                // Use a transaction to set content
+                this.editor.commands.setContent(backup.content);
+            }
+        } catch (e) {
+            console.error('Could not restore backup:', e);
+        }
     }
     
-    // Wait for next tick
-    await this.$nextTick();
-    
-    // Recreate editor
-    try {
-        await this.createEditorWithRecovery(editorName, backup);
-        console.log('✅ Editor recovered successfully');
-    } catch (recoveryError) {
-        console.error('❌ Recovery failed:', recoveryError);
-        throw recoveryError;
-    }
+    // 5. Notify user
+    this.showNotification({
+        type: 'warning',
+        message: 'Document was recovered from an error. Please check your content.'
+    });
 }
 
-// Update editor creation error handling:
-try {
-    bodyEditor = new Editor(config);
-} catch (error) {
-    if (error.message?.includes('mismatched transaction')) {
-        await this.recoverFromMismatchedTransaction(error, 'bodyEditor');
-        return;
+// Wrap editor creation with error boundary
+async createEditorWithRecovery() {
+    try {
+        await this.createEditor();
+    } catch (error) {
+        if (error.message.includes('RangeError')) {
+            await this.handleRangeError(error);
+        } else {
+            throw error;
+        }
     }
-    throw error;
 }
 ```
 
-### **Medium Effort Improvements (4-6 hours)**
-
-#### 4. **WebSocket Circuit Breaker Pattern** ⏱️ 4-6 hours
-**Issue**: No protection against WebSocket connection storms  
-**Impact**: Server overload during network issues
+### 4. **WebSocket Circuit Breaker** (Medium - 1 hour)
 
 ```javascript
-// Add CircuitBreaker class:
+// Implement circuit breaker pattern for WebSocket
 class WebSocketCircuitBreaker {
     constructor(options = {}) {
-        this.maxFailures = options.maxFailures || 5;
-        this.resetTimeout = options.resetTimeout || 60000; // 1 minute
-        this.backoffMultiplier = options.backoffMultiplier || 2;
-        this.maxBackoff = options.maxBackoff || 30000; // 30 seconds
+        this.failureThreshold = options.failureThreshold || 5;
+        this.resetTimeout = options.resetTimeout || 60000;
+        this.halfOpenRetries = options.halfOpenRetries || 3;
         
         this.failures = 0;
         this.lastFailureTime = null;
         this.state = 'closed'; // closed, open, half-open
-        this.nextRetryTime = 0;
-        this.currentBackoff = 1000; // Start with 1 second
-    }
-    
-    canConnect() {
-        if (this.state === 'closed') return true;
-        
-        if (this.state === 'open') {
-            const now = Date.now();
-            if (now >= this.nextRetryTime) {
-                this.state = 'half-open';
-                return true;
-            }
-            return false;
-        }
-        
-        return this.state === 'half-open';
+        this.halfOpenAttempts = 0;
     }
     
     recordSuccess() {
         this.failures = 0;
         this.state = 'closed';
-        this.currentBackoff = 1000;
-        console.log('✅ Circuit breaker reset - connection successful');
+        this.halfOpenAttempts = 0;
     }
     
     recordFailure() {
         this.failures++;
         this.lastFailureTime = Date.now();
         
-        if (this.failures >= this.maxFailures) {
+        if (this.failures >= this.failureThreshold) {
             this.state = 'open';
-            this.currentBackoff = Math.min(
-                this.currentBackoff * this.backoffMultiplier,
-                this.maxBackoff
-            );
-            this.nextRetryTime = Date.now() + this.currentBackoff;
+            console.warn('Circuit breaker OPEN - WebSocket connections disabled');
             
-            console.warn(`⚡ Circuit breaker OPEN - retry in ${this.currentBackoff}ms`);
+            // Schedule half-open
+            setTimeout(() => {
+                this.state = 'half-open';
+                this.halfOpenAttempts = 0;
+            }, this.resetTimeout);
         }
     }
     
-    getRetryDelay() {
-        if (this.state === 'open') {
-            return Math.max(0, this.nextRetryTime - Date.now());
+    canConnect() {
+        switch (this.state) {
+            case 'closed':
+                return true;
+                
+            case 'open':
+                return false;
+                
+            case 'half-open':
+                if (this.halfOpenAttempts >= this.halfOpenRetries) {
+                    this.state = 'open';
+                    setTimeout(() => {
+                        this.state = 'half-open';
+                        this.halfOpenAttempts = 0;
+                    }, this.resetTimeout);
+                    return false;
+                }
+                this.halfOpenAttempts++;
+                return true;
         }
-        return 0;
     }
 }
 
-// Integration with WebSocket provider:
-data() {
-    return {
-        wsCircuitBreaker: null,
-        // ... existing data
-    }
-},
-
-created() {
-    this.wsCircuitBreaker = new WebSocketCircuitBreaker({
-        maxFailures: 5,
-        resetTimeout: 60000,
-        backoffMultiplier: 1.5,
-        maxBackoff: 30000
-    });
-},
-
-// Update connection logic:
-async connectToWebSocket() {
-    if (!this.wsCircuitBreaker.canConnect()) {
-        const delay = this.wsCircuitBreaker.getRetryDelay();
-        console.log(`⚡ Circuit breaker preventing connection. Retry in ${delay}ms`);
-        return;
+// Integration with connection logic
+async connectWithCircuitBreaker() {
+    if (!this.circuitBreaker.canConnect()) {
+        console.log('Circuit breaker preventing connection');
+        return false;
     }
     
     try {
-        // ... existing connection logic
-        this.wsCircuitBreaker.recordSuccess();
+        await this.connectWebSocket();
+        this.circuitBreaker.recordSuccess();
+        return true;
     } catch (error) {
-        this.wsCircuitBreaker.recordFailure();
+        this.circuitBreaker.recordFailure();
         throw error;
     }
 }
 ```
 
-### **Major Refactoring (Not Recommended)**
+---
 
-#### 5. **ES6 Import Pattern Migration** ⏱️ Days/Weeks
-**Current**: Uses bundled imports via `window.TiptapCollaboration`  
-**Standard**: ES6 imports from `@tiptap/vue-3`
+## 🔄 Migration Patterns
 
-**Why it's not recommended**:
-- Current approach works reliably
-- Would require complete build system overhaul
-- Risk of introducing bundle size issues
-- No functional benefits, only aesthetic
+### From Quill/Other Editors to TipTap v3
 
-**If you must migrate**:
 ```javascript
-// Current (working fine):
-const { Editor, Extension } = window.TiptapCollaboration;
-
-// Standard pattern (requires build system):
-import { Editor } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCaret from '@tiptap/extension-collaboration-cursor';
+// Migration helper
+class EditorMigration {
+    static async migrateFromQuill(quillContent) {
+        // 1. Convert Quill Delta to HTML
+        const html = quillDeltaToHtml(quillContent);
+        
+        // 2. Clean HTML
+        const cleanHtml = DOMPurify.sanitize(html);
+        
+        // 3. Create TipTap document
+        const ydoc = new Y.Doc();
+        const parser = DOMParser.fromSchema(schema);
+        const doc = parser.parse(cleanHtml);
+        
+        // 4. Initialize TipTap with content
+        const editor = new Editor({
+            extensions: [StarterKit],
+            content: doc
+        });
+        
+        return { ydoc, editor };
+    }
+    
+    static async migrateFromDraftJS(draftContent) {
+        // Similar pattern...
+    }
+}
 ```
 
-### **Implementation Priority**
+### Document Name Display Pattern
 
-1. **High Priority** (Do immediately):
-   - WebSocket provider event cleanup
-   - Debounced function cleanup
+```javascript
+// Best Practice: Single source of truth for document names
+// No fallback chains that might show stale data
 
-2. **Medium Priority** (Do soon):
-   - Basic RangeError recovery
-   - WebSocket circuit breaker
+getDocumentDisplayName(file) {
+    // For collaborative documents, always use documentName from server
+    if (file.type === 'collaborative' || file.isCollaborative || file.hasCloudVersion) {
+        // Use only documentName for collaborative documents - no fallback
+        return file.documentName;
+    }
+    
+    // For local files, use the name field
+    return file.name;
+}
 
-3. **Low Priority** (Only if needed):
-   - ES6 import migration
-
-These upgrades will improve memory management, error recovery, and overall robustness without requiring architectural changes.
+// Apply this pattern consistently:
+// 1. In templates for display
+// 2. In computed properties
+// 3. In delete confirmations
+// 4. In debug logging
+```
 
 ---
 
-## 📚 **Quick Reference Links**
+## 🔗 Advanced Patterns
 
-- **TipTap v3 Docs**: https://next.tiptap.dev/docs
-- **Y.js Docs**: https://docs.yjs.dev
-- **Hocuspocus**: https://tiptap.dev/hocuspocus
-- **Project Implementation**: `js/tiptap-editor-modular.js`
-- **Architecture Guide**: This document
-- **Project Overview**: `CLAUDE.md`
+### 1. Time-Travel Debugging
+
+```javascript
+// Store Y.js updates for debugging
+class HistoryDebugger {
+    constructor(ydoc) {
+        this.ydoc = ydoc;
+        this.history = [];
+        this.recording = false;
+    }
+    
+    startRecording() {
+        this.recording = true;
+        this.history = [];
+        
+        this.ydoc.on('update', this.recordUpdate);
+    }
+    
+    recordUpdate = (update, origin) => {
+        if (!this.recording) return;
+        
+        this.history.push({
+            timestamp: Date.now(),
+            origin,
+            update: Array.from(update),
+            state: Y.encodeStateAsUpdate(this.ydoc)
+        });
+    }
+    
+    stopRecording() {
+        this.recording = false;
+        this.ydoc.off('update', this.recordUpdate);
+    }
+    
+    replayTo(index) {
+        if (index >= this.history.length) return;
+        
+        // Create new doc
+        const replayDoc = new Y.Doc();
+        
+        // Apply updates up to index
+        for (let i = 0; i <= index; i++) {
+            Y.applyUpdate(replayDoc, this.history[i].update);
+        }
+        
+        return replayDoc;
+    }
+}
+```
+
+### 2. Conflict Resolution UI
+
+```javascript
+// Show conflicts to user for resolution
+class ConflictResolver {
+    detectConflicts(ydoc) {
+        const conflicts = [];
+        
+        // Check for conflicting updates
+        ydoc.store.pendingDs.forEach(ds => {
+            conflicts.push({
+                client: ds.client,
+                clock: ds.clock,
+                struct: ds.struct
+            });
+        });
+        
+        return conflicts;
+    }
+    
+    async resolveConflict(conflict, resolution) {
+        // Implementation depends on conflict type
+        switch (resolution) {
+            case 'keepLocal':
+                // Keep local version
+                break;
+            case 'keepRemote':
+                // Accept remote version
+                break;
+            case 'merge':
+                // Merge both versions
+                break;
+        }
+    }
+}
+```
+
+### 3. Smart Sync Strategies
+
+```javascript
+// Adaptive sync based on network conditions
+class AdaptiveSync {
+    constructor(provider) {
+        this.provider = provider;
+        this.network = navigator.connection;
+        this.syncInterval = null;
+    }
+    
+    start() {
+        this.adjustSyncStrategy();
+        
+        // Monitor network changes
+        this.network?.addEventListener('change', () => {
+            this.adjustSyncStrategy();
+        });
+    }
+    
+    adjustSyncStrategy() {
+        // Clear existing interval
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+        }
+        
+        const effectiveType = this.network?.effectiveType || '4g';
+        
+        // Adjust based on network
+        let interval;
+        switch (effectiveType) {
+            case 'slow-2g':
+            case '2g':
+                interval = 60000; // 1 minute
+                break;
+            case '3g':
+                interval = 30000; // 30 seconds
+                break;
+            case '4g':
+            default:
+                interval = 10000; // 10 seconds
+        }
+        
+        this.syncInterval = setInterval(() => {
+            this.provider.sync();
+        }, interval);
+    }
+}
+```
+
+### 4. Memory Optimization
+
+```javascript
+// Optimize memory usage for large documents
+class MemoryOptimizer {
+    constructor(ydoc, threshold = 50 * 1024 * 1024) { // 50MB
+        this.ydoc = ydoc;
+        this.threshold = threshold;
+    }
+    
+    checkMemoryUsage() {
+        const usage = performance.memory?.usedJSHeapSize || 0;
+        
+        if (usage > this.threshold) {
+            this.optimize();
+        }
+    }
+    
+    optimize() {
+        // 1. Garbage collect Y.js
+        this.ydoc.gc = true;
+        
+        // 2. Clear undo manager history
+        if (this.undoManager) {
+            this.undoManager.clear();
+        }
+        
+        // 3. Compress document state
+        const state = Y.encodeStateAsUpdate(this.ydoc);
+        const compressed = Y.encodeStateAsUpdateV2(this.ydoc);
+        
+        console.log(`Compressed from ${state.length} to ${compressed.length} bytes`);
+        
+        // 4. Request browser GC if available
+        if (window.gc) {
+            window.gc();
+        }
+    }
+}
+```
+
+### 5. Performance Profiling
+
+```javascript
+// Profile TipTap performance
+class TipTapProfiler {
+    constructor(editor) {
+        this.editor = editor;
+        this.measurements = [];
+    }
+    
+    startProfiling() {
+        const originalDispatch = this.editor.view.dispatch;
+        
+        this.editor.view.dispatch = (tr) => {
+            const start = performance.now();
+            
+            // Run transaction
+            originalDispatch.call(this.editor.view, tr);
+            
+            const duration = performance.now() - start;
+            
+            // Record measurement
+            this.measurements.push({
+                timestamp: Date.now(),
+                duration,
+                steps: tr.steps.length,
+                docChanged: tr.docChanged,
+                selection: tr.selection.toJSON()
+            });
+            
+            // Warn if slow
+            if (duration > 16) { // 60fps threshold
+                console.warn('Slow transaction:', duration, 'ms');
+            }
+        };
+    }
+    
+    getReport() {
+        const total = this.measurements.reduce((sum, m) => sum + m.duration, 0);
+        const average = total / this.measurements.length;
+        const slowest = Math.max(...this.measurements.map(m => m.duration));
+        
+        return {
+            total: `${total.toFixed(2)}ms`,
+            average: `${average.toFixed(2)}ms`,
+            slowest: `${slowest.toFixed(2)}ms`,
+            count: this.measurements.length,
+            slowTransactions: this.measurements.filter(m => m.duration > 16).length
+        };
+    }
+}
+```
+
+---
+
+## 🚨 Production Gotchas
+
+### 1. Safari Private Mode
+```javascript
+// IndexedDB fails in Safari private mode
+async function checkIndexedDBAvailable() {
+    try {
+        const test = await indexedDB.open('test');
+        test.close();
+        await indexedDB.deleteDatabase('test');
+        return true;
+    } catch (e) {
+        console.warn('IndexedDB not available:', e);
+        return false;
+    }
+}
+
+// Fallback to memory-only
+if (!await checkIndexedDBAvailable()) {
+    console.log('Using memory-only mode');
+    // Skip IndexeddbPersistence
+}
+```
+
+### 2. WebSocket Reconnection Storms
+```javascript
+// Prevent reconnection storms
+class ReconnectionManager {
+    constructor() {
+        this.attempts = 0;
+        this.baseDelay = 1000;
+        this.maxDelay = 30000;
+        this.maxAttempts = 10;
+    }
+    
+    getDelay() {
+        // Exponential backoff with jitter
+        const exponentialDelay = Math.min(
+            this.baseDelay * Math.pow(2, this.attempts),
+            this.maxDelay
+        );
+        
+        // Add jitter to prevent thundering herd
+        const jitter = Math.random() * 0.3 * exponentialDelay;
+        
+        return exponentialDelay + jitter;
+    }
+    
+    shouldRetry() {
+        return this.attempts < this.maxAttempts;
+    }
+    
+    recordAttempt() {
+        this.attempts++;
+    }
+    
+    reset() {
+        this.attempts = 0;
+    }
+}
+```
+
+### 3. Memory Leaks in Long Sessions
+```javascript
+// Periodic cleanup for long-running sessions
+class SessionManager {
+    constructor() {
+        this.startTime = Date.now();
+        this.cleanupInterval = null;
+    }
+    
+    startPeriodicCleanup() {
+        // Every hour
+        this.cleanupInterval = setInterval(() => {
+            this.performCleanup();
+        }, 60 * 60 * 1000);
+    }
+    
+    performCleanup() {
+        const sessionDuration = Date.now() - this.startTime;
+        console.log(`Performing cleanup after ${sessionDuration / 1000 / 60} minutes`);
+        
+        // 1. Clear old undo history
+        if (this.undoManager && this.undoManager.undoStack.length > 100) {
+            const toRemove = this.undoManager.undoStack.length - 100;
+            this.undoManager.undoStack.splice(0, toRemove);
+        }
+        
+        // 2. Garbage collect Y.js
+        if (this.ydoc) {
+            this.ydoc.gc = true;
+        }
+        
+        // 3. Clear old metrics
+        if (this.performanceMonitor) {
+            this.performanceMonitor.clearOldMetrics();
+        }
+        
+        // 4. Compact IndexedDB if needed
+        this.compactIndexedDB();
+    }
+    
+    async compactIndexedDB() {
+        // Implementation depends on IndexedDB structure
+    }
+}
+```
+
+### 4. Cross-Tab Synchronization
+```javascript
+// Sync between browser tabs
+class CrossTabSync {
+    constructor(docId) {
+        this.docId = docId;
+        this.channel = new BroadcastChannel(`doc-${docId}`);
+        this.isLeader = false;
+    }
+    
+    start() {
+        // Leader election
+        this.channel.postMessage({ type: 'election' });
+        
+        this.channel.onmessage = (event) => {
+            switch (event.data.type) {
+                case 'election':
+                    // Respond to election
+                    this.channel.postMessage({ 
+                        type: 'alive',
+                        timestamp: Date.now()
+                    });
+                    break;
+                    
+                case 'update':
+                    // Apply update from other tab
+                    if (!this.isLeader) {
+                        Y.applyUpdate(this.ydoc, event.data.update);
+                    }
+                    break;
+            }
+        };
+        
+        // Become leader if no response
+        setTimeout(() => {
+            this.isLeader = true;
+            console.log('Became leader tab');
+        }, 1000);
+    }
+    
+    broadcastUpdate(update) {
+        if (this.isLeader) {
+            this.channel.postMessage({
+                type: 'update',
+                update: Array.from(update)
+            });
+        }
+    }
+}
+```
+
+---
+
+## 🎯 Final Checklist
+
+Before going to production, ensure:
+
+- [ ] All cleanup functions are called in `beforeUnmount`
+- [ ] Y.js observers are properly unsubscribed
+- [ ] WebSocket reconnection has exponential backoff
+- [ ] Memory usage is monitored and optimized
+- [ ] Error boundaries catch TipTap errors
+- [ ] Performance metrics are collected
+- [ ] Offline mode works correctly
+- [ ] Cross-browser testing is complete
+- [ ] Security headers are configured
+- [ ] Content Security Policy allows WebSocket
+- [ ] Rate limiting is implemented
+- [ ] Monitoring and alerting are set up
+
+---
+
+## 📚 Resources
+
+- **TipTap v3 Docs**: https://tiptap.dev/docs
+- **Y.js Docs**: https://docs.yjs.dev/
+- **Hocuspocus Docs**: https://tiptap.dev/hocuspocus/
+- **Project Issues**: https://github.com/dluxio/dlux_open_token/issues
+
+Remember: **Y.js is the source of truth**. When in doubt, let Y.js handle it!

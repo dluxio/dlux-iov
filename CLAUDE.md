@@ -324,6 +324,17 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Solution**: Added `permlinkInputTemp` update in `useGeneratedPermlink()`
 - **Result**: Users can click auto-generate while editing to reset to generated value and continue editing
 
+### ✅ Document Name Display Consistency Fix
+- **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names
+- **Root Cause**: `getDocumentDisplayName()` method used fallback chains (`file.name || file.documentName`) that could show stale data
+- **Solution**: Removed fallback chains - collaborative documents now only use `file.documentName`, local files only use `file.name`
+- **Pattern Applied**: 
+  - `getDocumentDisplayName()` method - single source of truth for document names
+  - `displayDocumentName` computed property - consistent logic for current document
+  - Delete confirmation dialogs - use `getDocumentDisplayName()` for consistency
+  - Debug logging - use `getDocumentDisplayName()` for accurate display
+- **Result**: Document names update correctly in all UI locations when changed
+
 ## Recent Updates (v2025.06.24)
 ### ✅ File > New Reset Fix
 - **Issue Fixed**: Custom permlink persisted after File > New, making document appear still loaded

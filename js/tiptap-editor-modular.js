@@ -5909,9 +5909,18 @@ export default {
                 return yjsDocumentName;
             }
 
-            const fileName = this.currentFile?.name || this.currentFile?.documentName;
-            if (fileName && fileName.trim() !== '' && !fileName.includes('/')) {
-                return fileName;
+            // For collaborative documents, use only documentName field
+            if (this.currentFile?.type === 'collaborative' || this.currentFile?.isCollaborative) {
+                const documentName = this.currentFile?.documentName;
+                if (documentName && documentName.trim() !== '') {
+                    return documentName;
+                }
+            } else {
+                // For local files, use name field
+                const fileName = this.currentFile?.name;
+                if (fileName && fileName.trim() !== '' && !fileName.includes('/')) {
+                    return fileName;
+                }
             }
 
             // ✅ SAFE FALLBACK: Never return username/permlink format
@@ -14034,7 +14043,8 @@ export default {
         async deleteDocument(file) {
             if (!file) return;
 
-            const fileName = file.name || file.documentName || 'Untitled';
+            // Use getDocumentDisplayName for consistent naming
+            const fileName = this.getDocumentDisplayName(file) || 'Untitled';
             if (confirm(`⚠️ Delete "${fileName}"? This action cannot be undone.`)) {
                 try {
                     if (file.type === 'local') {
@@ -17630,7 +17640,7 @@ export default {
             if (!file) return { level: 'no-access', source: 'no-file', confidence: 'high' };
 
             const debugInfo = {
-                file: file.name || `${file.owner}/${file.permlink}`,
+                file: this.getDocumentDisplayName(file) || `${file.owner}/${file.permlink}`,
                 type: file.type,
                 username: this.username,
                 isAuthenticated: this.isAuthenticated,
@@ -18356,14 +18366,7 @@ export default {
           <!--Collaborative Indicators -->
             <div class="d-flex align-items-center ms-1">
                 <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1 mx-1">
-                    <!-- Add User Button -->
-                    <button v-if="canShare" 
-                        @click="shareDocument"
-                        class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                        style="width: 24px; height: 24px; padding: 0;"
-                        title="Add collaborators">
-                        <i class="fas fa-plus" style="font-size: 10px;"></i>
-                    </button>
+                    
                     <!-- Current User -->
                     <div class="position-relative">
                         <img :src="avatarUrl"
@@ -18428,7 +18431,14 @@ export default {
                     </span>
                     
                 
-                    
+                    <!-- Add User Button -->
+                    <button v-if="canShare" 
+                        @click="shareDocument"
+                        class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 24px; height: 24px; padding: 0;"
+                        title="Add collaborators">
+                        <i class="fas fa-plus" style="font-size: 10px;"></i>
+                    </button>
                 </div>
      
         
@@ -18543,7 +18553,7 @@ export default {
           </div>
 
           <!-- Body Editor Section -->
-          <div class="body-section">
+          <div class="body-section d-flex flex-column">
             <!-- WYSIWYG Toolbar -->
             <div class="editor-toolbar bg-dark border border-secondary rounded-top" 
                  :class="{ 'opacity-50': isReadOnlyMode }">
@@ -18652,7 +18662,7 @@ export default {
             <div class="editor-field-body bg-dark border border-secondary border-top-0 rounded-bottom">
               <div ref="bodyEditor" class="body-editor"></div>
             </div>
-            <small class="text-muted">Full WYSIWYG editor with markdown export support.</small>
+            <small class="text-muted text-center mt-1">Full WYSIWYG editor with markdown export support.</small>
           </div>
 
           <!-- Tags Section -->
