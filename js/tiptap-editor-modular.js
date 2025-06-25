@@ -2245,6 +2245,13 @@ class EditorFactory {
                 // ✅ TIPTAP COMPLIANCE: Use synchronous permission check
                 if (!this.component.isReadOnlyMode) {
                     this.component.hasUnsavedChanges = true;
+                    this.component.hasUserIntent = true;
+                    
+                    // ✅ FIX: Show save indicator immediately (same as Tier 1)
+                    this.component.$nextTick(() => {
+                        this.component.updateSaveStatus();
+                    });
+                    
                     this.component.debouncedUpdateContent();
 
                     // ✅ PERFORMANCE: Tier 2 editors are always for stable documents
@@ -5837,9 +5844,9 @@ export default {
 
             if (this.connectionStatus === 'connected') {
                 // Solid cloud (connected)
-                const color = this.hasUnsavedChanges ? 'text-warning' : 'text-success';
+                //const color = this.hasUnsavedChanges ? 'text-warning' : 'text-success';
                 return `
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="${color}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="text-success">
                         <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
                     </svg>
                 `;
@@ -6014,6 +6021,12 @@ export default {
 
             // ✅ DEFAULT: All non-collaborative documents are editable
             return false;
+        },
+
+        // ✅ COMMENT OPTIONS: Check if rewards are declined
+        areRewardsDeclined() {
+            // When maxAcceptedPayout checkbox is true, rewards are declined
+            return this.reactiveCommentOptions.maxAcceptedPayout === true;
         },
 
         // ===== DROPDOWN MENU SUPPORT =====
@@ -6303,7 +6316,7 @@ export default {
                     "author": this.username || 'anonymous',
                     "permlink": this.actualPermlink,
                     "max_accepted_payout": this.reactiveCommentOptions.maxAcceptedPayout ?
-                        "0.000 SBD" : "1000000.000 SBD",
+                        "0.000 HBD" : "1000000.000 HBD",
                     "percent_hbd": this.reactiveCommentOptions.percentHbd ? 10000 : 0,
                     "allow_votes": this.reactiveCommentOptions.allowVotes,
                     "allow_curation_rewards": this.reactiveCommentOptions.allowCurationRewards,
@@ -6409,15 +6422,8 @@ export default {
             // Basic content validation
             if (!titleText || !bodyText) return false;
 
-            // Check tags from Y.js metadata or content fallback
-            let hasTags = false;
-            if (this.ydoc) {
-                const metadata = this.ydoc.getMap('metadata');
-                const tags = metadata.get('tags') || [];
-                hasTags = tags.length > 0;
-            } else {
-                hasTags = this.reactiveTags.length > 0;
-            }
+            // Check tags from reactive state (source of truth for UI)
+            const hasTags = this.reactiveTags.length > 0;
 
             if (!hasTags) return false;
 
@@ -8855,9 +8861,22 @@ export default {
                     const config = this.ydoc.getMap('config');
                     const currentName = config.get('documentName');
 
-                    // Only update if different from current name and server name is not a fallback
+                    // Check if the server name is generic or a fallback
                     const isServerNameFallback = serverDocumentName.includes('/');
-                    const shouldUpdate = currentName !== serverDocumentName && !isServerNameFallback;
+                    const isServerNameGeneric = serverDocumentName.startsWith('Untitled') || 
+                                               serverDocumentName === 'New Document' ||
+                                               serverDocumentName.includes('Untitled -');
+                    
+                    // Check if we have a user-set name in Y.js
+                    const hasUserSetName = currentName && 
+                                          currentName.trim() !== '' && 
+                                          !currentName.startsWith('Untitled') && 
+                                          currentName !== 'New Document';
+                    
+                    // Only update if different and not replacing a user-set name with a generic one
+                    const shouldUpdate = currentName !== serverDocumentName && 
+                                       !isServerNameFallback && 
+                                       (!isServerNameGeneric || !hasUserSetName);
 
                     if (shouldUpdate) {
                         // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
@@ -8894,8 +8913,24 @@ export default {
                             });
                         }
 
-                    } else if (isServerNameFallback) {
-                        // Skip using server name that contains slash patterns
+                    } else {
+                        // Log why we're not updating
+                        let skipReason = 'unknown';
+                        if (currentName === serverDocumentName) {
+                            skipReason = 'name-already-matches';
+                        } else if (isServerNameFallback) {
+                            skipReason = 'server-name-is-fallback';
+                        } else if (isServerNameGeneric && hasUserSetName) {
+                            skipReason = 'preserving-user-set-name';
+                        }
+                        
+                        console.log('⏭️ DOCUMENT NAME: Skipping server metadata update', {
+                            currentName,
+                            serverDocumentName,
+                            reason: skipReason,
+                            isServerNameGeneric,
+                            hasUserSetName
+                        });
                     }
                 }
             } catch (error) {
@@ -9663,7 +9698,7 @@ export default {
             const errors = [];
 
             // ✅ TIPTAP BEST PRACTICE: Use method calls for display data
-            const titleText = this.displayTitleForUI;
+            const titleText = this.titleInput ? this.titleInput.trim() : '';
             const permlink = this.actualPermlink;
 
             // Get tags from Y.js metadata
@@ -9951,7 +9986,25 @@ export default {
 
                                 // Update if we have a server document name and it's different from any current name
                                 const currentNames = [this.currentFile.name, this.currentFile.documentName, this.currentFile.title];
-                                const shouldUpdate = doc.documentName && !currentNames.includes(doc.documentName);
+                                
+                                // Check if the server name is a generic "Untitled" name
+                                const isServerNameGeneric = doc.documentName && 
+                                    (doc.documentName.startsWith('Untitled') || 
+                                     doc.documentName === 'New Document' ||
+                                     doc.documentName.includes('Untitled -'));
+                                
+                                // Check if we have a user-set name (not empty, not generic)
+                                const hasUserSetName = currentNames.some(name => 
+                                    name && 
+                                    name.trim() !== '' && 
+                                    !name.startsWith('Untitled') && 
+                                    name !== 'New Document'
+                                );
+                                
+                                // Only update if server has a non-generic name or we don't have a user-set name
+                                const shouldUpdate = doc.documentName && 
+                                    !currentNames.includes(doc.documentName) && 
+                                    (!isServerNameGeneric || !hasUserSetName);
 
                                 if (shouldUpdate) {
                                     console.log('📝 COLLAB DOCS: Updating document name from collaborative docs API', {
@@ -9964,10 +10017,21 @@ export default {
                                     // Use the same method that handles server metadata updates
                                     this.updateDocumentNameFromServerMetadata(doc.documentName);
                                 } else {
+                                    let reason = 'unknown';
+                                    if (!doc.documentName) {
+                                        reason = 'no-server-name';
+                                    } else if (currentNames.includes(doc.documentName)) {
+                                        reason = 'name-already-matches';
+                                    } else if (isServerNameGeneric && hasUserSetName) {
+                                        reason = 'preserving-user-set-name';
+                                    }
+                                    
                                     console.log('⏭️ COLLAB DOCS: Skipping document name update', {
                                         document: `${doc.owner}/${doc.permlink}`,
-                                        reason: shouldUpdate ? 'no-server-name' : 'name-already-matches',
+                                        reason: reason,
                                         serverName: doc.documentName,
+                                        isServerNameGeneric: isServerNameGeneric,
+                                        hasUserSetName: hasUserSetName,
                                         currentNames: currentNames
                                     });
                                 }
@@ -10185,7 +10249,7 @@ export default {
                     type: 'cloud-conversion',
                     originalFile: { ...this.currentFile },
                     timestamp: Date.now(),
-                    documentName: this.displayTitleForUI || `Untitled - ${new Date().toLocaleDateString()}`
+                    documentName: this.titleInput || `Untitled - ${new Date().toLocaleDateString()}`
                 };
                 this.requestAuthentication();
                 return;
@@ -10201,7 +10265,7 @@ export default {
 
             try {
                 // Use pending data if resuming from authentication, otherwise use current state
-                const title = pendingData?.documentName || this.displayTitleForUI || `Untitled - ${new Date().toLocaleDateString()}`;
+                const title = pendingData?.documentName || this.titleInput || `Untitled - ${new Date().toLocaleDateString()}`;
                 const description = 'Document created with DLUX TipTap Editor';
 
                 // Create cloud document via API
@@ -12999,6 +13063,9 @@ export default {
                 // ✅ ROBUST: No flags needed - meaningful name existence prevents auto-updates
 
                 if (success) {
+                    // Update reactive document name for immediate UI update
+                    this.updateReactiveDocumentName(newDocumentName);
+                    
                     // Update component state for immediate UI feedback
                     if (this.currentFile) {
                         this.currentFile.name = newDocumentName;
@@ -13048,6 +13115,28 @@ export default {
             } else if (event.key === 'Escape') {
                 this.cancelDocumentNameEdit();
             }
+        },
+        
+        // Get display name for document, preferring local custom names over server generic names
+        getDocumentDisplayName(file) {
+            // For collaborative documents, check if we have a local custom name
+            if (file.type === 'collaborative' && file.owner && file.permlink) {
+                const key = `${file.owner}/${file.permlink}`;
+                
+                // Check if there's a matching local file with a custom name
+                const localFile = this.localFiles.find(f => 
+                    f.collaborativeOwner === file.owner && 
+                    f.collaborativePermlink === file.permlink
+                );
+                
+                if (localFile && localFile.name && !localFile.name.startsWith('Untitled')) {
+                    // Use the local custom name
+                    return localFile.name;
+                }
+            }
+            
+            // Otherwise use the standard fallback chain
+            return file.name || file.documentName || file.permlink;
         },
 
         // ✅ FIX: Proper cancel method that prevents blur save
@@ -14624,7 +14713,18 @@ export default {
                     const batch = yjsDatabases.slice(i, i + batchSize);
                     const batchPromises = batch.map(async (dbInfo) => {
                         try {
-                            return await this.extractDocumentNameFromIndexedDB(dbInfo.name);
+                            const documentName = await this.extractDocumentNameFromIndexedDB(dbInfo.name);
+                            // Create proper document object
+                            return {
+                                id: dbInfo.name,
+                                name: documentName || `Document ${dbInfo.name.substring(0, 8)}...`,
+                                type: 'local',
+                                created: new Date().toISOString(),
+                                modified: new Date().toISOString(),
+                                isOfflineFirst: true,
+                                hasLocalVersion: true,
+                                creator: this.username
+                            };
                         } catch (error) {
                             console.warn('⚠️ Failed to extract from', dbInfo.name, ':', error.message);
                             return null;
@@ -14916,14 +15016,21 @@ export default {
                 this.permlinkInput = '';
             }
 
+            // Load title
+            const title = metadata.get('title') || '';
+            this.titleInput = title;
+
             // Load document name
             const documentName = config.get('documentName');
             if (documentName && this.currentFile) {
                 this.currentFile.name = documentName;
                 this.currentFile.documentName = documentName;
+                // Initialize reactive document name for UI display
+                this.reactiveDocumentName = documentName;
             }
 
             console.log('✅ Metadata loaded from Y.js:', {
+                title,
                 tags,
                 beneficiaries,
                 commentOptions: this.commentOptions,
@@ -17947,12 +18054,11 @@ export default {
     template: `
     <div class="tiptap-editor-modular">
         <!-- ==================== TOP TOOLBAR ==================== -->
-        <div class="d-flex bg-dark justify-content-between align-items-center mb-3 px-2 py-1">
-          
+        <div class="d-flex bg-dark mb-3 px-2 py-1 justify-content-between align-items-center">
           <!-- File Menu -->
-          <div class="btn-group me-2">
-            <button class="btn btn-dark dropdown-toggle no-caret" data-bs-toggle="dropdown">
-             File
+          <div class="btn-group me-3">
+            <button class="btn btn-primary bg-card btn-sm px-2 dropdown-toggle no-caret" data-bs-toggle="dropdown">
+                  <i class="fas fa-fw fa-file me-1"></i>File
             </button>
             <ul class="dropdown-menu bg-dark">
               <li><a class="dropdown-item" href="#" @click="newDocument()">
@@ -17964,7 +18070,7 @@ export default {
                 <li><hr class="dropdown-divider"></li>
                 <li v-if="currentFile?.type !== 'collaborative'">
                          <a class="dropdown-item" href="#" @click.prevent="convertToCollaborative">
-                             <i class="fas fa-cloud-bolt me-2"></i>Turn On Cloud Collaboration
+                             <i class="fas fa-cloud-upload me-2"></i>Turn On Cloud Collaboration
                              <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
                          </a>
                      </li>
@@ -17990,26 +18096,34 @@ export default {
           </div>
 
           <!-- Document Status & Name -->
-          <div class="mx-auto d-flex align-items-center">
-            <div class="d-flex align-items-center gap-2">
-              <button class="btn btn-dark" role="button" @click="showLoadModal = true">
-                <i class="fas fa-folder-open me-1"></i>Drafts
-              </button>
-              <i class="fa-solid fa-chevron-right"></i>
-              <div>
-                <i class="fas fa-file me-1"></i>
+         
+            <div class="d-flex align-items-center flex-grow-1 gap-1">
+
+            <!-- Permission indicator -->
+            <div class="d-none">
+                <span v-if="currentFile?.type === 'collaborative'" class="ms-2">
+                  <span v-if="isReadOnlyMode" class="badge bg-warning text-dark">
+                    <i class="fas fa-eye"></i>Read-Only
+                  </span>
+                  <span v-else class="badge bg-success">
+                    <i class="fas fa-edit"></i>Editable
+                  </span>
+                </span>
+                </div>
+          
+           
                 
                 <!-- Document Name Display/Edit -->
-                <span v-if="!isEditingDocumentName">
+                <span class="fs-4" v-if="!isEditingDocumentName">
                   <span v-if="currentFile" 
                         @click="isReadOnlyMode ? null : startEditingDocumentName()" 
-                        :class="isReadOnlyMode ? '' : 'cursor-pointer text-decoration-underline'"
+                        :class="isReadOnlyMode ? '' : 'cursor-pointer'"
                         :title="isReadOnlyMode ? 'Read-only users cannot edit document name' : 'Click to edit document name'">
                     {{ displayDocumentName }}
                   </span>
                   <span v-else 
                         @click="isReadOnlyMode ? null : startEditingDocumentName()" 
-                        :class="isReadOnlyMode ? '' : 'cursor-pointer text-decoration-underline'"
+                        :class="isReadOnlyMode ? '' : 'cursor-pointer'"
                         :title="isReadOnlyMode ? 'Read-only users cannot edit document name' : 'Click to edit document name'">
                     Untitled - {{ new Date().toLocaleDateString() }}
                   </span>
@@ -18035,139 +18149,136 @@ export default {
                   </button>
                 </span>
                 
-                <!-- Permission indicator -->
-                <span v-if="currentFile?.type === 'collaborative'" class="ms-2">
-                  <span v-if="isReadOnlyMode" class="badge bg-warning text-dark">
-                    <i class="fas fa-eye me-1"></i>Read-Only
-                  </span>
-                  <span v-else class="badge bg-success">
-                    <i class="fas fa-edit me-1"></i>Editable
-                  </span>
-                </span>
-              </div>
-            </div>
-          
+                
+             
+            
 
-            <!--Current User(in collaborative mode)-->
-            <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1 ms-1">
-                <div class="position-relative">
-                    <img :src="avatarUrl"
-                        :alt="username"
-                        class="user-avatar-small rounded-circle cursor-pointer"
-                        :title="'You (' + username + ') - Click to change color'"
-                        @click="toggleColorPicker"
-                        @error="handleAvatarError($event, {name: username, color: getUserColor})"
-                        :style="{
-                            width: '24px',
-                            height: '24px',
-                            objectFit: 'cover',
-                            border: '2px solid ' + getUserColor,
-                            boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
-                        }">
-
-                    <!-- Color picker dropdown -->
-                    <div v-if="showColorPicker"
-                        class="box-shadow-1 position-absolute bg-dark border border-secondary rounded p-2 shadow-lg"
-                        style="top: 30px; right: 0; z-index: 1000; width: 200px;">
-                        <div class="mb-2">
-                            <small class="text-white fw-bold">Choose your cursor color:</small>
+                <!-- Save Status Indicator (only show after persistence) -->
+                <div v-if="saveStatus.visible" class="ms-2 save-indicator d-flex align-items-center" style="width: 250px;">
+                <!-- Icon with popover trigger -->
+                <span class="save-icon position-relative" 
+                    @click="showSavePopover = !showSavePopover"
+                    style="cursor: pointer;">
+                    <i :class="saveStatus.icon"></i>
+                    
+                    <!-- Popover with details -->
+                    <div v-if="showSavePopover" 
+                        class="save-popover position-absolute bg-dark text-white p-3 rounded shadow"
+                        style="bottom: 100%; right: 0; margin-bottom: 10px; min-width: 250px; z-index: 1000;">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">Save Status</h6>
+                            <button @click="showSavePopover = false" class="btn-close btn-close-white btn-sm"></button>
                         </div>
-                        <div class="d-flex flex-wrap gap-1 mb-2">
-                            <div v-for="(color, index) in ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']"
-                                :key="index" @click="updateUserColor(color)"
-                                class="color-swatch cursor-pointer rounded"
-                                :style="{backgroundColor: color, width: '20px', height: '20px', border: color === getUserColor ? '2px solid white' : '1px solid #ccc' }"
-                                :title="color">
+                        <div class="small">
+                            <div class="mb-2">
+                                <strong>Current:</strong> {{ saveStatus.message }}
+                            </div>
+                            <div class="mb-2" v-if="cloudConnectionStatus.state !== 'non-collaborative'">
+                                <strong>Cloud:</strong> {{ cloudConnectionStatus.message }}
+                            </div>
+                            <div v-if="currentFile">
+                                <strong>Document:</strong> {{ currentFile.name || 'Untitled' }}
                             </div>
                         </div>
-                        <div class="d-flex gap-1 mb-2">
-                            <input type="color" :value="getUserColor" @input="updateUserColor($event.target.value)"
-                                class="form-control form-control-sm flex-grow-1" style="height: 25px;">
-                            <button @click="updateUserColor(getRandomColor())" class="btn btn-sm btn-outline-light"
-                                title="Random color">
-                                <i class="fas fa-random fa-xs"></i>
+                    </div>
+                </span>
+                
+                <!-- Message (can fade or persist) -->
+                <transition name="fade">
+                    <span v-if="saveMessageVisible" 
+                        :class="'ms-2 small ' + saveStatus.class">
+                        {{ saveMessageText }}
+                    </span>
+                </transition>
+                </div>
+       
+             </div>
+          <!--Collaborative Indicators -->
+            <div class="d-flex align-items-center ms-1">
+                <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1 mx-1">
+                    <!-- Add User Button -->
+                    <button v-if="canShare" 
+                        @click="shareDocument"
+                        class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 24px; height: 24px; padding: 0;"
+                        title="Add collaborators">
+                        <i class="fas fa-plus" style="font-size: 10px;"></i>
+                    </button>
+                    <!-- Current User -->
+                    <div class="position-relative">
+                        <img :src="avatarUrl"
+                            :alt="username"
+                            class="user-avatar-small rounded-circle cursor-pointer"
+                            :title="'You (' + username + ') - Click to change color'"
+                            @click="toggleColorPicker"
+                            @error="handleAvatarError($event, {name: username, color: getUserColor})"
+                            :style="{
+                                width: '24px',
+                                height: '24px',
+                                objectFit: 'cover',
+                                border: '2px solid ' + getUserColor,
+                                boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
+                            }">
+
+                        <!-- Color picker dropdown -->
+                        <div v-if="showColorPicker"
+                            class="box-shadow-1 position-absolute bg-dark border border-secondary rounded p-2 shadow-lg"
+                            style="top: 30px; right: 0; z-index: 1000; width: 200px;">
+                            <div class="mb-2">
+                                <small class="text-white fw-bold">Choose your cursor color:</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <div v-for="(color, index) in ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']"
+                                    :key="index" @click="updateUserColor(color)"
+                                    class="color-swatch cursor-pointer rounded"
+                                    :style="{backgroundColor: color, width: '20px', height: '20px', border: color === getUserColor ? '2px solid white' : '1px solid #ccc' }"
+                                    :title="color">
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 mb-2">
+                                <input type="color" :value="getUserColor" @input="updateUserColor($event.target.value)"
+                                    class="form-control form-control-sm flex-grow-1" style="height: 25px;">
+                                <button @click="updateUserColor(getRandomColor())" class="btn btn-sm btn-outline-light"
+                                    title="Random color">
+                                    <i class="fas fa-random fa-xs"></i>
+                                </button>
+                            </div>
+                            <button @click="showColorPicker = false" class="btn btn-sm btn-secondary w-100">
+                                Done
                             </button>
                         </div>
-                        <button @click="showColorPicker = false" class="btn btn-sm btn-secondary w-100">
-                            Done
-                        </button>
                     </div>
-                </div>
 
-                <!--Other Connected Users-->
-                <div v-for="user in connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).slice(0, 3)" :key="user.id"
-                    class="position-relative">
-                    <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'" :alt="user.name"
-                        class="user-avatar-small rounded-circle" :title="user.name + ' (ID: ' + user.id + ')'"
-                        @error="handleAvatarError($event, user)" :style="{ 
-                                     width: '24px', 
-                                     height: '24px', 
-                                     objectFit: 'cover',
-                                     border: '2px solid ' + user.color,
-                                     boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
-                                 }">
+                    <!--Other Connected Users-->
+                    <div v-for="user in connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).slice(0, 3)" :key="user.id"
+                        class="position-relative">
+                        <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'" :alt="user.name"
+                            class="user-avatar-small rounded-circle" :title="user.name + ' (ID: ' + user.id + ')'"
+                            @error="handleAvatarError($event, user)" :style="{ 
+                                        width: '24px', 
+                                        height: '24px', 
+                                        objectFit: 'cover',
+                                        border: '2px solid ' + user.color,
+                                        boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
+                                    }">
+                    </div>
+                    <span v-if="connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length > 3"
+                        class="badge bg-light text-dark small">
+                        +{{ connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length - 3 }}
+                    </span>
+                    
+                
+                    
                 </div>
-                <span v-if="connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length > 3"
-                    class="badge bg-light text-dark small">
-                    +{{ connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length - 3 }}
-                </span>
-                
-                <!-- Add User Button -->
-                <button v-if="canShare" 
-                    @click="shareDocument"
-                    class="btn btn-sm btn-outline-light rounded-circle d-flex align-items-center justify-content-center"
-                    style="width: 24px; height: 24px; padding: 0;"
-                    title="Add collaborators">
-                    <i class="fas fa-plus" style="font-size: 10px;"></i>
-                </button>
-                
-            </div>
-          </div>
+     
         
-          <!-- Save Status Indicator (only show after persistence) -->
-        <div v-if="saveStatus.visible" class="save-indicator d-flex align-items-center">
-            <!-- Icon with popover trigger -->
-            <span class="save-icon position-relative" 
-                  @click="showSavePopover = !showSavePopover"
-                  style="cursor: pointer;">
-                <i :class="saveStatus.icon"></i>
-                
-                <!-- Popover with details -->
-                <div v-if="showSavePopover" 
-                     class="save-popover position-absolute bg-dark text-white p-3 rounded shadow"
-                     style="bottom: 100%; right: 0; margin-bottom: 10px; min-width: 250px; z-index: 1000;">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0">Save Status</h6>
-                        <button @click="showSavePopover = false" class="btn-close btn-close-white btn-sm"></button>
-                    </div>
-                    <div class="small">
-                        <div class="mb-2">
-                            <strong>Current:</strong> {{ saveStatus.message }}
-                        </div>
-                        <div class="mb-2" v-if="cloudConnectionStatus.state !== 'non-collaborative'">
-                            <strong>Cloud:</strong> {{ cloudConnectionStatus.message }}
-                        </div>
-                        <div v-if="currentFile">
-                            <strong>Document:</strong> {{ currentFile.name || 'Untitled' }}
-                        </div>
-                    </div>
-                </div>
-            </span>
-            
-            <!-- Message (can fade or persist) -->
-            <transition name="fade">
-                <span v-if="saveMessageVisible" 
-                      :class="'ms-2 small ' + saveStatus.class">
-                    {{ saveMessageText }}
-                </span>
-            </transition>
-        </div>
+          
      
 
-          <!-- Status Indicator -->
-          <div class="btn-group">
-            <button class="btn btn-dark no-caret dropdown-toggle" 
-                    :style="cloudButtonStyle" 
+          <!-- Cloud Status Indicator   -->
+          <div class="btn-group ms-2">
+            <button class="btn btn-dark btn-sm px-2 no-caret dropdown-toggle" 
+                    :style="cloudButtonStyle"
                      data-bs-toggle="dropdown" aria-expanded="false">
               <span v-html="documentTitleIndicator"></span>
               
@@ -18206,21 +18317,18 @@ export default {
                          </a>
                      </li>
                      
-                     <li><hr class="dropdown-divider"></li>
+                     <li><hr class=" dropdown-divider"></li>
 
                      <!-- Authentication Status -->
-                     <li class="d-none dropdown-header d-flex align-items-center justify-content-between">
-                        <span>Authentication Status</span>
-                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
-                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
-                        </span>
-                        <span v-else class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Authenticated
-                        </span>
+                     <li v-if="!isAuthenticated || isAuthExpired" class="d-none dropdown-header bg-warning text-dark d-flex align-items-center justify-content-center">
+                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Authentication Expired' : 'Authentication Required' }}
+                    </li>
+                    <li v-else class="d-none dropdown-header bg-success-50 text-dark d-flex align-items-center justify-content-center">
+                            <i class="fas fa-check me-1"></i>Authentication Valid
                     </li>
                     
                     <!-- Authentication Actions -->
-                    <li class="d-none" v-if="!isAuthenticated || isAuthExpired">
+                    <li class="" v-if="!isAuthenticated || isAuthExpired">
                         <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
                             <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
                         </a>
@@ -18229,12 +18337,7 @@ export default {
                         <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
                             <i class="fas fa-redo me-2"></i>Refresh Authentication
                         </a>
-                    </li>
-                    
-                    <li><hr class="dropdown-divider"></li>
-                    
-                    
-                                                  
+                    </li>                                             
                 </ul>
             
             <!-- Status Details Dropdown -->
@@ -18255,6 +18358,7 @@ export default {
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         <!-- ==================== MAIN EDITOR SECTIONS ==================== -->
@@ -18536,7 +18640,7 @@ export default {
                         <label class="form-check-label text-white">Decline payout</label>
                       </div>
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.percentHbd" :disabled="isReadOnlyMode">
+                        <input class="form-check-input" type="checkbox" v-model="reactiveCommentOptions.percentHbd" :disabled="isReadOnlyMode || areRewardsDeclined">
                         <label class="form-check-label text-white">100% Power Up</label>
                       </div>
                     </div>
@@ -18643,7 +18747,7 @@ export default {
                           
                           <!-- Document Name -->
                           <td class="col-name cursor-pointer" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
-                            <strong class="d-block text-white text-truncate">{{ file.name || file.documentName || file.permlink }}</strong>
+                            <strong class="d-block text-white text-truncate">{{ getDocumentDisplayName(file) }}</strong>
                             <small v-if="file.hasCloudVersion && file.documentName && file.documentName !== file.permlink" class="text-muted text-truncate d-block">{{ file.permlink }}</small>
                           </td>
                           
@@ -18870,7 +18974,7 @@ export default {
                   <div class="mb-3">
                     <h6 class="fw-bold">Post Preview</h6>
                     <div class="border border-secondary rounded p-3">
-                      <h5 class="text-white">{{ displayTitleForUI }}</h5>
+                      <h5 class="text-white">{{ titleInput || 'No title yet...' }}</h5>
                       <div class="text-muted small mb-2">
                         by @{{ username }} 
                         <span v-if="displayTags.length > 0">
