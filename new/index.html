@@ -335,55 +335,7 @@
                                         aria-hidden="true"></i>Publish</button>
                             </div>
                         </div>
-                        <!-- 360 toggle buttons -->
-                        <div class="d-flex justify-content-center d-none ms-auto"
-                            v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
-                            <!-- assets button -->
-                            <a class="ms-1 no-decoration" data-bs-toggle="collapse" href="#assetMgr">
-                                <span class="if-collapsed">
-                                    <button class="btn btn-outline-light d-flex align-items-center">
-                                        <i class="fa-solid fa-shapes fa-fw force-parent-lh"></i>
-                                        <span class="d-none d-md-block ms-1">Assets</span>
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="btn btn-light d-flex align-items-center">
-                                        <i class="fa-solid fa-shapes fa-fw force-parent-lh"></i><span
-                                            class="d-none d-md-block ms-1">Assets</span>
-                                    </button>
-                                </span>
-                            </a>
-                            <!-- dapp button -->
-                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse" href="#dappPreview">
-                                <span class="if-collapsed">
-                                    <button class="btn btn-outline-light d-flex align-items-center">
-                                        <i class="fa-solid fa-up-down-left-right fa-fw force-parent-lh"></i><span
-                                            class="d-none d-md-block ms-1">Preview</span>
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="btn btn-light d-flex align-items-center">
-                                        <i class="fa-solid fa-up-down-left-right fa-fw force-parent-lh"></i><span
-                                            class="d-none d-md-block ms-1">Preview</span>
-                                    </button>
-                                </span>
-                            </a>
-                            <!-- post button -->
-                            <a class="ms-1 collapsed no-decoration" data-bs-toggle="collapse" href="#editPost">
-                                <span class="if-collapsed">
-                                    <button class="btn btn-outline-light d-flex align-items-center">
-                                        <i class="fa-solid fa-pen-to-square fa-fw force-parent-lh"></i><span
-                                            class="d-none d-md-block ms-1">Description</span>
-                                    </button>
-                                </span>
-                                <span class="if-not-collapsed">
-                                    <button class="btn btn-light d-flex align-items-center">
-                                        <i class="fa-solid fa-pen-to-square fa-fw force-parent-lh"></i><span
-                                            class="d-none d-md-block ms-1">Description</span>
-                                    </button>
-                                </span>
-                            </a>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -394,114 +346,37 @@
                     <div class="neon-banner pt-3 px-3 pb-2" :class="{
                         'blog': postCustom_json.vrHash == 'blog',
                         'video': postCustom_json.vrHash == 'video',
-                        'gallery': postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k',
                         'dapp': postCustom_json.vrHash == 'dapp',
                         'remix': postCustom_json.vrHash == 'remix'
                     }">
                         <!-- Blog Post Content -->
                         <div v-show="postCustom_json.vrHash == 'blog'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-book fa-fw"></i>Blog Post</h6>
-                            <p>Blogs are the default post type and support publishing image URLs and markdown
+                            <p>Blogs are the default post type and support publishing images and markdown
                                 text to the Hive blockchain. Perfect for articles, tutorials, and general content
                                 sharing.</p>
                         </div>
 
                         <!-- Video Content -->
                         <div v-show="postCustom_json.vrHash == 'video'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Streaming Video</h6>
-                            <p>Decentralized video streaming on SPK Network provides multiple quality levels for
-                                adaptive playback. To support streaming playback, your file must be converted to an
-                                <pop-vue popover-id="streaming-info" title="Streaming Technology Stack">
-                                    <template #trigger>
-                                        <a class="text-info-50">
-                                            <span class="tooltip-text text-nowrap">M3U8 playlist</span>
-                                            <i class="fa-solid fa-circle-question fa-fw mx-1"></i>
-                                        </a>
-                                    </template>
-                                    <template #content>
-                                        <ul class="text-start list-unstyled mt-2">
-
-                                            <!-- HLS -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">HLS - HTTP Live
-                                                        Streaming
-                                                    </h6>
-                                                </div>
-                                                <p>A streaming protocol that breaks video into small segmented files and
-                                                    creates an M3U8 playlist supporting multiple resolutions.</p>
-                                            </li>
-                                            <!-- M3U8 -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">M3U8 - Media Playlist
-                                                    </h6>
-                                                </div>
-                                                <p>A playlist format that contains a list of video segments and their
-                                                    associated CIDs, allowing for adaptive bitrate streaming.</p>
-                                            </li>
-                                            <!-- CID -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CID - Content
-                                                        IDentifier
-                                                    </h6>
-                                                </div>
-                                                <p>A unique identifier for content in IPFS, generated from the content's
-                                                    cryptographic hash to ensure integrity.
-                                                </p>
-                                            </li>
-                                            <!-- IPFS -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">IPFS - InterPlanetary
-                                                        File
-                                                        System</h6>
-                                                </div>
-                                                <p>A decentralized, peer-to-peer file storage and sharing system where
-                                                    files are distributed across
-                                                    multiple nodes.
-                                                </p>
-                                            </li>
-                                            <!-- CDN -->
-                                            <li>
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CDN - Content
-                                                        Delivery
-                                                        Network</h6>
-                                                </div>
-                                                <p>A distributed network of servers that uses CIDs to locate and deliver
-                                                    IPFS content to users.</p>
-                                            </li>
-                                        </ul>
-                                    </template>
-                                </pop-vue>
-                            </p>
-                        </div>
-
-                        <!-- 360 Image Gallery Content -->
-                        <div v-show="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-globe fa-fw"></i>360° Image Gallery
-                            </h6>
-                            <p>Create immersive 360° experiences using A-Frame to construct user-navigable,
-                                headset-enabled
-                                virtual environments. Perfect for virtual tours and immersive content.</p>
-                        </div>
-
-                        <!-- dApp Content -->
-                        <div v-show="postCustom_json.vrHash == 'dapp'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New
-                                dApp</span></h6>
-                            <p>Build decentralized applications using any modern web technology you're familiar with.
-                                Deploy
-                                your dApp to IPFS and make it accessible through the Hive blockchain.</p>
+                            <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Video</h6>
+                            <p>Decentralized video streaming on SPK Network. Upload your videos to create 
+                                streaming content accessible through the DLUX platform.</p>
                         </div>
 
                         <!-- ReMix dApp Content -->
                         <div v-show="postCustom_json.vrHash == 'remix'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-shuffle fa-fw"></i>ReMix dApp</h6>
-                            <p>Create derivative works by remixing existing dApps. Build upon the work of others while
-                                maintaining proper attribution and licensing.</p>
+                            <p>Create derivative works by remixing existing dApps and templates. Build upon the work of others while
+                                maintaining proper attribution and licensing. A user-friendly dApp builder that loads existing applications for customization.</p>
+                        </div>
+
+                        <!-- New dApp Content -->
+                        <div v-show="postCustom_json.vrHash == 'dapp'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New
+                                dApp</h6>
+                            <p>Build original decentralized applications using any modern web technology you're familiar with.
+                                Deploy your dApp to IPFS and make it accessible through the Hive blockchain. Advanced builder for creating new applications from scratch.</p>
                         </div>
 
                         <!-- Post Type Selection -->
@@ -525,12 +400,6 @@
                                 <i class="fa-solid fa-shuffle fa-fw"></i><span
                                     class="d-none d-md-flex ms-2 align-items-center">ReMix<span
                                         class="d-none d-xl-block ms-1">dApp</span></span>
-                            </button>
-                            <!-- 360 Image Gallery -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
-                                <i class="fa-solid fa-globe fa-fw"></i><span class="d-none d-md-block ms-2">360°</span>
                             </button>
                             <!-- New dApp -->
                             <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
@@ -568,6 +437,9 @@
                         </div>
                     </div>
                 </div>
+
+
+
 
                 <!-- Video Transcoding Section (Only show for video posts) -->
                 <div v-if="postCustom_json.vrHash == 'video' && spkapi.pubKey != 'NA'"
@@ -817,81 +689,7 @@
                     </div>
                 </div>
 
-                <!-- 360° Asset Management (Only show for 360 posts) -->
-                <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"
-                    class="accordion border-white-50 rounded mt-3" id="assetAccordion">
-                    <div class="accordion-item bg-img-none bg-dark-1">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#assetManager" aria-expanded="true"
-                                aria-controls="assetManager">
-                                <i class="fa-solid fa-globe fa-fw me-2"></i>360° Gallery Builder
-                            </button>
-                        </h2>
-                        <div id="assetManager" class="accordion-collapse collapse show"
-                            data-bs-parent="#assetAccordion">
-                            <div class="accordion-body p-0">
-                                <!-- Generic File Drop Zone for iframe Applications -->
-                                <div class="iframe-drop-zone p-3 mb-0" 
-                                     @drop="handleIframeDrop($event)" 
-                                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
-                                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
-                                     @dragleave="handleDragLeave($event)">
-                                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3 mb-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
-                                            <div>
-                                                <h6 class="mb-1">Drop Files Here</h6>
-                                                <p class="small text-muted mb-0">
-                                                    Drag files from SPK Drive or use the context menu "Add to 360° Gallery" option
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <button class="btn btn-outline-info btn-sm" @click="$refs.iframeFileInput.click()">
-                                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 360° Gallery Builder iFrame -->
-                                <!-- 
-                                    Integration Notes:
-                                    - Monolithic 360° gallery builder runs in iframe for isolation
-                                    - Communicates with parent via window messaging
-                                    - Drag and drop from SPK Drive works across iframe boundary
-                                    - Updates postCustom_json.assets and postCustom_json.navigation via messaging
-                                -->
-                                <div v-if="account" style="height: 800px; min-height: 800px;">
-                                    <iframe 
-                                        ref="gallery360Iframe"
-                                        src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
-                                        width="100%" 
-                                        height="100%"
-                                        frameborder="0"
-                                        style="border-radius: 8px;"
-                                        @load="init360GalleryIframe">
-                                    </iframe>
-                                </div>
-
-                                <!-- Fallback when not logged in -->
-                                <div v-else class="text-center text-muted py-5">
-                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
-                                    <h5>Please Log In</h5>
-                                    <p>You need to log in to manage 360° gallery assets.</p>
-                                </div>
-                                
-                                <!-- Hidden File Input for direct uploads -->
-                                <input ref="iframeFileInput" type="file" multiple accept="image/*" @change="handleIframeFileInput" style="display: none;">
-                                
-                                
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- dApp Asset Management (Only show for dApp posts) -->
+                <!-- New dApp Asset Management (Only show for dApp posts) -->
                 <div v-if="postCustom_json.vrHash == 'dapp'"
                     class="accordion border-white-50 rounded mt-3" id="dappAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
@@ -899,7 +697,7 @@
                             <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#dappManager" aria-expanded="true"
                                 aria-controls="dappManager">
-                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>dApp Builder
+                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp Builder
                             </button>
                         </h2>
                         <div id="dappManager" class="accordion-collapse collapse show"
@@ -908,11 +706,13 @@
                                 <!-- New dApp Manager Component -->
                                 <!-- 
                                     Integration Notes:
-                                    - This component manages dApp files with drag-and-drop organization and custom JSON structure
+                                    - This component manages original dApp creation with drag-and-drop organization and custom JSON structure
                                     - Integrates with SPK Drive for file selection and upload
-                                    - Outputs dApp structure with licensing and custom JSON data
+                                    - Outputs dApp structure with licensing and custom JSON data conforming to DLUX API schema
+                                    - Includes functionality from former 360° asset manager for immersive content creation
                                     - Data is passed to TipTap editor via @dapp-updated event for blockchain posting
                                     - SPK contract IDs are preserved for proper asset referencing in posts
+                                    - Creates original dApp applications that can be remixed by others
                                 -->
                                 <dapp-manager
                                     v-if="account"
@@ -920,6 +720,7 @@
                                     :spk-api="spkapi"
                                     :initial-custom-json="postCustom_json || {}"
                                     :spk-file-to-add="handleSPKFileForAssets"
+                                    :mode="'create'"
                                     @dapp-updated="handleDappUpdated($event)"
                                     @tosign="sendIt($event)">
                                 </dapp-manager>
@@ -928,7 +729,7 @@
                                 <div v-else class="text-center text-muted py-5">
                                     <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
                                     <h5>Please Log In</h5>
-                                    <p>You need to log in to build dApps.</p>
+                                    <p>You need to log in to build original dApps.</p>
                                 </div>
                             </div>
                         </div>
@@ -949,31 +750,286 @@
                         <div id="remixManager" class="accordion-collapse collapse show"
                             data-bs-parent="#remixAccordion">
                             <div class="accordion-body">
-                                <!-- ReMix dApp Manager Component -->
-                                <!-- 
-                                    Integration Notes:
-                                    - This component manages remixing of existing dApps with proper licensing attribution
-                                    - Integrates with SPK Drive for file selection and upload
-                                    - Outputs remix structure with base dApp attribution and licensing trees
-                                    - Data is passed to TipTap editor via @remix-updated event for blockchain posting
-                                    - SPK contract IDs are preserved for proper asset referencing in posts
-                                -->
-                                <remix-dapp-manager
-                                    v-if="account"
-                                    :account="account"
-                                    :spk-api="spkapi"
-                                    :initial-custom-json="postCustom_json || {}"
-                                    :spk-file-to-add="handleSPKFileForAssets"
-                                    @remix-updated="handleRemixUpdated($event)"
-                                    @tosign="sendIt($event)">
-                                </remix-dapp-manager>
-                                
-                                <!-- Fallback when not logged in -->
-                                <div v-else class="text-center text-muted py-5">
-                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
-                                    <h5>Please Log In</h5>
-                                    <p>You need to log in to remix dApps.</p>
+                                <!-- ReMix App Browser (when no app is loaded) -->
+                                <div v-if="!currentRemixApp">
+                                    <!-- Search and Filters -->
+                                    <div class="card mb-3">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">
+                                                <i class="fa-solid fa-search fa-fw me-2"></i>
+                                                Browse ReMix Applications
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Search</label>
+                                                    <input type="text" class="form-control" v-model="remixSearch" 
+                                                           placeholder="Search by title, author, or tags..." 
+                                                           @input="searchRemixApps()">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">License</label>
+                                                    <select class="form-select" v-model="selectedLicense" @change="filterRemixApps()">
+                                                        <option value="">All Licenses</option>
+                                                        <option v-for="license in availableLicenses" :key="license.license" :value="license.license">
+                                                            {{license.license}} ({{license.count}})
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Sort By</label>
+                                                    <select class="form-select" v-model="sortBy" @change="loadRemixApps()">
+                                                        <option value="popular">Most Popular</option>
+                                                        <option value="newest">Newest</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Advanced Options -->
+                                            <div class="mt-3">
+                                                <button class="btn btn-sm btn-outline-secondary" 
+                                                        @click="showAdvancedRemixOptions = !showAdvancedRemixOptions">
+                                                    <i class="fa-solid fa-cogs fa-fw me-1"></i>Advanced Options
+                                                </button>
                                 </div>
+                                            
+                                            <!-- Advanced Manual Loading -->
+                                            <div v-if="showAdvancedRemixOptions" class="mt-3 p-3 bg-dark-1 rounded">
+                                                <h6 class="small text-muted mb-2">Load by CID or URL</h6>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" v-model="manualRemixInput" 
+                                                           placeholder="QmReMixCIDExample123456789 or /dlux/@author/permlink">
+                                                    <button class="btn btn-outline-primary" @click="loadManualRemix()">
+                                                        <i class="fa-solid fa-download fa-fw me-1"></i>Load
+                                                    </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                                    <!-- Loading State -->
+                                    <div v-if="loadingRemixApps" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted">Loading ReMix applications...</p>
+                                    </div>
+                                    
+                                    <!-- ReMix Apps Grid -->
+                                    <div v-else-if="availableRemixApps.length > 0" class="row g-3">
+                                        <div v-for="app in availableRemixApps" :key="app.remix_cid" class="col-md-6 col-lg-4">
+                                            <div class="card bg-darker h-100 cursor-pointer" @click="selectRemixApp(app)">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">{{app.title || 'Untitled Application'}}</h6>
+                                                    <p class="card-text small text-muted">{{app.description || 'No description available'}}</p>
+                                                    <div class="d-flex justify-content-between align-items-end">
+                                                        <div class="small">
+                                                            <div><strong>@{{app.first_author}}</strong></div>
+                                                            <div class="text-muted">{{app.license || 'No license'}}</div>
+                                                        </div>
+                                                        <div class="text-end small">
+                                                            <div class="text-success">{{app.usage_count || 0}} uses</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                                        <!-- No Results -->
+                    <div v-else-if="!loadingRemixApps" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-search fa-2x mb-3"></i>
+                        <h5>No ReMix Applications Found</h5>
+                        <p>Try adjusting your search criteria or create a new dApp instead.</p>
+                    </div>
+                </div>
+                
+                <!-- Hardcoded Test ReMix Application (Always Visible for Testing) -->
+                <div class="alert alert-info mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-flask fa-fw me-2"></i>
+                        <div class="flex-grow-1">
+                            <strong>Test Mode:</strong> Using hardcoded 360° Gallery ReMix application for testing
+                        </div>
+                        <button class="btn btn-sm btn-outline-info" onclick="alert('This is a hardcoded test application for development')">
+                            <i class="fa-solid fa-info fa-fw"></i>Info
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SPK Drive Drop Zone (Always visible for testing) -->
+                <div class="iframe-drop-zone p-3 mb-3" 
+                     @drop="handleRemixIframeDrop($event)" 
+                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
+                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
+                     @dragleave="handleDragLeave($event)">
+                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Drop Files Here</h6>
+                                <p class="small text-muted mb-0">
+                                    Drag files from SPK Drive or use the context menu "Add to ReMix" option to test the iframe integration
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-outline-info btn-sm" @click="$refs.remixFileInput.click()">
+                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hardcoded ReMix Application iframe (Always visible for testing) -->
+                <div class="mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fa-solid fa-cube fa-fw me-2"></i>
+                                Test ReMix Builder: 360° Gallery Template
+                            </h6>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary me-2" @click="showRemixDetails = !showRemixDetails">
+                                    <i class="fa-solid fa-info fa-fw"></i>Details
+                                </button>
+                                <span class="badge bg-success">Test Mode</span>
+                            </div>
+                        </div>
+                        
+                        <!-- ReMix Details (collapsible) -->
+                        <div v-if="showRemixDetails" class="card-body border-bottom">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>360° Gallery Template</h6>
+                                    <p class="text-muted small mb-2">A hardcoded test application for creating 360° photo galleries with navigation</p>
+                                    <div class="d-flex gap-3 small">
+                                        <span><strong>Author:</strong> @markegiles</span>
+                                        <span><strong>License:</strong> CC BY-SA 4.0</span>
+                                        <span><strong>Status:</strong> Test Application</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="small text-muted">
+                                        <div><strong>Test CID:</strong></div>
+                                        <code class="small">QmTestReMix123456789</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- iframe for hardcoded ReMix application -->
+                        <div style="height: 600px; min-height: 600px;">
+                            <iframe 
+                                ref="remixApplicationIframe"
+                                src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
+                                width="100%" 
+                                height="100%"
+                                frameborder="0"
+                                style="border-radius: 0 0 8px 8px;"
+                                @load="initRemixApplicationIframe">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+                                
+                                <!-- Active ReMix Status (when app is loaded) -->
+                                <div v-if="currentRemixApp" class="alert alert-success mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <i class="fa-solid fa-shuffle fa-fw me-2"></i>
+                                            <strong>Status:</strong> Remixing "{{currentRemixApp.title || 'Untitled Application'}}" 
+                                            by @{{currentRemixApp.first_author}}
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-success" @click="changeRemixApp()">
+                                            <i class="fa-solid fa-exchange-alt fa-fw me-1"></i>Change App
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- SPK Drive Drop Zone (for active remix) -->
+                                <div v-if="currentRemixApp" class="iframe-drop-zone p-3 mb-3" 
+                                     @drop="handleRemixIframeDrop($event)" 
+                                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
+                                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
+                                     @dragleave="handleDragLeave($event)">
+                                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
+                                            <div>
+                                                <h6 class="mb-1">Drop Files Here</h6>
+                                                <p class="small text-muted mb-0">
+                                                    Drag files from SPK Drive or use the context menu "Add to ReMix" option
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button class="btn btn-outline-info btn-sm" @click="$refs.remixFileInput.click()">
+                                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ReMix Application iframe -->
+                                <div v-if="currentRemixApp" class="mb-4">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">
+                                                <i class="fa-solid fa-cube fa-fw me-2"></i>
+                                                ReMix Builder: {{currentRemixApp.title || 'Untitled Application'}}
+                                            </h6>
+                                            <div>
+                                                <button class="btn btn-sm btn-outline-secondary me-2" @click="showRemixDetails = !showRemixDetails">
+                                                    <i class="fa-solid fa-info fa-fw"></i>Details
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" @click="closeRemixApp()">
+                                                    <i class="fa-solid fa-times fa-fw"></i>Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- ReMix Details (collapsible) -->
+                                        <div v-if="showRemixDetails" class="card-body border-bottom">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <h6>{{currentRemixApp.title || 'Untitled Application'}}</h6>
+                                                    <p class="text-muted small mb-2">{{currentRemixApp.description || 'No description available'}}</p>
+                                                    <div class="d-flex gap-3 small">
+                                                        <span><strong>Author:</strong> @{{currentRemixApp.first_author}}</span>
+                                                        <span><strong>License:</strong> {{currentRemixApp.license || 'Not specified'}}</span>
+                                                        <span><strong>Usage:</strong> {{currentRemixApp.usage_count || 0}} derivatives</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <div class="small text-muted">
+                                                        <div><strong>ReMix CID:</strong></div>
+                                                        <code class="small">{{currentRemixApp.remix_cid}}</code>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- iframe for loaded ReMix application -->
+                                        <div style="height: 600px; min-height: 600px;">
+                                            <iframe 
+                                                ref="remixApplicationIframe"
+                                                src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
+                                                width="100%" 
+                                                height="100%"
+                                                frameborder="0"
+                                                style="border-radius: 0 0 8px 8px;"
+                                                @load="initRemixApplicationIframe">
+                                            </iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden File Input for ReMix uploads -->
+                                <input ref="remixFileInput" type="file" multiple @change="handleRemixFileInput" style="display: none;">
+
+                                
                             </div>
                         </div>
                     </div>
@@ -1092,6 +1148,156 @@
     </script>
     <script>
         var video_page = true
+        
+        // Global functions for the new consolidated post structure
+        window.dappApiHelpers = {
+            // Load ReMix application details from DLUX API
+            async loadRemixApplicationDetails(remixCid) {
+                try {
+                    const response = await fetch(`https://data.dlux.io/remix/apps/${remixCid}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.result;
+                    }
+                } catch (error) {
+                    console.error('Error loading remix application details:', error);
+                }
+                return null;
+            },
+            
+            // Load popular remix applications
+            async loadPopularRemixApplications(limit = 20, offset = 0) {
+                try {
+                    const response = await fetch(`https://data.dlux.io/remix/apps/popular?a=${limit}&o=${offset}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.result || [];
+                    }
+                } catch (error) {
+                    console.error('Error loading popular remix applications:', error);
+                }
+                return [];
+            },
+            
+            // Load newest remix applications
+            async loadNewestRemixApplications(limit = 20, offset = 0) {
+                try {
+                    const response = await fetch(`https://data.dlux.io/remix/apps/newest?a=${limit}&o=${offset}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.result || [];
+                    }
+                } catch (error) {
+                    console.error('Error loading newest remix applications:', error);
+                }
+                return [];
+            },
+            
+            // Load available licenses
+            async loadRemixLicenses() {
+                try {
+                    const response = await fetch('https://data.dlux.io/remix/licenses');
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.result || [];
+                    }
+                } catch (error) {
+                    console.error('Error loading remix licenses:', error);
+                }
+                return [];
+            },
+            
+            // Load popular tags
+            async loadRemixTags() {
+                try {
+                    const response = await fetch('https://data.dlux.io/remix/tags');
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.result || [];
+                    }
+                } catch (error) {
+                    console.error('Error loading remix tags:', error);
+                }
+                return [];
+            },
+            
+            // Search remix applications
+            async searchRemixApplications(query, license = '', tag = '', sortBy = 'popular', limit = 20) {
+                try {
+                    let url = `https://data.dlux.io/remix/${sortBy}?a=${limit}`;
+                    if (license) url += `&license=${encodeURIComponent(license)}`;
+                    if (tag) url += `&tag=${encodeURIComponent(tag)}`;
+                    
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        let results = data.result || [];
+                        
+                        // Client-side search filtering if query provided
+                        if (query) {
+                            const searchLower = query.toLowerCase();
+                            results = results.filter(app => 
+                                (app.title && app.title.toLowerCase().includes(searchLower)) ||
+                                (app.description && app.description.toLowerCase().includes(searchLower)) ||
+                                (app.first_author && app.first_author.toLowerCase().includes(searchLower)) ||
+                                (app.tags && app.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+                            );
+                        }
+                        
+                        return results;
+                    }
+                } catch (error) {
+                    console.error('Error searching remix applications:', error);
+                }
+                return [];
+            },
+            
+            // Extract ReMix CID from DLUX post URL
+            extractRemixCidFromUrl(url) {
+                // Handle both full URLs and short paths
+                if (url.includes('/dlux/')) {
+                    const match = url.match(/\/dlux\/@([^\/]+)\/([^\/\?#]+)/);
+                    if (match) {
+                        return { author: match[1], permlink: match[2] };
+                    }
+                }
+                return null;
+            },
+            
+            // Generate proper custom JSON structure based on API schema
+            generateCustomJsonForPost(type, data) {
+                const customJson = {
+                    vrHash: type,
+                    ...data
+                };
+                
+                // Ensure required fields based on API schema
+                if (type === 'remix' && data.ReMix) {
+                    customJson.ReMix = data.ReMix;
+                    customJson.originalApp = data.originalApp || null; // For collaborative editing state restoration
+                }
+                
+                if (data.dappCID) {
+                    customJson.dappCID = data.dappCID;
+                }
+                
+                if (data.license) {
+                    customJson['.lic'] = data.license;
+                }
+                
+                if (data.tags && Array.isArray(data.tags)) {
+                    customJson.tags = data.tags;
+                }
+                
+                return customJson;
+            },
+            
+            // Get iframe source for ReMix application
+            getRemixIframeSrc(remixCid) {
+                // Use IPFS gateway to load the ReMix application
+                return `https://ipfs-3speak.b-cdn.net/ipfs/${remixCid}/`;
+            }
+        };
     </script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
     <script src="/js/tiptap-collaboration.bundle.js?v=20250122-aligned"></script>

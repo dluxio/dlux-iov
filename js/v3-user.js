@@ -121,6 +121,19 @@ createApp({
       videoUploadContract: false,
       showvideoupload: false,
       dataURLS: [],
+      // ReMix dApp Properties
+      currentRemixApp: null,
+      remixSearch: "",
+      availableLicenses: [],
+      selectedLicense: "",
+      sortBy: "popular",
+      showAdvancedRemixOptions: false,
+      loadingRemixApps: false,
+      availableRemixApps: [],
+      manualRemixInput: "",
+      showRemixDetails: false,
+      loadedRemixCid: null,
+      remixApplicationDetails: null,
       debounceScroll: 0,
       rcCost: {
         time: 0,
@@ -6530,6 +6543,172 @@ function buyNFT(setname, uid, price, type, callback){
       this.dluxMock();
       
       // Log the structure for debugging
+    },
+
+    // ReMix API and UI Methods
+    async loadRemixApps() {
+      this.loadingRemixApps = true;
+      try {
+        let apps = [];
+        if (this.sortBy === 'popular') {
+          apps = await window.dappApiHelpers.loadPopularRemixApplications(50);
+        } else {
+          apps = await window.dappApiHelpers.loadNewestRemixApplications(50);
+        }
+        this.availableRemixApps = apps;
+        
+        // Load licenses on first load
+        if (this.availableLicenses.length === 0) {
+          this.availableLicenses = await window.dappApiHelpers.loadRemixLicenses();
+        }
+      } catch (error) {
+        console.error('Error loading remix apps:', error);
+        this.availableRemixApps = [];
+      } finally {
+        this.loadingRemixApps = false;
+      }
+    },
+
+    async searchRemixApps() {
+      if (!this.remixSearch.trim()) {
+        await this.loadRemixApps();
+        return;
+      }
+      
+      this.loadingRemixApps = true;
+      try {
+        const apps = await window.dappApiHelpers.searchRemixApplications(
+          this.remixSearch,
+          this.selectedLicense,
+          '',
+          this.sortBy === 'popular' ? 'popular' : 'newest',
+          50
+        );
+        this.availableRemixApps = apps;
+      } catch (error) {
+        console.error('Error searching remix apps:', error);
+        this.availableRemixApps = [];
+      } finally {
+        this.loadingRemixApps = false;
+      }
+    },
+
+    async filterRemixApps() {
+      await this.searchRemixApps();
+    },
+
+    async selectRemixApp(app) {
+      this.currentRemixApp = app;
+      this.loadedRemixCid = app.remix_cid;
+      
+      try {
+        const details = await window.dappApiHelpers.loadRemixApplicationDetails(app.remix_cid);
+        this.remixApplicationDetails = details;
+      } catch (error) {
+        console.error('Error loading remix app details:', error);
+        this.remixApplicationDetails = null;
+      }
+    },
+
+    changeRemixApp() {
+      this.currentRemixApp = null;
+      this.loadedRemixCid = null;
+      this.remixApplicationDetails = null;
+      this.showRemixDetails = false;
+    },
+
+    closeRemixApp() {
+      this.currentRemixApp = null;
+      this.loadedRemixCid = null;
+      this.remixApplicationDetails = null;
+      this.showRemixDetails = false;
+    },
+
+    async loadManualRemix() {
+      if (!this.manualRemixInput.trim()) return;
+      
+      try {
+        // Try to extract CID from URL or use directly
+        let cid = this.manualRemixInput.trim();
+        if (cid.includes('/dlux/')) {
+          const extracted = window.dappApiHelpers.extractRemixCidFromUrl(cid);
+          if (extracted) {
+            // Would need to fetch the actual CID from the post data
+            console.log('Manual URL loading not fully implemented yet');
+            return;
+          }
+        }
+        
+        // Load directly by CID
+        if (cid.startsWith('Qm')) {
+          const details = await window.dappApiHelpers.loadRemixApplicationDetails(cid);
+          if (details && details.application) {
+            this.selectRemixApp(details.application);
+          } else {
+            alert('Could not load ReMix application with that CID');
+          }
+        } else {
+          alert('Please enter a valid IPFS CID (starting with Qm) or DLUX post URL');
+        }
+      } catch (error) {
+        console.error('Error loading manual remix:', error);
+        alert('Error loading ReMix application: ' + error.message);
+      }
+    },
+
+    // ReMix Iframe Integration
+    initRemixApplicationIframe() {
+      // Initialize communication with ReMix application iframe
+      if (this.$refs.remixApplicationIframe) {
+        // Send initialization data to iframe
+        this.$refs.remixApplicationIframe.onload = () => {
+          if (this.currentRemixApp) {
+            this.$refs.remixApplicationIframe.contentWindow.postMessage({
+              type: '360_gallery_init',
+              assets: [],
+              navigation: []
+            }, '*');
+          }
+        };
+      }
+    },
+
+    handleRemixIframeDrop(event) {
+      event.preventDefault();
+      this.handleDragLeave(event);
+      
+      // Handle drag and drop for remix iframe
+      const files = Array.from(event.dataTransfer.files);
+      if (files.length > 0) {
+        this.handleRemixFileInput({ target: { files } });
+      }
+    },
+
+    handleRemixFileInput(event) {
+      const files = Array.from(event.target.files);
+      
+      // Process files for ReMix application
+      files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          // Send to iframe as spk_file_added message
+          if (this.$refs.remixApplicationIframe) {
+            this.$refs.remixApplicationIframe.contentWindow.postMessage({
+              type: 'spk_file_added',
+              file: {
+                fileName: file.name,
+                url: URL.createObjectURL(file),
+                size: file.size,
+                type: file.type
+              }
+            }, '*');
+          }
+        }
+      });
+      
+      // Clear input
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   },
   mounted() {
@@ -6633,6 +6812,13 @@ function buyNFT(setname, uid, price, type, callback){
         this.handle360AssetsUpdated(event.data);
       }
     });
+
+    // Initialize ReMix apps if on remix post type
+    if (this.postCustom_json.vrHash === 'remix') {
+      this.$nextTick(() => {
+        this.loadRemixApps();
+      });
+    }
   },
   beforeDestroy() {
     if (this.observer) {
