@@ -805,6 +805,31 @@ class PersistenceManager {
                         bodyEditorIsEditable: persistenceManager.component.bodyEditor?.isEditable,
                         // NOTE: Y.js share access removed - content stats available via ContentStateManager
                     });
+                    
+                    // ✅ FIX: Initialize config map if empty after WebSocket sync
+                    // This happens when server returns empty document for new collaborative docs
+                    if (config.size === 0 && !persistenceManager.component.isReadOnlyMode) {
+                        console.log('⚠️ Config map is empty after WebSocket sync - initializing...');
+                        yjsDoc.transact(() => {
+                            config.set('created', new Date().toISOString());
+                            config.set('version', '1.0');
+                            config.set('documentType', 'collaborative');
+                            config.set('lastModified', new Date().toISOString());
+                            if (file.owner) {
+                                config.set('owner', file.owner);
+                            }
+                            // Preserve document name from component state or file
+                            const preservedDocumentName = persistenceManager.component.documentName || 
+                                                         persistenceManager.component.currentFile?.documentName ||
+                                                         persistenceManager.component.currentFile?.name ||
+                                                         file.documentName ||
+                                                         file.name;
+                            if (preservedDocumentName && !preservedDocumentName.includes('/')) {
+                                config.set('documentName', preservedDocumentName);
+                                console.log('✅ Preserved document name in config:', preservedDocumentName);
+                            }
+                        }, 'websocket-sync-init');
+                    }
 
                     // ✅ DEBUG: Check if content is actually in Y.js for read-only users
                     if (persistenceManager.component.isReadOnlyMode) {
@@ -10264,9 +10289,31 @@ export default {
             this.conversionInProgress = true;
 
             try {
-                // Use pending data if resuming from authentication, otherwise use current state
-                const title = pendingData?.documentName || this.titleInput || `Untitled - ${new Date().toLocaleDateString()}`;
+                // ✅ FIX: Get document name from Y.js config, not from title
+                let documentName = null;
+                if (this.ydoc) {
+                    const config = this.ydoc.getMap('config');
+                    documentName = config.get('documentName');
+                }
+                
+                // Use Y.js document name, fallback to pending data, then title, then default
+                documentName = documentName || pendingData?.documentName || this.documentName || this.currentFile?.documentName || this.currentFile?.name;
+                
+                // Only use title if no document name exists
+                if (!documentName || documentName.includes('/')) {
+                    documentName = this.titleInput || `Untitled - ${new Date().toLocaleDateString()}`;
+                }
+                
+                const title = this.titleInput || documentName;
                 const description = 'Document created with DLUX TipTap Editor';
+
+                console.log('🔄 Converting to collaborative with:', {
+                    documentName: documentName,
+                    title: title,
+                    hasYjsConfig: !!this.ydoc,
+                    configDocumentName: this.ydoc?.getMap('config').get('documentName'),
+                    currentFileName: this.currentFile?.name
+                });
 
                 // Create cloud document via API
                 const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
@@ -10276,7 +10323,7 @@ export default {
                         ...this.authHeaders
                     },
                     body: JSON.stringify({
-                        documentName: title,
+                        documentName: documentName,
                         title: title,
                         description: description
                     })
@@ -11819,6 +11866,114 @@ export default {
                 alert('Error deleting collaborative document: ' + error.message);
             }
         },
+        
+        // ✅ COLLABORATIVE DOCUMENT NAME UPDATE: Sync document name to server metadata
+        async updateCollaborativeDocumentName(newDocumentName) {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                console.warn('⚠️ Cannot update document name: Not a collaborative document');
+                return;
+            }
+            
+            if (!this.isAuthenticated) {
+                console.warn('⚠️ Cannot update document name: Authentication required');
+                this.requestAuthentication();
+                return;
+            }
+            
+            const { owner, permlink } = this.currentFile;
+            if (!owner || !permlink) {
+                console.warn('⚠️ Cannot update document name: Missing owner or permlink');
+                return;
+            }
+            
+            try {
+                console.log('📝 Sending document name update to server:', {
+                    document: `${owner}/${permlink}`,
+                    newName: newDocumentName
+                });
+                
+                // Update save status to show syncing
+                this.updateSaveStatus('saving', 'Syncing document name to server...');
+                
+                const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}/name`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        documentName: newDocumentName
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Document name updated on server:', data);
+                    
+                    // Update save status
+                    this.updateSaveStatus('saved', 'Document name synced to server');
+                    
+                    // ✅ CACHE UPDATE: Update cached metadata to prevent reversion
+                    if (data.document) {
+                        // Update cache with server response
+                        this.cacheDocumentMetadata(owner, permlink, data.document.documentName || newDocumentName);
+                        
+                        // Also update collaborative docs cache if present
+                        const cachedDocs = this.collaborativeDocs.find(doc => 
+                            doc.owner === owner && doc.permlink === permlink
+                        );
+                        if (cachedDocs) {
+                            cachedDocs.documentName = data.document.documentName || newDocumentName;
+                            cachedDocs.name = data.document.documentName || newDocumentName;
+                        }
+                        
+                        // ✅ UPDATE LOCALSTORAGE CACHE: Ensure the cache reflects the new name
+                        try {
+                            const cache = localStorage.getItem('dlux_collaborative_docs_cache');
+                            if (cache) {
+                                const cacheData = JSON.parse(cache);
+                                if (cacheData.documents && Array.isArray(cacheData.documents)) {
+                                    // Find and update the document in the cache
+                                    const docIndex = cacheData.documents.findIndex(doc => 
+                                        doc.owner === owner && doc.permlink === permlink
+                                    );
+                                    if (docIndex >= 0) {
+                                        cacheData.documents[docIndex].documentName = data.document.documentName || newDocumentName;
+                                        cacheData.documents[docIndex].name = data.document.documentName || newDocumentName;
+                                        
+                                        // Update timestamp to keep cache fresh
+                                        cacheData.timestamp = Date.now();
+                                        
+                                        // Save back to localStorage
+                                        localStorage.setItem('dlux_collaborative_docs_cache', JSON.stringify(cacheData));
+                                        console.log('💾 Updated collaborative docs cache with new document name:', {
+                                            document: `${owner}/${permlink}`,
+                                            newName: data.document.documentName || newDocumentName
+                                        });
+                                    }
+                                }
+                            }
+                        } catch (cacheError) {
+                            console.warn('⚠️ Could not update collaborative docs cache:', cacheError);
+                        }
+                    }
+                    
+                    return data;
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Server error: ${errorData.error || response.statusText}`);
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to update document name on server:', error);
+                
+                // Update save status to show error
+                this.updateSaveStatus('error', `Failed to sync name: ${error.message}`);
+                
+                // Don't revert local changes - user can retry
+                throw error;
+            }
+        },
 
         async shareWithUser() {
             console.log('🟢 SHARE BUTTON CLICKED - METHOD CALLED');
@@ -13088,6 +13243,21 @@ export default {
                                 reason: 'user explicitly saved document with name'
                             });
                         }
+                        
+                        // ✅ COLLABORATIVE SYNC: Update server metadata for collaborative documents
+                        if (this.currentFile.type === 'collaborative' && this.currentFile.owner && this.currentFile.permlink) {
+                            console.log('📝 Updating collaborative document name on server:', {
+                                document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
+                                newName: newDocumentName
+                            });
+                            
+                            // Update server metadata asynchronously
+                            this.updateCollaborativeDocumentName(newDocumentName).catch(error => {
+                                console.error('❌ Failed to update document name on server:', error);
+                                // Show error to user but don't revert local changes
+                                this.updateSaveStatus('error', 'Failed to sync document name to server');
+                            });
+                        }
                     }
 
                     // ✅ TRIGGER AUTOSAVE: Y.js config change will trigger sync automatically
@@ -13119,24 +13289,14 @@ export default {
         
         // Get display name for document, preferring local custom names over server generic names
         getDocumentDisplayName(file) {
-            // For collaborative documents, check if we have a local custom name
-            if (file.type === 'collaborative' && file.owner && file.permlink) {
-                const key = `${file.owner}/${file.permlink}`;
-                
-                // Check if there's a matching local file with a custom name
-                const localFile = this.localFiles.find(f => 
-                    f.collaborativeOwner === file.owner && 
-                    f.collaborativePermlink === file.permlink
-                );
-                
-                if (localFile && localFile.name && !localFile.name.startsWith('Untitled')) {
-                    // Use the local custom name
-                    return localFile.name;
-                }
+            // For collaborative documents, always use documentName from server
+            if (file.type === 'collaborative' || file.isCollaborative || file.hasCloudVersion) {
+                // Use only documentName for collaborative documents - no fallback
+                return file.documentName;
             }
             
-            // Otherwise use the standard fallback chain
-            return file.name || file.documentName || file.permlink;
+            // For local files, use the name field
+            return file.name;
         },
 
         // ✅ FIX: Proper cancel method that prevents blur save
