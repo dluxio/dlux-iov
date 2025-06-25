@@ -2566,6 +2566,12 @@ class SyncManager {
                 if (event.keysChanged.has('customJson')) {
                     this.component.customJsonString = JSON.stringify(customJson, null, 2);
                     this.component.content.custom_json = customJson; // Legacy support
+                    
+                    // ✅ IFRAME INTEGRATION: Broadcast custom JSON changes to registered iframes
+                    if (this.component.customJsonMessageHandler) {
+                        this.component.customJsonMessageHandler.broadcastCustomJsonUpdate(customJson);
+                        console.log('📢 Broadcasted custom JSON update from Y.js to iframes');
+                    }
                 }
 
                 // ✅ REACTIVE PATTERN: Sync comment options to reactive property
@@ -2823,7 +2829,346 @@ class SyncManager {
 }
 
 /**
- * 6. LIFECYCLE MANAGER
+ * 6. CUSTOM JSON MESSAGE HANDLER
+ * Handle custom JSON updates from iframe-based enhanced post components
+ * Provides performant, collaborative synchronization for any type of component
+ */
+class CustomJsonMessageHandler {
+    constructor(component) {
+        this.component = component;
+        this.iframeRegistry = new Map(); // Track active iframes
+        this.updateQueue = [];
+        this.updateDebounceTimer = null;
+        this.isProcessing = false;
+        
+        // Performance monitoring
+        this.metrics = {
+            totalUpdates: 0,
+            batchedUpdates: 0,
+            largestPayload: 0,
+            averageLatency: 0
+        };
+        
+        // Listen for custom JSON updates from any iframe
+        this.messageHandler = this.handleMessage.bind(this);
+        window.addEventListener('message', this.messageHandler);
+        
+        console.log('🔧 CustomJsonMessageHandler initialized for enhanced post components');
+    }
+    
+    /**
+     * Handle incoming messages from iframe components
+     */
+    handleMessage(event) {
+        // Skip non-iframe messages
+        if (!event.data || typeof event.data !== 'object') return;
+        
+        const { type, payload, iframeId } = event.data;
+        
+        // Only process our custom JSON messages
+        if (!type || !type.startsWith('CUSTOM_JSON_')) return;
+        
+        // Security: Validate origin if needed (can be configured)
+        if (!this.isValidOrigin(event.origin)) {
+            console.warn('⚠️ Rejected message from untrusted origin:', event.origin);
+            return;
+        }
+        
+        console.log('📨 Received iframe message:', { type, iframeId, payloadSize: JSON.stringify(payload || {}).length });
+        
+        switch(type) {
+            case 'CUSTOM_JSON_UPDATE':
+                this.queueCustomJsonUpdate(payload, iframeId, event.source);
+                break;
+                
+            case 'CUSTOM_JSON_REQUEST':
+                this.sendCurrentCustomJson(event.source, iframeId);
+                break;
+                
+            case 'CUSTOM_JSON_REGISTER':
+                this.registerIframe(event.source, iframeId, payload);
+                break;
+                
+            case 'CUSTOM_JSON_UNREGISTER':
+                this.unregisterIframe(iframeId);
+                break;
+        }
+    }
+    
+    /**
+     * Security check for message origins
+     */
+    isValidOrigin(origin) {
+        // Allow same origin always
+        if (origin === window.location.origin) return true;
+        
+        // Allow local development
+        if (origin === 'http://localhost' || origin.startsWith('http://localhost:')) return true;
+        
+        // Allow file:// protocol for local development
+        if (origin === 'file://') return true;
+        
+        // Allow null origin (some iframes)
+        if (origin === 'null') return true;
+        
+        // Could add whitelist of allowed domains here
+        // For now, allow all origins since iframes may have various sources
+        return true;
+    }
+    
+    /**
+     * Register an iframe component
+     */
+    registerIframe(source, iframeId, metadata = {}) {
+        this.iframeRegistry.set(iframeId, {
+            source,
+            metadata,
+            registeredAt: Date.now(),
+            lastUpdate: null
+        });
+        
+        console.log('✅ Iframe registered:', {
+            iframeId,
+            type: metadata.type,
+            version: metadata.version,
+            totalRegistered: this.iframeRegistry.size
+        });
+        
+        // Send current custom JSON state to newly registered iframe
+        this.sendCurrentCustomJson(source, iframeId);
+    }
+    
+    /**
+     * Unregister an iframe component
+     */
+    unregisterIframe(iframeId) {
+        if (this.iframeRegistry.has(iframeId)) {
+            this.iframeRegistry.delete(iframeId);
+            console.log('👋 Iframe unregistered:', { iframeId, remaining: this.iframeRegistry.size });
+        }
+    }
+    
+    /**
+     * Queue custom JSON updates for debounced batch processing
+     */
+    queueCustomJsonUpdate(updates, iframeId, source) {
+        // Validate updates
+        if (!updates || typeof updates !== 'object') {
+            console.warn('⚠️ Invalid custom JSON update:', updates);
+            return;
+        }
+        
+        // Track metrics
+        const updateSize = JSON.stringify(updates).length;
+        this.metrics.totalUpdates++;
+        this.metrics.largestPayload = Math.max(this.metrics.largestPayload, updateSize);
+        
+        // Add to queue
+        this.updateQueue.push({ 
+            updates, 
+            iframeId, 
+            timestamp: Date.now(),
+            size: updateSize 
+        });
+        
+        // Update iframe registry
+        if (this.iframeRegistry.has(iframeId)) {
+            const iframe = this.iframeRegistry.get(iframeId);
+            iframe.lastUpdate = Date.now();
+            iframe.source = source; // Update source in case it changed
+        }
+        
+        console.log('📥 Queued custom JSON update:', {
+            iframeId,
+            updateSize,
+            queueLength: this.updateQueue.length,
+            willProcessIn: this.updateDebounceTimer ? 'pending' : '200ms'
+        });
+        
+        // Debounce Y.js updates (200ms recommended for balance)
+        clearTimeout(this.updateDebounceTimer);
+        this.updateDebounceTimer = setTimeout(() => {
+            this.processBatchedUpdates();
+        }, 200);
+    }
+    
+    /**
+     * Process all queued updates in a single Y.js transaction
+     */
+    async processBatchedUpdates() {
+        if (this.updateQueue.length === 0 || this.isProcessing) return;
+        
+        this.isProcessing = true;
+        const startTime = Date.now();
+        const queueSnapshot = [...this.updateQueue];
+        this.updateQueue = [];
+        
+        try {
+            // Check if we have Y.js document
+            if (!this.component.ydoc) {
+                console.warn('⚠️ No Y.js document available for custom JSON updates');
+                return;
+            }
+            
+            // Merge all queued updates
+            const mergedUpdates = {};
+            let totalSize = 0;
+            
+            for (const { updates, iframeId, size } of queueSnapshot) {
+                // Option 1: Namespace by iframe ID (prevents conflicts)
+                // mergedUpdates[iframeId] = updates;
+                
+                // Option 2: Merge at root level (allows shared data)
+                Object.assign(mergedUpdates, updates);
+                
+                totalSize += size;
+            }
+            
+            console.log('🔄 Processing batched custom JSON updates:', {
+                batchSize: queueSnapshot.length,
+                totalSize,
+                iframes: [...new Set(queueSnapshot.map(u => u.iframeId))]
+            });
+            
+            // Single Y.js transaction for all updates
+            this.component.ydoc.transact(() => {
+                const metadata = this.component.ydoc.getMap('metadata');
+                const currentJson = metadata.get('customJson') || {};
+                const newJson = { ...currentJson, ...mergedUpdates };
+                
+                // Size check and warning
+                const jsonSize = JSON.stringify(newJson).length;
+                if (jsonSize > 50000) { // 50KB warning threshold
+                    console.warn('⚠️ Large custom JSON size:', {
+                        size: jsonSize,
+                        sizeKB: Math.round(jsonSize / 1024) + 'KB',
+                        recommendation: 'Consider optimizing data structure'
+                    });
+                }
+                
+                metadata.set('customJson', newJson);
+                
+                // Also update last modified timestamp
+                const config = this.component.ydoc.getMap('config');
+                config.set('lastModified', new Date().toISOString());
+                config.set('lastCustomJsonUpdate', new Date().toISOString());
+                
+            }, 'iframe-customjson-batch');
+            
+            // Update metrics
+            const latency = Date.now() - startTime;
+            this.metrics.batchedUpdates++;
+            this.metrics.averageLatency = (this.metrics.averageLatency + latency) / 2;
+            
+            console.log('✅ Custom JSON batch update completed:', {
+                latency: latency + 'ms',
+                totalUpdatesProcessed: this.metrics.totalUpdates,
+                batchesProcessed: this.metrics.batchedUpdates
+            });
+            
+            // Notify all registered iframes of the update
+            this.broadcastCustomJsonUpdate(mergedUpdates);
+            
+        } catch (error) {
+            console.error('❌ Error processing custom JSON updates:', error);
+            
+            // Re-queue failed updates for retry
+            this.updateQueue.unshift(...queueSnapshot);
+            
+        } finally {
+            this.isProcessing = false;
+        }
+    }
+    
+    /**
+     * Send current custom JSON state to an iframe
+     */
+    sendCurrentCustomJson(target, iframeId) {
+        try {
+            if (!this.component.ydoc) {
+                console.warn('⚠️ No Y.js document available for custom JSON request');
+                return;
+            }
+            
+            const metadata = this.component.ydoc.getMap('metadata');
+            const customJson = metadata.get('customJson') || {};
+            
+            const message = {
+                type: 'CUSTOM_JSON_STATE',
+                iframeId,
+                payload: customJson,
+                timestamp: Date.now()
+            };
+            
+            target.postMessage(message, '*');
+            
+            console.log('📤 Sent custom JSON state to iframe:', {
+                iframeId,
+                jsonSize: JSON.stringify(customJson).length,
+                hasContent: Object.keys(customJson).length > 0
+            });
+            
+        } catch (error) {
+            console.error('❌ Error sending custom JSON to iframe:', error);
+        }
+    }
+    
+    /**
+     * Broadcast custom JSON updates to all registered iframes
+     */
+    broadcastCustomJsonUpdate(updates) {
+        if (this.iframeRegistry.size === 0) return;
+        
+        const message = {
+            type: 'CUSTOM_JSON_UPDATE_BROADCAST',
+            payload: updates,
+            timestamp: Date.now()
+        };
+        
+        for (const [iframeId, { source }] of this.iframeRegistry) {
+            try {
+                source.postMessage(message, '*');
+            } catch (error) {
+                console.warn('⚠️ Failed to broadcast to iframe:', iframeId, error.message);
+                // Clean up dead iframes
+                this.unregisterIframe(iframeId);
+            }
+        }
+        
+        console.log('📢 Broadcasted custom JSON updates to', this.iframeRegistry.size, 'iframes');
+    }
+    
+    /**
+     * Get performance metrics
+     */
+    getMetrics() {
+        return {
+            ...this.metrics,
+            activeIframes: this.iframeRegistry.size,
+            queueLength: this.updateQueue.length
+        };
+    }
+    
+    /**
+     * Cleanup handler
+     */
+    destroy() {
+        // Remove message listener
+        window.removeEventListener('message', this.messageHandler);
+        
+        // Clear timers
+        clearTimeout(this.updateDebounceTimer);
+        
+        // Clear registries
+        this.iframeRegistry.clear();
+        this.updateQueue = [];
+        
+        console.log('🧹 CustomJsonMessageHandler destroyed');
+    }
+}
+
+/**
+ * 7. LIFECYCLE MANAGER
  * Proper TipTap cleanup patterns
  */
 class LifecycleManager {
@@ -2842,11 +3187,17 @@ class LifecycleManager {
 
             // 2. Cleanup WebSocket provider
             await this.cleanupWebSocketProvider();
+            
+            // 3. Cleanup custom JSON message handler
+            if (this.component.customJsonMessageHandler) {
+                this.component.customJsonMessageHandler.destroy();
+                this.component.customJsonMessageHandler = null;
+            }
 
-            // 3. Cleanup Y.js document
+            // 4. Cleanup Y.js document
             await this.cleanupYjsDocument();
 
-            // 4. Reset component state
+            // 5. Reset component state
             this.resetComponentState();
 
         } finally {
@@ -6354,6 +6705,7 @@ export default {
             this.documentManager = new DocumentManager(this);
             this.recoveryManager = new RecoveryManager(this);
             this.contentStateManager = new ContentStateManager(this);
+            this.customJsonMessageHandler = new CustomJsonMessageHandler(this);
 
             // ✅ COMPLIANCE: Auth header caching is handled by the parent component
             // The sessionStorage cache is used for API calls when headers expire mid-session
@@ -7234,6 +7586,79 @@ export default {
     },
 
     methods: {
+        // ===== CUSTOM JSON PERFORMANCE MONITORING =====
+        
+        /**
+         * Get custom JSON performance metrics
+         */
+        getCustomJsonMetrics() {
+            const metrics = {
+                customJsonSize: 0,
+                customJsonKeys: 0,
+                iframeMetrics: {},
+                yjsMetrics: {}
+            };
+            
+            // Get custom JSON size from Y.js
+            if (this.ydoc) {
+                const metadata = this.ydoc.getMap('metadata');
+                const customJson = metadata.get('customJson') || {};
+                const jsonString = JSON.stringify(customJson);
+                
+                metrics.customJsonSize = jsonString.length;
+                metrics.customJsonKeys = Object.keys(customJson).length;
+                metrics.customJsonSizeKB = Math.round(jsonString.length / 1024 * 100) / 100;
+                
+                // Warning thresholds
+                metrics.sizeWarning = jsonString.length > 50000; // 50KB warning
+                metrics.sizeCritical = jsonString.length > 100000; // 100KB critical
+            }
+            
+            // Get iframe integration metrics
+            if (this.customJsonMessageHandler) {
+                metrics.iframeMetrics = this.customJsonMessageHandler.getMetrics();
+            }
+            
+            // Get Y.js document metrics
+            if (this.ydoc) {
+                metrics.yjsMetrics = {
+                    clientID: this.ydoc.clientID,
+                    subdocs: this.ydoc.subdocs.size,
+                    undoStackSize: this.ydoc.undoManager?.undoStack?.length || 0,
+                    redoStackSize: this.ydoc.undoManager?.redoStack?.length || 0
+                };
+            }
+            
+            return metrics;
+        },
+        
+        /**
+         * Log custom JSON performance metrics
+         */
+        logCustomJsonPerformance() {
+            const metrics = this.getCustomJsonMetrics();
+            
+            console.log('📊 Custom JSON Performance Metrics:', {
+                size: `${metrics.customJsonSizeKB}KB`,
+                keys: metrics.customJsonKeys,
+                warning: metrics.sizeWarning ? 'Size exceeds 50KB' : 'OK',
+                iframes: {
+                    active: metrics.iframeMetrics.activeIframes,
+                    totalUpdates: metrics.iframeMetrics.totalUpdates,
+                    averageLatency: `${metrics.iframeMetrics.averageLatency}ms`
+                }
+            });
+            
+            if (metrics.sizeWarning) {
+                console.warn('⚠️ Custom JSON size warning:', {
+                    size: `${metrics.customJsonSizeKB}KB`,
+                    recommendation: 'Consider optimizing data structure or using compression'
+                });
+            }
+            
+            return metrics;
+        },
+
         // ===== AUTHENTICATION HANDLING =====
 
         // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
