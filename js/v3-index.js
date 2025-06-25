@@ -193,7 +193,7 @@ const app = createApp({
       authors: {}, // Store author information for reputation calculations
       hiveprice: {
         hive: {
-          usd: 0.25, // Will be fetched from CoinGecko or calculated from witnesses
+          usd: 0.25, // Initial fallback, will be updated from witness feeds
         },
       },
       hbdprice: {
@@ -1277,7 +1277,7 @@ const app = createApp({
            if (hiveFundAccount.balance) {
              hiveBalance = parseFloat(hiveFundAccount.balance.split(' ')[0]);
              // Ninja grant: 0.05% per day of hive balance converted to HBD
-             ninjaGrant = (hiveBalance * 0.0005) * (this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice());
+             ninjaGrant = (hiveBalance * 0.0005) * this.hiveprice.hive.usd;
            }
          }
          
@@ -2782,7 +2782,7 @@ const app = createApp({
     },
 
     calculateProjectedValues(timeframe = 365) {
-      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
+      const currentPrice = this.hiveprice.hive.usd;
       const growthMultiplier = 1 + (this.priceGrowthRate / 100);
       const projectedPrice = currentPrice * Math.pow(growthMultiplier, timeframe / 365);
       
@@ -3118,7 +3118,7 @@ const app = createApp({
 
     calculateDailyProjections() {
       const days = 365 * 3; // 3 years
-      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
+      const currentPrice = this.hiveprice.hive.usd;
       const currentRewardFund = this.daoFund.dailyInflow / (currentPrice * 0.325);
       const currentHiveBalance = this.daoFund.hiveBalance;
       const currentTreasury = this.daoFund.treasury;
@@ -3204,7 +3204,7 @@ const app = createApp({
 
     generateChartData() {
       // This method generates completely plain, non-reactive data for Chart.js
-      const currentPrice = this.hiveprice?.hive?.usd || this.getWitnessFallbackPrice();
+      const currentPrice = this.hiveprice.hive.usd;
       const dailyRewardsInflow = this.daoFund?.dailyInflow || 0;
       const treasury = this.daoFund?.treasury || 0;
       const hiveBalance = this.daoFund?.hiveBalance || 0;
@@ -3954,6 +3954,35 @@ const app = createApp({
       return Math.max(proportionalWeight, estimatedMinimumWeight);
         },
 
+    updateHivePriceFromWitnesses() {
+      // Calculate price from witness price feeds and update hiveprice
+      if (!this.witnesses || !Array.isArray(this.witnesses)) {
+        return; // Keep existing price if no witness data
+      }
+      
+      const activeWitnesses = this.witnesses.filter(w => w.rank <= 20 && w.hbd_exchange_rate);
+      if (activeWitnesses.length === 0) {
+        return; // Keep existing price if no active witnesses with price feeds
+      }
+      
+      const totalPrice = activeWitnesses.reduce((sum, witness) => {
+        const price = parseFloat(this.getHivePrice(witness.hbd_exchange_rate));
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      
+      const averagePrice = totalPrice / activeWitnesses.length;
+      
+      // Update hiveprice if calculation successful
+      if (averagePrice > 0) {
+        this.hiveprice = {
+          hive: {
+            usd: averagePrice
+          }
+        };
+        console.log(`Updated Hive price from witness consensus: $${averagePrice.toFixed(3)}`);
+      }
+    },
+
     getWitnessFallbackPrice() {
       // Calculate fallback price from witness price feeds
       if (!this.witnesses || !Array.isArray(this.witnesses)) {
@@ -4192,20 +4221,18 @@ const app = createApp({
       if (Container.querySelector("input:invalid")) this[validKey] = false;
       else this[validKey] = true;
     },
-    getQuotes() {
-      fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=hive&amp;vs_currencies=usd"
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          this.hiveprice = data;
-        });
+    // Note: Hive price now comes from witness feeds instead of CoinGecko
+    // HBD price could still be fetched from CoinGecko if needed
+    getHbdPrice() {
       fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&amp;vs_currencies=usd"
       )
         .then((response) => response.json())
         .then((data) => {
           this.hbdprice = data;
+        })
+        .catch(error => {
+          console.warn('Failed to fetch HBD price from CoinGecko:', error);
         });
     },
     getTickers(){
@@ -4791,6 +4818,9 @@ const app = createApp({
           rank: index + 1
         }));
 
+        // Update Hive price from witness consensus
+        this.updateHivePriceFromWitnesses();
+
         // Get current block number
         const propsResponse = await fetch(this.hapi, {
           method: 'POST',
@@ -5282,7 +5312,6 @@ const app = createApp({
     },
   },
   mounted() {
-    this.getQuotes();
     this.getNodes();
     this.getProtocol();
     this.getTickers();
