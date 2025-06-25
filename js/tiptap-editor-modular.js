@@ -6244,6 +6244,33 @@ export default {
                     }
                 }
             }
+        },
+        
+        // ✅ SECURITY FIX: Watch for authentication changes
+        username: {
+            handler(newUsername, oldUsername) {
+                // Skip initial mount
+                if (!oldUsername) return;
+                
+                // Skip if username hasn't actually changed
+                if (newUsername === oldUsername) return;
+                
+                console.log('🔐 Username changed - invalidating permission caches:', {
+                    from: oldUsername,
+                    to: newUsername
+                });
+                
+                // Clear all permission caches
+                this.clearAllPermissionCaches();
+                
+                // If we have a current collaborative document, re-validate permissions
+                if (this.currentFile && this.currentFile.type === 'collaborative') {
+                    console.log('🔐 Re-validating permissions for current collaborative document');
+                    
+                    // Force immediate permission check
+                    this.validateCurrentDocumentPermissions();
+                }
+            }
         }
     },
 
@@ -12652,6 +12679,11 @@ export default {
 
                 // ✅ RECURSION FIX: Clear permlinkInput so UI shows generated permlink
                 this.permlinkInput = '';
+                
+                // ✅ FIX: If editor is open, update the temp input to show generated value
+                if (this.showPermlinkEditor) {
+                    this.permlinkInputTemp = this.generatedPermlink;
+                }
 
                 console.log('🔗 Using generated permlink:', this.generatedPermlink);
             }
@@ -15475,6 +15507,107 @@ export default {
             this.clearAllAnalyticsCaches();
 
         },
+        
+        // ✅ SECURITY FIX: Validate current document permissions after auth change
+        async validateCurrentDocumentPermissions() {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                return;
+            }
+            
+            const owner = this.currentFile.owner || this.currentFile.author;
+            const permlink = this.currentFile.permlink;
+            
+            if (!owner || !permlink) {
+                console.warn('⚠️ Cannot validate permissions - missing owner/permlink');
+                return;
+            }
+            
+            console.log('🔐 Validating permissions after auth change for:', { owner, permlink });
+            
+            try {
+                // Clear cache for this specific document to force fresh check
+                const documentKey = `${owner}/${permlink}`;
+                if (this.reactivePermissionState[documentKey]) {
+                    delete this.reactivePermissionState[documentKey];
+                }
+                if (this.currentFile.cachedPermissions) {
+                    delete this.currentFile.cachedPermissions[this.username];
+                }
+                
+                // Fetch fresh permissions from server if authenticated
+                let permissionLevel = 'no-access';
+                
+                if (this.isAuthenticated) {
+                    try {
+                        // Try to fetch from server
+                        const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${owner}/${permlink}`, {
+                            headers: this.authHeaders
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            // Find current user's permission
+                            const userPermission = data.find(p => p.account === this.username);
+                            permissionLevel = userPermission ? userPermission.permission : 'no-access';
+                            
+                            // Update cache with fresh data
+                            if (!this.currentFile.cachedPermissions) {
+                                this.currentFile.cachedPermissions = {};
+                            }
+                            this.currentFile.cachedPermissions[this.username] = {
+                                level: permissionLevel,
+                                timestamp: Date.now()
+                            };
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Failed to fetch fresh permissions:', error);
+                    }
+                }
+                
+                // Fall back to cache check if server fetch failed
+                if (permissionLevel === 'no-access') {
+                    permissionLevel = this.getUserPermissionLevel(this.currentFile);
+                }
+                
+                console.log('🔐 Current permission level:', permissionLevel);
+                
+                // If user has no access, close the document
+                if (permissionLevel === 'no-access') {
+                    console.log('🚫 Access denied after auth change - closing document');
+                    
+                    // Show error message
+                    this.showError('Access denied. You no longer have permission to view this document.');
+                    
+                    // Close the collaborative connection
+                    if (this.provider) {
+                        await this.disconnectCollaboration();
+                    }
+                    
+                    // Clear current file
+                    this.currentFile = null;
+                    
+                    // Navigate to home or create new document
+                    this.documentManager.newDocument();
+                }
+                // If permission level dropped, reconnect with new permissions
+                else if (this.provider && this.currentPermissionLevel !== permissionLevel) {
+                    console.log('🔄 Permission level changed - reconnecting with new permissions');
+                    this.currentPermissionLevel = permissionLevel;
+                    
+                    // Reconnect WebSocket with new permission level
+                    if (this.collaborationManager && this.collaborationManager.reconnectWebSocketForPermissionUpgrade) {
+                        await this.collaborationManager.reconnectWebSocketForPermissionUpgrade();
+                    } else {
+                        console.warn('⚠️ Cannot reconnect WebSocket - collaboration manager not available');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error validating permissions:', error);
+                // On error, assume no access for security
+                this.showError('Unable to verify permissions. Access denied.');
+                this.documentManager.newDocument();
+            }
+        },
 
         // ✅ ENHANCED: Clear all analytics caches (info, stats, activity)
         clearAllAnalyticsCaches() {
@@ -16504,7 +16637,13 @@ export default {
                         // Reconnect WebSocket with new permission level for server authentication
                         this.$nextTick(async () => {
                             try {
-                                await this.reconnectWebSocketForPermissionUpgrade();
+                                if (this.collaborationManager && this.collaborationManager.reconnectWebSocketForPermissionUpgrade) {
+                                    await this.collaborationManager.reconnectWebSocketForPermissionUpgrade();
+                                } else {
+                                    console.warn('⚠️ Collaboration manager not available for WebSocket reconnection');
+                                    // Fall back to basic editor update
+                                    this.bodyEditor.setEditable(shouldBeEditable, false);
+                                }
                             } catch (error) {
                                 console.warn('⚠️ WebSocket reconnection failed after permission change:', error.message);
                                 // Fall back to basic editor update
@@ -17948,7 +18087,7 @@ export default {
                       <i class="fas fa-lock fa-2x mb-2"></i>
                       <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
                     </div>
-                    <button @click="requestAuthentication(); closeLoadModal()" class="btn btn-primary btn-sm">
+                    <button @click="requestAuthentication()" class="btn btn-primary btn-sm">
                       <i class="fas fa-key me-1"></i>Authenticate for Collaboration
                     </button>
                   </div>
