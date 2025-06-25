@@ -1,4 +1,4 @@
-this.version = "2025.06.25.4";
+this.version = "2025.06.25.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.25.09",
-  "generated": "2025-06-25T16:33:04Z",
+  "version": "2025.06.25.5",
+  "generated": "2025-06-25T16:33:17Z",
   "files": {
-    "/img/txt-file-type-svgrepo-com.svg": {
-      "checksum": "90a1ea59895f59235680505a41e17d10",
-      "size": 1476,
-      "priority": "important"
-    },
     "/img/wallets/coinbase-logo.png": {
       "checksum": "44ee96c50cb5c743af38465a4222cc54",
       "size": 4939,
@@ -1302,11 +1297,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/powershell/powershell.js": {
-      "checksum": "d42611b54a1b94947c98c575d6dcafed",
-      "size": 4104,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/protobuf/protobuf.js": {
       "checksum": "8f1f4302b1de0c4a28c7cc1a9fb276c8",
       "size": 9877,
@@ -1722,12 +1712,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
