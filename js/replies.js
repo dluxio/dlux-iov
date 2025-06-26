@@ -33,7 +33,10 @@ export default {
 <vue-ratings v-if="post.rating" class="d-flex me-1" :stars="post.rating"/>
 <span class="small text-muted" style="font-weight: 400">{{ post.ago || timeSince(post.created) }}</span>
 <div class="ms-auto d-flex align-items-center">
-  <small v-if="post.depth" class="text-muted me-2">{{ post.depth }}</small>
+  <small v-if="post.depth && post.depth > 6" class="badge bg-warning me-2" title="Very deep reply thread">
+    <i class="fa-solid fa-layer-group me-1"></i>{{ post.depth }}
+  </small>
+  <small v-else-if="post.depth > 1" class="text-muted me-2">{{ post.depth }}</small>
   <a role="button" class="no-decoration text-white-50" @click="view = !view">
     <i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i>
     <i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i>
@@ -47,7 +50,7 @@ export default {
 <vue-markdown :toedit="post.body" @settext="pending($event)"/>
 </div>
 <div class="card-footer p-0 mb-2" v-if="view">
-<vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
+<vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)" @tosign="sendIt($event)"></vote>
 </div>
 <div v-if="!view" class="collapsed-info">
 <span class="text-muted">{{ getCollapsedText() }}</span>
@@ -61,7 +64,8 @@ export default {
         :account="account" 
         :voteval="voteval" 
         @vote="vote($event)" 
-        @reply="reply($event)"/>
+        @reply="reply($event)"
+        @tosign="sendIt($event)"/>
 </div>
 </div>                 
 </div>
@@ -94,7 +98,7 @@ export default {
       replyAuthorInfo: null,
     };
   },
-  emits: ['vote', 'reply'],
+  emits: ['vote', 'reply', 'tosign'],
   methods: {
     ...MCommon,
     async getReplyAuthorReputation() {
@@ -143,6 +147,26 @@ export default {
       this.mde = event
     },
     vote(event) {
+      // Create vote signing operation using the same logic as v3-user.js
+      const voteOp = {
+        type: "vote",
+        cj: {
+          author: event.url.split("/@")[1].split("/")[0],
+          permlink: event.url.split("/@")[1].split("/")[1],
+          weight: event.slider * (event.flag ? -1 : 1),
+        },
+        msg: `Voting ...`,
+        ops: [""],
+        txid: "vote",
+      };
+      
+      console.log('Vote operation created:', voteOp);
+      console.log('Original vote event:', event);
+      
+      // Send through signing system
+      this.sendIt(voteOp);
+      
+      // Also emit the original vote event for any other handlers
       this.$emit('vote', event);
     },
     timeSince(date) {
@@ -181,6 +205,9 @@ export default {
         json_metadata
       }
       this.$emit('reply', deets)
+    },
+    sendIt(op) {
+      this.$emit('tosign', op);
     },
     formatNumber(t, n, r, e) {
       if (typeof t != "number") {
@@ -228,14 +255,35 @@ export default {
     },
     getReplyStyles() {
       const depth = this.post.depth || 1;
-      const maxDepth = 6; // Limit visual nesting
-      const effectiveDepth = Math.min(depth, maxDepth);
+      
+      // Rainbow colors from violet to red (6 steps)
+      const rainbowColors = [
+        '#21FFB5',
+        '#033EFD',
+        '#FB00FF',
+        '#FF216B',
+        '#FDC203',
+        '#04FF00' 
+      ];
+      
+      if (depth <= 1) {
+        return {
+          'margin-bottom': '1rem',
+          'padding-left': '0px'
+        };
+      }
+      
+      // Get the color for this specific depth
+      const colorIndex = depth - 2 % rainbowColors.length // depth-2 because depth 1 has no line
+      const color = rainbowColors[colorIndex];
+      
+      // Indent equals the depth in pixels
+      const indent = `${depth * 2}px`;
       
       return {
-        'margin-left': `${Math.max(0, (effectiveDepth - 1) * 20)}px`,
-        'border-left': effectiveDepth > 1 ? '2px solid rgba(255,255,255,0.1)' : 'none',
-        'padding-left': effectiveDepth > 1 ? '10px' : '0px',
-        'margin-bottom': '1rem'
+        'margin-bottom': '1rem',
+        'padding-left': indent,
+        'border-left': `2px solid ${color}`
       };
     },
     getAvatarSize() {
@@ -308,7 +356,7 @@ export default {
     this.hideLowRep();
     
     // Set initial view state based on depth (auto-collapse deep replies)
-    if (this.post.depth && this.post.depth > 4) {
+    if (this.post.depth && this.post.depth > 3) {
       this.view = false;
     }
     

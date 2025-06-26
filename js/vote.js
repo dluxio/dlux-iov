@@ -86,7 +86,7 @@ post.curator_payout_value, 3, '.',','):formatNumber(post.pending_payout_value, 3
         bens: [],
     };
     },
-    emits: ['vote', 'reply'],
+    emits: ['vote', 'reply', 'tosign'],
     methods:{
       pending(event){
         this.mde = event
@@ -113,6 +113,9 @@ post.curator_payout_value, 3, '.',','):formatNumber(post.pending_payout_value, 3
         vote(url){
             this.$emit('vote', {url:`/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag:this.flag})
             console.log(this.post)
+        },
+        sendIt(op) {
+            this.$emit('tosign', op);
         },
         formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
             if (typeof t != "number") {

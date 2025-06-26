@@ -2392,7 +2392,7 @@ PORT=3000
     },
     /*
 function sellNFTcancel(setname, uid, callback){
-     broadcastCJA({ set: setname, uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
+     broadcastCJA({ set: setname, uid: uid}, "dlux_nft_sell_cancel", `Trying to cancel ${setname}:${uid} sell`)
  }
 */
     cancelNFT(item) {
@@ -2667,7 +2667,7 @@ function buyNFT(setname, uid, price, type, callback){
             if (this.activeTab == 'blog') {
               this.getPosts();
             } else if (this.activeTab == 'inventory') {
-              this.getNFTs();
+              this.getNFTs(this.pageAccount || this.account);
             }
           }
         }
@@ -3819,6 +3819,9 @@ function buyNFT(setname, uid, price, type, callback){
     getNFTs(account) {
       this.accountNFTs = [];
       this.accountRNFTs = [];
+      // Clear trades arrays once at the beginning
+      this.FTtrades = [];
+      this.NFTtrades = [];
       for (var i = 0; i < this.providers.length; i++) {
         this.NFTsLookUp(account, this.providers, i);
         this.trades(i);
@@ -3859,8 +3862,7 @@ function buyNFT(setname, uid, price, type, callback){
         }, 250);
     },
     trades(i) {
-      this.FTtrades = []; // Clear existing FT trades
-      this.NFTtrades = []; // Clear existing NFT trades
+      // Trades arrays are now cleared once in getNFTs method, not per provider
       fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
@@ -3925,27 +3927,33 @@ function buyNFT(setname, uid, price, type, callback){
           var NFTs = json.result;
           var rNFTs = json.mint_tokens;
           var scripts = {};
+          
+          // Track completion of all NFT processing for this provider
+          let nftPromises = [];
+          
           for (var j = 0; j < NFTs.length; j++) {
             NFTs[j].token = p[i].token;
             NFTs[j].owner = un;
             // this.itemModal.items.push(NFTs[j]);
             // this.itemModal.item = this.itemModal[0];
             scripts[NFTs[j].script] = { token: p[i].token, set: NFTs[j].setname };
-            this.callScript(NFTs[j]).then((comp) => {
+            let promise = this.callScript(NFTs[j]).then((comp) => {
               // Sanitize HTML content for NFTs
               if (comp.HTML) {
                 comp.HTML = this.sanitizeHTML(comp.HTML);
               }
               this.accountNFTs.push(comp);
-              this.displayNFT(0);
             });
+            nftPromises.push(promise);
           }
+          
           for (var j = 0; j < rNFTs.length; j++) {
             rNFTs[j].token = p[i].token;
             scripts[rNFTs[j].script] = 1;
             rNFTs[j].source = 'accountRNFTs'
             this.accountRNFTs.push(rNFTs[j]);
           }
+          
           for (var script in scripts) {
             this.callScript({
               script,
@@ -3959,6 +3967,13 @@ function buyNFT(setname, uid, price, type, callback){
               this.baseScript[comp.script] = comp;
               this.baseScript[comp.script].token = p[i].token;
               this.baseScript[comp.script].setname = scripts[script].setname;
+            });
+          }
+          
+          // Only update display once all NFTs for this provider are processed
+          if (nftPromises.length > 0) {
+            Promise.all(nftPromises).then(() => {
+              this.displayNFT(0);
             });
           }
         });
@@ -4451,7 +4466,7 @@ function buyNFT(setname, uid, price, type, callback){
       this.getSapi(this.pageAccount, false);
       this.getTokenUser(this.pageAccount, false);
       if (!this.me) this.accountRelations(this.pageAccount);
-      this.getNFTs(this.pageAccount);
+      // NFTs will be loaded when switching to inventory tab
     },
     goBack() {
       window.history.back();
@@ -7140,8 +7155,16 @@ function buyNFT(setname, uid, price, type, callback){
       } else if (location.hash == "#files") {
         this.activeTab = "files";
       }
-
     }
+    
+    // Ensure initial tab content loads if starting with specific hash
+    this.$nextTick(() => {
+      if (this.activeTab === 'inventory' && this.pageAccount) {
+        if (this.accountNFTs.length === 0 && this.accountRNFTs.length === 0) {
+          this.getNFTs(this.pageAccount);
+        }
+      }
+    });
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
       if (this.pageAccount.indexOf('/') > -1) {
@@ -7260,9 +7283,12 @@ function buyNFT(setname, uid, price, type, callback){
           } else {
           }
         } else if (newTab === 'inventory') {
-          if (this.accountNFTs.length === 0 && this.accountRNFTs.length === 0) {
-            this.getNFTs();
+          // Only load NFTs if arrays are truly empty AND we have a pageAccount
+          if (this.pageAccount && this.accountNFTs.length === 0 && this.accountRNFTs.length === 0) {
+            this.getNFTs(this.pageAccount);
           } else {
+            // Refresh display from existing data
+            this.displayNFT(0);
           }
         } else if (newTab === 'drive' && !this.contractsLoaded) {
           this.contractsLoaded = true;
@@ -7320,6 +7346,11 @@ function buyNFT(setname, uid, price, type, callback){
           this.postSelect[this.postSelect.entry].start_author = '';
           this.postSelect[this.postSelect.entry].start_permlink = '';
           
+          // Clear NFT data when switching users to prevent double loading
+          this.accountNFTs = [];
+          this.accountRNFTs = [];
+          this.displayNFTs = [];
+          
           // Load posts for the new user if on blog tab
           if (this.activeTab === 'blog') {
             this.getPosts(true);
@@ -7329,7 +7360,11 @@ function buyNFT(setname, uid, price, type, callback){
           this.getHiveUser(newValue);
           this.getSapi(newValue, false);
           this.getTokenUser(newValue, false);
-          this.getNFTs(newValue);
+          
+          // Only load NFTs if on inventory tab
+          if (this.activeTab === 'inventory') {
+            this.getNFTs(newValue);
+          }
           
           // Update focus account
           this.focus.account = newValue;

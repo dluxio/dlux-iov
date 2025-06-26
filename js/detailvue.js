@@ -223,7 +223,7 @@ export default {
 </div>
 </div>
 <div v-for="post in post.replies" :key="post.url">
-<replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
+<replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)" @tosign="handleReplySigning($event)"/>
 </div>
 </div>
 </div>
@@ -431,7 +431,7 @@ export default {
 </div>
 </div>
 <div v-for="post in post.replies" :key="post.url">
-<replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
+<replies :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)" @tosign="handleReplySigning($event)"/>
 </div>
 </div>
 </div>`,
@@ -698,8 +698,41 @@ methods: {
         this.mde = event
     },
     vote(url) {
-        this.$emit('vote', { url: `/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag: this.flag })
-        console.log(this.post)
+        // Handle both direct URL calls and event objects
+        let voteUrl, slider, flag;
+        
+        if (typeof url === 'object') {
+            // Event from vote component
+            voteUrl = url.url;
+            slider = url.slider;
+            flag = url.flag;
+        } else {
+            // Direct URL call
+            voteUrl = `/@${this.post.author}/${this.post.permlink}`;
+            slider = this.slider;
+            flag = this.flag;
+        }
+        
+        // Create vote signing operation
+        const voteOp = {
+            type: "vote",
+            cj: {
+                author: voteUrl.split("/@")[1].split("/")[0],
+                permlink: voteUrl.split("/@")[1].split("/")[1],
+                weight: slider * (flag ? -1 : 1),
+            },
+            msg: `Voting ...`,
+            ops: [""],
+            txid: "vote",
+        };
+        
+        console.log('DetailVue vote operation created:', voteOp);
+        
+        // Send through signing system
+        this.handleReplySigning(voteOp);
+        
+        // Also emit the original vote event for backward compatibility
+        this.$emit('vote', { url: voteUrl, slider: slider, flag: flag });
     },
     store(contract, remove = false){
         const toSign = {
@@ -908,6 +941,9 @@ methods: {
         // Navigate to the community feed
         console.log(`Navigating to community: ${community}`);
         window.location.href = `/hub/#community/${community}`;
+    },
+    handleReplySigning(op) {
+        this.$emit('tosign', op);
     }
 },
 watch: {
