@@ -376,27 +376,30 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Solution**: Added `permlinkInputTemp` update in `useGeneratedPermlink()`
 - **Result**: Users can click auto-generate while editing to reset to generated value and continue editing
 
-### ✅ Fix Persistent Document Creation on Page Refresh
+### ✅ Fix Persistent Document Creation on Page Refresh - COMPLETE
 - **Issue Fixed**: Persistent documents were created immediately on page refresh without user interaction
 - **Root Cause**: 
   1. Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
   2. TipTap editor fires `onUpdate` events during initialization, triggering `debouncedUpdateContent`
-  3. Multiple code paths were triggering `debouncedCheckUserIntentAndCreatePersistence`
-- **Solution**: Added comprehensive protection to prevent false user intent detection:
+  3. Multiple code paths were triggering persistence creation before editor was ready
+  4. Metadata changes from Y.js sync were triggering `autoSave()` during initialization
+- **Solution**: Added comprehensive multi-layer protection to prevent false user intent detection:
   1. **isLoadingDocument flag**: Prevents intent detection during document loading
   2. **editorInitialized flag**: Prevents auto-save triggers during editor initialization
 - **Implementation Details**:
   - Added `editorInitialized = false` to data properties
   - Set `editorInitialized = true` after 1.5s delay in editor's `onCreate` callback
-  - Added checks for both flags in:
-    - `onUpdate` callback before calling `debouncedUpdateContent`
-    - `debouncedCheckUserIntentAndCreatePersistence` method
-    - Metadata observer for all metadata changes
-    - Title change handler in metadata observer
+  - Added protection checks in ALL critical methods:
+    - `autoSave()` - early return if editor not initialized
+    - Both `debouncedUpdateContent()` methods - early return if editor not initialized
+    - `debouncedCheckUserIntentAndCreatePersistence()` - checks both flags
+    - `onUpdate` callback - checks both flags before calling methods
+    - Metadata observer - checks both flags before setting user intent
+    - Title change handler - checks both flags before setting user intent
   - Reset both flags in `resetComponentState` and `newDocument`
   - Set `isLoadingDocument = true` at start of document loading methods
   - Reset `isLoadingDocument = false` after successful load
-- **Result**: Documents are only persisted when user actually interacts with editor after initialization, not on page load
+- **Result**: Documents are only persisted when user actually interacts with editor after full initialization, preventing false persistence on page load
 
 ### ✅ Document Name Display Consistency Fix
 - **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names

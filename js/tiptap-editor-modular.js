@@ -9616,6 +9616,15 @@ export default {
         },
 
         debouncedUpdateContent() {
+            // ✅ FIX: Prevent updates during initialization or document loading
+            if (!this.editorInitialized || this.isLoadingDocument) {
+                console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
+                    editorInitialized: this.editorInitialized,
+                    isLoadingDocument: this.isLoadingDocument
+                });
+                return;
+            }
+
             // ✅ REACTIVE PATTERN: Update content immediately
             // No debouncing needed - updateContent only emits metadata, not content
             this.updateContent();
@@ -9759,6 +9768,15 @@ export default {
 
         // ===== AUTO SAVE METHOD =====
         autoSave() {
+            // ✅ FIX: Prevent auto-save during initialization or document loading
+            if (!this.editorInitialized || this.isLoadingDocument) {
+                console.log('🔍 Skipping autoSave - editor not ready:', {
+                    editorInitialized: this.editorInitialized,
+                    isLoadingDocument: this.isLoadingDocument
+                });
+                return;
+            }
+
             // ✅ TIPTAP v3 COMPLIANT: Debounced autosave for metadata changes
             if (this.autoSaveTimeout) {
                 clearTimeout(this.autoSaveTimeout);
@@ -14812,6 +14830,15 @@ export default {
 
         // ✅ PHASE 1: Missing debouncedUpdateContent method - fixes hanging saving indicator
         debouncedUpdateContent() {
+            // ✅ FIX: Prevent auto-save during initialization or document loading
+            if (!this.editorInitialized || this.isLoadingDocument) {
+                console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
+                    editorInitialized: this.editorInitialized,
+                    isLoadingDocument: this.isLoadingDocument
+                });
+                return;
+            }
+
             // ✅ READ-ONLY PROTECTION: Block auto-save for read-only users
             if (this.isReadOnlyMode) {
                 console.log('🔒 Auto-save blocked for read-only user - content updates are receive-only');
