@@ -220,7 +220,7 @@ __webpack_require__.d(yjs_namespaceObject, {
  * @module math
  */
 
-const floor = Math.floor;
+const hocuspocus_common_esm_floor = Math.floor;
 
 /**
  * @function
@@ -228,7 +228,7 @@ const floor = Math.floor;
  * @param {number} b
  * @return {number} The smaller element of a and b
  */
-const min = (a, b) => a < b ? a : b;
+const hocuspocus_common_esm_min = (a, b) => a < b ? a : b;
 
 /**
  * @function
@@ -236,7 +236,7 @@ const min = (a, b) => a < b ? a : b;
  * @param {number} b
  * @return {number} The bigger element of a and b
  */
-const max = (a, b) => a > b ? a : b;
+const hocuspocus_common_esm_max = (a, b) => a > b ? a : b;
 
 /* eslint-env browser */
 
@@ -352,7 +352,7 @@ const write = (encoder, num) => {
 const writeVarUint = (encoder, num) => {
   while (num > BITS7) {
     write(encoder, BIT8 | (BITS7 & num));
-    num = floor(num / 128); // shift >>> 7
+    num = hocuspocus_common_esm_floor(num / 128); // shift >>> 7
   }
   write(encoder, BITS7 & num);
 };
@@ -420,7 +420,7 @@ const writeVarString = (utf8TextEncoder && /** @type {any} */ (utf8TextEncoder).
 const writeUint8Array = (encoder, uint8Array) => {
   const bufferLen = encoder.cbuf.length;
   const cpos = encoder.cpos;
-  const leftCopyLen = min(bufferLen - cpos, uint8Array.length);
+  const leftCopyLen = hocuspocus_common_esm_min(bufferLen - cpos, uint8Array.length);
   const rightCopyLen = uint8Array.length - leftCopyLen;
   encoder.cbuf.set(uint8Array.subarray(0, leftCopyLen), cpos);
   encoder.cpos += leftCopyLen;
@@ -429,7 +429,7 @@ const writeUint8Array = (encoder, uint8Array) => {
     // Append new buffer
     encoder.bufs.push(encoder.cbuf);
     // must have at least size of remaining buffer
-    encoder.cbuf = new Uint8Array(max(bufferLen * 2, rightCopyLen));
+    encoder.cbuf = new Uint8Array(hocuspocus_common_esm_max(bufferLen * 2, rightCopyLen));
     // copy array
     encoder.cbuf.set(uint8Array.subarray(leftCopyLen));
     encoder.cpos = rightCopyLen;
@@ -25306,7 +25306,7 @@ Abstraction to build up and track an array of
 Most transforming methods return the `Transform` object itself, so
 that they can be chained.
 */
-class Transform {
+class dist_Transform {
     /**
     Create a transform that starts with the given document.
     */
@@ -25696,7 +25696,7 @@ class dist_Selection {
     found.
     */
     static findFrom($pos, dir, textOnly = false) {
-        let inner = $pos.parent.inlineContent ? new TextSelection($pos)
+        let inner = $pos.parent.inlineContent ? new dist_TextSelection($pos)
             : findSelectionIn($pos.node(0), $pos.parent, $pos.pos, $pos.index(), dir, textOnly);
         if (inner)
             return inner;
@@ -25768,7 +25768,7 @@ class dist_Selection {
     returns the bookmark for that.
     */
     getBookmark() {
-        return TextSelection.between(this.$anchor, this.$head).getBookmark();
+        return dist_TextSelection.between(this.$anchor, this.$head).getBookmark();
     }
 }
 dist_Selection.prototype.visible = true;
@@ -25805,7 +25805,7 @@ head (the moving side) and anchor (immobile side), both of which
 point into textblock nodes. It can be empty (a regular cursor
 position).
 */
-class TextSelection extends dist_Selection {
+class dist_TextSelection extends dist_Selection {
     /**
     Construct a text selection between the given points.
     */
@@ -25824,7 +25824,7 @@ class TextSelection extends dist_Selection {
         if (!$head.parent.inlineContent)
             return dist_Selection.near($head);
         let $anchor = doc.resolve(mapping.map(this.anchor));
-        return new TextSelection($anchor.parent.inlineContent ? $anchor : $head, $head);
+        return new dist_TextSelection($anchor.parent.inlineContent ? $anchor : $head, $head);
     }
     replace(tr, content = dist_Slice.empty) {
         super.replace(tr, content);
@@ -25835,7 +25835,7 @@ class TextSelection extends dist_Selection {
         }
     }
     eq(other) {
-        return other instanceof TextSelection && other.anchor == this.anchor && other.head == this.head;
+        return other instanceof dist_TextSelection && other.anchor == this.anchor && other.head == this.head;
     }
     getBookmark() {
         return new TextBookmark(this.anchor, this.head);
@@ -25849,7 +25849,7 @@ class TextSelection extends dist_Selection {
     static fromJSON(doc, json) {
         if (typeof json.anchor != "number" || typeof json.head != "number")
             throw new RangeError("Invalid input for TextSelection.fromJSON");
-        return new TextSelection(doc.resolve(json.anchor), doc.resolve(json.head));
+        return new dist_TextSelection(doc.resolve(json.anchor), doc.resolve(json.head));
     }
     /**
     Create a text selection from non-resolved positions.
@@ -25887,10 +25887,10 @@ class TextSelection extends dist_Selection {
                     $anchor = $head;
             }
         }
-        return new TextSelection($anchor, $head);
+        return new dist_TextSelection($anchor, $head);
     }
 }
-dist_Selection.jsonID("text", TextSelection);
+dist_Selection.jsonID("text", dist_TextSelection);
 class TextBookmark {
     constructor(anchor, head) {
         this.anchor = anchor;
@@ -25900,7 +25900,7 @@ class TextBookmark {
         return new TextBookmark(mapping.map(this.anchor), mapping.map(this.head));
     }
     resolve(doc) {
-        return TextSelection.between(doc.resolve(this.anchor), doc.resolve(this.head));
+        return dist_TextSelection.between(doc.resolve(this.anchor), doc.resolve(this.head));
     }
 }
 /**
@@ -26021,7 +26021,7 @@ const AllBookmark = {
 // text selections.
 function findSelectionIn(doc, node, pos, index, dir, text = false) {
     if (node.inlineContent)
-        return TextSelection.create(doc, pos);
+        return dist_TextSelection.create(doc, pos);
     for (let i = index - (dir > 0 ? 0 : 1); dir > 0 ? i < node.childCount : i >= 0; i += dir) {
         let child = node.child(i);
         if (!child.isAtom) {
@@ -26072,7 +26072,7 @@ composition that caused it to transactions caused by composed DOM
 input, and a `"uiEvent"` property of that may be `"paste"`,
 `"cut"`, or `"drop"`.
 */
-class dist_Transaction extends Transform {
+class dist_Transaction extends dist_Transform {
     /**
     @internal
     */
@@ -26526,7 +26526,7 @@ Plugins bundle functionality that can be added to an editor.
 They are part of the [editor state](https://prosemirror.net/docs/ref/#state.EditorState) and
 may influence that state and the view that contains it.
 */
-class Plugin {
+class dist_Plugin {
     /**
     Create a plugin.
     */
@@ -26777,7 +26777,7 @@ function windowRect(doc) {
     return { left: 0, right: doc.documentElement.clientWidth,
         top: 0, bottom: doc.documentElement.clientHeight };
 }
-function getSide(value, side) {
+function dist_getSide(value, side) {
     return typeof value == "number" ? value : value[side];
 }
 function clientRect(node) {
@@ -26803,16 +26803,16 @@ function scrollRectIntoView(view, rect, startDOM) {
         let atTop = elt == doc.body;
         let bounding = atTop ? windowRect(doc) : clientRect(elt);
         let moveX = 0, moveY = 0;
-        if (rect.top < bounding.top + getSide(scrollThreshold, "top"))
-            moveY = -(bounding.top - rect.top + getSide(scrollMargin, "top"));
-        else if (rect.bottom > bounding.bottom - getSide(scrollThreshold, "bottom"))
+        if (rect.top < bounding.top + dist_getSide(scrollThreshold, "top"))
+            moveY = -(bounding.top - rect.top + dist_getSide(scrollMargin, "top"));
+        else if (rect.bottom > bounding.bottom - dist_getSide(scrollThreshold, "bottom"))
             moveY = rect.bottom - rect.top > bounding.bottom - bounding.top
-                ? rect.top + getSide(scrollMargin, "top") - bounding.top
-                : rect.bottom - bounding.bottom + getSide(scrollMargin, "bottom");
-        if (rect.left < bounding.left + getSide(scrollThreshold, "left"))
-            moveX = -(bounding.left - rect.left + getSide(scrollMargin, "left"));
-        else if (rect.right > bounding.right - getSide(scrollThreshold, "right"))
-            moveX = rect.right - bounding.right + getSide(scrollMargin, "right");
+                ? rect.top + dist_getSide(scrollMargin, "top") - bounding.top
+                : rect.bottom - bounding.bottom + dist_getSide(scrollMargin, "bottom");
+        if (rect.left < bounding.left + dist_getSide(scrollThreshold, "left"))
+            moveX = -(bounding.left - rect.left + dist_getSide(scrollMargin, "left"));
+        else if (rect.right > bounding.right - dist_getSide(scrollThreshold, "right"))
+            moveX = rect.right - bounding.right + dist_getSide(scrollMargin, "right");
         if (moveX || moveY) {
             if (atTop) {
                 doc.defaultView.scrollBy(moveX, moveY);
@@ -27998,7 +27998,7 @@ class NodeViewDesc extends ViewDesc {
         // Only do something if both the selection and a focused text node
         // are inside of this node
         let { from, to } = view.state.selection;
-        if (!(view.state.selection instanceof TextSelection) || from < pos || to > pos + this.node.content.size)
+        if (!(view.state.selection instanceof dist_TextSelection) || from < pos || to > pos + this.node.content.size)
             return null;
         let textNode = view.input.compositionNode;
         if (!textNode || !this.dom.contains(textNode.parentNode))
@@ -28842,7 +28842,7 @@ function selectionToDOM(view, force = false) {
     }
     else {
         let { anchor, head } = sel, resetEditableFrom, resetEditableTo;
-        if (brokenSelectBetweenUneditable && !(sel instanceof TextSelection)) {
+        if (brokenSelectBetweenUneditable && !(sel instanceof dist_TextSelection)) {
             if (!sel.$from.parent.inlineContent)
                 resetEditableFrom = temporarilyEditableNear(view, sel.from);
             if (!sel.empty && !sel.$from.parent.inlineContent)
@@ -28961,7 +28961,7 @@ function clearNodeSelection(view) {
 }
 function selectionBetween(view, $anchor, $head, bias) {
     return view.someProp("createSelectionBetween", f => f(view, $anchor, $head))
-        || TextSelection.between($anchor, $head, bias);
+        || dist_TextSelection.between($anchor, $head, bias);
 }
 function hasFocusAndSelection(view) {
     if (view.editable && !view.hasFocus())
@@ -29001,13 +29001,13 @@ function dist_apply(view, sel) {
 }
 function selectHorizontally(view, dir, mods) {
     let sel = view.state.selection;
-    if (sel instanceof TextSelection) {
+    if (sel instanceof dist_TextSelection) {
         if (mods.indexOf("s") > -1) {
             let { $head } = sel, node = $head.textOffset ? null : dir < 0 ? $head.nodeBefore : $head.nodeAfter;
             if (!node || node.isText || !node.isLeaf)
                 return false;
             let $newHead = view.state.doc.resolve($head.pos + node.nodeSize * (dir < 0 ? -1 : 1));
-            return dist_apply(view, new TextSelection(sel.$anchor, $newHead));
+            return dist_apply(view, new dist_TextSelection(sel.$anchor, $newHead));
         }
         else if (!sel.empty) {
             return false;
@@ -29032,7 +29032,7 @@ function selectHorizontally(view, dir, mods) {
                 // Chrome and Safari will introduce extra pointless cursor
                 // positions around inline uneditable nodes, so we have to
                 // take over and move the cursor past them (#937)
-                return dist_apply(view, new TextSelection(view.state.doc.resolve(dir < 0 ? nodePos : nodePos + node.nodeSize)));
+                return dist_apply(view, new dist_TextSelection(view.state.doc.resolve(dir < 0 ? nodePos : nodePos + node.nodeSize)));
             }
             else {
                 return false;
@@ -29040,7 +29040,7 @@ function selectHorizontally(view, dir, mods) {
         }
     }
     else if (sel instanceof NodeSelection && sel.node.isInline) {
-        return dist_apply(view, new TextSelection(dir > 0 ? sel.$to : sel.$from));
+        return dist_apply(view, new dist_TextSelection(dir > 0 ? sel.$to : sel.$from));
     }
     else {
         let next = moveSelectionBlock(view.state, dir);
@@ -29257,7 +29257,7 @@ function findDirection(view, pos) {
 // browser)
 function selectVertically(view, dir, mods) {
     let sel = view.state.selection;
-    if (sel instanceof TextSelection && !sel.empty || mods.indexOf("s") > -1)
+    if (sel instanceof dist_TextSelection && !sel.empty || mods.indexOf("s") > -1)
         return false;
     if (mac && mods.indexOf("m") > -1)
         return false;
@@ -29275,7 +29275,7 @@ function selectVertically(view, dir, mods) {
     return false;
 }
 function stopNativeHorizontalDelete(view, dir) {
-    if (!(view.state.selection instanceof TextSelection))
+    if (!(view.state.selection instanceof dist_TextSelection))
         return true;
     let { $head, $anchor, empty } = view.state.selection;
     if (!$head.sameParent($anchor))
@@ -29766,7 +29766,7 @@ editHandlers.keypress = (view, _event) => {
         return;
     }
     let sel = view.state.selection;
-    if (!(sel instanceof TextSelection) || !sel.$from.sameParent(sel.$to)) {
+    if (!(sel instanceof dist_TextSelection) || !sel.$from.sameParent(sel.$to)) {
         let text = String.fromCharCode(event.charCode);
         let deflt = () => view.state.tr.insertText(text).scrollIntoView();
         if (!/[\r\n]/.test(text) && !view.someProp("handleTextInput", f => f(view, sel.$from.pos, sel.$to.pos, text, deflt)))
@@ -29856,7 +29856,7 @@ function defaultTripleClick(view, inside, event) {
     let doc = view.state.doc;
     if (inside == -1) {
         if (doc.inlineContent) {
-            updateSelection(view, TextSelection.create(doc, 0, doc.content.size), "pointer");
+            updateSelection(view, dist_TextSelection.create(doc, 0, doc.content.size), "pointer");
             return true;
         }
         return false;
@@ -29866,7 +29866,7 @@ function defaultTripleClick(view, inside, event) {
         let node = i > $pos.depth ? $pos.nodeAfter : $pos.node(i);
         let nodePos = $pos.before(i);
         if (node.inlineContent)
-            updateSelection(view, TextSelection.create(doc, nodePos + 1, nodePos + 1 + node.content.size), "pointer");
+            updateSelection(view, dist_TextSelection.create(doc, nodePos + 1, nodePos + 1 + node.content.size), "pointer");
         else if (NodeSelection.isSelectable(node))
             updateSelection(view, NodeSelection.create(doc, nodePos), "pointer");
         else
@@ -30051,7 +30051,7 @@ editHandlers.compositionstart = editHandlers.compositionupdate = view => {
     if (!view.composing) {
         view.domObserver.flush();
         let { state } = view, $pos = state.selection.$to;
-        if (state.selection instanceof TextSelection &&
+        if (state.selection instanceof dist_TextSelection &&
             (state.storedMarks ||
                 (!$pos.textOffset && $pos.parentOffset && $pos.nodeBefore.marks.some(m => m.type.spec.inclusive === false)))) {
             // Need to wrap the cursor in mark nodes different from the ones in the DOM context
@@ -30443,7 +30443,7 @@ class WidgetType {
     }
     map(mapping, span, offset, oldOffset) {
         let { pos, deleted } = mapping.mapResult(span.from + oldOffset, this.side < 0 ? -1 : 1);
-        return deleted ? null : new Decoration(pos - offset, pos - offset, this);
+        return deleted ? null : new dist_Decoration(pos - offset, pos - offset, this);
     }
     valid() { return true; }
     eq(other) {
@@ -30465,7 +30465,7 @@ class InlineType {
     map(mapping, span, offset, oldOffset) {
         let from = mapping.map(span.from + oldOffset, this.spec.inclusiveStart ? -1 : 1) - offset;
         let to = mapping.map(span.to + oldOffset, this.spec.inclusiveEnd ? 1 : -1) - offset;
-        return from >= to ? null : new Decoration(from, to, this);
+        return from >= to ? null : new dist_Decoration(from, to, this);
     }
     valid(_, span) { return span.from < span.to; }
     eq(other) {
@@ -30488,7 +30488,7 @@ class dist_NodeType {
         let to = mapping.mapResult(span.to + oldOffset, -1);
         if (to.deleted || to.pos <= from.pos)
             return null;
-        return new Decoration(from.pos - offset, to.pos - offset, this);
+        return new dist_Decoration(from.pos - offset, to.pos - offset, this);
     }
     valid(node, span) {
         let { index, offset } = node.content.findIndex(span.from), child;
@@ -30506,7 +30506,7 @@ Decoration objects can be provided to the view through the
 [`decorations` prop](https://prosemirror.net/docs/ref/#view.EditorProps.decorations). They come in
 several variants—see the static members of this class for details.
 */
-class Decoration {
+class dist_Decoration {
     /**
     @internal
     */
@@ -30532,7 +30532,7 @@ class Decoration {
     @internal
     */
     copy(from, to) {
-        return new Decoration(from, to, this.type);
+        return new dist_Decoration(from, to, this.type);
     }
     /**
     @internal
@@ -30555,14 +30555,14 @@ class Decoration {
     widget's current document position.
     */
     static widget(pos, toDOM, spec) {
-        return new Decoration(pos, pos, new WidgetType(toDOM, spec));
+        return new dist_Decoration(pos, pos, new WidgetType(toDOM, spec));
     }
     /**
     Creates an inline decoration, which adds the given attributes to
     each inline node between `from` and `to`.
     */
     static inline(from, to, attrs, spec) {
-        return new Decoration(from, to, new InlineType(attrs, spec));
+        return new dist_Decoration(from, to, new InlineType(attrs, spec));
     }
     /**
     Creates a node decoration. `from` and `to` should point precisely
@@ -30570,7 +30570,7 @@ class Decoration {
     node, will receive the given attributes.
     */
     static node(from, to, attrs, spec) {
-        return new Decoration(from, to, new dist_NodeType(attrs, spec));
+        return new dist_Decoration(from, to, new dist_NodeType(attrs, spec));
     }
     /**
     The spec provided when creating this decoration. Can be useful
@@ -30593,7 +30593,7 @@ a way that the drawing algorithm can efficiently use and compare
 them. This is a persistent data structure—it is not modified,
 updates create a new value.
 */
-class DecorationSet {
+class dist_DecorationSet {
     /**
     @internal
     */
@@ -30659,7 +30659,7 @@ class DecorationSet {
         if (this.children.length)
             return mapChildren(this.children, newLocal || [], mapping, node, offset, oldOffset, options);
         else
-            return newLocal ? new DecorationSet(newLocal.sort(byPos), none) : empty;
+            return newLocal ? new dist_DecorationSet(newLocal.sort(byPos), none) : empty;
     }
     /**
     Add the given array of decorations to the ones in the set,
@@ -30671,7 +30671,7 @@ class DecorationSet {
         if (!decorations.length)
             return this;
         if (this == empty)
-            return DecorationSet.create(doc, decorations);
+            return dist_DecorationSet.create(doc, decorations);
         return this.addInner(doc, decorations, 0);
     }
     addInner(doc, decorations, offset) {
@@ -30694,7 +30694,7 @@ class DecorationSet {
         for (let i = 0; i < local.length; i++)
             if (!local[i].type.valid(doc, local[i]))
                 local.splice(i--, 1);
-        return new DecorationSet(local.length ? this.local.concat(local).sort(byPos) : this.local, children || this.children);
+        return new dist_DecorationSet(local.length ? this.local.concat(local).sort(byPos) : this.local, children || this.children);
     }
     /**
     Create a new set that contains the decorations in this set, minus
@@ -30742,13 +30742,13 @@ class DecorationSet {
                 }
         if (children == this.children && local == this.local)
             return this;
-        return local.length || children.length ? new DecorationSet(local, children) : empty;
+        return local.length || children.length ? new dist_DecorationSet(local, children) : empty;
     }
     forChild(offset, node) {
         if (this == empty)
             return this;
         if (node.isLeaf)
-            return DecorationSet.empty;
+            return dist_DecorationSet.empty;
         let child, local;
         for (let i = 0; i < this.children.length; i += 3)
             if (this.children[i] >= offset) {
@@ -30766,7 +30766,7 @@ class DecorationSet {
             }
         }
         if (local) {
-            let localSet = new DecorationSet(local.sort(byPos), none);
+            let localSet = new dist_DecorationSet(local.sort(byPos), none);
             return child ? new DecorationGroup([localSet, child]) : localSet;
         }
         return child || empty;
@@ -30777,7 +30777,7 @@ class DecorationSet {
     eq(other) {
         if (this == other)
             return true;
-        if (!(other instanceof DecorationSet) ||
+        if (!(other instanceof dist_DecorationSet) ||
             this.local.length != other.local.length ||
             this.children.length != other.children.length)
             return false;
@@ -30817,12 +30817,12 @@ class DecorationSet {
 /**
 The empty set of decorations.
 */
-DecorationSet.empty = new DecorationSet([], []);
+dist_DecorationSet.empty = new dist_DecorationSet([], []);
 /**
 @internal
 */
-DecorationSet.removeOverlap = removeOverlap;
-const empty = DecorationSet.empty;
+dist_DecorationSet.removeOverlap = removeOverlap;
+const empty = dist_DecorationSet.empty;
 // An abstraction that allows the code dealing with decorations to
 // treat multiple DecorationSet objects as if it were a single object
 // with (a subset of) the same interface.
@@ -30836,7 +30836,7 @@ class DecorationGroup {
     }
     forChild(offset, child) {
         if (child.isLeaf)
-            return DecorationSet.empty;
+            return dist_DecorationSet.empty;
         let found = [];
         for (let i = 0; i < this.members.length; i++) {
             let result = this.members[i].forChild(offset, child);
@@ -30884,8 +30884,8 @@ class DecorationGroup {
         switch (members.length) {
             case 0: return empty;
             case 1: return members[0];
-            default: return new DecorationGroup(members.every(m => m instanceof DecorationSet) ? members :
-                members.reduce((r, m) => r.concat(m instanceof DecorationSet ? m : m.members), []));
+            default: return new DecorationGroup(members.every(m => m instanceof dist_DecorationSet) ? members :
+                members.reduce((r, m) => r.concat(m instanceof dist_DecorationSet ? m : m.members), []));
         }
     }
     forEachSet(f) {
@@ -30971,7 +30971,7 @@ function mapChildren(oldChildren, newLocal, mapping, node, offset, oldOffset, op
             children.splice(j, 0, built.children[i], built.children[i + 1], built.children[i + 2]);
         }
     }
-    return new DecorationSet(newLocal.sort(byPos), children);
+    return new dist_DecorationSet(newLocal.sort(byPos), children);
 }
 function moveSpans(spans, offset) {
     if (!offset || !spans.length)
@@ -30979,7 +30979,7 @@ function moveSpans(spans, offset) {
     let result = [];
     for (let i = 0; i < spans.length; i++) {
         let span = spans[i];
-        result.push(new Decoration(span.from + offset, span.to + offset, span.type));
+        result.push(new dist_Decoration(span.from + offset, span.to + offset, span.type));
     }
     return result;
 }
@@ -31042,7 +31042,7 @@ function buildTree(spans, node, offset, options) {
                 options.onRemove(locals[i].spec);
             locals.splice(i--, 1);
         }
-    return locals.length || children.length ? new DecorationSet(locals, children) : empty;
+    return locals.length || children.length ? new dist_DecorationSet(locals, children) : empty;
 }
 // Used to sort decorations so that ones with a low start position
 // come first, and within a set with the same start position, those
@@ -31101,7 +31101,7 @@ function viewDecorations(view) {
             found.push(result);
     });
     if (view.cursorWrapper)
-        found.push(DecorationSet.create(view.state.doc, [view.cursorWrapper.deco]));
+        found.push(dist_DecorationSet.create(view.state.doc, [view.cursorWrapper.deco]));
     return DecorationGroup.from(found);
 }
 
@@ -31564,7 +31564,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
         return;
     }
     if (!change) {
-        if (typeOver && sel instanceof TextSelection && !sel.empty && sel.$head.sameParent(sel.$anchor) &&
+        if (typeOver && sel instanceof dist_TextSelection && !sel.empty && sel.$head.sameParent(sel.$anchor) &&
             !view.composing && !(parse.sel && parse.sel.anchor != parse.sel.head)) {
             change = { start: sel.from, endA: sel.to, endB: sel.to };
         }
@@ -31586,7 +31586,7 @@ function readDOMChange(view, from, to, typeOver, addedNodes) {
     // that's smaller than what was actually overwritten.
     if (view.state.selection.from < view.state.selection.to &&
         change.start == change.endB &&
-        view.state.selection instanceof TextSelection) {
+        view.state.selection instanceof dist_TextSelection) {
         if (change.start > view.state.selection.from && change.start <= view.state.selection.from + 2 &&
             view.state.selection.from >= parse.from) {
             change.start = view.state.selection.from;
@@ -32354,7 +32354,7 @@ function computeDocDeco(view) {
     });
     if (!attrs.translate)
         attrs.translate = "no";
-    return [Decoration.node(0, view.state.doc.content.size, attrs)];
+    return [dist_Decoration.node(0, view.state.doc.content.size, attrs)];
 }
 function updateCursorWrapper(view) {
     if (view.markCursor) {
@@ -32362,7 +32362,7 @@ function updateCursorWrapper(view) {
         dom.className = "ProseMirror-separator";
         dom.setAttribute("mark-placeholder", "true");
         dom.setAttribute("alt", "");
-        view.cursorWrapper = { dom, deco: Decoration.widget(view.state.selection.from, dom, { raw: true, marks: view.markCursor }) };
+        view.cursorWrapper = { dom, deco: dist_Decoration.widget(view.state.selection.from, dom, { raw: true, marks: view.markCursor }) };
     }
     else {
         view.cursorWrapper = null;
@@ -32614,7 +32614,7 @@ which they appear determines their precedence (the ones early in
 the array get to dispatch first).
 */
 function keymap(bindings) {
-    return new Plugin({ props: { handleKeyDown: keydownHandler(bindings) } });
+    return new dist_Plugin({ props: { handleKeyDown: keydownHandler(bindings) } });
 }
 /**
 Given a set of bindings (using the same format as
@@ -32781,7 +32781,7 @@ function joinTextblocksAround(state, $cut, dispatch) {
         return false;
     if (dispatch) {
         let tr = state.tr.step(step);
-        tr.setSelection(TextSelection.create(tr.doc, beforePos));
+        tr.setSelection(dist_TextSelection.create(tr.doc, beforePos));
         dispatch(tr.scrollIntoView());
     }
     return true;
@@ -33025,7 +33025,7 @@ const createParagraphNear = (state, dispatch) => {
     if (dispatch) {
         let side = (!$from.parentOffset && $to.index() < $to.parent.childCount ? $from : $to).pos;
         let tr = state.tr.insert(side, type.createAndFill());
-        tr.setSelection(TextSelection.create(tr.doc, side + 1));
+        tr.setSelection(dist_TextSelection.create(tr.doc, side + 1));
         dispatch(tr.scrollIntoView());
     }
     return true;
@@ -33089,7 +33089,7 @@ function splitBlockAs(splitNode) {
             }
         }
         let tr = state.tr;
-        if (state.selection instanceof TextSelection || state.selection instanceof AllSelection)
+        if (state.selection instanceof dist_TextSelection || state.selection instanceof AllSelection)
             tr.deleteSelection();
         let splitPos = tr.mapping.map($from.pos);
         let can = dist_canSplit(tr.doc, splitPos, types.length, types);
@@ -33230,7 +33230,7 @@ function selectTextblockSide(side) {
         if (!$pos.node(depth).isTextblock)
             return false;
         if (dispatch)
-            dispatch(state.tr.setSelection(TextSelection.create(state.doc, side < 0 ? $pos.start(depth) : $pos.end(depth))));
+            dispatch(state.tr.setSelection(dist_TextSelection.create(state.doc, side < 0 ? $pos.start(depth) : $pos.end(depth))));
         return true;
     };
 }
@@ -33995,7 +33995,7 @@ var dist_EventEmitter = class {
 // src/helpers/combineTransactionSteps.ts
 
 function combineTransactionSteps(oldDoc, transactions) {
-  const transform = new Transform(oldDoc);
+  const transform = new dist_Transform(oldDoc);
   transactions.forEach((transaction) => {
     transaction.steps.forEach((step) => {
       transform.step(step);
@@ -35220,7 +35220,7 @@ function isNodeSelection(value) {
 // src/helpers/isTextSelection.ts
 
 function isTextSelection(value) {
-  return value instanceof TextSelection;
+  return value instanceof dist_TextSelection;
 }
 
 // src/utilities/minMax.ts
@@ -35277,9 +35277,9 @@ function resolveFocusPosition(doc, position = null) {
   const minPos = selectionAtStart.from;
   const maxPos = selectionAtEnd.to;
   if (position === "all") {
-    return TextSelection.create(doc, minMax(0, minPos, maxPos), minMax(doc.content.size, minPos, maxPos));
+    return dist_TextSelection.create(doc, minMax(0, minPos, maxPos), minMax(doc.content.size, minPos, maxPos));
   }
-  return TextSelection.create(doc, minMax(position, minPos, maxPos), minMax(position, minPos, maxPos));
+  return dist_TextSelection.create(doc, minMax(position, minPos, maxPos), minMax(position, minPos, maxPos));
 }
 
 // src/helpers/rewriteUnknownContent.ts
@@ -35455,7 +35455,7 @@ function run(config) {
 }
 function inputRulesPlugin(props) {
   const { editor, rules } = props;
-  const plugin = new Plugin({
+  const plugin = new dist_Plugin({
     state: {
       init() {
         return null;
@@ -35796,7 +35796,7 @@ function pasteRulesPlugin(props) {
     return tr;
   };
   const plugins = rules.map((rule) => {
-    return new Plugin({
+    return new dist_Plugin({
       // we register a global drag handler to track the current drag source element
       view(view) {
         const handleDragstart = (event) => {
@@ -36185,7 +36185,7 @@ var ClipboardTextSerializer = Extension.create({
   },
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("clipboardTextSerializer"),
         props: {
           clipboardTextSerializer: () => {
@@ -36341,7 +36341,7 @@ var cut = (originRange, targetPos) => ({ editor, tr }) => {
   tr.deleteRange(originRange.from, originRange.to);
   const newPos = tr.mapping.map(targetPos);
   tr.insert(newPos, contentSlice.content);
-  tr.setSelection(new TextSelection(tr.doc.resolve(newPos - 1)));
+  tr.setSelection(new dist_TextSelection(tr.doc.resolve(newPos - 1)));
   return true;
 };
 
@@ -36420,7 +36420,7 @@ var extendMarkRange = (typeOrName, attributes = {}) => ({ tr, state, dispatch })
   if (dispatch) {
     const range = getMarkRange($from, type, attributes);
     if (range && range.from <= from && range.to >= to) {
-      const newSelection = TextSelection.create(doc, range.from, range.to);
+      const newSelection = dist_TextSelection.create(doc, range.from, range.to);
       tr.setSelection(newSelection);
     }
   }
@@ -37012,11 +37012,11 @@ var setTextSelection = (position) => ({ tr, dispatch }) => {
   if (dispatch) {
     const { doc } = tr;
     const { from, to } = typeof position === "number" ? { from: position, to: position } : position;
-    const minPos = TextSelection.atStart(doc).from;
-    const maxPos = TextSelection.atEnd(doc).to;
+    const minPos = dist_TextSelection.atStart(doc).from;
+    const maxPos = dist_TextSelection.atEnd(doc).to;
     const resolvedFrom = minMax(from, minPos, maxPos);
     const resolvedEnd = minMax(to, minPos, maxPos);
-    const selection = TextSelection.create(doc, resolvedFrom, resolvedEnd);
+    const selection = dist_TextSelection.create(doc, resolvedFrom, resolvedEnd);
     tr.setSelection(selection);
   }
   return true;
@@ -37079,7 +37079,7 @@ var dist_splitBlock = ({ keepMarks = true } = {}) => ({ tr, state, dispatch, edi
   }
   if (dispatch) {
     if (can) {
-      if (selection instanceof TextSelection) {
+      if (selection instanceof dist_TextSelection) {
         tr.deleteSelection();
       }
       tr.split(tr.mapping.map($from.pos), 1, types);
@@ -37148,7 +37148,7 @@ var dist_splitListItem = (typeOrName, overrideAttrs = {}) => ({ tr, state, dispa
         }
       });
       if (sel > -1) {
-        tr.setSelection(TextSelection.near(tr.doc.resolve(sel)));
+        tr.setSelection(dist_TextSelection.near(tr.doc.resolve(sel)));
       }
       tr.scrollIntoView();
     }
@@ -37568,7 +37568,7 @@ var Drop = Extension.create({
   name: "drop",
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("tiptapDrop"),
         props: {
           handleDrop: (_, e, slice, moved) => {
@@ -37591,7 +37591,7 @@ var Editable = Extension.create({
   name: "editable",
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("editable"),
         props: {
           editable: () => this.editor.options.editable
@@ -37609,7 +37609,7 @@ var FocusEvents = Extension.create({
   addProseMirrorPlugins() {
     const { editor } = this;
     return [
-      new Plugin({
+      new dist_Plugin({
         key: focusEventsPluginKey,
         props: {
           handleDOMEvents: {
@@ -37705,7 +37705,7 @@ var Keymap = Extension.create({
       // to a paragraph if necessary.
       // This is an alternative to ProseMirror's `AllSelection`, which doesn’t work well
       // with many other commands.
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("clearDocument"),
         appendTransaction: (transactions, oldState, newState) => {
           if (transactions.some((tr2) => tr2.getMeta("composition"))) {
@@ -37753,7 +37753,7 @@ var Paste = Extension.create({
   name: "paste",
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("tiptapPaste"),
         props: {
           handlePaste: (_view, e, slice) => {
@@ -37775,7 +37775,7 @@ var Tabindex = Extension.create({
   name: "tabindex",
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("tabindex"),
         props: {
           attributes: () => this.editor.isEditable ? { tabindex: "0" } : {}
@@ -52080,7 +52080,7 @@ var CodeBlock = Node3.create({
     return [
       // this plugin creates a code block for pasted content from VS Code
       // we can also detect the copied code language
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("codeBlockVSCodeHandler"),
         props: {
           handlePaste: (view, event) => {
@@ -52101,7 +52101,7 @@ var CodeBlock = Node3.create({
             const textNode = schema.text(text.replace(/\r\n?/g, "\n"));
             tr.replaceSelectionWith(this.type.create({ language }, textNode));
             if (tr.selection.$from.parent.type !== this.type) {
-              tr.setSelection(TextSelection.near(tr.doc.resolve(Math.max(0, tr.selection.from - 2))));
+              tr.setSelection(dist_TextSelection.near(tr.doc.resolve(Math.max(0, tr.selection.from - 2))));
             }
             tr.setMeta("paste", true);
             view.dispatch(tr);
@@ -52309,17 +52309,17 @@ var HorizontalRule = Node3.create({
             const posAfter = $to.end();
             if ($to.nodeAfter) {
               if ($to.nodeAfter.isTextblock) {
-                tr.setSelection(TextSelection.create(tr.doc, $to.pos + 1));
+                tr.setSelection(dist_TextSelection.create(tr.doc, $to.pos + 1));
               } else if ($to.nodeAfter.isBlock) {
                 tr.setSelection(NodeSelection.create(tr.doc, $to.pos));
               } else {
-                tr.setSelection(TextSelection.create(tr.doc, $to.pos));
+                tr.setSelection(dist_TextSelection.create(tr.doc, $to.pos));
               }
             } else {
               const node = (_a = $to.parent.type.contentMatch.defaultType) == null ? void 0 : _a.create();
               if (node) {
                 tr.insert(posAfter, node);
-                tr.setSelection(TextSelection.create(tr.doc, posAfter + 1));
+                tr.setSelection(dist_TextSelection.create(tr.doc, posAfter + 1));
               }
             }
             tr.scrollIntoView();
@@ -54302,7 +54302,7 @@ function isValidLinkStructure(tokens) {
   return false;
 }
 function autolink(options) {
-  return new Plugin({
+  return new dist_Plugin({
     key: new PluginKey("autolink"),
     appendTransaction: (transactions, oldState, newState) => {
       const docChanges = transactions.some((transaction) => transaction.docChanged) && !oldState.doc.eq(newState.doc);
@@ -54379,7 +54379,7 @@ function autolink(options) {
 
 
 function clickHandler(options) {
-  return new Plugin({
+  return new dist_Plugin({
     key: new PluginKey("handleClickLink"),
     props: {
       handleClick: (view, pos, event) => {
@@ -54422,7 +54422,7 @@ function clickHandler(options) {
 
 
 function pasteHandler(options) {
-  return new Plugin({
+  return new dist_Plugin({
     key: new PluginKey("handlePasteLink"),
     props: {
       handlePaste: (view, event, slice) => {
@@ -55526,7 +55526,7 @@ boolean or a function, which will be called with a view and a
 position, and should return a boolean.
 */
 function dropCursor(options = {}) {
-    return new Plugin({
+    return new dist_Plugin({
         view(editorView) { return new DropCursorView(editorView, options); }
     });
 }
@@ -55819,7 +55819,7 @@ them. The cursor is drawn as an element with class
 styles to make it visible.
 */
 function gapCursor() {
-    return new Plugin({
+    return new dist_Plugin({
         props: {
             decorations: drawGapCursor,
             createSelectionBetween(_view, $anchor, $head) {
@@ -55842,7 +55842,7 @@ function arrow(axis, dir) {
     return function (state, dispatch, view) {
         let sel = state.selection;
         let $start = dir > 0 ? sel.$to : sel.$from, mustMove = sel.empty;
-        if (sel instanceof TextSelection) {
+        if (sel instanceof dist_TextSelection) {
             if (!view.endOfTextblock(dirStr) || $start.depth == 0)
                 return false;
             mustMove = false;
@@ -55883,7 +55883,7 @@ function beforeinput(view, event) {
     for (let i = insert.length - 1; i >= 0; i--)
         frag = dist_Fragment.from(insert[i].createAndFill(null, frag));
     let tr = view.state.tr.replace($from.pos, $from.pos, new dist_Slice(frag, 0, 0));
-    tr.setSelection(TextSelection.near(tr.doc.resolve($from.pos + 1)));
+    tr.setSelection(dist_TextSelection.near(tr.doc.resolve($from.pos + 1)));
     view.dispatch(tr);
     return false;
 }
@@ -55892,7 +55892,7 @@ function drawGapCursor(state) {
         return null;
     let node = document.createElement("div");
     node.className = "ProseMirror-gapcursor";
-    return DecorationSet.create(state.doc, [Decoration.widget(state.selection.head, node, { key: "gapcursor" })]);
+    return dist_DecorationSet.create(state.doc, [dist_Decoration.widget(state.selection.head, node, { key: "gapcursor" })]);
 }
 
 
@@ -56481,7 +56481,7 @@ to prevent it from being rolled back by undo.
 function dist_history(config = {}) {
     config = { depth: config.depth || 100,
         newGroupDelay: config.newGroupDelay || 500 };
-    return new Plugin({
+    return new dist_Plugin({
         key: historyKey,
         state: {
             init() {
@@ -56593,7 +56593,7 @@ var CharacterCount = Extension.create({
   addProseMirrorPlugins() {
     let initialEvaluationDone = false;
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("characterCount"),
         appendTransaction: (transactions, oldState, newState) => {
           if (initialEvaluationDone) {
@@ -56685,7 +56685,7 @@ var Focus = Extension.create({
   },
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("focus"),
         props: {
           decorations: ({ doc, selection }) => {
@@ -56693,7 +56693,7 @@ var Focus = Extension.create({
             const { anchor } = selection;
             const decorations = [];
             if (!isEditable || !isFocused) {
-              return DecorationSet.create(doc, []);
+              return dist_DecorationSet.create(doc, []);
             }
             let maxLevels = 0;
             if (this.options.mode === "deepest") {
@@ -56723,12 +56723,12 @@ var Focus = Extension.create({
                 return this.options.mode === "deepest";
               }
               decorations.push(
-                Decoration.node(pos, pos + node.nodeSize, {
+                dist_Decoration.node(pos, pos + node.nodeSize, {
                   class: this.options.className
                 })
               );
             });
-            return DecorationSet.create(doc, decorations);
+            return dist_DecorationSet.create(doc, decorations);
           }
         }
       })
@@ -56775,7 +56775,7 @@ var Placeholder = Extension.create({
   },
   addProseMirrorPlugins() {
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("placeholder"),
         props: {
           decorations: ({ doc, selection }) => {
@@ -56794,7 +56794,7 @@ var Placeholder = Extension.create({
                 if (isEmptyDoc) {
                   classes.push(this.options.emptyEditorClass);
                 }
-                const decoration = Decoration.node(pos, pos + node.nodeSize, {
+                const decoration = dist_Decoration.node(pos, pos + node.nodeSize, {
                   class: classes.join(" "),
                   "data-placeholder": typeof this.options.placeholder === "function" ? this.options.placeholder({
                     editor: this.editor,
@@ -56807,7 +56807,7 @@ var Placeholder = Extension.create({
               }
               return this.options.includeChildren;
             });
-            return DecorationSet.create(doc, decorations);
+            return dist_DecorationSet.create(doc, decorations);
           }
         }
       })
@@ -56829,15 +56829,15 @@ var extensions_dist_Selection = Extension.create({
   addProseMirrorPlugins() {
     const { editor, options } = this;
     return [
-      new Plugin({
+      new dist_Plugin({
         key: new PluginKey("selection"),
         props: {
           decorations(state) {
             if (state.selection.empty || editor.isFocused || !editor.isEditable || isNodeSelection(state.selection)) {
               return null;
             }
-            return DecorationSet.create(state.doc, [
-              Decoration.inline(state.selection.from, state.selection.to, {
+            return dist_DecorationSet.create(state.doc, [
+              dist_Decoration.inline(state.selection.from, state.selection.to, {
                 class: options.className
               })
             ]);
@@ -56866,7 +56866,7 @@ var TrailingNode = Extension.create({
     const plugin = new PluginKey(this.name);
     const disabledNodes = Object.entries(this.editor.schema.nodes).map(([, value]) => value).filter((node) => (this.options.notAfter || []).concat(this.options.node).includes(node.name));
     return [
-      new Plugin({
+      new dist_Plugin({
         key: plugin,
         appendTransaction: (_, __, state) => {
           const { doc, tr, schema } = state;
@@ -57639,7 +57639,7 @@ const ySyncPlugin = (yXmlFragment, {
 } = {}) => {
   let initialContentChanged = false;
   const binding = new ProsemirrorBinding(yXmlFragment, mapping);
-  const plugin = new Plugin({
+  const plugin = new dist_Plugin({
     props: {
       editable: (state) => {
         const syncState = y_tiptap_ySyncPluginKey.getState(state);
@@ -57802,7 +57802,7 @@ const restoreRelativeSelection = (tr, relSel, binding) => {
         binding.mapping
       );
       if (anchor !== null && head !== null) {
-        tr.setSelection(TextSelection.between(tr.doc.resolve(anchor), tr.doc.resolve(head)));
+        tr.setSelection(dist_TextSelection.between(tr.doc.resolve(anchor), tr.doc.resolve(head)));
       }
     }
   }
@@ -57988,7 +57988,7 @@ class ProsemirrorBinding {
         const clampedAnchor = math_min(math_max(sel.anchor, 0), tr.doc.content.size);
         const clampedHead = math_min(math_max(sel.head, 0), tr.doc.content.size);
 
-        tr.setSelection(TextSelection.create(tr.doc, clampedAnchor, clampedHead));
+        tr.setSelection(dist_TextSelection.create(tr.doc, clampedAnchor, clampedHead));
       }
       this.prosemirrorView.dispatch(
         tr.setMeta(y_tiptap_ySyncPluginKey, { isChangeOrigin: true, binding: this })
@@ -59334,7 +59334,7 @@ const createDecorations = (
     ystate.binding.mapping.size === 0
   ) {
     // do not render cursors while snapshot is active
-    return DecorationSet.create(state.doc, [])
+    return dist_DecorationSet.create(state.doc, [])
   }
   awareness.getStates().forEach((aw, clientId) => {
     if (!awarenessFilter(y.clientID, clientId, aw)) {
@@ -59369,7 +59369,7 @@ const createDecorations = (
         anchor = math_min(anchor, maxsize);
         head = math_min(head, maxsize);
         decorations.push(
-          Decoration.widget(head, () => createCursor(user, clientId), {
+          dist_Decoration.widget(head, () => createCursor(user, clientId), {
             key: clientId + '',
             side: 10
           })
@@ -59377,7 +59377,7 @@ const createDecorations = (
         const from = math_min(anchor, head);
         const to = math_max(anchor, head);
         decorations.push(
-          Decoration.inline(from, to, createSelection(user, clientId), {
+          dist_Decoration.inline(from, to, createSelection(user, clientId), {
             inclusiveEnd: true,
             inclusiveStart: false
           })
@@ -59385,7 +59385,7 @@ const createDecorations = (
       }
     }
   });
-  return DecorationSet.create(state.doc, decorations)
+  return dist_DecorationSet.create(state.doc, decorations)
 };
 
 /**
@@ -59412,7 +59412,7 @@ const yCursorPlugin = (
   } = {},
   cursorStateField = 'cursor'
 ) =>
-  new Plugin({
+  new dist_Plugin({
     key: yCursorPluginKey,
     state: {
       init (_, state) {
@@ -59544,7 +59544,7 @@ const defaultDeleteFilter = (item, protectedNodes) => !(item instanceof Item) ||
   (item.content.type instanceof YXmlElement && protectedNodes.has(item.content.type.nodeName))) ||
 item.content.type._length === 0;
 
-const yUndoPlugin = ({ protectedNodes = defaultProtectedNodes, trackedOrigins = [], undoManager = null } = {}) => new Plugin({
+const yUndoPlugin = ({ protectedNodes = defaultProtectedNodes, trackedOrigins = [], undoManager = null } = {}) => new dist_Plugin({
   key: yUndoPluginKey,
   state: {
     init: (initargs, state) => {
@@ -59736,7 +59736,7 @@ var Collaboration = Extension.create({
       ySyncPluginInstance,
       yUndoPluginInstance,
       // Only add the filterInvalidContent plugin if content checking is enabled
-      this.editor.options.enableContentCheck && new Plugin({
+      this.editor.options.enableContentCheck && new dist_Plugin({
         key: new PluginKey("filterInvalidContent"),
         filterTransaction: () => {
           var _a2;
@@ -60117,7 +60117,7 @@ function Suggestion({
 }) {
   let props;
   const renderer = render == null ? void 0 : render();
-  const plugin = new Plugin({
+  const plugin = new dist_Plugin({
     key: pluginKey,
     view() {
       return {
@@ -60269,8 +60269,8 @@ function Suggestion({
         if (!active) {
           return null;
         }
-        return DecorationSet.create(state.doc, [
-          Decoration.inline(range.from, range.to, {
+        return dist_DecorationSet.create(state.doc, [
+          dist_Decoration.inline(range.from, range.to, {
             nodeName: decorationTag,
             class: decorationClass,
             "data-decoration-id": decorationId
@@ -60514,6 +60514,4725 @@ var Mention = Node3.create({
 
 // src/index.ts
 var extension_mention_dist_index_default = Mention;
+
+//# sourceMappingURL=index.js.map
+;// ./node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
+/**
+ * Custom positioning reference element.
+ * @see https://floating-ui.com/docs/virtual-elements
+ */
+
+const sides = ['top', 'right', 'bottom', 'left'];
+const alignments = ['start', 'end'];
+const placements = /*#__PURE__*/sides.reduce((acc, side) => acc.concat(side, side + "-" + alignments[0], side + "-" + alignments[1]), []);
+const floating_ui_utils_min = Math.min;
+const floating_ui_utils_max = Math.max;
+const floating_ui_utils_round = Math.round;
+const floating_ui_utils_floor = Math.floor;
+const createCoords = v => ({
+  x: v,
+  y: v
+});
+const oppositeSideMap = {
+  left: 'right',
+  right: 'left',
+  bottom: 'top',
+  top: 'bottom'
+};
+const oppositeAlignmentMap = {
+  start: 'end',
+  end: 'start'
+};
+function clamp(start, value, end) {
+  return floating_ui_utils_max(start, floating_ui_utils_min(value, end));
+}
+function floating_ui_utils_evaluate(value, param) {
+  return typeof value === 'function' ? value(param) : value;
+}
+function floating_ui_utils_getSide(placement) {
+  return placement.split('-')[0];
+}
+function getAlignment(placement) {
+  return placement.split('-')[1];
+}
+function floating_ui_utils_getOppositeAxis(axis) {
+  return axis === 'x' ? 'y' : 'x';
+}
+function getAxisLength(axis) {
+  return axis === 'y' ? 'height' : 'width';
+}
+function floating_ui_utils_getSideAxis(placement) {
+  return ['top', 'bottom'].includes(floating_ui_utils_getSide(placement)) ? 'y' : 'x';
+}
+function getAlignmentAxis(placement) {
+  return floating_ui_utils_getOppositeAxis(floating_ui_utils_getSideAxis(placement));
+}
+function getAlignmentSides(placement, rects, rtl) {
+  if (rtl === void 0) {
+    rtl = false;
+  }
+  const alignment = getAlignment(placement);
+  const alignmentAxis = getAlignmentAxis(placement);
+  const length = getAxisLength(alignmentAxis);
+  let mainAlignmentSide = alignmentAxis === 'x' ? alignment === (rtl ? 'end' : 'start') ? 'right' : 'left' : alignment === 'start' ? 'bottom' : 'top';
+  if (rects.reference[length] > rects.floating[length]) {
+    mainAlignmentSide = getOppositePlacement(mainAlignmentSide);
+  }
+  return [mainAlignmentSide, getOppositePlacement(mainAlignmentSide)];
+}
+function getExpandedPlacements(placement) {
+  const oppositePlacement = getOppositePlacement(placement);
+  return [getOppositeAlignmentPlacement(placement), oppositePlacement, getOppositeAlignmentPlacement(oppositePlacement)];
+}
+function getOppositeAlignmentPlacement(placement) {
+  return placement.replace(/start|end/g, alignment => oppositeAlignmentMap[alignment]);
+}
+function getSideList(side, isStart, rtl) {
+  const lr = ['left', 'right'];
+  const rl = ['right', 'left'];
+  const tb = ['top', 'bottom'];
+  const bt = ['bottom', 'top'];
+  switch (side) {
+    case 'top':
+    case 'bottom':
+      if (rtl) return isStart ? rl : lr;
+      return isStart ? lr : rl;
+    case 'left':
+    case 'right':
+      return isStart ? tb : bt;
+    default:
+      return [];
+  }
+}
+function getOppositeAxisPlacements(placement, flipAlignment, direction, rtl) {
+  const alignment = getAlignment(placement);
+  let list = getSideList(floating_ui_utils_getSide(placement), direction === 'start', rtl);
+  if (alignment) {
+    list = list.map(side => side + "-" + alignment);
+    if (flipAlignment) {
+      list = list.concat(list.map(getOppositeAlignmentPlacement));
+    }
+  }
+  return list;
+}
+function getOppositePlacement(placement) {
+  return placement.replace(/left|right|bottom|top/g, side => oppositeSideMap[side]);
+}
+function expandPaddingObject(padding) {
+  return {
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    ...padding
+  };
+}
+function getPaddingObject(padding) {
+  return typeof padding !== 'number' ? expandPaddingObject(padding) : {
+    top: padding,
+    right: padding,
+    bottom: padding,
+    left: padding
+  };
+}
+function rectToClientRect(rect) {
+  const {
+    x,
+    y,
+    width,
+    height
+  } = rect;
+  return {
+    width,
+    height,
+    top: y,
+    left: x,
+    right: x + width,
+    bottom: y + height,
+    x,
+    y
+  };
+}
+
+
+
+;// ./node_modules/@floating-ui/core/dist/floating-ui.core.mjs
+
+
+
+function computeCoordsFromPlacement(_ref, placement, rtl) {
+  let {
+    reference,
+    floating
+  } = _ref;
+  const sideAxis = floating_ui_utils_getSideAxis(placement);
+  const alignmentAxis = getAlignmentAxis(placement);
+  const alignLength = getAxisLength(alignmentAxis);
+  const side = floating_ui_utils_getSide(placement);
+  const isVertical = sideAxis === 'y';
+  const commonX = reference.x + reference.width / 2 - floating.width / 2;
+  const commonY = reference.y + reference.height / 2 - floating.height / 2;
+  const commonAlign = reference[alignLength] / 2 - floating[alignLength] / 2;
+  let coords;
+  switch (side) {
+    case 'top':
+      coords = {
+        x: commonX,
+        y: reference.y - floating.height
+      };
+      break;
+    case 'bottom':
+      coords = {
+        x: commonX,
+        y: reference.y + reference.height
+      };
+      break;
+    case 'right':
+      coords = {
+        x: reference.x + reference.width,
+        y: commonY
+      };
+      break;
+    case 'left':
+      coords = {
+        x: reference.x - floating.width,
+        y: commonY
+      };
+      break;
+    default:
+      coords = {
+        x: reference.x,
+        y: reference.y
+      };
+  }
+  switch (getAlignment(placement)) {
+    case 'start':
+      coords[alignmentAxis] -= commonAlign * (rtl && isVertical ? -1 : 1);
+      break;
+    case 'end':
+      coords[alignmentAxis] += commonAlign * (rtl && isVertical ? -1 : 1);
+      break;
+  }
+  return coords;
+}
+
+/**
+ * Computes the `x` and `y` coordinates that will place the floating element
+ * next to a given reference element.
+ *
+ * This export does not have any `platform` interface logic. You will need to
+ * write one for the platform you are using Floating UI with.
+ */
+const computePosition = async (reference, floating, config) => {
+  const {
+    placement = 'bottom',
+    strategy = 'absolute',
+    middleware = [],
+    platform
+  } = config;
+  const validMiddleware = middleware.filter(Boolean);
+  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(floating));
+  let rects = await platform.getElementRects({
+    reference,
+    floating,
+    strategy
+  });
+  let {
+    x,
+    y
+  } = computeCoordsFromPlacement(rects, placement, rtl);
+  let statefulPlacement = placement;
+  let middlewareData = {};
+  let resetCount = 0;
+  for (let i = 0; i < validMiddleware.length; i++) {
+    const {
+      name,
+      fn
+    } = validMiddleware[i];
+    const {
+      x: nextX,
+      y: nextY,
+      data,
+      reset
+    } = await fn({
+      x,
+      y,
+      initialPlacement: placement,
+      placement: statefulPlacement,
+      strategy,
+      middlewareData,
+      rects,
+      platform,
+      elements: {
+        reference,
+        floating
+      }
+    });
+    x = nextX != null ? nextX : x;
+    y = nextY != null ? nextY : y;
+    middlewareData = {
+      ...middlewareData,
+      [name]: {
+        ...middlewareData[name],
+        ...data
+      }
+    };
+    if (reset && resetCount <= 50) {
+      resetCount++;
+      if (typeof reset === 'object') {
+        if (reset.placement) {
+          statefulPlacement = reset.placement;
+        }
+        if (reset.rects) {
+          rects = reset.rects === true ? await platform.getElementRects({
+            reference,
+            floating,
+            strategy
+          }) : reset.rects;
+        }
+        ({
+          x,
+          y
+        } = computeCoordsFromPlacement(rects, statefulPlacement, rtl));
+      }
+      i = -1;
+    }
+  }
+  return {
+    x,
+    y,
+    placement: statefulPlacement,
+    strategy,
+    middlewareData
+  };
+};
+
+/**
+ * Resolves with an object of overflow side offsets that determine how much the
+ * element is overflowing a given clipping boundary on each side.
+ * - positive = overflowing the boundary by that number of pixels
+ * - negative = how many pixels left before it will overflow
+ * - 0 = lies flush with the boundary
+ * @see https://floating-ui.com/docs/detectOverflow
+ */
+async function detectOverflow(state, options) {
+  var _await$platform$isEle;
+  if (options === void 0) {
+    options = {};
+  }
+  const {
+    x,
+    y,
+    platform,
+    rects,
+    elements,
+    strategy
+  } = state;
+  const {
+    boundary = 'clippingAncestors',
+    rootBoundary = 'viewport',
+    elementContext = 'floating',
+    altBoundary = false,
+    padding = 0
+  } = floating_ui_utils_evaluate(options, state);
+  const paddingObject = getPaddingObject(padding);
+  const altContext = elementContext === 'floating' ? 'reference' : 'floating';
+  const element = elements[altBoundary ? altContext : elementContext];
+  const clippingClientRect = rectToClientRect(await platform.getClippingRect({
+    element: ((_await$platform$isEle = await (platform.isElement == null ? void 0 : platform.isElement(element))) != null ? _await$platform$isEle : true) ? element : element.contextElement || (await (platform.getDocumentElement == null ? void 0 : platform.getDocumentElement(elements.floating))),
+    boundary,
+    rootBoundary,
+    strategy
+  }));
+  const rect = elementContext === 'floating' ? {
+    x,
+    y,
+    width: rects.floating.width,
+    height: rects.floating.height
+  } : rects.reference;
+  const offsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(elements.floating));
+  const offsetScale = (await (platform.isElement == null ? void 0 : platform.isElement(offsetParent))) ? (await (platform.getScale == null ? void 0 : platform.getScale(offsetParent))) || {
+    x: 1,
+    y: 1
+  } : {
+    x: 1,
+    y: 1
+  };
+  const elementClientRect = rectToClientRect(platform.convertOffsetParentRelativeRectToViewportRelativeRect ? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
+    elements,
+    rect,
+    offsetParent,
+    strategy
+  }) : rect);
+  return {
+    top: (clippingClientRect.top - elementClientRect.top + paddingObject.top) / offsetScale.y,
+    bottom: (elementClientRect.bottom - clippingClientRect.bottom + paddingObject.bottom) / offsetScale.y,
+    left: (clippingClientRect.left - elementClientRect.left + paddingObject.left) / offsetScale.x,
+    right: (elementClientRect.right - clippingClientRect.right + paddingObject.right) / offsetScale.x
+  };
+}
+
+/**
+ * Provides data to position an inner element of the floating element so that it
+ * appears centered to the reference element.
+ * @see https://floating-ui.com/docs/arrow
+ */
+const floating_ui_core_arrow = options => ({
+  name: 'arrow',
+  options,
+  async fn(state) {
+    const {
+      x,
+      y,
+      placement,
+      rects,
+      platform,
+      elements,
+      middlewareData
+    } = state;
+    // Since `element` is required, we don't Partial<> the type.
+    const {
+      element,
+      padding = 0
+    } = floating_ui_utils_evaluate(options, state) || {};
+    if (element == null) {
+      return {};
+    }
+    const paddingObject = getPaddingObject(padding);
+    const coords = {
+      x,
+      y
+    };
+    const axis = getAlignmentAxis(placement);
+    const length = getAxisLength(axis);
+    const arrowDimensions = await platform.getDimensions(element);
+    const isYAxis = axis === 'y';
+    const minProp = isYAxis ? 'top' : 'left';
+    const maxProp = isYAxis ? 'bottom' : 'right';
+    const clientProp = isYAxis ? 'clientHeight' : 'clientWidth';
+    const endDiff = rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length];
+    const startDiff = coords[axis] - rects.reference[axis];
+    const arrowOffsetParent = await (platform.getOffsetParent == null ? void 0 : platform.getOffsetParent(element));
+    let clientSize = arrowOffsetParent ? arrowOffsetParent[clientProp] : 0;
+
+    // DOM platform can return `window` as the `offsetParent`.
+    if (!clientSize || !(await (platform.isElement == null ? void 0 : platform.isElement(arrowOffsetParent)))) {
+      clientSize = elements.floating[clientProp] || rects.floating[length];
+    }
+    const centerToReference = endDiff / 2 - startDiff / 2;
+
+    // If the padding is large enough that it causes the arrow to no longer be
+    // centered, modify the padding so that it is centered.
+    const largestPossiblePadding = clientSize / 2 - arrowDimensions[length] / 2 - 1;
+    const minPadding = floating_ui_utils_min(paddingObject[minProp], largestPossiblePadding);
+    const maxPadding = floating_ui_utils_min(paddingObject[maxProp], largestPossiblePadding);
+
+    // Make sure the arrow doesn't overflow the floating element if the center
+    // point is outside the floating element's bounds.
+    const min$1 = minPadding;
+    const max = clientSize - arrowDimensions[length] - maxPadding;
+    const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
+    const offset = clamp(min$1, center, max);
+
+    // If the reference is small enough that the arrow's padding causes it to
+    // to point to nothing for an aligned placement, adjust the offset of the
+    // floating element itself. To ensure `shift()` continues to take action,
+    // a single reset is performed when this is true.
+    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+    const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max : 0;
+    return {
+      [axis]: coords[axis] + alignmentOffset,
+      data: {
+        [axis]: offset,
+        centerOffset: center - offset - alignmentOffset,
+        ...(shouldAddOffset && {
+          alignmentOffset
+        })
+      },
+      reset: shouldAddOffset
+    };
+  }
+});
+
+function getPlacementList(alignment, autoAlignment, allowedPlacements) {
+  const allowedPlacementsSortedByAlignment = alignment ? [...allowedPlacements.filter(placement => getAlignment(placement) === alignment), ...allowedPlacements.filter(placement => getAlignment(placement) !== alignment)] : allowedPlacements.filter(placement => floating_ui_utils_getSide(placement) === placement);
+  return allowedPlacementsSortedByAlignment.filter(placement => {
+    if (alignment) {
+      return getAlignment(placement) === alignment || (autoAlignment ? getOppositeAlignmentPlacement(placement) !== placement : false);
+    }
+    return true;
+  });
+}
+/**
+ * Optimizes the visibility of the floating element by choosing the placement
+ * that has the most space available automatically, without needing to specify a
+ * preferred placement. Alternative to `flip`.
+ * @see https://floating-ui.com/docs/autoPlacement
+ */
+const autoPlacement = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'autoPlacement',
+    options,
+    async fn(state) {
+      var _middlewareData$autoP, _middlewareData$autoP2, _placementsThatFitOnE;
+      const {
+        rects,
+        middlewareData,
+        placement,
+        platform,
+        elements
+      } = state;
+      const {
+        crossAxis = false,
+        alignment,
+        allowedPlacements = placements,
+        autoAlignment = true,
+        ...detectOverflowOptions
+      } = floating_ui_utils_evaluate(options, state);
+      const placements$1 = alignment !== undefined || allowedPlacements === placements ? getPlacementList(alignment || null, autoAlignment, allowedPlacements) : allowedPlacements;
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const currentIndex = ((_middlewareData$autoP = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP.index) || 0;
+      const currentPlacement = placements$1[currentIndex];
+      if (currentPlacement == null) {
+        return {};
+      }
+      const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating)));
+
+      // Make `computeCoords` start from the right place.
+      if (placement !== currentPlacement) {
+        return {
+          reset: {
+            placement: placements$1[0]
+          }
+        };
+      }
+      const currentOverflows = [overflow[floating_ui_utils_getSide(currentPlacement)], overflow[alignmentSides[0]], overflow[alignmentSides[1]]];
+      const allOverflows = [...(((_middlewareData$autoP2 = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP2.overflows) || []), {
+        placement: currentPlacement,
+        overflows: currentOverflows
+      }];
+      const nextPlacement = placements$1[currentIndex + 1];
+
+      // There are more placements to check.
+      if (nextPlacement) {
+        return {
+          data: {
+            index: currentIndex + 1,
+            overflows: allOverflows
+          },
+          reset: {
+            placement: nextPlacement
+          }
+        };
+      }
+      const placementsSortedByMostSpace = allOverflows.map(d => {
+        const alignment = getAlignment(d.placement);
+        return [d.placement, alignment && crossAxis ?
+        // Check along the mainAxis and main crossAxis side.
+        d.overflows.slice(0, 2).reduce((acc, v) => acc + v, 0) :
+        // Check only the mainAxis.
+        d.overflows[0], d.overflows];
+      }).sort((a, b) => a[1] - b[1]);
+      const placementsThatFitOnEachSide = placementsSortedByMostSpace.filter(d => d[2].slice(0,
+      // Aligned placements should not check their opposite crossAxis
+      // side.
+      getAlignment(d[0]) ? 2 : 3).every(v => v <= 0));
+      const resetPlacement = ((_placementsThatFitOnE = placementsThatFitOnEachSide[0]) == null ? void 0 : _placementsThatFitOnE[0]) || placementsSortedByMostSpace[0][0];
+      if (resetPlacement !== placement) {
+        return {
+          data: {
+            index: currentIndex + 1,
+            overflows: allOverflows
+          },
+          reset: {
+            placement: resetPlacement
+          }
+        };
+      }
+      return {};
+    }
+  };
+};
+
+/**
+ * Optimizes the visibility of the floating element by flipping the `placement`
+ * in order to keep it in view when the preferred placement(s) will overflow the
+ * clipping boundary. Alternative to `autoPlacement`.
+ * @see https://floating-ui.com/docs/flip
+ */
+const flip = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'flip',
+    options,
+    async fn(state) {
+      var _middlewareData$arrow, _middlewareData$flip;
+      const {
+        placement,
+        middlewareData,
+        rects,
+        initialPlacement,
+        platform,
+        elements
+      } = state;
+      const {
+        mainAxis: checkMainAxis = true,
+        crossAxis: checkCrossAxis = true,
+        fallbackPlacements: specifiedFallbackPlacements,
+        fallbackStrategy = 'bestFit',
+        fallbackAxisSideDirection = 'none',
+        flipAlignment = true,
+        ...detectOverflowOptions
+      } = floating_ui_utils_evaluate(options, state);
+
+      // If a reset by the arrow was caused due to an alignment offset being
+      // added, we should skip any logic now since `flip()` has already done its
+      // work.
+      // https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
+      if ((_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+        return {};
+      }
+      const side = floating_ui_utils_getSide(placement);
+      const initialSideAxis = floating_ui_utils_getSideAxis(initialPlacement);
+      const isBasePlacement = floating_ui_utils_getSide(initialPlacement) === initialPlacement;
+      const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+      const fallbackPlacements = specifiedFallbackPlacements || (isBasePlacement || !flipAlignment ? [getOppositePlacement(initialPlacement)] : getExpandedPlacements(initialPlacement));
+      const hasFallbackAxisSideDirection = fallbackAxisSideDirection !== 'none';
+      if (!specifiedFallbackPlacements && hasFallbackAxisSideDirection) {
+        fallbackPlacements.push(...getOppositeAxisPlacements(initialPlacement, flipAlignment, fallbackAxisSideDirection, rtl));
+      }
+      const placements = [initialPlacement, ...fallbackPlacements];
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const overflows = [];
+      let overflowsData = ((_middlewareData$flip = middlewareData.flip) == null ? void 0 : _middlewareData$flip.overflows) || [];
+      if (checkMainAxis) {
+        overflows.push(overflow[side]);
+      }
+      if (checkCrossAxis) {
+        const sides = getAlignmentSides(placement, rects, rtl);
+        overflows.push(overflow[sides[0]], overflow[sides[1]]);
+      }
+      overflowsData = [...overflowsData, {
+        placement,
+        overflows
+      }];
+
+      // One or more sides is overflowing.
+      if (!overflows.every(side => side <= 0)) {
+        var _middlewareData$flip2, _overflowsData$filter;
+        const nextIndex = (((_middlewareData$flip2 = middlewareData.flip) == null ? void 0 : _middlewareData$flip2.index) || 0) + 1;
+        const nextPlacement = placements[nextIndex];
+        if (nextPlacement) {
+          const ignoreCrossAxisOverflow = checkCrossAxis === 'alignment' ? initialSideAxis !== floating_ui_utils_getSideAxis(nextPlacement) : false;
+          if (!ignoreCrossAxisOverflow ||
+          // We leave the current main axis only if every placement on that axis
+          // overflows the main axis.
+          overflowsData.every(d => d.overflows[0] > 0 && floating_ui_utils_getSideAxis(d.placement) === initialSideAxis)) {
+            // Try next placement and re-run the lifecycle.
+            return {
+              data: {
+                index: nextIndex,
+                overflows: overflowsData
+              },
+              reset: {
+                placement: nextPlacement
+              }
+            };
+          }
+        }
+
+        // First, find the candidates that fit on the mainAxis side of overflow,
+        // then find the placement that fits the best on the main crossAxis side.
+        let resetPlacement = (_overflowsData$filter = overflowsData.filter(d => d.overflows[0] <= 0).sort((a, b) => a.overflows[1] - b.overflows[1])[0]) == null ? void 0 : _overflowsData$filter.placement;
+
+        // Otherwise fallback.
+        if (!resetPlacement) {
+          switch (fallbackStrategy) {
+            case 'bestFit':
+              {
+                var _overflowsData$filter2;
+                const placement = (_overflowsData$filter2 = overflowsData.filter(d => {
+                  if (hasFallbackAxisSideDirection) {
+                    const currentSideAxis = floating_ui_utils_getSideAxis(d.placement);
+                    return currentSideAxis === initialSideAxis ||
+                    // Create a bias to the `y` side axis due to horizontal
+                    // reading directions favoring greater width.
+                    currentSideAxis === 'y';
+                  }
+                  return true;
+                }).map(d => [d.placement, d.overflows.filter(overflow => overflow > 0).reduce((acc, overflow) => acc + overflow, 0)]).sort((a, b) => a[1] - b[1])[0]) == null ? void 0 : _overflowsData$filter2[0];
+                if (placement) {
+                  resetPlacement = placement;
+                }
+                break;
+              }
+            case 'initialPlacement':
+              resetPlacement = initialPlacement;
+              break;
+          }
+        }
+        if (placement !== resetPlacement) {
+          return {
+            reset: {
+              placement: resetPlacement
+            }
+          };
+        }
+      }
+      return {};
+    }
+  };
+};
+
+function getSideOffsets(overflow, rect) {
+  return {
+    top: overflow.top - rect.height,
+    right: overflow.right - rect.width,
+    bottom: overflow.bottom - rect.height,
+    left: overflow.left - rect.width
+  };
+}
+function isAnySideFullyClipped(overflow) {
+  return sides.some(side => overflow[side] >= 0);
+}
+/**
+ * Provides data to hide the floating element in applicable situations, such as
+ * when it is not in the same clipping context as the reference element.
+ * @see https://floating-ui.com/docs/hide
+ */
+const hide = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'hide',
+    options,
+    async fn(state) {
+      const {
+        rects
+      } = state;
+      const {
+        strategy = 'referenceHidden',
+        ...detectOverflowOptions
+      } = floating_ui_utils_evaluate(options, state);
+      switch (strategy) {
+        case 'referenceHidden':
+          {
+            const overflow = await detectOverflow(state, {
+              ...detectOverflowOptions,
+              elementContext: 'reference'
+            });
+            const offsets = getSideOffsets(overflow, rects.reference);
+            return {
+              data: {
+                referenceHiddenOffsets: offsets,
+                referenceHidden: isAnySideFullyClipped(offsets)
+              }
+            };
+          }
+        case 'escaped':
+          {
+            const overflow = await detectOverflow(state, {
+              ...detectOverflowOptions,
+              altBoundary: true
+            });
+            const offsets = getSideOffsets(overflow, rects.floating);
+            return {
+              data: {
+                escapedOffsets: offsets,
+                escaped: isAnySideFullyClipped(offsets)
+              }
+            };
+          }
+        default:
+          {
+            return {};
+          }
+      }
+    }
+  };
+};
+
+function getBoundingRect(rects) {
+  const minX = floating_ui_utils_min(...rects.map(rect => rect.left));
+  const minY = floating_ui_utils_min(...rects.map(rect => rect.top));
+  const maxX = floating_ui_utils_max(...rects.map(rect => rect.right));
+  const maxY = floating_ui_utils_max(...rects.map(rect => rect.bottom));
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY
+  };
+}
+function getRectsByLine(rects) {
+  const sortedRects = rects.slice().sort((a, b) => a.y - b.y);
+  const groups = [];
+  let prevRect = null;
+  for (let i = 0; i < sortedRects.length; i++) {
+    const rect = sortedRects[i];
+    if (!prevRect || rect.y - prevRect.y > prevRect.height / 2) {
+      groups.push([rect]);
+    } else {
+      groups[groups.length - 1].push(rect);
+    }
+    prevRect = rect;
+  }
+  return groups.map(rect => rectToClientRect(getBoundingRect(rect)));
+}
+/**
+ * Provides improved positioning for inline reference elements that can span
+ * over multiple lines, such as hyperlinks or range selections.
+ * @see https://floating-ui.com/docs/inline
+ */
+const inline = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'inline',
+    options,
+    async fn(state) {
+      const {
+        placement,
+        elements,
+        rects,
+        platform,
+        strategy
+      } = state;
+      // A MouseEvent's client{X,Y} coords can be up to 2 pixels off a
+      // ClientRect's bounds, despite the event listener being triggered. A
+      // padding of 2 seems to handle this issue.
+      const {
+        padding = 2,
+        x,
+        y
+      } = floating_ui_utils_evaluate(options, state);
+      const nativeClientRects = Array.from((await (platform.getClientRects == null ? void 0 : platform.getClientRects(elements.reference))) || []);
+      const clientRects = getRectsByLine(nativeClientRects);
+      const fallback = rectToClientRect(getBoundingRect(nativeClientRects));
+      const paddingObject = getPaddingObject(padding);
+      function getBoundingClientRect() {
+        // There are two rects and they are disjoined.
+        if (clientRects.length === 2 && clientRects[0].left > clientRects[1].right && x != null && y != null) {
+          // Find the first rect in which the point is fully inside.
+          return clientRects.find(rect => x > rect.left - paddingObject.left && x < rect.right + paddingObject.right && y > rect.top - paddingObject.top && y < rect.bottom + paddingObject.bottom) || fallback;
+        }
+
+        // There are 2 or more connected rects.
+        if (clientRects.length >= 2) {
+          if (floating_ui_utils_getSideAxis(placement) === 'y') {
+            const firstRect = clientRects[0];
+            const lastRect = clientRects[clientRects.length - 1];
+            const isTop = floating_ui_utils_getSide(placement) === 'top';
+            const top = firstRect.top;
+            const bottom = lastRect.bottom;
+            const left = isTop ? firstRect.left : lastRect.left;
+            const right = isTop ? firstRect.right : lastRect.right;
+            const width = right - left;
+            const height = bottom - top;
+            return {
+              top,
+              bottom,
+              left,
+              right,
+              width,
+              height,
+              x: left,
+              y: top
+            };
+          }
+          const isLeftSide = floating_ui_utils_getSide(placement) === 'left';
+          const maxRight = floating_ui_utils_max(...clientRects.map(rect => rect.right));
+          const minLeft = floating_ui_utils_min(...clientRects.map(rect => rect.left));
+          const measureRects = clientRects.filter(rect => isLeftSide ? rect.left === minLeft : rect.right === maxRight);
+          const top = measureRects[0].top;
+          const bottom = measureRects[measureRects.length - 1].bottom;
+          const left = minLeft;
+          const right = maxRight;
+          const width = right - left;
+          const height = bottom - top;
+          return {
+            top,
+            bottom,
+            left,
+            right,
+            width,
+            height,
+            x: left,
+            y: top
+          };
+        }
+        return fallback;
+      }
+      const resetRects = await platform.getElementRects({
+        reference: {
+          getBoundingClientRect
+        },
+        floating: elements.floating,
+        strategy
+      });
+      if (rects.reference.x !== resetRects.reference.x || rects.reference.y !== resetRects.reference.y || rects.reference.width !== resetRects.reference.width || rects.reference.height !== resetRects.reference.height) {
+        return {
+          reset: {
+            rects: resetRects
+          }
+        };
+      }
+      return {};
+    }
+  };
+};
+
+// For type backwards-compatibility, the `OffsetOptions` type was also
+// Derivable.
+
+async function convertValueToCoords(state, options) {
+  const {
+    placement,
+    platform,
+    elements
+  } = state;
+  const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
+  const side = floating_ui_utils_getSide(placement);
+  const alignment = getAlignment(placement);
+  const isVertical = floating_ui_utils_getSideAxis(placement) === 'y';
+  const mainAxisMulti = ['left', 'top'].includes(side) ? -1 : 1;
+  const crossAxisMulti = rtl && isVertical ? -1 : 1;
+  const rawValue = floating_ui_utils_evaluate(options, state);
+
+  // eslint-disable-next-line prefer-const
+  let {
+    mainAxis,
+    crossAxis,
+    alignmentAxis
+  } = typeof rawValue === 'number' ? {
+    mainAxis: rawValue,
+    crossAxis: 0,
+    alignmentAxis: null
+  } : {
+    mainAxis: rawValue.mainAxis || 0,
+    crossAxis: rawValue.crossAxis || 0,
+    alignmentAxis: rawValue.alignmentAxis
+  };
+  if (alignment && typeof alignmentAxis === 'number') {
+    crossAxis = alignment === 'end' ? alignmentAxis * -1 : alignmentAxis;
+  }
+  return isVertical ? {
+    x: crossAxis * crossAxisMulti,
+    y: mainAxis * mainAxisMulti
+  } : {
+    x: mainAxis * mainAxisMulti,
+    y: crossAxis * crossAxisMulti
+  };
+}
+
+/**
+ * Modifies the placement by translating the floating element along the
+ * specified axes.
+ * A number (shorthand for `mainAxis` or distance), or an axes configuration
+ * object may be passed.
+ * @see https://floating-ui.com/docs/offset
+ */
+const offset = function (options) {
+  if (options === void 0) {
+    options = 0;
+  }
+  return {
+    name: 'offset',
+    options,
+    async fn(state) {
+      var _middlewareData$offse, _middlewareData$arrow;
+      const {
+        x,
+        y,
+        placement,
+        middlewareData
+      } = state;
+      const diffCoords = await convertValueToCoords(state, options);
+
+      // If the placement is the same and the arrow caused an alignment offset
+      // then we don't need to change the positioning coordinates.
+      if (placement === ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse.placement) && (_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+        return {};
+      }
+      return {
+        x: x + diffCoords.x,
+        y: y + diffCoords.y,
+        data: {
+          ...diffCoords,
+          placement
+        }
+      };
+    }
+  };
+};
+
+/**
+ * Optimizes the visibility of the floating element by shifting it in order to
+ * keep it in view when it will overflow the clipping boundary.
+ * @see https://floating-ui.com/docs/shift
+ */
+const floating_ui_core_shift = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'shift',
+    options,
+    async fn(state) {
+      const {
+        x,
+        y,
+        placement
+      } = state;
+      const {
+        mainAxis: checkMainAxis = true,
+        crossAxis: checkCrossAxis = false,
+        limiter = {
+          fn: _ref => {
+            let {
+              x,
+              y
+            } = _ref;
+            return {
+              x,
+              y
+            };
+          }
+        },
+        ...detectOverflowOptions
+      } = floating_ui_utils_evaluate(options, state);
+      const coords = {
+        x,
+        y
+      };
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const crossAxis = floating_ui_utils_getSideAxis(floating_ui_utils_getSide(placement));
+      const mainAxis = floating_ui_utils_getOppositeAxis(crossAxis);
+      let mainAxisCoord = coords[mainAxis];
+      let crossAxisCoord = coords[crossAxis];
+      if (checkMainAxis) {
+        const minSide = mainAxis === 'y' ? 'top' : 'left';
+        const maxSide = mainAxis === 'y' ? 'bottom' : 'right';
+        const min = mainAxisCoord + overflow[minSide];
+        const max = mainAxisCoord - overflow[maxSide];
+        mainAxisCoord = clamp(min, mainAxisCoord, max);
+      }
+      if (checkCrossAxis) {
+        const minSide = crossAxis === 'y' ? 'top' : 'left';
+        const maxSide = crossAxis === 'y' ? 'bottom' : 'right';
+        const min = crossAxisCoord + overflow[minSide];
+        const max = crossAxisCoord - overflow[maxSide];
+        crossAxisCoord = clamp(min, crossAxisCoord, max);
+      }
+      const limitedCoords = limiter.fn({
+        ...state,
+        [mainAxis]: mainAxisCoord,
+        [crossAxis]: crossAxisCoord
+      });
+      return {
+        ...limitedCoords,
+        data: {
+          x: limitedCoords.x - x,
+          y: limitedCoords.y - y,
+          enabled: {
+            [mainAxis]: checkMainAxis,
+            [crossAxis]: checkCrossAxis
+          }
+        }
+      };
+    }
+  };
+};
+/**
+ * Built-in `limiter` that will stop `shift()` at a certain point.
+ */
+const limitShift = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    options,
+    fn(state) {
+      const {
+        x,
+        y,
+        placement,
+        rects,
+        middlewareData
+      } = state;
+      const {
+        offset = 0,
+        mainAxis: checkMainAxis = true,
+        crossAxis: checkCrossAxis = true
+      } = evaluate(options, state);
+      const coords = {
+        x,
+        y
+      };
+      const crossAxis = getSideAxis(placement);
+      const mainAxis = getOppositeAxis(crossAxis);
+      let mainAxisCoord = coords[mainAxis];
+      let crossAxisCoord = coords[crossAxis];
+      const rawOffset = evaluate(offset, state);
+      const computedOffset = typeof rawOffset === 'number' ? {
+        mainAxis: rawOffset,
+        crossAxis: 0
+      } : {
+        mainAxis: 0,
+        crossAxis: 0,
+        ...rawOffset
+      };
+      if (checkMainAxis) {
+        const len = mainAxis === 'y' ? 'height' : 'width';
+        const limitMin = rects.reference[mainAxis] - rects.floating[len] + computedOffset.mainAxis;
+        const limitMax = rects.reference[mainAxis] + rects.reference[len] - computedOffset.mainAxis;
+        if (mainAxisCoord < limitMin) {
+          mainAxisCoord = limitMin;
+        } else if (mainAxisCoord > limitMax) {
+          mainAxisCoord = limitMax;
+        }
+      }
+      if (checkCrossAxis) {
+        var _middlewareData$offse, _middlewareData$offse2;
+        const len = mainAxis === 'y' ? 'width' : 'height';
+        const isOriginSide = ['top', 'left'].includes(getSide(placement));
+        const limitMin = rects.reference[crossAxis] - rects.floating[len] + (isOriginSide ? ((_middlewareData$offse = middlewareData.offset) == null ? void 0 : _middlewareData$offse[crossAxis]) || 0 : 0) + (isOriginSide ? 0 : computedOffset.crossAxis);
+        const limitMax = rects.reference[crossAxis] + rects.reference[len] + (isOriginSide ? 0 : ((_middlewareData$offse2 = middlewareData.offset) == null ? void 0 : _middlewareData$offse2[crossAxis]) || 0) - (isOriginSide ? computedOffset.crossAxis : 0);
+        if (crossAxisCoord < limitMin) {
+          crossAxisCoord = limitMin;
+        } else if (crossAxisCoord > limitMax) {
+          crossAxisCoord = limitMax;
+        }
+      }
+      return {
+        [mainAxis]: mainAxisCoord,
+        [crossAxis]: crossAxisCoord
+      };
+    }
+  };
+};
+
+/**
+ * Provides data that allows you to change the size of the floating element —
+ * for instance, prevent it from overflowing the clipping boundary or match the
+ * width of the reference element.
+ * @see https://floating-ui.com/docs/size
+ */
+const floating_ui_core_size = function (options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'size',
+    options,
+    async fn(state) {
+      var _state$middlewareData, _state$middlewareData2;
+      const {
+        placement,
+        rects,
+        platform,
+        elements
+      } = state;
+      const {
+        apply = () => {},
+        ...detectOverflowOptions
+      } = floating_ui_utils_evaluate(options, state);
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const side = floating_ui_utils_getSide(placement);
+      const alignment = getAlignment(placement);
+      const isYAxis = floating_ui_utils_getSideAxis(placement) === 'y';
+      const {
+        width,
+        height
+      } = rects.floating;
+      let heightSide;
+      let widthSide;
+      if (side === 'top' || side === 'bottom') {
+        heightSide = side;
+        widthSide = alignment === ((await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating))) ? 'start' : 'end') ? 'left' : 'right';
+      } else {
+        widthSide = side;
+        heightSide = alignment === 'end' ? 'top' : 'bottom';
+      }
+      const maximumClippingHeight = height - overflow.top - overflow.bottom;
+      const maximumClippingWidth = width - overflow.left - overflow.right;
+      const overflowAvailableHeight = floating_ui_utils_min(height - overflow[heightSide], maximumClippingHeight);
+      const overflowAvailableWidth = floating_ui_utils_min(width - overflow[widthSide], maximumClippingWidth);
+      const noShift = !state.middlewareData.shift;
+      let availableHeight = overflowAvailableHeight;
+      let availableWidth = overflowAvailableWidth;
+      if ((_state$middlewareData = state.middlewareData.shift) != null && _state$middlewareData.enabled.x) {
+        availableWidth = maximumClippingWidth;
+      }
+      if ((_state$middlewareData2 = state.middlewareData.shift) != null && _state$middlewareData2.enabled.y) {
+        availableHeight = maximumClippingHeight;
+      }
+      if (noShift && !alignment) {
+        const xMin = floating_ui_utils_max(overflow.left, 0);
+        const xMax = floating_ui_utils_max(overflow.right, 0);
+        const yMin = floating_ui_utils_max(overflow.top, 0);
+        const yMax = floating_ui_utils_max(overflow.bottom, 0);
+        if (isYAxis) {
+          availableWidth = width - 2 * (xMin !== 0 || xMax !== 0 ? xMin + xMax : floating_ui_utils_max(overflow.left, overflow.right));
+        } else {
+          availableHeight = height - 2 * (yMin !== 0 || yMax !== 0 ? yMin + yMax : floating_ui_utils_max(overflow.top, overflow.bottom));
+        }
+      }
+      await apply({
+        ...state,
+        availableWidth,
+        availableHeight
+      });
+      const nextDimensions = await platform.getDimensions(elements.floating);
+      if (width !== nextDimensions.width || height !== nextDimensions.height) {
+        return {
+          reset: {
+            rects: true
+          }
+        };
+      }
+      return {};
+    }
+  };
+};
+
+
+
+;// ./node_modules/@floating-ui/utils/dist/floating-ui.utils.dom.mjs
+function hasWindow() {
+  return typeof window !== 'undefined';
+}
+function getNodeName(node) {
+  if (floating_ui_utils_dom_isNode(node)) {
+    return (node.nodeName || '').toLowerCase();
+  }
+  // Mocked nodes in testing environments may not be instances of Node. By
+  // returning `#document` an infinite loop won't occur.
+  // https://github.com/floating-ui/floating-ui/issues/2317
+  return '#document';
+}
+function getWindow(node) {
+  var _node$ownerDocument;
+  return (node == null || (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
+}
+function floating_ui_utils_dom_getDocumentElement(node) {
+  var _ref;
+  return (_ref = (floating_ui_utils_dom_isNode(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
+}
+function floating_ui_utils_dom_isNode(value) {
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof Node || value instanceof getWindow(value).Node;
+}
+function isElement(value) {
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof Element || value instanceof getWindow(value).Element;
+}
+function isHTMLElement(value) {
+  if (!hasWindow()) {
+    return false;
+  }
+  return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
+}
+function isShadowRoot(value) {
+  if (!hasWindow() || typeof ShadowRoot === 'undefined') {
+    return false;
+  }
+  return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
+}
+function isOverflowElement(element) {
+  const {
+    overflow,
+    overflowX,
+    overflowY,
+    display
+  } = floating_ui_utils_dom_getComputedStyle(element);
+  return /auto|scroll|overlay|hidden|clip/.test(overflow + overflowY + overflowX) && !['inline', 'contents'].includes(display);
+}
+function isTableElement(element) {
+  return ['table', 'td', 'th'].includes(getNodeName(element));
+}
+function isTopLayer(element) {
+  return [':popover-open', ':modal'].some(selector => {
+    try {
+      return element.matches(selector);
+    } catch (e) {
+      return false;
+    }
+  });
+}
+function isContainingBlock(elementOrCss) {
+  const webkit = isWebKit();
+  const css = isElement(elementOrCss) ? floating_ui_utils_dom_getComputedStyle(elementOrCss) : elementOrCss;
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+  // https://drafts.csswg.org/css-transforms-2/#individual-transforms
+  return ['transform', 'translate', 'scale', 'rotate', 'perspective'].some(value => css[value] ? css[value] !== 'none' : false) || (css.containerType ? css.containerType !== 'normal' : false) || !webkit && (css.backdropFilter ? css.backdropFilter !== 'none' : false) || !webkit && (css.filter ? css.filter !== 'none' : false) || ['transform', 'translate', 'scale', 'rotate', 'perspective', 'filter'].some(value => (css.willChange || '').includes(value)) || ['paint', 'layout', 'strict', 'content'].some(value => (css.contain || '').includes(value));
+}
+function getContainingBlock(element) {
+  let currentNode = getParentNode(element);
+  while (isHTMLElement(currentNode) && !isLastTraversableNode(currentNode)) {
+    if (isContainingBlock(currentNode)) {
+      return currentNode;
+    } else if (isTopLayer(currentNode)) {
+      return null;
+    }
+    currentNode = getParentNode(currentNode);
+  }
+  return null;
+}
+function isWebKit() {
+  if (typeof CSS === 'undefined' || !CSS.supports) return false;
+  return CSS.supports('-webkit-backdrop-filter', 'none');
+}
+function isLastTraversableNode(node) {
+  return ['html', 'body', '#document'].includes(getNodeName(node));
+}
+function floating_ui_utils_dom_getComputedStyle(element) {
+  return getWindow(element).getComputedStyle(element);
+}
+function getNodeScroll(element) {
+  if (isElement(element)) {
+    return {
+      scrollLeft: element.scrollLeft,
+      scrollTop: element.scrollTop
+    };
+  }
+  return {
+    scrollLeft: element.scrollX,
+    scrollTop: element.scrollY
+  };
+}
+function getParentNode(node) {
+  if (getNodeName(node) === 'html') {
+    return node;
+  }
+  const result =
+  // Step into the shadow DOM of the parent of a slotted node.
+  node.assignedSlot ||
+  // DOM Element detected.
+  node.parentNode ||
+  // ShadowRoot detected.
+  isShadowRoot(node) && node.host ||
+  // Fallback.
+  floating_ui_utils_dom_getDocumentElement(node);
+  return isShadowRoot(result) ? result.host : result;
+}
+function getNearestOverflowAncestor(node) {
+  const parentNode = getParentNode(node);
+  if (isLastTraversableNode(parentNode)) {
+    return node.ownerDocument ? node.ownerDocument.body : node.body;
+  }
+  if (isHTMLElement(parentNode) && isOverflowElement(parentNode)) {
+    return parentNode;
+  }
+  return getNearestOverflowAncestor(parentNode);
+}
+function floating_ui_utils_dom_getOverflowAncestors(node, list, traverseIframes) {
+  var _node$ownerDocument2;
+  if (list === void 0) {
+    list = [];
+  }
+  if (traverseIframes === void 0) {
+    traverseIframes = true;
+  }
+  const scrollableAncestor = getNearestOverflowAncestor(node);
+  const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
+  const win = getWindow(scrollableAncestor);
+  if (isBody) {
+    const frameElement = getFrameElement(win);
+    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? floating_ui_utils_dom_getOverflowAncestors(frameElement) : []);
+  }
+  return list.concat(scrollableAncestor, floating_ui_utils_dom_getOverflowAncestors(scrollableAncestor, [], traverseIframes));
+}
+function getFrameElement(win) {
+  return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
+}
+
+
+
+;// ./node_modules/@floating-ui/dom/dist/floating-ui.dom.mjs
+
+
+
+
+
+function getCssDimensions(element) {
+  const css = floating_ui_utils_dom_getComputedStyle(element);
+  // In testing environments, the `width` and `height` properties are empty
+  // strings for SVG elements, returning NaN. Fallback to `0` in this case.
+  let width = parseFloat(css.width) || 0;
+  let height = parseFloat(css.height) || 0;
+  const hasOffset = isHTMLElement(element);
+  const offsetWidth = hasOffset ? element.offsetWidth : width;
+  const offsetHeight = hasOffset ? element.offsetHeight : height;
+  const shouldFallback = floating_ui_utils_round(width) !== offsetWidth || floating_ui_utils_round(height) !== offsetHeight;
+  if (shouldFallback) {
+    width = offsetWidth;
+    height = offsetHeight;
+  }
+  return {
+    width,
+    height,
+    $: shouldFallback
+  };
+}
+
+function unwrapElement(element) {
+  return !isElement(element) ? element.contextElement : element;
+}
+
+function getScale(element) {
+  const domElement = unwrapElement(element);
+  if (!isHTMLElement(domElement)) {
+    return createCoords(1);
+  }
+  const rect = domElement.getBoundingClientRect();
+  const {
+    width,
+    height,
+    $
+  } = getCssDimensions(domElement);
+  let x = ($ ? floating_ui_utils_round(rect.width) : rect.width) / width;
+  let y = ($ ? floating_ui_utils_round(rect.height) : rect.height) / height;
+
+  // 0, NaN, or Infinity should always fallback to 1.
+
+  if (!x || !Number.isFinite(x)) {
+    x = 1;
+  }
+  if (!y || !Number.isFinite(y)) {
+    y = 1;
+  }
+  return {
+    x,
+    y
+  };
+}
+
+const noOffsets = /*#__PURE__*/createCoords(0);
+function getVisualOffsets(element) {
+  const win = getWindow(element);
+  if (!isWebKit() || !win.visualViewport) {
+    return noOffsets;
+  }
+  return {
+    x: win.visualViewport.offsetLeft,
+    y: win.visualViewport.offsetTop
+  };
+}
+function shouldAddVisualOffsets(element, isFixed, floatingOffsetParent) {
+  if (isFixed === void 0) {
+    isFixed = false;
+  }
+  if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) {
+    return false;
+  }
+  return isFixed;
+}
+
+function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
+  if (includeScale === void 0) {
+    includeScale = false;
+  }
+  if (isFixedStrategy === void 0) {
+    isFixedStrategy = false;
+  }
+  const clientRect = element.getBoundingClientRect();
+  const domElement = unwrapElement(element);
+  let scale = createCoords(1);
+  if (includeScale) {
+    if (offsetParent) {
+      if (isElement(offsetParent)) {
+        scale = getScale(offsetParent);
+      }
+    } else {
+      scale = getScale(element);
+    }
+  }
+  const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent) ? getVisualOffsets(domElement) : createCoords(0);
+  let x = (clientRect.left + visualOffsets.x) / scale.x;
+  let y = (clientRect.top + visualOffsets.y) / scale.y;
+  let width = clientRect.width / scale.x;
+  let height = clientRect.height / scale.y;
+  if (domElement) {
+    const win = getWindow(domElement);
+    const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
+    let currentWin = win;
+    let currentIFrame = getFrameElement(currentWin);
+    while (currentIFrame && offsetParent && offsetWin !== currentWin) {
+      const iframeScale = getScale(currentIFrame);
+      const iframeRect = currentIFrame.getBoundingClientRect();
+      const css = floating_ui_utils_dom_getComputedStyle(currentIFrame);
+      const left = iframeRect.left + (currentIFrame.clientLeft + parseFloat(css.paddingLeft)) * iframeScale.x;
+      const top = iframeRect.top + (currentIFrame.clientTop + parseFloat(css.paddingTop)) * iframeScale.y;
+      x *= iframeScale.x;
+      y *= iframeScale.y;
+      width *= iframeScale.x;
+      height *= iframeScale.y;
+      x += left;
+      y += top;
+      currentWin = getWindow(currentIFrame);
+      currentIFrame = getFrameElement(currentWin);
+    }
+  }
+  return rectToClientRect({
+    width,
+    height,
+    x,
+    y
+  });
+}
+
+// If <html> has a CSS width greater than the viewport, then this will be
+// incorrect for RTL.
+function getWindowScrollBarX(element, rect) {
+  const leftScroll = getNodeScroll(element).scrollLeft;
+  if (!rect) {
+    return getBoundingClientRect(floating_ui_utils_dom_getDocumentElement(element)).left + leftScroll;
+  }
+  return rect.left + leftScroll;
+}
+
+function getHTMLOffset(documentElement, scroll, ignoreScrollbarX) {
+  if (ignoreScrollbarX === void 0) {
+    ignoreScrollbarX = false;
+  }
+  const htmlRect = documentElement.getBoundingClientRect();
+  const x = htmlRect.left + scroll.scrollLeft - (ignoreScrollbarX ? 0 :
+  // RTL <body> scrollbar.
+  getWindowScrollBarX(documentElement, htmlRect));
+  const y = htmlRect.top + scroll.scrollTop;
+  return {
+    x,
+    y
+  };
+}
+
+function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
+  let {
+    elements,
+    rect,
+    offsetParent,
+    strategy
+  } = _ref;
+  const isFixed = strategy === 'fixed';
+  const documentElement = floating_ui_utils_dom_getDocumentElement(offsetParent);
+  const topLayer = elements ? isTopLayer(elements.floating) : false;
+  if (offsetParent === documentElement || topLayer && isFixed) {
+    return rect;
+  }
+  let scroll = {
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  let scale = createCoords(1);
+  const offsets = createCoords(0);
+  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+      scroll = getNodeScroll(offsetParent);
+    }
+    if (isHTMLElement(offsetParent)) {
+      const offsetRect = getBoundingClientRect(offsetParent);
+      scale = getScale(offsetParent);
+      offsets.x = offsetRect.x + offsetParent.clientLeft;
+      offsets.y = offsetRect.y + offsetParent.clientTop;
+    }
+  }
+  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll, true) : createCoords(0);
+  return {
+    width: rect.width * scale.x,
+    height: rect.height * scale.y,
+    x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x + htmlOffset.x,
+    y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y + htmlOffset.y
+  };
+}
+
+function getClientRects(element) {
+  return Array.from(element.getClientRects());
+}
+
+// Gets the entire size of the scrollable document area, even extending outside
+// of the `<html>` and `<body>` rect bounds if horizontally scrollable.
+function getDocumentRect(element) {
+  const html = floating_ui_utils_dom_getDocumentElement(element);
+  const scroll = getNodeScroll(element);
+  const body = element.ownerDocument.body;
+  const width = floating_ui_utils_max(html.scrollWidth, html.clientWidth, body.scrollWidth, body.clientWidth);
+  const height = floating_ui_utils_max(html.scrollHeight, html.clientHeight, body.scrollHeight, body.clientHeight);
+  let x = -scroll.scrollLeft + getWindowScrollBarX(element);
+  const y = -scroll.scrollTop;
+  if (floating_ui_utils_dom_getComputedStyle(body).direction === 'rtl') {
+    x += floating_ui_utils_max(html.clientWidth, body.clientWidth) - width;
+  }
+  return {
+    width,
+    height,
+    x,
+    y
+  };
+}
+
+function getViewportRect(element, strategy) {
+  const win = getWindow(element);
+  const html = floating_ui_utils_dom_getDocumentElement(element);
+  const visualViewport = win.visualViewport;
+  let width = html.clientWidth;
+  let height = html.clientHeight;
+  let x = 0;
+  let y = 0;
+  if (visualViewport) {
+    width = visualViewport.width;
+    height = visualViewport.height;
+    const visualViewportBased = isWebKit();
+    if (!visualViewportBased || visualViewportBased && strategy === 'fixed') {
+      x = visualViewport.offsetLeft;
+      y = visualViewport.offsetTop;
+    }
+  }
+  return {
+    width,
+    height,
+    x,
+    y
+  };
+}
+
+// Returns the inner client rect, subtracting scrollbars if present.
+function getInnerBoundingClientRect(element, strategy) {
+  const clientRect = getBoundingClientRect(element, true, strategy === 'fixed');
+  const top = clientRect.top + element.clientTop;
+  const left = clientRect.left + element.clientLeft;
+  const scale = isHTMLElement(element) ? getScale(element) : createCoords(1);
+  const width = element.clientWidth * scale.x;
+  const height = element.clientHeight * scale.y;
+  const x = left * scale.x;
+  const y = top * scale.y;
+  return {
+    width,
+    height,
+    x,
+    y
+  };
+}
+function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) {
+  let rect;
+  if (clippingAncestor === 'viewport') {
+    rect = getViewportRect(element, strategy);
+  } else if (clippingAncestor === 'document') {
+    rect = getDocumentRect(floating_ui_utils_dom_getDocumentElement(element));
+  } else if (isElement(clippingAncestor)) {
+    rect = getInnerBoundingClientRect(clippingAncestor, strategy);
+  } else {
+    const visualOffsets = getVisualOffsets(element);
+    rect = {
+      x: clippingAncestor.x - visualOffsets.x,
+      y: clippingAncestor.y - visualOffsets.y,
+      width: clippingAncestor.width,
+      height: clippingAncestor.height
+    };
+  }
+  return rectToClientRect(rect);
+}
+function hasFixedPositionAncestor(element, stopNode) {
+  const parentNode = getParentNode(element);
+  if (parentNode === stopNode || !isElement(parentNode) || isLastTraversableNode(parentNode)) {
+    return false;
+  }
+  return floating_ui_utils_dom_getComputedStyle(parentNode).position === 'fixed' || hasFixedPositionAncestor(parentNode, stopNode);
+}
+
+// A "clipping ancestor" is an `overflow` element with the characteristic of
+// clipping (or hiding) child elements. This returns all clipping ancestors
+// of the given element up the tree.
+function getClippingElementAncestors(element, cache) {
+  const cachedResult = cache.get(element);
+  if (cachedResult) {
+    return cachedResult;
+  }
+  let result = floating_ui_utils_dom_getOverflowAncestors(element, [], false).filter(el => isElement(el) && getNodeName(el) !== 'body');
+  let currentContainingBlockComputedStyle = null;
+  const elementIsFixed = floating_ui_utils_dom_getComputedStyle(element).position === 'fixed';
+  let currentNode = elementIsFixed ? getParentNode(element) : element;
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
+  while (isElement(currentNode) && !isLastTraversableNode(currentNode)) {
+    const computedStyle = floating_ui_utils_dom_getComputedStyle(currentNode);
+    const currentNodeIsContaining = isContainingBlock(currentNode);
+    if (!currentNodeIsContaining && computedStyle.position === 'fixed') {
+      currentContainingBlockComputedStyle = null;
+    }
+    const shouldDropCurrentNode = elementIsFixed ? !currentNodeIsContaining && !currentContainingBlockComputedStyle : !currentNodeIsContaining && computedStyle.position === 'static' && !!currentContainingBlockComputedStyle && ['absolute', 'fixed'].includes(currentContainingBlockComputedStyle.position) || isOverflowElement(currentNode) && !currentNodeIsContaining && hasFixedPositionAncestor(element, currentNode);
+    if (shouldDropCurrentNode) {
+      // Drop non-containing blocks.
+      result = result.filter(ancestor => ancestor !== currentNode);
+    } else {
+      // Record last containing block for next iteration.
+      currentContainingBlockComputedStyle = computedStyle;
+    }
+    currentNode = getParentNode(currentNode);
+  }
+  cache.set(element, result);
+  return result;
+}
+
+// Gets the maximum area that the element is visible in due to any number of
+// clipping ancestors.
+function getClippingRect(_ref) {
+  let {
+    element,
+    boundary,
+    rootBoundary,
+    strategy
+  } = _ref;
+  const elementClippingAncestors = boundary === 'clippingAncestors' ? isTopLayer(element) ? [] : getClippingElementAncestors(element, this._c) : [].concat(boundary);
+  const clippingAncestors = [...elementClippingAncestors, rootBoundary];
+  const firstClippingAncestor = clippingAncestors[0];
+  const clippingRect = clippingAncestors.reduce((accRect, clippingAncestor) => {
+    const rect = getClientRectFromClippingAncestor(element, clippingAncestor, strategy);
+    accRect.top = floating_ui_utils_max(rect.top, accRect.top);
+    accRect.right = floating_ui_utils_min(rect.right, accRect.right);
+    accRect.bottom = floating_ui_utils_min(rect.bottom, accRect.bottom);
+    accRect.left = floating_ui_utils_max(rect.left, accRect.left);
+    return accRect;
+  }, getClientRectFromClippingAncestor(element, firstClippingAncestor, strategy));
+  return {
+    width: clippingRect.right - clippingRect.left,
+    height: clippingRect.bottom - clippingRect.top,
+    x: clippingRect.left,
+    y: clippingRect.top
+  };
+}
+
+function getDimensions(element) {
+  const {
+    width,
+    height
+  } = getCssDimensions(element);
+  return {
+    width,
+    height
+  };
+}
+
+function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
+  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  const documentElement = floating_ui_utils_dom_getDocumentElement(offsetParent);
+  const isFixed = strategy === 'fixed';
+  const rect = getBoundingClientRect(element, true, isFixed, offsetParent);
+  let scroll = {
+    scrollLeft: 0,
+    scrollTop: 0
+  };
+  const offsets = createCoords(0);
+
+  // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
+  // Firefox with layout.scrollbar.side = 3 in about:config to test this.
+  function setLeftRTLScrollbarOffset() {
+    offsets.x = getWindowScrollBarX(documentElement);
+  }
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
+    if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
+      scroll = getNodeScroll(offsetParent);
+    }
+    if (isOffsetParentAnElement) {
+      const offsetRect = getBoundingClientRect(offsetParent, true, isFixed, offsetParent);
+      offsets.x = offsetRect.x + offsetParent.clientLeft;
+      offsets.y = offsetRect.y + offsetParent.clientTop;
+    } else if (documentElement) {
+      setLeftRTLScrollbarOffset();
+    }
+  }
+  if (isFixed && !isOffsetParentAnElement && documentElement) {
+    setLeftRTLScrollbarOffset();
+  }
+  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
+  const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
+  const y = rect.top + scroll.scrollTop - offsets.y - htmlOffset.y;
+  return {
+    x,
+    y,
+    width: rect.width,
+    height: rect.height
+  };
+}
+
+function isStaticPositioned(element) {
+  return floating_ui_utils_dom_getComputedStyle(element).position === 'static';
+}
+
+function getTrueOffsetParent(element, polyfill) {
+  if (!isHTMLElement(element) || floating_ui_utils_dom_getComputedStyle(element).position === 'fixed') {
+    return null;
+  }
+  if (polyfill) {
+    return polyfill(element);
+  }
+  let rawOffsetParent = element.offsetParent;
+
+  // Firefox returns the <html> element as the offsetParent if it's non-static,
+  // while Chrome and Safari return the <body> element. The <body> element must
+  // be used to perform the correct calculations even if the <html> element is
+  // non-static.
+  if (floating_ui_utils_dom_getDocumentElement(element) === rawOffsetParent) {
+    rawOffsetParent = rawOffsetParent.ownerDocument.body;
+  }
+  return rawOffsetParent;
+}
+
+// Gets the closest ancestor positioned element. Handles some edge cases,
+// such as table ancestors and cross browser bugs.
+function getOffsetParent(element, polyfill) {
+  const win = getWindow(element);
+  if (isTopLayer(element)) {
+    return win;
+  }
+  if (!isHTMLElement(element)) {
+    let svgOffsetParent = getParentNode(element);
+    while (svgOffsetParent && !isLastTraversableNode(svgOffsetParent)) {
+      if (isElement(svgOffsetParent) && !isStaticPositioned(svgOffsetParent)) {
+        return svgOffsetParent;
+      }
+      svgOffsetParent = getParentNode(svgOffsetParent);
+    }
+    return win;
+  }
+  let offsetParent = getTrueOffsetParent(element, polyfill);
+  while (offsetParent && isTableElement(offsetParent) && isStaticPositioned(offsetParent)) {
+    offsetParent = getTrueOffsetParent(offsetParent, polyfill);
+  }
+  if (offsetParent && isLastTraversableNode(offsetParent) && isStaticPositioned(offsetParent) && !isContainingBlock(offsetParent)) {
+    return win;
+  }
+  return offsetParent || getContainingBlock(element) || win;
+}
+
+const getElementRects = async function (data) {
+  const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
+  const getDimensionsFn = this.getDimensions;
+  const floatingDimensions = await getDimensionsFn(data.floating);
+  return {
+    reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
+    floating: {
+      x: 0,
+      y: 0,
+      width: floatingDimensions.width,
+      height: floatingDimensions.height
+    }
+  };
+};
+
+function isRTL(element) {
+  return floating_ui_utils_dom_getComputedStyle(element).direction === 'rtl';
+}
+
+const platform = {
+  convertOffsetParentRelativeRectToViewportRelativeRect,
+  getDocumentElement: floating_ui_utils_dom_getDocumentElement,
+  getClippingRect,
+  getOffsetParent,
+  getElementRects,
+  getClientRects,
+  getDimensions,
+  getScale,
+  isElement: isElement,
+  isRTL
+};
+
+function rectsAreEqual(a, b) {
+  return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
+}
+
+// https://samthor.au/2021/observing-dom/
+function observeMove(element, onMove) {
+  let io = null;
+  let timeoutId;
+  const root = getDocumentElement(element);
+  function cleanup() {
+    var _io;
+    clearTimeout(timeoutId);
+    (_io = io) == null || _io.disconnect();
+    io = null;
+  }
+  function refresh(skip, threshold) {
+    if (skip === void 0) {
+      skip = false;
+    }
+    if (threshold === void 0) {
+      threshold = 1;
+    }
+    cleanup();
+    const elementRectForRootMargin = element.getBoundingClientRect();
+    const {
+      left,
+      top,
+      width,
+      height
+    } = elementRectForRootMargin;
+    if (!skip) {
+      onMove();
+    }
+    if (!width || !height) {
+      return;
+    }
+    const insetTop = floor(top);
+    const insetRight = floor(root.clientWidth - (left + width));
+    const insetBottom = floor(root.clientHeight - (top + height));
+    const insetLeft = floor(left);
+    const rootMargin = -insetTop + "px " + -insetRight + "px " + -insetBottom + "px " + -insetLeft + "px";
+    const options = {
+      rootMargin,
+      threshold: max(0, min(1, threshold)) || 1
+    };
+    let isFirstUpdate = true;
+    function handleObserve(entries) {
+      const ratio = entries[0].intersectionRatio;
+      if (ratio !== threshold) {
+        if (!isFirstUpdate) {
+          return refresh();
+        }
+        if (!ratio) {
+          // If the reference is clipped, the ratio is 0. Throttle the refresh
+          // to prevent an infinite loop of updates.
+          timeoutId = setTimeout(() => {
+            refresh(false, 1e-7);
+          }, 1000);
+        } else {
+          refresh(false, ratio);
+        }
+      }
+      if (ratio === 1 && !rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) {
+        // It's possible that even though the ratio is reported as 1, the
+        // element is not actually fully within the IntersectionObserver's root
+        // area anymore. This can happen under performance constraints. This may
+        // be a bug in the browser's IntersectionObserver implementation. To
+        // work around this, we compare the element's bounding rect now with
+        // what it was at the time we created the IntersectionObserver. If they
+        // are not equal then the element moved, so we refresh.
+        refresh();
+      }
+      isFirstUpdate = false;
+    }
+
+    // Older browsers don't support a `document` as the root and will throw an
+    // error.
+    try {
+      io = new IntersectionObserver(handleObserve, {
+        ...options,
+        // Handle <iframe>s
+        root: root.ownerDocument
+      });
+    } catch (_e) {
+      io = new IntersectionObserver(handleObserve, options);
+    }
+    io.observe(element);
+  }
+  refresh(true);
+  return cleanup;
+}
+
+/**
+ * Automatically updates the position of the floating element when necessary.
+ * Should only be called when the floating element is mounted on the DOM or
+ * visible on the screen.
+ * @returns cleanup function that should be invoked when the floating element is
+ * removed from the DOM or hidden from the screen.
+ * @see https://floating-ui.com/docs/autoUpdate
+ */
+function autoUpdate(reference, floating, update, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  const {
+    ancestorScroll = true,
+    ancestorResize = true,
+    elementResize = typeof ResizeObserver === 'function',
+    layoutShift = typeof IntersectionObserver === 'function',
+    animationFrame = false
+  } = options;
+  const referenceEl = unwrapElement(reference);
+  const ancestors = ancestorScroll || ancestorResize ? [...(referenceEl ? getOverflowAncestors(referenceEl) : []), ...getOverflowAncestors(floating)] : [];
+  ancestors.forEach(ancestor => {
+    ancestorScroll && ancestor.addEventListener('scroll', update, {
+      passive: true
+    });
+    ancestorResize && ancestor.addEventListener('resize', update);
+  });
+  const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null;
+  let reobserveFrame = -1;
+  let resizeObserver = null;
+  if (elementResize) {
+    resizeObserver = new ResizeObserver(_ref => {
+      let [firstEntry] = _ref;
+      if (firstEntry && firstEntry.target === referenceEl && resizeObserver) {
+        // Prevent update loops when using the `size` middleware.
+        // https://github.com/floating-ui/floating-ui/issues/1740
+        resizeObserver.unobserve(floating);
+        cancelAnimationFrame(reobserveFrame);
+        reobserveFrame = requestAnimationFrame(() => {
+          var _resizeObserver;
+          (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
+        });
+      }
+      update();
+    });
+    if (referenceEl && !animationFrame) {
+      resizeObserver.observe(referenceEl);
+    }
+    resizeObserver.observe(floating);
+  }
+  let frameId;
+  let prevRefRect = animationFrame ? getBoundingClientRect(reference) : null;
+  if (animationFrame) {
+    frameLoop();
+  }
+  function frameLoop() {
+    const nextRefRect = getBoundingClientRect(reference);
+    if (prevRefRect && !rectsAreEqual(prevRefRect, nextRefRect)) {
+      update();
+    }
+    prevRefRect = nextRefRect;
+    frameId = requestAnimationFrame(frameLoop);
+  }
+  update();
+  return () => {
+    var _resizeObserver2;
+    ancestors.forEach(ancestor => {
+      ancestorScroll && ancestor.removeEventListener('scroll', update);
+      ancestorResize && ancestor.removeEventListener('resize', update);
+    });
+    cleanupIo == null || cleanupIo();
+    (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
+    resizeObserver = null;
+    if (animationFrame) {
+      cancelAnimationFrame(frameId);
+    }
+  };
+}
+
+/**
+ * Resolves with an object of overflow side offsets that determine how much the
+ * element is overflowing a given clipping boundary on each side.
+ * - positive = overflowing the boundary by that number of pixels
+ * - negative = how many pixels left before it will overflow
+ * - 0 = lies flush with the boundary
+ * @see https://floating-ui.com/docs/detectOverflow
+ */
+const floating_ui_dom_detectOverflow = (/* unused pure expression or super */ null && (detectOverflow$1));
+
+/**
+ * Modifies the placement by translating the floating element along the
+ * specified axes.
+ * A number (shorthand for `mainAxis` or distance), or an axes configuration
+ * object may be passed.
+ * @see https://floating-ui.com/docs/offset
+ */
+const floating_ui_dom_offset = offset;
+
+/**
+ * Optimizes the visibility of the floating element by choosing the placement
+ * that has the most space available automatically, without needing to specify a
+ * preferred placement. Alternative to `flip`.
+ * @see https://floating-ui.com/docs/autoPlacement
+ */
+const floating_ui_dom_autoPlacement = autoPlacement;
+
+/**
+ * Optimizes the visibility of the floating element by shifting it in order to
+ * keep it in view when it will overflow the clipping boundary.
+ * @see https://floating-ui.com/docs/shift
+ */
+const floating_ui_dom_shift = floating_ui_core_shift;
+
+/**
+ * Optimizes the visibility of the floating element by flipping the `placement`
+ * in order to keep it in view when the preferred placement(s) will overflow the
+ * clipping boundary. Alternative to `autoPlacement`.
+ * @see https://floating-ui.com/docs/flip
+ */
+const floating_ui_dom_flip = flip;
+
+/**
+ * Provides data that allows you to change the size of the floating element —
+ * for instance, prevent it from overflowing the clipping boundary or match the
+ * width of the reference element.
+ * @see https://floating-ui.com/docs/size
+ */
+const floating_ui_dom_size = floating_ui_core_size;
+
+/**
+ * Provides data to hide the floating element in applicable situations, such as
+ * when it is not in the same clipping context as the reference element.
+ * @see https://floating-ui.com/docs/hide
+ */
+const floating_ui_dom_hide = hide;
+
+/**
+ * Provides data to position an inner element of the floating element so that it
+ * appears centered to the reference element.
+ * @see https://floating-ui.com/docs/arrow
+ */
+const floating_ui_dom_arrow = floating_ui_core_arrow;
+
+/**
+ * Provides improved positioning for inline reference elements that can span
+ * over multiple lines, such as hyperlinks or range selections.
+ * @see https://floating-ui.com/docs/inline
+ */
+const floating_ui_dom_inline = inline;
+
+/**
+ * Built-in `limiter` that will stop `shift()` at a certain point.
+ */
+const floating_ui_dom_limitShift = (/* unused pure expression or super */ null && (limitShift$1));
+
+/**
+ * Computes the `x` and `y` coordinates that will place the floating element
+ * next to a given reference element.
+ */
+const floating_ui_dom_computePosition = (reference, floating, options) => {
+  // This caches the expensive `getClippingElementAncestors` function so that
+  // multiple lifecycle resets re-use the same result. It only lives for a
+  // single call. If other functions become expensive, we can add them as well.
+  const cache = new Map();
+  const mergedOptions = {
+    platform,
+    ...options
+  };
+  const platformWithCache = {
+    ...mergedOptions.platform,
+    _c: cache
+  };
+  return computePosition(reference, floating, {
+    ...mergedOptions,
+    platform: platformWithCache
+  });
+};
+
+
+
+;// ./node_modules/prosemirror-tables/dist/index.js
+// src/index.ts
+
+
+// src/cellselection.ts
+
+
+
+
+// src/tablemap.ts
+var readFromCache;
+var addToCache;
+if (typeof WeakMap != "undefined") {
+  let cache = /* @__PURE__ */ new WeakMap();
+  readFromCache = (key) => cache.get(key);
+  addToCache = (key, value) => {
+    cache.set(key, value);
+    return value;
+  };
+} else {
+  const cache = [];
+  const cacheSize = 10;
+  let cachePos = 0;
+  readFromCache = (key) => {
+    for (let i = 0; i < cache.length; i += 2)
+      if (cache[i] == key) return cache[i + 1];
+  };
+  addToCache = (key, value) => {
+    if (cachePos == cacheSize) cachePos = 0;
+    cache[cachePos++] = key;
+    return cache[cachePos++] = value;
+  };
+}
+var TableMap = class {
+  constructor(width, height, map, problems) {
+    this.width = width;
+    this.height = height;
+    this.map = map;
+    this.problems = problems;
+  }
+  // Find the dimensions of the cell at the given position.
+  findCell(pos) {
+    for (let i = 0; i < this.map.length; i++) {
+      const curPos = this.map[i];
+      if (curPos != pos) continue;
+      const left = i % this.width;
+      const top = i / this.width | 0;
+      let right = left + 1;
+      let bottom = top + 1;
+      for (let j = 1; right < this.width && this.map[i + j] == curPos; j++) {
+        right++;
+      }
+      for (let j = 1; bottom < this.height && this.map[i + this.width * j] == curPos; j++) {
+        bottom++;
+      }
+      return { left, top, right, bottom };
+    }
+    throw new RangeError(`No cell with offset ${pos} found`);
+  }
+  // Find the left side of the cell at the given position.
+  colCount(pos) {
+    for (let i = 0; i < this.map.length; i++) {
+      if (this.map[i] == pos) {
+        return i % this.width;
+      }
+    }
+    throw new RangeError(`No cell with offset ${pos} found`);
+  }
+  // Find the next cell in the given direction, starting from the cell
+  // at `pos`, if any.
+  nextCell(pos, axis, dir) {
+    const { left, right, top, bottom } = this.findCell(pos);
+    if (axis == "horiz") {
+      if (dir < 0 ? left == 0 : right == this.width) return null;
+      return this.map[top * this.width + (dir < 0 ? left - 1 : right)];
+    } else {
+      if (dir < 0 ? top == 0 : bottom == this.height) return null;
+      return this.map[left + this.width * (dir < 0 ? top - 1 : bottom)];
+    }
+  }
+  // Get the rectangle spanning the two given cells.
+  rectBetween(a, b) {
+    const {
+      left: leftA,
+      right: rightA,
+      top: topA,
+      bottom: bottomA
+    } = this.findCell(a);
+    const {
+      left: leftB,
+      right: rightB,
+      top: topB,
+      bottom: bottomB
+    } = this.findCell(b);
+    return {
+      left: Math.min(leftA, leftB),
+      top: Math.min(topA, topB),
+      right: Math.max(rightA, rightB),
+      bottom: Math.max(bottomA, bottomB)
+    };
+  }
+  // Return the position of all cells that have the top left corner in
+  // the given rectangle.
+  cellsInRect(rect) {
+    const result = [];
+    const seen = {};
+    for (let row = rect.top; row < rect.bottom; row++) {
+      for (let col = rect.left; col < rect.right; col++) {
+        const index = row * this.width + col;
+        const pos = this.map[index];
+        if (seen[pos]) continue;
+        seen[pos] = true;
+        if (col == rect.left && col && this.map[index - 1] == pos || row == rect.top && row && this.map[index - this.width] == pos) {
+          continue;
+        }
+        result.push(pos);
+      }
+    }
+    return result;
+  }
+  // Return the position at which the cell at the given row and column
+  // starts, or would start, if a cell started there.
+  positionAt(row, col, table) {
+    for (let i = 0, rowStart = 0; ; i++) {
+      const rowEnd = rowStart + table.child(i).nodeSize;
+      if (i == row) {
+        let index = col + row * this.width;
+        const rowEndIndex = (row + 1) * this.width;
+        while (index < rowEndIndex && this.map[index] < rowStart) index++;
+        return index == rowEndIndex ? rowEnd - 1 : this.map[index];
+      }
+      rowStart = rowEnd;
+    }
+  }
+  // Find the table map for the given table node.
+  static get(table) {
+    return readFromCache(table) || addToCache(table, computeMap(table));
+  }
+};
+function computeMap(table) {
+  if (table.type.spec.tableRole != "table")
+    throw new RangeError("Not a table node: " + table.type.name);
+  const width = findWidth(table), height = table.childCount;
+  const map = [];
+  let mapPos = 0;
+  let problems = null;
+  const colWidths = [];
+  for (let i = 0, e = width * height; i < e; i++) map[i] = 0;
+  for (let row = 0, pos = 0; row < height; row++) {
+    const rowNode = table.child(row);
+    pos++;
+    for (let i = 0; ; i++) {
+      while (mapPos < map.length && map[mapPos] != 0) mapPos++;
+      if (i == rowNode.childCount) break;
+      const cellNode = rowNode.child(i);
+      const { colspan, rowspan, colwidth } = cellNode.attrs;
+      for (let h = 0; h < rowspan; h++) {
+        if (h + row >= height) {
+          (problems || (problems = [])).push({
+            type: "overlong_rowspan",
+            pos,
+            n: rowspan - h
+          });
+          break;
+        }
+        const start = mapPos + h * width;
+        for (let w = 0; w < colspan; w++) {
+          if (map[start + w] == 0) map[start + w] = pos;
+          else
+            (problems || (problems = [])).push({
+              type: "collision",
+              row,
+              pos,
+              n: colspan - w
+            });
+          const colW = colwidth && colwidth[w];
+          if (colW) {
+            const widthIndex = (start + w) % width * 2, prev = colWidths[widthIndex];
+            if (prev == null || prev != colW && colWidths[widthIndex + 1] == 1) {
+              colWidths[widthIndex] = colW;
+              colWidths[widthIndex + 1] = 1;
+            } else if (prev == colW) {
+              colWidths[widthIndex + 1]++;
+            }
+          }
+        }
+      }
+      mapPos += colspan;
+      pos += cellNode.nodeSize;
+    }
+    const expectedPos = (row + 1) * width;
+    let missing = 0;
+    while (mapPos < expectedPos) if (map[mapPos++] == 0) missing++;
+    if (missing)
+      (problems || (problems = [])).push({ type: "missing", row, n: missing });
+    pos++;
+  }
+  if (width === 0 || height === 0)
+    (problems || (problems = [])).push({ type: "zero_sized" });
+  const tableMap = new TableMap(width, height, map, problems);
+  let badWidths = false;
+  for (let i = 0; !badWidths && i < colWidths.length; i += 2)
+    if (colWidths[i] != null && colWidths[i + 1] < height) badWidths = true;
+  if (badWidths) findBadColWidths(tableMap, colWidths, table);
+  return tableMap;
+}
+function findWidth(table) {
+  let width = -1;
+  let hasRowSpan = false;
+  for (let row = 0; row < table.childCount; row++) {
+    const rowNode = table.child(row);
+    let rowWidth = 0;
+    if (hasRowSpan)
+      for (let j = 0; j < row; j++) {
+        const prevRow = table.child(j);
+        for (let i = 0; i < prevRow.childCount; i++) {
+          const cell = prevRow.child(i);
+          if (j + cell.attrs.rowspan > row) rowWidth += cell.attrs.colspan;
+        }
+      }
+    for (let i = 0; i < rowNode.childCount; i++) {
+      const cell = rowNode.child(i);
+      rowWidth += cell.attrs.colspan;
+      if (cell.attrs.rowspan > 1) hasRowSpan = true;
+    }
+    if (width == -1) width = rowWidth;
+    else if (width != rowWidth) width = Math.max(width, rowWidth);
+  }
+  return width;
+}
+function findBadColWidths(map, colWidths, table) {
+  if (!map.problems) map.problems = [];
+  const seen = {};
+  for (let i = 0; i < map.map.length; i++) {
+    const pos = map.map[i];
+    if (seen[pos]) continue;
+    seen[pos] = true;
+    const node = table.nodeAt(pos);
+    if (!node) {
+      throw new RangeError(`No cell with offset ${pos} found`);
+    }
+    let updated = null;
+    const attrs = node.attrs;
+    for (let j = 0; j < attrs.colspan; j++) {
+      const col = (i + j) % map.width;
+      const colWidth = colWidths[col * 2];
+      if (colWidth != null && (!attrs.colwidth || attrs.colwidth[j] != colWidth))
+        (updated || (updated = freshColWidth(attrs)))[j] = colWidth;
+    }
+    if (updated)
+      map.problems.unshift({
+        type: "colwidth mismatch",
+        pos,
+        colwidth: updated
+      });
+  }
+}
+function freshColWidth(attrs) {
+  if (attrs.colwidth) return attrs.colwidth.slice();
+  const result = [];
+  for (let i = 0; i < attrs.colspan; i++) result.push(0);
+  return result;
+}
+
+// src/util.ts
+
+
+// src/schema.ts
+function getCellAttrs(dom, extraAttrs) {
+  if (typeof dom === "string") {
+    return {};
+  }
+  const widthAttr = dom.getAttribute("data-colwidth");
+  const widths = widthAttr && /^\d+(,\d+)*$/.test(widthAttr) ? widthAttr.split(",").map((s) => Number(s)) : null;
+  const colspan = Number(dom.getAttribute("colspan") || 1);
+  const result = {
+    colspan,
+    rowspan: Number(dom.getAttribute("rowspan") || 1),
+    colwidth: widths && widths.length == colspan ? widths : null
+  };
+  for (const prop in extraAttrs) {
+    const getter = extraAttrs[prop].getFromDOM;
+    const value = getter && getter(dom);
+    if (value != null) {
+      result[prop] = value;
+    }
+  }
+  return result;
+}
+function setCellAttrs(node, extraAttrs) {
+  const attrs = {};
+  if (node.attrs.colspan != 1) attrs.colspan = node.attrs.colspan;
+  if (node.attrs.rowspan != 1) attrs.rowspan = node.attrs.rowspan;
+  if (node.attrs.colwidth)
+    attrs["data-colwidth"] = node.attrs.colwidth.join(",");
+  for (const prop in extraAttrs) {
+    const setter = extraAttrs[prop].setDOMAttr;
+    if (setter) setter(node.attrs[prop], attrs);
+  }
+  return attrs;
+}
+function validateColwidth(value) {
+  if (value === null) {
+    return;
+  }
+  if (!Array.isArray(value)) {
+    throw new TypeError("colwidth must be null or an array");
+  }
+  for (const item of value) {
+    if (typeof item !== "number") {
+      throw new TypeError("colwidth must be null or an array of numbers");
+    }
+  }
+}
+function tableNodes(options) {
+  const extraAttrs = options.cellAttributes || {};
+  const cellAttrs = {
+    colspan: { default: 1, validate: "number" },
+    rowspan: { default: 1, validate: "number" },
+    colwidth: { default: null, validate: validateColwidth }
+  };
+  for (const prop in extraAttrs)
+    cellAttrs[prop] = {
+      default: extraAttrs[prop].default,
+      validate: extraAttrs[prop].validate
+    };
+  return {
+    table: {
+      content: "table_row+",
+      tableRole: "table",
+      isolating: true,
+      group: options.tableGroup,
+      parseDOM: [{ tag: "table" }],
+      toDOM() {
+        return ["table", ["tbody", 0]];
+      }
+    },
+    table_row: {
+      content: "(table_cell | table_header)*",
+      tableRole: "row",
+      parseDOM: [{ tag: "tr" }],
+      toDOM() {
+        return ["tr", 0];
+      }
+    },
+    table_cell: {
+      content: options.cellContent,
+      attrs: cellAttrs,
+      tableRole: "cell",
+      isolating: true,
+      parseDOM: [
+        { tag: "td", getAttrs: (dom) => getCellAttrs(dom, extraAttrs) }
+      ],
+      toDOM(node) {
+        return ["td", setCellAttrs(node, extraAttrs), 0];
+      }
+    },
+    table_header: {
+      content: options.cellContent,
+      attrs: cellAttrs,
+      tableRole: "header_cell",
+      isolating: true,
+      parseDOM: [
+        { tag: "th", getAttrs: (dom) => getCellAttrs(dom, extraAttrs) }
+      ],
+      toDOM(node) {
+        return ["th", setCellAttrs(node, extraAttrs), 0];
+      }
+    }
+  };
+}
+function tableNodeTypes(schema) {
+  let result = schema.cached.tableNodeTypes;
+  if (!result) {
+    result = schema.cached.tableNodeTypes = {};
+    for (const name in schema.nodes) {
+      const type = schema.nodes[name], role = type.spec.tableRole;
+      if (role) result[role] = type;
+    }
+  }
+  return result;
+}
+
+// src/util.ts
+var tableEditingKey = new PluginKey("selectingCells");
+function cellAround($pos) {
+  for (let d = $pos.depth - 1; d > 0; d--)
+    if ($pos.node(d).type.spec.tableRole == "row")
+      return $pos.node(0).resolve($pos.before(d + 1));
+  return null;
+}
+function cellWrapping($pos) {
+  for (let d = $pos.depth; d > 0; d--) {
+    const role = $pos.node(d).type.spec.tableRole;
+    if (role === "cell" || role === "header_cell") return $pos.node(d);
+  }
+  return null;
+}
+function isInTable(state) {
+  const $head = state.selection.$head;
+  for (let d = $head.depth; d > 0; d--)
+    if ($head.node(d).type.spec.tableRole == "row") return true;
+  return false;
+}
+function selectionCell(state) {
+  const sel = state.selection;
+  if ("$anchorCell" in sel && sel.$anchorCell) {
+    return sel.$anchorCell.pos > sel.$headCell.pos ? sel.$anchorCell : sel.$headCell;
+  } else if ("node" in sel && sel.node && sel.node.type.spec.tableRole == "cell") {
+    return sel.$anchor;
+  }
+  const $cell = cellAround(sel.$head) || cellNear(sel.$head);
+  if ($cell) {
+    return $cell;
+  }
+  throw new RangeError(`No cell found around position ${sel.head}`);
+}
+function cellNear($pos) {
+  for (let after = $pos.nodeAfter, pos = $pos.pos; after; after = after.firstChild, pos++) {
+    const role = after.type.spec.tableRole;
+    if (role == "cell" || role == "header_cell") return $pos.doc.resolve(pos);
+  }
+  for (let before = $pos.nodeBefore, pos = $pos.pos; before; before = before.lastChild, pos--) {
+    const role = before.type.spec.tableRole;
+    if (role == "cell" || role == "header_cell")
+      return $pos.doc.resolve(pos - before.nodeSize);
+  }
+}
+function pointsAtCell($pos) {
+  return $pos.parent.type.spec.tableRole == "row" && !!$pos.nodeAfter;
+}
+function moveCellForward($pos) {
+  return $pos.node(0).resolve($pos.pos + $pos.nodeAfter.nodeSize);
+}
+function inSameTable($cellA, $cellB) {
+  return $cellA.depth == $cellB.depth && $cellA.pos >= $cellB.start(-1) && $cellA.pos <= $cellB.end(-1);
+}
+function findCell($pos) {
+  return TableMap.get($pos.node(-1)).findCell($pos.pos - $pos.start(-1));
+}
+function colCount($pos) {
+  return TableMap.get($pos.node(-1)).colCount($pos.pos - $pos.start(-1));
+}
+function nextCell($pos, axis, dir) {
+  const table = $pos.node(-1);
+  const map = TableMap.get(table);
+  const tableStart = $pos.start(-1);
+  const moved = map.nextCell($pos.pos - tableStart, axis, dir);
+  return moved == null ? null : $pos.node(0).resolve(tableStart + moved);
+}
+function removeColSpan(attrs, pos, n = 1) {
+  const result = { ...attrs, colspan: attrs.colspan - n };
+  if (result.colwidth) {
+    result.colwidth = result.colwidth.slice();
+    result.colwidth.splice(pos, n);
+    if (!result.colwidth.some((w) => w > 0)) result.colwidth = null;
+  }
+  return result;
+}
+function addColSpan(attrs, pos, n = 1) {
+  const result = { ...attrs, colspan: attrs.colspan + n };
+  if (result.colwidth) {
+    result.colwidth = result.colwidth.slice();
+    for (let i = 0; i < n; i++) result.colwidth.splice(pos, 0, 0);
+  }
+  return result;
+}
+function columnIsHeader(map, table, col) {
+  const headerCell = tableNodeTypes(table.type.schema).header_cell;
+  for (let row = 0; row < map.height; row++)
+    if (table.nodeAt(map.map[col + row * map.width]).type != headerCell)
+      return false;
+  return true;
+}
+
+// src/cellselection.ts
+var CellSelection = class _CellSelection extends dist_Selection {
+  // A table selection is identified by its anchor and head cells. The
+  // positions given to this constructor should point _before_ two
+  // cells in the same table. They may be the same, to select a single
+  // cell.
+  constructor($anchorCell, $headCell = $anchorCell) {
+    const table = $anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = $anchorCell.start(-1);
+    const rect = map.rectBetween(
+      $anchorCell.pos - tableStart,
+      $headCell.pos - tableStart
+    );
+    const doc = $anchorCell.node(0);
+    const cells = map.cellsInRect(rect).filter((p) => p != $headCell.pos - tableStart);
+    cells.unshift($headCell.pos - tableStart);
+    const ranges = cells.map((pos) => {
+      const cell = table.nodeAt(pos);
+      if (!cell) {
+        throw RangeError(`No cell with offset ${pos} found`);
+      }
+      const from = tableStart + pos + 1;
+      return new dist_SelectionRange(
+        doc.resolve(from),
+        doc.resolve(from + cell.content.size)
+      );
+    });
+    super(ranges[0].$from, ranges[0].$to, ranges);
+    this.$anchorCell = $anchorCell;
+    this.$headCell = $headCell;
+  }
+  map(doc, mapping) {
+    const $anchorCell = doc.resolve(mapping.map(this.$anchorCell.pos));
+    const $headCell = doc.resolve(mapping.map(this.$headCell.pos));
+    if (pointsAtCell($anchorCell) && pointsAtCell($headCell) && inSameTable($anchorCell, $headCell)) {
+      const tableChanged = this.$anchorCell.node(-1) != $anchorCell.node(-1);
+      if (tableChanged && this.isRowSelection())
+        return _CellSelection.rowSelection($anchorCell, $headCell);
+      else if (tableChanged && this.isColSelection())
+        return _CellSelection.colSelection($anchorCell, $headCell);
+      else return new _CellSelection($anchorCell, $headCell);
+    }
+    return dist_TextSelection.between($anchorCell, $headCell);
+  }
+  // Returns a rectangular slice of table rows containing the selected
+  // cells.
+  content() {
+    const table = this.$anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = this.$anchorCell.start(-1);
+    const rect = map.rectBetween(
+      this.$anchorCell.pos - tableStart,
+      this.$headCell.pos - tableStart
+    );
+    const seen = {};
+    const rows = [];
+    for (let row = rect.top; row < rect.bottom; row++) {
+      const rowContent = [];
+      for (let index = row * map.width + rect.left, col = rect.left; col < rect.right; col++, index++) {
+        const pos = map.map[index];
+        if (seen[pos]) continue;
+        seen[pos] = true;
+        const cellRect = map.findCell(pos);
+        let cell = table.nodeAt(pos);
+        if (!cell) {
+          throw RangeError(`No cell with offset ${pos} found`);
+        }
+        const extraLeft = rect.left - cellRect.left;
+        const extraRight = cellRect.right - rect.right;
+        if (extraLeft > 0 || extraRight > 0) {
+          let attrs = cell.attrs;
+          if (extraLeft > 0) {
+            attrs = removeColSpan(attrs, 0, extraLeft);
+          }
+          if (extraRight > 0) {
+            attrs = removeColSpan(
+              attrs,
+              attrs.colspan - extraRight,
+              extraRight
+            );
+          }
+          if (cellRect.left < rect.left) {
+            cell = cell.type.createAndFill(attrs);
+            if (!cell) {
+              throw RangeError(
+                `Could not create cell with attrs ${JSON.stringify(attrs)}`
+              );
+            }
+          } else {
+            cell = cell.type.create(attrs, cell.content);
+          }
+        }
+        if (cellRect.top < rect.top || cellRect.bottom > rect.bottom) {
+          const attrs = {
+            ...cell.attrs,
+            rowspan: Math.min(cellRect.bottom, rect.bottom) - Math.max(cellRect.top, rect.top)
+          };
+          if (cellRect.top < rect.top) {
+            cell = cell.type.createAndFill(attrs);
+          } else {
+            cell = cell.type.create(attrs, cell.content);
+          }
+        }
+        rowContent.push(cell);
+      }
+      rows.push(table.child(row).copy(dist_Fragment.from(rowContent)));
+    }
+    const fragment = this.isColSelection() && this.isRowSelection() ? table : rows;
+    return new dist_Slice(dist_Fragment.from(fragment), 1, 1);
+  }
+  replace(tr, content = dist_Slice.empty) {
+    const mapFrom = tr.steps.length, ranges = this.ranges;
+    for (let i = 0; i < ranges.length; i++) {
+      const { $from, $to } = ranges[i], mapping = tr.mapping.slice(mapFrom);
+      tr.replace(
+        mapping.map($from.pos),
+        mapping.map($to.pos),
+        i ? dist_Slice.empty : content
+      );
+    }
+    const sel = dist_Selection.findFrom(
+      tr.doc.resolve(tr.mapping.slice(mapFrom).map(this.to)),
+      -1
+    );
+    if (sel) tr.setSelection(sel);
+  }
+  replaceWith(tr, node) {
+    this.replace(tr, new dist_Slice(dist_Fragment.from(node), 0, 0));
+  }
+  forEachCell(f) {
+    const table = this.$anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = this.$anchorCell.start(-1);
+    const cells = map.cellsInRect(
+      map.rectBetween(
+        this.$anchorCell.pos - tableStart,
+        this.$headCell.pos - tableStart
+      )
+    );
+    for (let i = 0; i < cells.length; i++) {
+      f(table.nodeAt(cells[i]), tableStart + cells[i]);
+    }
+  }
+  // True if this selection goes all the way from the top to the
+  // bottom of the table.
+  isColSelection() {
+    const anchorTop = this.$anchorCell.index(-1);
+    const headTop = this.$headCell.index(-1);
+    if (Math.min(anchorTop, headTop) > 0) return false;
+    const anchorBottom = anchorTop + this.$anchorCell.nodeAfter.attrs.rowspan;
+    const headBottom = headTop + this.$headCell.nodeAfter.attrs.rowspan;
+    return Math.max(anchorBottom, headBottom) == this.$headCell.node(-1).childCount;
+  }
+  // Returns the smallest column selection that covers the given anchor
+  // and head cell.
+  static colSelection($anchorCell, $headCell = $anchorCell) {
+    const table = $anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = $anchorCell.start(-1);
+    const anchorRect = map.findCell($anchorCell.pos - tableStart);
+    const headRect = map.findCell($headCell.pos - tableStart);
+    const doc = $anchorCell.node(0);
+    if (anchorRect.top <= headRect.top) {
+      if (anchorRect.top > 0)
+        $anchorCell = doc.resolve(tableStart + map.map[anchorRect.left]);
+      if (headRect.bottom < map.height)
+        $headCell = doc.resolve(
+          tableStart + map.map[map.width * (map.height - 1) + headRect.right - 1]
+        );
+    } else {
+      if (headRect.top > 0)
+        $headCell = doc.resolve(tableStart + map.map[headRect.left]);
+      if (anchorRect.bottom < map.height)
+        $anchorCell = doc.resolve(
+          tableStart + map.map[map.width * (map.height - 1) + anchorRect.right - 1]
+        );
+    }
+    return new _CellSelection($anchorCell, $headCell);
+  }
+  // True if this selection goes all the way from the left to the
+  // right of the table.
+  isRowSelection() {
+    const table = this.$anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = this.$anchorCell.start(-1);
+    const anchorLeft = map.colCount(this.$anchorCell.pos - tableStart);
+    const headLeft = map.colCount(this.$headCell.pos - tableStart);
+    if (Math.min(anchorLeft, headLeft) > 0) return false;
+    const anchorRight = anchorLeft + this.$anchorCell.nodeAfter.attrs.colspan;
+    const headRight = headLeft + this.$headCell.nodeAfter.attrs.colspan;
+    return Math.max(anchorRight, headRight) == map.width;
+  }
+  eq(other) {
+    return other instanceof _CellSelection && other.$anchorCell.pos == this.$anchorCell.pos && other.$headCell.pos == this.$headCell.pos;
+  }
+  // Returns the smallest row selection that covers the given anchor
+  // and head cell.
+  static rowSelection($anchorCell, $headCell = $anchorCell) {
+    const table = $anchorCell.node(-1);
+    const map = TableMap.get(table);
+    const tableStart = $anchorCell.start(-1);
+    const anchorRect = map.findCell($anchorCell.pos - tableStart);
+    const headRect = map.findCell($headCell.pos - tableStart);
+    const doc = $anchorCell.node(0);
+    if (anchorRect.left <= headRect.left) {
+      if (anchorRect.left > 0)
+        $anchorCell = doc.resolve(
+          tableStart + map.map[anchorRect.top * map.width]
+        );
+      if (headRect.right < map.width)
+        $headCell = doc.resolve(
+          tableStart + map.map[map.width * (headRect.top + 1) - 1]
+        );
+    } else {
+      if (headRect.left > 0)
+        $headCell = doc.resolve(tableStart + map.map[headRect.top * map.width]);
+      if (anchorRect.right < map.width)
+        $anchorCell = doc.resolve(
+          tableStart + map.map[map.width * (anchorRect.top + 1) - 1]
+        );
+    }
+    return new _CellSelection($anchorCell, $headCell);
+  }
+  toJSON() {
+    return {
+      type: "cell",
+      anchor: this.$anchorCell.pos,
+      head: this.$headCell.pos
+    };
+  }
+  static fromJSON(doc, json) {
+    return new _CellSelection(doc.resolve(json.anchor), doc.resolve(json.head));
+  }
+  static create(doc, anchorCell, headCell = anchorCell) {
+    return new _CellSelection(doc.resolve(anchorCell), doc.resolve(headCell));
+  }
+  getBookmark() {
+    return new CellBookmark(this.$anchorCell.pos, this.$headCell.pos);
+  }
+};
+CellSelection.prototype.visible = false;
+dist_Selection.jsonID("cell", CellSelection);
+var CellBookmark = class _CellBookmark {
+  constructor(anchor, head) {
+    this.anchor = anchor;
+    this.head = head;
+  }
+  map(mapping) {
+    return new _CellBookmark(mapping.map(this.anchor), mapping.map(this.head));
+  }
+  resolve(doc) {
+    const $anchorCell = doc.resolve(this.anchor), $headCell = doc.resolve(this.head);
+    if ($anchorCell.parent.type.spec.tableRole == "row" && $headCell.parent.type.spec.tableRole == "row" && $anchorCell.index() < $anchorCell.parent.childCount && $headCell.index() < $headCell.parent.childCount && inSameTable($anchorCell, $headCell))
+      return new CellSelection($anchorCell, $headCell);
+    else return dist_Selection.near($headCell, 1);
+  }
+};
+function drawCellSelection(state) {
+  if (!(state.selection instanceof CellSelection)) return null;
+  const cells = [];
+  state.selection.forEachCell((node, pos) => {
+    cells.push(
+      Decoration.node(pos, pos + node.nodeSize, { class: "selectedCell" })
+    );
+  });
+  return DecorationSet.create(state.doc, cells);
+}
+function isCellBoundarySelection({ $from, $to }) {
+  if ($from.pos == $to.pos || $from.pos < $to.pos - 6) return false;
+  let afterFrom = $from.pos;
+  let beforeTo = $to.pos;
+  let depth = $from.depth;
+  for (; depth >= 0; depth--, afterFrom++)
+    if ($from.after(depth + 1) < $from.end(depth)) break;
+  for (let d = $to.depth; d >= 0; d--, beforeTo--)
+    if ($to.before(d + 1) > $to.start(d)) break;
+  return afterFrom == beforeTo && /row|table/.test($from.node(depth).type.spec.tableRole);
+}
+function isTextSelectionAcrossCells({ $from, $to }) {
+  let fromCellBoundaryNode;
+  let toCellBoundaryNode;
+  for (let i = $from.depth; i > 0; i--) {
+    const node = $from.node(i);
+    if (node.type.spec.tableRole === "cell" || node.type.spec.tableRole === "header_cell") {
+      fromCellBoundaryNode = node;
+      break;
+    }
+  }
+  for (let i = $to.depth; i > 0; i--) {
+    const node = $to.node(i);
+    if (node.type.spec.tableRole === "cell" || node.type.spec.tableRole === "header_cell") {
+      toCellBoundaryNode = node;
+      break;
+    }
+  }
+  return fromCellBoundaryNode !== toCellBoundaryNode && $to.parentOffset === 0;
+}
+function normalizeSelection(state, tr, allowTableNodeSelection) {
+  const sel = (tr || state).selection;
+  const doc = (tr || state).doc;
+  let normalize;
+  let role;
+  if (sel instanceof NodeSelection2 && (role = sel.node.type.spec.tableRole)) {
+    if (role == "cell" || role == "header_cell") {
+      normalize = CellSelection.create(doc, sel.from);
+    } else if (role == "row") {
+      const $cell = doc.resolve(sel.from + 1);
+      normalize = CellSelection.rowSelection($cell, $cell);
+    } else if (!allowTableNodeSelection) {
+      const map = TableMap.get(sel.node);
+      const start = sel.from + 1;
+      const lastCell = start + map.map[map.width * map.height - 1];
+      normalize = CellSelection.create(doc, start + 1, lastCell);
+    }
+  } else if (sel instanceof TextSelection && isCellBoundarySelection(sel)) {
+    normalize = TextSelection.create(doc, sel.from);
+  } else if (sel instanceof TextSelection && isTextSelectionAcrossCells(sel)) {
+    normalize = TextSelection.create(doc, sel.$from.start(), sel.$from.end());
+  }
+  if (normalize) (tr || (tr = state.tr)).setSelection(normalize);
+  return tr;
+}
+
+// src/fixtables.ts
+
+var fixTablesKey = new PluginKey("fix-tables");
+function changedDescendants(old, cur, offset, f) {
+  const oldSize = old.childCount, curSize = cur.childCount;
+  outer: for (let i = 0, j = 0; i < curSize; i++) {
+    const child = cur.child(i);
+    for (let scan = j, e = Math.min(oldSize, i + 3); scan < e; scan++) {
+      if (old.child(scan) == child) {
+        j = scan + 1;
+        offset += child.nodeSize;
+        continue outer;
+      }
+    }
+    f(child, offset);
+    if (j < oldSize && old.child(j).sameMarkup(child))
+      changedDescendants(old.child(j), child, offset + 1, f);
+    else child.nodesBetween(0, child.content.size, f, offset + 1);
+    offset += child.nodeSize;
+  }
+}
+function fixTables(state, oldState) {
+  let tr;
+  const check = (node, pos) => {
+    if (node.type.spec.tableRole == "table")
+      tr = fixTable(state, node, pos, tr);
+  };
+  if (!oldState) state.doc.descendants(check);
+  else if (oldState.doc != state.doc)
+    changedDescendants(oldState.doc, state.doc, 0, check);
+  return tr;
+}
+function fixTable(state, table, tablePos, tr) {
+  const map = TableMap.get(table);
+  if (!map.problems) return tr;
+  if (!tr) tr = state.tr;
+  const mustAdd = [];
+  for (let i = 0; i < map.height; i++) mustAdd.push(0);
+  for (let i = 0; i < map.problems.length; i++) {
+    const prob = map.problems[i];
+    if (prob.type == "collision") {
+      const cell = table.nodeAt(prob.pos);
+      if (!cell) continue;
+      const attrs = cell.attrs;
+      for (let j = 0; j < attrs.rowspan; j++) mustAdd[prob.row + j] += prob.n;
+      tr.setNodeMarkup(
+        tr.mapping.map(tablePos + 1 + prob.pos),
+        null,
+        removeColSpan(attrs, attrs.colspan - prob.n, prob.n)
+      );
+    } else if (prob.type == "missing") {
+      mustAdd[prob.row] += prob.n;
+    } else if (prob.type == "overlong_rowspan") {
+      const cell = table.nodeAt(prob.pos);
+      if (!cell) continue;
+      tr.setNodeMarkup(tr.mapping.map(tablePos + 1 + prob.pos), null, {
+        ...cell.attrs,
+        rowspan: cell.attrs.rowspan - prob.n
+      });
+    } else if (prob.type == "colwidth mismatch") {
+      const cell = table.nodeAt(prob.pos);
+      if (!cell) continue;
+      tr.setNodeMarkup(tr.mapping.map(tablePos + 1 + prob.pos), null, {
+        ...cell.attrs,
+        colwidth: prob.colwidth
+      });
+    } else if (prob.type == "zero_sized") {
+      const pos = tr.mapping.map(tablePos);
+      tr.delete(pos, pos + table.nodeSize);
+    }
+  }
+  let first, last;
+  for (let i = 0; i < mustAdd.length; i++)
+    if (mustAdd[i]) {
+      if (first == null) first = i;
+      last = i;
+    }
+  for (let i = 0, pos = tablePos + 1; i < map.height; i++) {
+    const row = table.child(i);
+    const end = pos + row.nodeSize;
+    const add = mustAdd[i];
+    if (add > 0) {
+      let role = "cell";
+      if (row.firstChild) {
+        role = row.firstChild.type.spec.tableRole;
+      }
+      const nodes = [];
+      for (let j = 0; j < add; j++) {
+        const node = tableNodeTypes(state.schema)[role].createAndFill();
+        if (node) nodes.push(node);
+      }
+      const side = (i == 0 || first == i - 1) && last == i ? pos + 1 : end - 1;
+      tr.insert(tr.mapping.map(side), nodes);
+    }
+    pos = end;
+  }
+  return tr.setMeta(fixTablesKey, { fixTables: true });
+}
+
+// src/input.ts
+
+
+
+
+// src/commands.ts
+
+
+function selectedRect(state) {
+  const sel = state.selection;
+  const $pos = selectionCell(state);
+  const table = $pos.node(-1);
+  const tableStart = $pos.start(-1);
+  const map = TableMap.get(table);
+  const rect = sel instanceof CellSelection ? map.rectBetween(
+    sel.$anchorCell.pos - tableStart,
+    sel.$headCell.pos - tableStart
+  ) : map.findCell($pos.pos - tableStart);
+  return { ...rect, tableStart, map, table };
+}
+function addColumn(tr, { map, tableStart, table }, col) {
+  let refColumn = col > 0 ? -1 : 0;
+  if (columnIsHeader(map, table, col + refColumn)) {
+    refColumn = col == 0 || col == map.width ? null : 0;
+  }
+  for (let row = 0; row < map.height; row++) {
+    const index = row * map.width + col;
+    if (col > 0 && col < map.width && map.map[index - 1] == map.map[index]) {
+      const pos = map.map[index];
+      const cell = table.nodeAt(pos);
+      tr.setNodeMarkup(
+        tr.mapping.map(tableStart + pos),
+        null,
+        addColSpan(cell.attrs, col - map.colCount(pos))
+      );
+      row += cell.attrs.rowspan - 1;
+    } else {
+      const type = refColumn == null ? tableNodeTypes(table.type.schema).cell : table.nodeAt(map.map[index + refColumn]).type;
+      const pos = map.positionAt(row, col, table);
+      tr.insert(tr.mapping.map(tableStart + pos), type.createAndFill());
+    }
+  }
+  return tr;
+}
+function addColumnBefore(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addColumn(state.tr, rect, rect.left));
+  }
+  return true;
+}
+function addColumnAfter(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addColumn(state.tr, rect, rect.right));
+  }
+  return true;
+}
+function removeColumn(tr, { map, table, tableStart }, col) {
+  const mapStart = tr.mapping.maps.length;
+  for (let row = 0; row < map.height; ) {
+    const index = row * map.width + col;
+    const pos = map.map[index];
+    const cell = table.nodeAt(pos);
+    const attrs = cell.attrs;
+    if (col > 0 && map.map[index - 1] == pos || col < map.width - 1 && map.map[index + 1] == pos) {
+      tr.setNodeMarkup(
+        tr.mapping.slice(mapStart).map(tableStart + pos),
+        null,
+        removeColSpan(attrs, col - map.colCount(pos))
+      );
+    } else {
+      const start = tr.mapping.slice(mapStart).map(tableStart + pos);
+      tr.delete(start, start + cell.nodeSize);
+    }
+    row += attrs.rowspan;
+  }
+}
+function deleteColumn(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    const tr = state.tr;
+    if (rect.left == 0 && rect.right == rect.map.width) return false;
+    for (let i = rect.right - 1; ; i--) {
+      removeColumn(tr, rect, i);
+      if (i == rect.left) break;
+      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
+      if (!table) {
+        throw RangeError("No table found");
+      }
+      rect.table = table;
+      rect.map = TableMap.get(table);
+    }
+    dispatch(tr);
+  }
+  return true;
+}
+function rowIsHeader(map, table, row) {
+  var _a;
+  const headerCell = tableNodeTypes(table.type.schema).header_cell;
+  for (let col = 0; col < map.width; col++)
+    if (((_a = table.nodeAt(map.map[col + row * map.width])) == null ? void 0 : _a.type) != headerCell)
+      return false;
+  return true;
+}
+function addRow(tr, { map, tableStart, table }, row) {
+  var _a;
+  let rowPos = tableStart;
+  for (let i = 0; i < row; i++) rowPos += table.child(i).nodeSize;
+  const cells = [];
+  let refRow = row > 0 ? -1 : 0;
+  if (rowIsHeader(map, table, row + refRow))
+    refRow = row == 0 || row == map.height ? null : 0;
+  for (let col = 0, index = map.width * row; col < map.width; col++, index++) {
+    if (row > 0 && row < map.height && map.map[index] == map.map[index - map.width]) {
+      const pos = map.map[index];
+      const attrs = table.nodeAt(pos).attrs;
+      tr.setNodeMarkup(tableStart + pos, null, {
+        ...attrs,
+        rowspan: attrs.rowspan + 1
+      });
+      col += attrs.colspan - 1;
+    } else {
+      const type = refRow == null ? tableNodeTypes(table.type.schema).cell : (_a = table.nodeAt(map.map[index + refRow * map.width])) == null ? void 0 : _a.type;
+      const node = type == null ? void 0 : type.createAndFill();
+      if (node) cells.push(node);
+    }
+  }
+  tr.insert(rowPos, tableNodeTypes(table.type.schema).row.create(null, cells));
+  return tr;
+}
+function addRowBefore(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addRow(state.tr, rect, rect.top));
+  }
+  return true;
+}
+function addRowAfter(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state);
+    dispatch(addRow(state.tr, rect, rect.bottom));
+  }
+  return true;
+}
+function removeRow(tr, { map, table, tableStart }, row) {
+  let rowPos = 0;
+  for (let i = 0; i < row; i++) rowPos += table.child(i).nodeSize;
+  const nextRow = rowPos + table.child(row).nodeSize;
+  const mapFrom = tr.mapping.maps.length;
+  tr.delete(rowPos + tableStart, nextRow + tableStart);
+  const seen = /* @__PURE__ */ new Set();
+  for (let col = 0, index = row * map.width; col < map.width; col++, index++) {
+    const pos = map.map[index];
+    if (seen.has(pos)) continue;
+    seen.add(pos);
+    if (row > 0 && pos == map.map[index - map.width]) {
+      const attrs = table.nodeAt(pos).attrs;
+      tr.setNodeMarkup(tr.mapping.slice(mapFrom).map(pos + tableStart), null, {
+        ...attrs,
+        rowspan: attrs.rowspan - 1
+      });
+      col += attrs.colspan - 1;
+    } else if (row < map.height && pos == map.map[index + map.width]) {
+      const cell = table.nodeAt(pos);
+      const attrs = cell.attrs;
+      const copy = cell.type.create(
+        { ...attrs, rowspan: cell.attrs.rowspan - 1 },
+        cell.content
+      );
+      const newPos = map.positionAt(row + 1, col, table);
+      tr.insert(tr.mapping.slice(mapFrom).map(tableStart + newPos), copy);
+      col += attrs.colspan - 1;
+    }
+  }
+}
+function deleteRow(state, dispatch) {
+  if (!isInTable(state)) return false;
+  if (dispatch) {
+    const rect = selectedRect(state), tr = state.tr;
+    if (rect.top == 0 && rect.bottom == rect.map.height) return false;
+    for (let i = rect.bottom - 1; ; i--) {
+      removeRow(tr, rect, i);
+      if (i == rect.top) break;
+      const table = rect.tableStart ? tr.doc.nodeAt(rect.tableStart - 1) : tr.doc;
+      if (!table) {
+        throw RangeError("No table found");
+      }
+      rect.table = table;
+      rect.map = TableMap.get(rect.table);
+    }
+    dispatch(tr);
+  }
+  return true;
+}
+function dist_isEmpty(cell) {
+  const c = cell.content;
+  return c.childCount == 1 && c.child(0).isTextblock && c.child(0).childCount == 0;
+}
+function cellsOverlapRectangle({ width, height, map }, rect) {
+  let indexTop = rect.top * width + rect.left, indexLeft = indexTop;
+  let indexBottom = (rect.bottom - 1) * width + rect.left, indexRight = indexTop + (rect.right - rect.left - 1);
+  for (let i = rect.top; i < rect.bottom; i++) {
+    if (rect.left > 0 && map[indexLeft] == map[indexLeft - 1] || rect.right < width && map[indexRight] == map[indexRight + 1])
+      return true;
+    indexLeft += width;
+    indexRight += width;
+  }
+  for (let i = rect.left; i < rect.right; i++) {
+    if (rect.top > 0 && map[indexTop] == map[indexTop - width] || rect.bottom < height && map[indexBottom] == map[indexBottom + width])
+      return true;
+    indexTop++;
+    indexBottom++;
+  }
+  return false;
+}
+function mergeCells(state, dispatch) {
+  const sel = state.selection;
+  if (!(sel instanceof CellSelection) || sel.$anchorCell.pos == sel.$headCell.pos)
+    return false;
+  const rect = selectedRect(state), { map } = rect;
+  if (cellsOverlapRectangle(map, rect)) return false;
+  if (dispatch) {
+    const tr = state.tr;
+    const seen = {};
+    let content = Fragment2.empty;
+    let mergedPos;
+    let mergedCell;
+    for (let row = rect.top; row < rect.bottom; row++) {
+      for (let col = rect.left; col < rect.right; col++) {
+        const cellPos = map.map[row * map.width + col];
+        const cell = rect.table.nodeAt(cellPos);
+        if (seen[cellPos] || !cell) continue;
+        seen[cellPos] = true;
+        if (mergedPos == null) {
+          mergedPos = cellPos;
+          mergedCell = cell;
+        } else {
+          if (!dist_isEmpty(cell)) content = content.append(cell.content);
+          const mapped = tr.mapping.map(cellPos + rect.tableStart);
+          tr.delete(mapped, mapped + cell.nodeSize);
+        }
+      }
+    }
+    if (mergedPos == null || mergedCell == null) {
+      return true;
+    }
+    tr.setNodeMarkup(mergedPos + rect.tableStart, null, {
+      ...addColSpan(
+        mergedCell.attrs,
+        mergedCell.attrs.colspan,
+        rect.right - rect.left - mergedCell.attrs.colspan
+      ),
+      rowspan: rect.bottom - rect.top
+    });
+    if (content.size) {
+      const end = mergedPos + 1 + mergedCell.content.size;
+      const start = dist_isEmpty(mergedCell) ? mergedPos + 1 : end;
+      tr.replaceWith(start + rect.tableStart, end + rect.tableStart, content);
+    }
+    tr.setSelection(
+      new CellSelection(tr.doc.resolve(mergedPos + rect.tableStart))
+    );
+    dispatch(tr);
+  }
+  return true;
+}
+function splitCell(state, dispatch) {
+  const nodeTypes = tableNodeTypes(state.schema);
+  return splitCellWithType(({ node }) => {
+    return nodeTypes[node.type.spec.tableRole];
+  })(state, dispatch);
+}
+function splitCellWithType(getCellType) {
+  return (state, dispatch) => {
+    var _a;
+    const sel = state.selection;
+    let cellNode;
+    let cellPos;
+    if (!(sel instanceof CellSelection)) {
+      cellNode = cellWrapping(sel.$from);
+      if (!cellNode) return false;
+      cellPos = (_a = cellAround(sel.$from)) == null ? void 0 : _a.pos;
+    } else {
+      if (sel.$anchorCell.pos != sel.$headCell.pos) return false;
+      cellNode = sel.$anchorCell.nodeAfter;
+      cellPos = sel.$anchorCell.pos;
+    }
+    if (cellNode == null || cellPos == null) {
+      return false;
+    }
+    if (cellNode.attrs.colspan == 1 && cellNode.attrs.rowspan == 1) {
+      return false;
+    }
+    if (dispatch) {
+      let baseAttrs = cellNode.attrs;
+      const attrs = [];
+      const colwidth = baseAttrs.colwidth;
+      if (baseAttrs.rowspan > 1) baseAttrs = { ...baseAttrs, rowspan: 1 };
+      if (baseAttrs.colspan > 1) baseAttrs = { ...baseAttrs, colspan: 1 };
+      const rect = selectedRect(state), tr = state.tr;
+      for (let i = 0; i < rect.right - rect.left; i++)
+        attrs.push(
+          colwidth ? {
+            ...baseAttrs,
+            colwidth: colwidth && colwidth[i] ? [colwidth[i]] : null
+          } : baseAttrs
+        );
+      let lastCell;
+      for (let row = rect.top; row < rect.bottom; row++) {
+        let pos = rect.map.positionAt(row, rect.left, rect.table);
+        if (row == rect.top) pos += cellNode.nodeSize;
+        for (let col = rect.left, i = 0; col < rect.right; col++, i++) {
+          if (col == rect.left && row == rect.top) continue;
+          tr.insert(
+            lastCell = tr.mapping.map(pos + rect.tableStart, 1),
+            getCellType({ node: cellNode, row, col }).createAndFill(attrs[i])
+          );
+        }
+      }
+      tr.setNodeMarkup(
+        cellPos,
+        getCellType({ node: cellNode, row: rect.top, col: rect.left }),
+        attrs[0]
+      );
+      if (sel instanceof CellSelection)
+        tr.setSelection(
+          new CellSelection(
+            tr.doc.resolve(sel.$anchorCell.pos),
+            lastCell ? tr.doc.resolve(lastCell) : void 0
+          )
+        );
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+function setCellAttr(name, value) {
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    const $cell = selectionCell(state);
+    if ($cell.nodeAfter.attrs[name] === value) return false;
+    if (dispatch) {
+      const tr = state.tr;
+      if (state.selection instanceof CellSelection)
+        state.selection.forEachCell((node, pos) => {
+          if (node.attrs[name] !== value)
+            tr.setNodeMarkup(pos, null, {
+              ...node.attrs,
+              [name]: value
+            });
+        });
+      else
+        tr.setNodeMarkup($cell.pos, null, {
+          ...$cell.nodeAfter.attrs,
+          [name]: value
+        });
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+function deprecated_toggleHeader(type) {
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    if (dispatch) {
+      const types = tableNodeTypes(state.schema);
+      const rect = selectedRect(state), tr = state.tr;
+      const cells = rect.map.cellsInRect(
+        type == "column" ? {
+          left: rect.left,
+          top: 0,
+          right: rect.right,
+          bottom: rect.map.height
+        } : type == "row" ? {
+          left: 0,
+          top: rect.top,
+          right: rect.map.width,
+          bottom: rect.bottom
+        } : rect
+      );
+      const nodes = cells.map((pos) => rect.table.nodeAt(pos));
+      for (let i = 0; i < cells.length; i++)
+        if (nodes[i].type == types.header_cell)
+          tr.setNodeMarkup(
+            rect.tableStart + cells[i],
+            types.cell,
+            nodes[i].attrs
+          );
+      if (tr.steps.length == 0)
+        for (let i = 0; i < cells.length; i++)
+          tr.setNodeMarkup(
+            rect.tableStart + cells[i],
+            types.header_cell,
+            nodes[i].attrs
+          );
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+function isHeaderEnabledByType(type, rect, types) {
+  const cellPositions = rect.map.cellsInRect({
+    left: 0,
+    top: 0,
+    right: type == "row" ? rect.map.width : 1,
+    bottom: type == "column" ? rect.map.height : 1
+  });
+  for (let i = 0; i < cellPositions.length; i++) {
+    const cell = rect.table.nodeAt(cellPositions[i]);
+    if (cell && cell.type !== types.header_cell) {
+      return false;
+    }
+  }
+  return true;
+}
+function toggleHeader(type, options) {
+  options = options || { useDeprecatedLogic: false };
+  if (options.useDeprecatedLogic) return deprecated_toggleHeader(type);
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    if (dispatch) {
+      const types = tableNodeTypes(state.schema);
+      const rect = selectedRect(state), tr = state.tr;
+      const isHeaderRowEnabled = isHeaderEnabledByType("row", rect, types);
+      const isHeaderColumnEnabled = isHeaderEnabledByType(
+        "column",
+        rect,
+        types
+      );
+      const isHeaderEnabled = type === "column" ? isHeaderRowEnabled : type === "row" ? isHeaderColumnEnabled : false;
+      const selectionStartsAt = isHeaderEnabled ? 1 : 0;
+      const cellsRect = type == "column" ? {
+        left: 0,
+        top: selectionStartsAt,
+        right: 1,
+        bottom: rect.map.height
+      } : type == "row" ? {
+        left: selectionStartsAt,
+        top: 0,
+        right: rect.map.width,
+        bottom: 1
+      } : rect;
+      const newType = type == "column" ? isHeaderColumnEnabled ? types.cell : types.header_cell : type == "row" ? isHeaderRowEnabled ? types.cell : types.header_cell : types.cell;
+      rect.map.cellsInRect(cellsRect).forEach((relativeCellPos) => {
+        const cellPos = relativeCellPos + rect.tableStart;
+        const cell = tr.doc.nodeAt(cellPos);
+        if (cell) {
+          tr.setNodeMarkup(cellPos, newType, cell.attrs);
+        }
+      });
+      dispatch(tr);
+    }
+    return true;
+  };
+}
+var toggleHeaderRow = toggleHeader("row", {
+  useDeprecatedLogic: true
+});
+var toggleHeaderColumn = toggleHeader("column", {
+  useDeprecatedLogic: true
+});
+var toggleHeaderCell = toggleHeader("cell", {
+  useDeprecatedLogic: true
+});
+function findNextCell($cell, dir) {
+  if (dir < 0) {
+    const before = $cell.nodeBefore;
+    if (before) return $cell.pos - before.nodeSize;
+    for (let row = $cell.index(-1) - 1, rowEnd = $cell.before(); row >= 0; row--) {
+      const rowNode = $cell.node(-1).child(row);
+      const lastChild = rowNode.lastChild;
+      if (lastChild) {
+        return rowEnd - 1 - lastChild.nodeSize;
+      }
+      rowEnd -= rowNode.nodeSize;
+    }
+  } else {
+    if ($cell.index() < $cell.parent.childCount - 1) {
+      return $cell.pos + $cell.nodeAfter.nodeSize;
+    }
+    const table = $cell.node(-1);
+    for (let row = $cell.indexAfter(-1), rowStart = $cell.after(); row < table.childCount; row++) {
+      const rowNode = table.child(row);
+      if (rowNode.childCount) return rowStart + 1;
+      rowStart += rowNode.nodeSize;
+    }
+  }
+  return null;
+}
+function goToNextCell(direction) {
+  return function(state, dispatch) {
+    if (!isInTable(state)) return false;
+    const cell = findNextCell(selectionCell(state), direction);
+    if (cell == null) return false;
+    if (dispatch) {
+      const $cell = state.doc.resolve(cell);
+      dispatch(
+        state.tr.setSelection(TextSelection2.between($cell, moveCellForward($cell))).scrollIntoView()
+      );
+    }
+    return true;
+  };
+}
+function deleteTable(state, dispatch) {
+  const $pos = state.selection.$anchor;
+  for (let d = $pos.depth; d > 0; d--) {
+    const node = $pos.node(d);
+    if (node.type.spec.tableRole == "table") {
+      if (dispatch)
+        dispatch(
+          state.tr.delete($pos.before(d), $pos.after(d)).scrollIntoView()
+        );
+      return true;
+    }
+  }
+  return false;
+}
+function deleteCellSelection(state, dispatch) {
+  const sel = state.selection;
+  if (!(sel instanceof CellSelection)) return false;
+  if (dispatch) {
+    const tr = state.tr;
+    const baseContent = tableNodeTypes(state.schema).cell.createAndFill().content;
+    sel.forEachCell((cell, pos) => {
+      if (!cell.content.eq(baseContent))
+        tr.replace(
+          tr.mapping.map(pos + 1),
+          tr.mapping.map(pos + cell.nodeSize - 1),
+          new dist_Slice(baseContent, 0, 0)
+        );
+    });
+    if (tr.docChanged) dispatch(tr);
+  }
+  return true;
+}
+
+// src/copypaste.ts
+
+
+function pastedCells(slice) {
+  if (!slice.size) return null;
+  let { content, openStart, openEnd } = slice;
+  while (content.childCount == 1 && (openStart > 0 && openEnd > 0 || content.child(0).type.spec.tableRole == "table")) {
+    openStart--;
+    openEnd--;
+    content = content.child(0).content;
+  }
+  const first = content.child(0);
+  const role = first.type.spec.tableRole;
+  const schema = first.type.schema, rows = [];
+  if (role == "row") {
+    for (let i = 0; i < content.childCount; i++) {
+      let cells = content.child(i).content;
+      const left = i ? 0 : Math.max(0, openStart - 1);
+      const right = i < content.childCount - 1 ? 0 : Math.max(0, openEnd - 1);
+      if (left || right)
+        cells = fitSlice(
+          tableNodeTypes(schema).row,
+          new Slice3(cells, left, right)
+        ).content;
+      rows.push(cells);
+    }
+  } else if (role == "cell" || role == "header_cell") {
+    rows.push(
+      openStart || openEnd ? fitSlice(
+        tableNodeTypes(schema).row,
+        new Slice3(content, openStart, openEnd)
+      ).content : content
+    );
+  } else {
+    return null;
+  }
+  return ensureRectangular(schema, rows);
+}
+function ensureRectangular(schema, rows) {
+  const widths = [];
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    for (let j = row.childCount - 1; j >= 0; j--) {
+      const { rowspan, colspan } = row.child(j).attrs;
+      for (let r = i; r < i + rowspan; r++)
+        widths[r] = (widths[r] || 0) + colspan;
+    }
+  }
+  let width = 0;
+  for (let r = 0; r < widths.length; r++) width = Math.max(width, widths[r]);
+  for (let r = 0; r < widths.length; r++) {
+    if (r >= rows.length) rows.push(Fragment3.empty);
+    if (widths[r] < width) {
+      const empty = tableNodeTypes(schema).cell.createAndFill();
+      const cells = [];
+      for (let i = widths[r]; i < width; i++) {
+        cells.push(empty);
+      }
+      rows[r] = rows[r].append(Fragment3.from(cells));
+    }
+  }
+  return { height: rows.length, width, rows };
+}
+function fitSlice(nodeType, slice) {
+  const node = nodeType.createAndFill();
+  const tr = new Transform(node).replace(0, node.content.size, slice);
+  return tr.doc;
+}
+function clipCells({ width, height, rows }, newWidth, newHeight) {
+  if (width != newWidth) {
+    const added = [];
+    const newRows = [];
+    for (let row = 0; row < rows.length; row++) {
+      const frag = rows[row], cells = [];
+      for (let col = added[row] || 0, i = 0; col < newWidth; i++) {
+        let cell = frag.child(i % frag.childCount);
+        if (col + cell.attrs.colspan > newWidth)
+          cell = cell.type.createChecked(
+            removeColSpan(
+              cell.attrs,
+              cell.attrs.colspan,
+              col + cell.attrs.colspan - newWidth
+            ),
+            cell.content
+          );
+        cells.push(cell);
+        col += cell.attrs.colspan;
+        for (let j = 1; j < cell.attrs.rowspan; j++)
+          added[row + j] = (added[row + j] || 0) + cell.attrs.colspan;
+      }
+      newRows.push(Fragment3.from(cells));
+    }
+    rows = newRows;
+    width = newWidth;
+  }
+  if (height != newHeight) {
+    const newRows = [];
+    for (let row = 0, i = 0; row < newHeight; row++, i++) {
+      const cells = [], source = rows[i % height];
+      for (let j = 0; j < source.childCount; j++) {
+        let cell = source.child(j);
+        if (row + cell.attrs.rowspan > newHeight)
+          cell = cell.type.create(
+            {
+              ...cell.attrs,
+              rowspan: Math.max(1, newHeight - cell.attrs.rowspan)
+            },
+            cell.content
+          );
+        cells.push(cell);
+      }
+      newRows.push(Fragment3.from(cells));
+    }
+    rows = newRows;
+    height = newHeight;
+  }
+  return { width, height, rows };
+}
+function growTable(tr, map, table, start, width, height, mapFrom) {
+  const schema = tr.doc.type.schema;
+  const types = tableNodeTypes(schema);
+  let empty;
+  let emptyHead;
+  if (width > map.width) {
+    for (let row = 0, rowEnd = 0; row < map.height; row++) {
+      const rowNode = table.child(row);
+      rowEnd += rowNode.nodeSize;
+      const cells = [];
+      let add;
+      if (rowNode.lastChild == null || rowNode.lastChild.type == types.cell)
+        add = empty || (empty = types.cell.createAndFill());
+      else add = emptyHead || (emptyHead = types.header_cell.createAndFill());
+      for (let i = map.width; i < width; i++) cells.push(add);
+      tr.insert(tr.mapping.slice(mapFrom).map(rowEnd - 1 + start), cells);
+    }
+  }
+  if (height > map.height) {
+    const cells = [];
+    for (let i = 0, start2 = (map.height - 1) * map.width; i < Math.max(map.width, width); i++) {
+      const header = i >= map.width ? false : table.nodeAt(map.map[start2 + i]).type == types.header_cell;
+      cells.push(
+        header ? emptyHead || (emptyHead = types.header_cell.createAndFill()) : empty || (empty = types.cell.createAndFill())
+      );
+    }
+    const emptyRow = types.row.create(null, Fragment3.from(cells)), rows = [];
+    for (let i = map.height; i < height; i++) rows.push(emptyRow);
+    tr.insert(tr.mapping.slice(mapFrom).map(start + table.nodeSize - 2), rows);
+  }
+  return !!(empty || emptyHead);
+}
+function isolateHorizontal(tr, map, table, start, left, right, top, mapFrom) {
+  if (top == 0 || top == map.height) return false;
+  let found = false;
+  for (let col = left; col < right; col++) {
+    const index = top * map.width + col, pos = map.map[index];
+    if (map.map[index - map.width] == pos) {
+      found = true;
+      const cell = table.nodeAt(pos);
+      const { top: cellTop, left: cellLeft } = map.findCell(pos);
+      tr.setNodeMarkup(tr.mapping.slice(mapFrom).map(pos + start), null, {
+        ...cell.attrs,
+        rowspan: top - cellTop
+      });
+      tr.insert(
+        tr.mapping.slice(mapFrom).map(map.positionAt(top, cellLeft, table)),
+        cell.type.createAndFill({
+          ...cell.attrs,
+          rowspan: cellTop + cell.attrs.rowspan - top
+        })
+      );
+      col += cell.attrs.colspan - 1;
+    }
+  }
+  return found;
+}
+function isolateVertical(tr, map, table, start, top, bottom, left, mapFrom) {
+  if (left == 0 || left == map.width) return false;
+  let found = false;
+  for (let row = top; row < bottom; row++) {
+    const index = row * map.width + left, pos = map.map[index];
+    if (map.map[index - 1] == pos) {
+      found = true;
+      const cell = table.nodeAt(pos);
+      const cellLeft = map.colCount(pos);
+      const updatePos = tr.mapping.slice(mapFrom).map(pos + start);
+      tr.setNodeMarkup(
+        updatePos,
+        null,
+        removeColSpan(
+          cell.attrs,
+          left - cellLeft,
+          cell.attrs.colspan - (left - cellLeft)
+        )
+      );
+      tr.insert(
+        updatePos + cell.nodeSize,
+        cell.type.createAndFill(
+          removeColSpan(cell.attrs, 0, left - cellLeft)
+        )
+      );
+      row += cell.attrs.rowspan - 1;
+    }
+  }
+  return found;
+}
+function insertCells(state, dispatch, tableStart, rect, cells) {
+  let table = tableStart ? state.doc.nodeAt(tableStart - 1) : state.doc;
+  if (!table) {
+    throw new Error("No table found");
+  }
+  let map = TableMap.get(table);
+  const { top, left } = rect;
+  const right = left + cells.width, bottom = top + cells.height;
+  const tr = state.tr;
+  let mapFrom = 0;
+  function recomp() {
+    table = tableStart ? tr.doc.nodeAt(tableStart - 1) : tr.doc;
+    if (!table) {
+      throw new Error("No table found");
+    }
+    map = TableMap.get(table);
+    mapFrom = tr.mapping.maps.length;
+  }
+  if (growTable(tr, map, table, tableStart, right, bottom, mapFrom)) recomp();
+  if (isolateHorizontal(tr, map, table, tableStart, left, right, top, mapFrom))
+    recomp();
+  if (isolateHorizontal(tr, map, table, tableStart, left, right, bottom, mapFrom))
+    recomp();
+  if (isolateVertical(tr, map, table, tableStart, top, bottom, left, mapFrom))
+    recomp();
+  if (isolateVertical(tr, map, table, tableStart, top, bottom, right, mapFrom))
+    recomp();
+  for (let row = top; row < bottom; row++) {
+    const from = map.positionAt(row, left, table), to = map.positionAt(row, right, table);
+    tr.replace(
+      tr.mapping.slice(mapFrom).map(from + tableStart),
+      tr.mapping.slice(mapFrom).map(to + tableStart),
+      new Slice3(cells.rows[row - top], 0, 0)
+    );
+  }
+  recomp();
+  tr.setSelection(
+    new CellSelection(
+      tr.doc.resolve(tableStart + map.positionAt(top, left, table)),
+      tr.doc.resolve(tableStart + map.positionAt(bottom - 1, right - 1, table))
+    )
+  );
+  dispatch(tr);
+}
+
+// src/input.ts
+var dist_handleKeyDown = keydownHandler({
+  ArrowLeft: dist_arrow("horiz", -1),
+  ArrowRight: dist_arrow("horiz", 1),
+  ArrowUp: dist_arrow("vert", -1),
+  ArrowDown: dist_arrow("vert", 1),
+  "Shift-ArrowLeft": shiftArrow("horiz", -1),
+  "Shift-ArrowRight": shiftArrow("horiz", 1),
+  "Shift-ArrowUp": shiftArrow("vert", -1),
+  "Shift-ArrowDown": shiftArrow("vert", 1),
+  Backspace: deleteCellSelection,
+  "Mod-Backspace": deleteCellSelection,
+  Delete: deleteCellSelection,
+  "Mod-Delete": deleteCellSelection
+});
+function maybeSetSelection(state, dispatch, selection) {
+  if (selection.eq(state.selection)) return false;
+  if (dispatch) dispatch(state.tr.setSelection(selection).scrollIntoView());
+  return true;
+}
+function dist_arrow(axis, dir) {
+  return (state, dispatch, view) => {
+    if (!view) return false;
+    const sel = state.selection;
+    if (sel instanceof CellSelection) {
+      return maybeSetSelection(
+        state,
+        dispatch,
+        dist_Selection.near(sel.$headCell, dir)
+      );
+    }
+    if (axis != "horiz" && !sel.empty) return false;
+    const end = atEndOfCell(view, axis, dir);
+    if (end == null) return false;
+    if (axis == "horiz") {
+      return maybeSetSelection(
+        state,
+        dispatch,
+        dist_Selection.near(state.doc.resolve(sel.head + dir), dir)
+      );
+    } else {
+      const $cell = state.doc.resolve(end);
+      const $next = nextCell($cell, axis, dir);
+      let newSel;
+      if ($next) newSel = dist_Selection.near($next, 1);
+      else if (dir < 0)
+        newSel = dist_Selection.near(state.doc.resolve($cell.before(-1)), -1);
+      else newSel = dist_Selection.near(state.doc.resolve($cell.after(-1)), 1);
+      return maybeSetSelection(state, dispatch, newSel);
+    }
+  };
+}
+function shiftArrow(axis, dir) {
+  return (state, dispatch, view) => {
+    if (!view) return false;
+    const sel = state.selection;
+    let cellSel;
+    if (sel instanceof CellSelection) {
+      cellSel = sel;
+    } else {
+      const end = atEndOfCell(view, axis, dir);
+      if (end == null) return false;
+      cellSel = new CellSelection(state.doc.resolve(end));
+    }
+    const $head = nextCell(cellSel.$headCell, axis, dir);
+    if (!$head) return false;
+    return maybeSetSelection(
+      state,
+      dispatch,
+      new CellSelection(cellSel.$anchorCell, $head)
+    );
+  };
+}
+function dist_handleTripleClick(view, pos) {
+  const doc = view.state.doc, $cell = cellAround(doc.resolve(pos));
+  if (!$cell) return false;
+  view.dispatch(view.state.tr.setSelection(new CellSelection($cell)));
+  return true;
+}
+function handlePaste(view, _, slice) {
+  if (!isInTable(view.state)) return false;
+  let cells = pastedCells(slice);
+  const sel = view.state.selection;
+  if (sel instanceof CellSelection) {
+    if (!cells)
+      cells = {
+        width: 1,
+        height: 1,
+        rows: [
+          Fragment4.from(
+            fitSlice(tableNodeTypes(view.state.schema).cell, slice)
+          )
+        ]
+      };
+    const table = sel.$anchorCell.node(-1);
+    const start = sel.$anchorCell.start(-1);
+    const rect = TableMap.get(table).rectBetween(
+      sel.$anchorCell.pos - start,
+      sel.$headCell.pos - start
+    );
+    cells = clipCells(cells, rect.right - rect.left, rect.bottom - rect.top);
+    insertCells(view.state, view.dispatch, start, rect, cells);
+    return true;
+  } else if (cells) {
+    const $cell = selectionCell(view.state);
+    const start = $cell.start(-1);
+    insertCells(
+      view.state,
+      view.dispatch,
+      start,
+      TableMap.get($cell.node(-1)).findCell($cell.pos - start),
+      cells
+    );
+    return true;
+  } else {
+    return false;
+  }
+}
+function handleMouseDown(view, startEvent) {
+  var _a;
+  if (startEvent.ctrlKey || startEvent.metaKey) return;
+  const startDOMCell = domInCell(view, startEvent.target);
+  let $anchor;
+  if (startEvent.shiftKey && view.state.selection instanceof CellSelection) {
+    setCellSelection(view.state.selection.$anchorCell, startEvent);
+    startEvent.preventDefault();
+  } else if (startEvent.shiftKey && startDOMCell && ($anchor = cellAround(view.state.selection.$anchor)) != null && ((_a = cellUnderMouse(view, startEvent)) == null ? void 0 : _a.pos) != $anchor.pos) {
+    setCellSelection($anchor, startEvent);
+    startEvent.preventDefault();
+  } else if (!startDOMCell) {
+    return;
+  }
+  function setCellSelection($anchor2, event) {
+    let $head = cellUnderMouse(view, event);
+    const starting = tableEditingKey.getState(view.state) == null;
+    if (!$head || !inSameTable($anchor2, $head)) {
+      if (starting) $head = $anchor2;
+      else return;
+    }
+    const selection = new CellSelection($anchor2, $head);
+    if (starting || !view.state.selection.eq(selection)) {
+      const tr = view.state.tr.setSelection(selection);
+      if (starting) tr.setMeta(tableEditingKey, $anchor2.pos);
+      view.dispatch(tr);
+    }
+  }
+  function stop() {
+    view.root.removeEventListener("mouseup", stop);
+    view.root.removeEventListener("dragstart", stop);
+    view.root.removeEventListener("mousemove", move);
+    if (tableEditingKey.getState(view.state) != null)
+      view.dispatch(view.state.tr.setMeta(tableEditingKey, -1));
+  }
+  function move(_event) {
+    const event = _event;
+    const anchor = tableEditingKey.getState(view.state);
+    let $anchor2;
+    if (anchor != null) {
+      $anchor2 = view.state.doc.resolve(anchor);
+    } else if (domInCell(view, event.target) != startDOMCell) {
+      $anchor2 = cellUnderMouse(view, startEvent);
+      if (!$anchor2) return stop();
+    }
+    if ($anchor2) setCellSelection($anchor2, event);
+  }
+  view.root.addEventListener("mouseup", stop);
+  view.root.addEventListener("dragstart", stop);
+  view.root.addEventListener("mousemove", move);
+}
+function atEndOfCell(view, axis, dir) {
+  if (!(view.state.selection instanceof dist_TextSelection)) return null;
+  const { $head } = view.state.selection;
+  for (let d = $head.depth - 1; d >= 0; d--) {
+    const parent = $head.node(d), index = dir < 0 ? $head.index(d) : $head.indexAfter(d);
+    if (index != (dir < 0 ? 0 : parent.childCount)) return null;
+    if (parent.type.spec.tableRole == "cell" || parent.type.spec.tableRole == "header_cell") {
+      const cellPos = $head.before(d);
+      const dirStr = axis == "vert" ? dir > 0 ? "down" : "up" : dir > 0 ? "right" : "left";
+      return view.endOfTextblock(dirStr) ? cellPos : null;
+    }
+  }
+  return null;
+}
+function domInCell(view, dom) {
+  for (; dom && dom != view.dom; dom = dom.parentNode) {
+    if (dom.nodeName == "TD" || dom.nodeName == "TH") {
+      return dom;
+    }
+  }
+  return null;
+}
+function cellUnderMouse(view, event) {
+  const mousePos = view.posAtCoords({
+    left: event.clientX,
+    top: event.clientY
+  });
+  if (!mousePos) return null;
+  return mousePos ? cellAround(view.state.doc.resolve(mousePos.pos)) : null;
+}
+
+// src/columnresizing.ts
+
+
+
+// src/tableview.ts
+var TableView = class {
+  constructor(node, defaultCellMinWidth) {
+    this.node = node;
+    this.defaultCellMinWidth = defaultCellMinWidth;
+    this.dom = document.createElement("div");
+    this.dom.className = "tableWrapper";
+    this.table = this.dom.appendChild(document.createElement("table"));
+    this.table.style.setProperty(
+      "--default-cell-min-width",
+      `${defaultCellMinWidth}px`
+    );
+    this.colgroup = this.table.appendChild(document.createElement("colgroup"));
+    updateColumnsOnResize(node, this.colgroup, this.table, defaultCellMinWidth);
+    this.contentDOM = this.table.appendChild(document.createElement("tbody"));
+  }
+  update(node) {
+    if (node.type != this.node.type) return false;
+    this.node = node;
+    updateColumnsOnResize(
+      node,
+      this.colgroup,
+      this.table,
+      this.defaultCellMinWidth
+    );
+    return true;
+  }
+  ignoreMutation(record) {
+    return record.type == "attributes" && (record.target == this.table || this.colgroup.contains(record.target));
+  }
+};
+function updateColumnsOnResize(node, colgroup, table, defaultCellMinWidth, overrideCol, overrideValue) {
+  var _a;
+  let totalWidth = 0;
+  let fixedWidth = true;
+  let nextDOM = colgroup.firstChild;
+  const row = node.firstChild;
+  if (!row) return;
+  for (let i = 0, col = 0; i < row.childCount; i++) {
+    const { colspan, colwidth } = row.child(i).attrs;
+    for (let j = 0; j < colspan; j++, col++) {
+      const hasWidth = overrideCol == col ? overrideValue : colwidth && colwidth[j];
+      const cssWidth = hasWidth ? hasWidth + "px" : "";
+      totalWidth += hasWidth || defaultCellMinWidth;
+      if (!hasWidth) fixedWidth = false;
+      if (!nextDOM) {
+        const col2 = document.createElement("col");
+        col2.style.width = cssWidth;
+        colgroup.appendChild(col2);
+      } else {
+        if (nextDOM.style.width != cssWidth) {
+          nextDOM.style.width = cssWidth;
+        }
+        nextDOM = nextDOM.nextSibling;
+      }
+    }
+  }
+  while (nextDOM) {
+    const after = nextDOM.nextSibling;
+    (_a = nextDOM.parentNode) == null ? void 0 : _a.removeChild(nextDOM);
+    nextDOM = after;
+  }
+  if (fixedWidth) {
+    table.style.width = totalWidth + "px";
+    table.style.minWidth = "";
+  } else {
+    table.style.width = "";
+    table.style.minWidth = totalWidth + "px";
+  }
+}
+
+// src/columnresizing.ts
+var columnResizingPluginKey = new PluginKey(
+  "tableColumnResizing"
+);
+function columnResizing({
+  handleWidth = 5,
+  cellMinWidth = 25,
+  defaultCellMinWidth = 100,
+  View = TableView,
+  lastColumnResizable = true
+} = {}) {
+  const plugin = new Plugin({
+    key: columnResizingPluginKey,
+    state: {
+      init(_, state) {
+        var _a, _b;
+        const nodeViews = (_b = (_a = plugin.spec) == null ? void 0 : _a.props) == null ? void 0 : _b.nodeViews;
+        const tableName = tableNodeTypes(state.schema).table.name;
+        if (View && nodeViews) {
+          nodeViews[tableName] = (node, view) => {
+            return new View(node, defaultCellMinWidth, view);
+          };
+        }
+        return new ResizeState(-1, false);
+      },
+      apply(tr, prev) {
+        return prev.apply(tr);
+      }
+    },
+    props: {
+      attributes: (state) => {
+        const pluginState = columnResizingPluginKey.getState(state);
+        return pluginState && pluginState.activeHandle > -1 ? { class: "resize-cursor" } : {};
+      },
+      handleDOMEvents: {
+        mousemove: (view, event) => {
+          handleMouseMove(view, event, handleWidth, lastColumnResizable);
+        },
+        mouseleave: (view) => {
+          handleMouseLeave(view);
+        },
+        mousedown: (view, event) => {
+          handleMouseDown2(view, event, cellMinWidth, defaultCellMinWidth);
+        }
+      },
+      decorations: (state) => {
+        const pluginState = columnResizingPluginKey.getState(state);
+        if (pluginState && pluginState.activeHandle > -1) {
+          return handleDecorations(state, pluginState.activeHandle);
+        }
+      },
+      nodeViews: {}
+    }
+  });
+  return plugin;
+}
+var ResizeState = class _ResizeState {
+  constructor(activeHandle, dragging) {
+    this.activeHandle = activeHandle;
+    this.dragging = dragging;
+  }
+  apply(tr) {
+    const state = this;
+    const action = tr.getMeta(columnResizingPluginKey);
+    if (action && action.setHandle != null)
+      return new _ResizeState(action.setHandle, false);
+    if (action && action.setDragging !== void 0)
+      return new _ResizeState(state.activeHandle, action.setDragging);
+    if (state.activeHandle > -1 && tr.docChanged) {
+      let handle = tr.mapping.map(state.activeHandle, -1);
+      if (!pointsAtCell(tr.doc.resolve(handle))) {
+        handle = -1;
+      }
+      return new _ResizeState(handle, state.dragging);
+    }
+    return state;
+  }
+};
+function handleMouseMove(view, event, handleWidth, lastColumnResizable) {
+  if (!view.editable) return;
+  const pluginState = columnResizingPluginKey.getState(view.state);
+  if (!pluginState) return;
+  if (!pluginState.dragging) {
+    const target = domCellAround(event.target);
+    let cell = -1;
+    if (target) {
+      const { left, right } = target.getBoundingClientRect();
+      if (event.clientX - left <= handleWidth)
+        cell = edgeCell(view, event, "left", handleWidth);
+      else if (right - event.clientX <= handleWidth)
+        cell = edgeCell(view, event, "right", handleWidth);
+    }
+    if (cell != pluginState.activeHandle) {
+      if (!lastColumnResizable && cell !== -1) {
+        const $cell = view.state.doc.resolve(cell);
+        const table = $cell.node(-1);
+        const map = TableMap.get(table);
+        const tableStart = $cell.start(-1);
+        const col = map.colCount($cell.pos - tableStart) + $cell.nodeAfter.attrs.colspan - 1;
+        if (col == map.width - 1) {
+          return;
+        }
+      }
+      updateHandle(view, cell);
+    }
+  }
+}
+function handleMouseLeave(view) {
+  if (!view.editable) return;
+  const pluginState = columnResizingPluginKey.getState(view.state);
+  if (pluginState && pluginState.activeHandle > -1 && !pluginState.dragging)
+    updateHandle(view, -1);
+}
+function handleMouseDown2(view, event, cellMinWidth, defaultCellMinWidth) {
+  var _a;
+  if (!view.editable) return false;
+  const win = (_a = view.dom.ownerDocument.defaultView) != null ? _a : window;
+  const pluginState = columnResizingPluginKey.getState(view.state);
+  if (!pluginState || pluginState.activeHandle == -1 || pluginState.dragging)
+    return false;
+  const cell = view.state.doc.nodeAt(pluginState.activeHandle);
+  const width = currentColWidth(view, pluginState.activeHandle, cell.attrs);
+  view.dispatch(
+    view.state.tr.setMeta(columnResizingPluginKey, {
+      setDragging: { startX: event.clientX, startWidth: width }
+    })
+  );
+  function finish(event2) {
+    win.removeEventListener("mouseup", finish);
+    win.removeEventListener("mousemove", move);
+    const pluginState2 = columnResizingPluginKey.getState(view.state);
+    if (pluginState2 == null ? void 0 : pluginState2.dragging) {
+      updateColumnWidth(
+        view,
+        pluginState2.activeHandle,
+        draggedWidth(pluginState2.dragging, event2, cellMinWidth)
+      );
+      view.dispatch(
+        view.state.tr.setMeta(columnResizingPluginKey, { setDragging: null })
+      );
+    }
+  }
+  function move(event2) {
+    if (!event2.which) return finish(event2);
+    const pluginState2 = columnResizingPluginKey.getState(view.state);
+    if (!pluginState2) return;
+    if (pluginState2.dragging) {
+      const dragged = draggedWidth(pluginState2.dragging, event2, cellMinWidth);
+      displayColumnWidth(
+        view,
+        pluginState2.activeHandle,
+        dragged,
+        defaultCellMinWidth
+      );
+    }
+  }
+  displayColumnWidth(
+    view,
+    pluginState.activeHandle,
+    width,
+    defaultCellMinWidth
+  );
+  win.addEventListener("mouseup", finish);
+  win.addEventListener("mousemove", move);
+  event.preventDefault();
+  return true;
+}
+function currentColWidth(view, cellPos, { colspan, colwidth }) {
+  const width = colwidth && colwidth[colwidth.length - 1];
+  if (width) return width;
+  const dom = view.domAtPos(cellPos);
+  const node = dom.node.childNodes[dom.offset];
+  let domWidth = node.offsetWidth, parts = colspan;
+  if (colwidth) {
+    for (let i = 0; i < colspan; i++)
+      if (colwidth[i]) {
+        domWidth -= colwidth[i];
+        parts--;
+      }
+  }
+  return domWidth / parts;
+}
+function domCellAround(target) {
+  while (target && target.nodeName != "TD" && target.nodeName != "TH")
+    target = target.classList && target.classList.contains("ProseMirror") ? null : target.parentNode;
+  return target;
+}
+function edgeCell(view, event, side, handleWidth) {
+  const offset = side == "right" ? -handleWidth : handleWidth;
+  const found = view.posAtCoords({
+    left: event.clientX + offset,
+    top: event.clientY
+  });
+  if (!found) return -1;
+  const { pos } = found;
+  const $cell = cellAround(view.state.doc.resolve(pos));
+  if (!$cell) return -1;
+  if (side == "right") return $cell.pos;
+  const map = TableMap.get($cell.node(-1)), start = $cell.start(-1);
+  const index = map.map.indexOf($cell.pos - start);
+  return index % map.width == 0 ? -1 : start + map.map[index - 1];
+}
+function draggedWidth(dragging, event, resizeMinWidth) {
+  const offset = event.clientX - dragging.startX;
+  return Math.max(resizeMinWidth, dragging.startWidth + offset);
+}
+function updateHandle(view, value) {
+  view.dispatch(
+    view.state.tr.setMeta(columnResizingPluginKey, { setHandle: value })
+  );
+}
+function updateColumnWidth(view, cell, width) {
+  const $cell = view.state.doc.resolve(cell);
+  const table = $cell.node(-1), map = TableMap.get(table), start = $cell.start(-1);
+  const col = map.colCount($cell.pos - start) + $cell.nodeAfter.attrs.colspan - 1;
+  const tr = view.state.tr;
+  for (let row = 0; row < map.height; row++) {
+    const mapIndex = row * map.width + col;
+    if (row && map.map[mapIndex] == map.map[mapIndex - map.width]) continue;
+    const pos = map.map[mapIndex];
+    const attrs = table.nodeAt(pos).attrs;
+    const index = attrs.colspan == 1 ? 0 : col - map.colCount(pos);
+    if (attrs.colwidth && attrs.colwidth[index] == width) continue;
+    const colwidth = attrs.colwidth ? attrs.colwidth.slice() : zeroes(attrs.colspan);
+    colwidth[index] = width;
+    tr.setNodeMarkup(start + pos, null, { ...attrs, colwidth });
+  }
+  if (tr.docChanged) view.dispatch(tr);
+}
+function displayColumnWidth(view, cell, width, defaultCellMinWidth) {
+  const $cell = view.state.doc.resolve(cell);
+  const table = $cell.node(-1), start = $cell.start(-1);
+  const col = TableMap.get(table).colCount($cell.pos - start) + $cell.nodeAfter.attrs.colspan - 1;
+  let dom = view.domAtPos($cell.start(-1)).node;
+  while (dom && dom.nodeName != "TABLE") {
+    dom = dom.parentNode;
+  }
+  if (!dom) return;
+  updateColumnsOnResize(
+    table,
+    dom.firstChild,
+    dom,
+    defaultCellMinWidth,
+    col,
+    width
+  );
+}
+function zeroes(n) {
+  return Array(n).fill(0);
+}
+function handleDecorations(state, cell) {
+  var _a;
+  const decorations = [];
+  const $cell = state.doc.resolve(cell);
+  const table = $cell.node(-1);
+  if (!table) {
+    return DecorationSet2.empty;
+  }
+  const map = TableMap.get(table);
+  const start = $cell.start(-1);
+  const col = map.colCount($cell.pos - start) + $cell.nodeAfter.attrs.colspan - 1;
+  for (let row = 0; row < map.height; row++) {
+    const index = col + row * map.width;
+    if ((col == map.width - 1 || map.map[index] != map.map[index + 1]) && (row == 0 || map.map[index] != map.map[index - map.width])) {
+      const cellPos = map.map[index];
+      const pos = start + cellPos + table.nodeAt(cellPos).nodeSize - 1;
+      const dom = document.createElement("div");
+      dom.className = "column-resize-handle";
+      if ((_a = columnResizingPluginKey.getState(state)) == null ? void 0 : _a.dragging) {
+        decorations.push(
+          Decoration2.node(
+            start + cellPos,
+            start + cellPos + table.nodeAt(cellPos).nodeSize,
+            {
+              class: "column-resize-dragging"
+            }
+          )
+        );
+      }
+      decorations.push(Decoration2.widget(pos, dom));
+    }
+  }
+  return DecorationSet2.create(state.doc, decorations);
+}
+
+// src/index.ts
+function tableEditing({
+  allowTableNodeSelection = false
+} = {}) {
+  return new Plugin2({
+    key: tableEditingKey,
+    // This piece of state is used to remember when a mouse-drag
+    // cell-selection is happening, so that it can continue even as
+    // transactions (which might move its anchor cell) come in.
+    state: {
+      init() {
+        return null;
+      },
+      apply(tr, cur) {
+        const set = tr.getMeta(tableEditingKey);
+        if (set != null) return set == -1 ? null : set;
+        if (cur == null || !tr.docChanged) return cur;
+        const { deleted, pos } = tr.mapping.mapResult(cur);
+        return deleted ? null : pos;
+      }
+    },
+    props: {
+      decorations: drawCellSelection,
+      handleDOMEvents: {
+        mousedown: handleMouseDown
+      },
+      createSelectionBetween(view) {
+        return tableEditingKey.getState(view.state) != null ? view.state.selection : null;
+      },
+      handleTripleClick: dist_handleTripleClick,
+      handleKeyDown: dist_handleKeyDown,
+      handlePaste
+    },
+    appendTransaction(_, oldState, state) {
+      return normalizeSelection(
+        state,
+        fixTables(state, oldState),
+        allowTableNodeSelection
+      );
+    }
+  });
+}
+
+
+;// ./node_modules/@tiptap/pm/dist/tables/index.js
+// tables/index.ts
+
+
+;// ./node_modules/@tiptap/extension-bubble-menu/dist/index.js
+// src/bubble-menu.ts
+
+
+// src/bubble-menu-plugin.ts
+
+
+
+
+function combineDOMRects(rect1, rect2) {
+  const top = Math.min(rect1.top, rect2.top);
+  const bottom = Math.max(rect1.bottom, rect2.bottom);
+  const left = Math.min(rect1.left, rect2.left);
+  const right = Math.max(rect1.right, rect2.right);
+  const width = right - left;
+  const height = bottom - top;
+  const x = left;
+  const y = top;
+  return new DOMRect(x, y, width, height);
+}
+var BubbleMenuView = class {
+  constructor({
+    editor,
+    element,
+    view,
+    updateDelay = 250,
+    resizeDelay = 60,
+    shouldShow,
+    options
+  }) {
+    this.preventHide = false;
+    this.isVisible = false;
+    this.floatingUIOptions = {
+      strategy: "absolute",
+      placement: "top",
+      offset: 8,
+      flip: {},
+      shift: {},
+      arrow: false,
+      size: false,
+      autoPlacement: false,
+      hide: false,
+      inline: false,
+      onShow: void 0,
+      onHide: void 0,
+      onUpdate: void 0,
+      onDestroy: void 0
+    };
+    this.shouldShow = ({ view, state, from, to }) => {
+      const { doc, selection } = state;
+      const { empty } = selection;
+      const isEmptyTextBlock = !doc.textBetween(from, to).length && isTextSelection(state.selection);
+      const isChildOfMenu = this.element.contains(document.activeElement);
+      const hasEditorFocus = view.hasFocus() || isChildOfMenu;
+      if (!hasEditorFocus || empty || isEmptyTextBlock || !this.editor.isEditable) {
+        return false;
+      }
+      return true;
+    };
+    this.mousedownHandler = () => {
+      this.preventHide = true;
+    };
+    this.dragstartHandler = () => {
+      this.hide();
+    };
+    this.focusHandler = () => {
+      setTimeout(() => this.update(this.editor.view));
+    };
+    this.blurHandler = ({ event }) => {
+      var _a;
+      if (this.preventHide) {
+        this.preventHide = false;
+        return;
+      }
+      if ((event == null ? void 0 : event.relatedTarget) && ((_a = this.element.parentNode) == null ? void 0 : _a.contains(event.relatedTarget))) {
+        return;
+      }
+      if ((event == null ? void 0 : event.relatedTarget) === this.editor.view.dom) {
+        return;
+      }
+      this.hide();
+    };
+    this.handleDebouncedUpdate = (view, oldState) => {
+      const selectionChanged = !(oldState == null ? void 0 : oldState.selection.eq(view.state.selection));
+      const docChanged = !(oldState == null ? void 0 : oldState.doc.eq(view.state.doc));
+      if (!selectionChanged && !docChanged) {
+        return;
+      }
+      if (this.updateDebounceTimer) {
+        clearTimeout(this.updateDebounceTimer);
+      }
+      this.updateDebounceTimer = window.setTimeout(() => {
+        this.updateHandler(view, selectionChanged, docChanged, oldState);
+      }, this.updateDelay);
+    };
+    this.updateHandler = (view, selectionChanged, docChanged, oldState) => {
+      const { composing } = view;
+      const isSame = !selectionChanged && !docChanged;
+      if (composing || isSame) {
+        return;
+      }
+      const shouldShow = this.getShouldShow(oldState);
+      if (!shouldShow) {
+        this.hide();
+        return;
+      }
+      this.updatePosition();
+      this.show();
+    };
+    this.editor = editor;
+    this.element = element;
+    this.view = view;
+    this.updateDelay = updateDelay;
+    this.resizeDelay = resizeDelay;
+    this.floatingUIOptions = {
+      ...this.floatingUIOptions,
+      ...options
+    };
+    if (shouldShow) {
+      this.shouldShow = shouldShow;
+    }
+    this.element.addEventListener("mousedown", this.mousedownHandler, { capture: true });
+    this.view.dom.addEventListener("dragstart", this.dragstartHandler);
+    this.editor.on("focus", this.focusHandler);
+    this.editor.on("blur", this.blurHandler);
+    window.addEventListener("resize", () => {
+      if (this.resizeDebounceTimer) {
+        clearTimeout(this.resizeDebounceTimer);
+      }
+      this.resizeDebounceTimer = window.setTimeout(() => {
+        this.updatePosition();
+      }, this.resizeDelay);
+    });
+    this.update(view, view.state);
+    if (this.getShouldShow()) {
+      this.show();
+    }
+  }
+  get middlewares() {
+    const middlewares = [];
+    if (this.floatingUIOptions.flip) {
+      middlewares.push(floating_ui_dom_flip(typeof this.floatingUIOptions.flip !== "boolean" ? this.floatingUIOptions.flip : void 0));
+    }
+    if (this.floatingUIOptions.shift) {
+      middlewares.push(
+        floating_ui_dom_shift(typeof this.floatingUIOptions.shift !== "boolean" ? this.floatingUIOptions.shift : void 0)
+      );
+    }
+    if (this.floatingUIOptions.offset) {
+      middlewares.push(
+        floating_ui_dom_offset(typeof this.floatingUIOptions.offset !== "boolean" ? this.floatingUIOptions.offset : void 0)
+      );
+    }
+    if (this.floatingUIOptions.arrow) {
+      middlewares.push(floating_ui_dom_arrow(this.floatingUIOptions.arrow));
+    }
+    if (this.floatingUIOptions.size) {
+      middlewares.push(floating_ui_dom_size(typeof this.floatingUIOptions.size !== "boolean" ? this.floatingUIOptions.size : void 0));
+    }
+    if (this.floatingUIOptions.autoPlacement) {
+      middlewares.push(
+        floating_ui_dom_autoPlacement(
+          typeof this.floatingUIOptions.autoPlacement !== "boolean" ? this.floatingUIOptions.autoPlacement : void 0
+        )
+      );
+    }
+    if (this.floatingUIOptions.hide) {
+      middlewares.push(floating_ui_dom_hide(typeof this.floatingUIOptions.hide !== "boolean" ? this.floatingUIOptions.hide : void 0));
+    }
+    if (this.floatingUIOptions.inline) {
+      middlewares.push(
+        floating_ui_dom_inline(typeof this.floatingUIOptions.inline !== "boolean" ? this.floatingUIOptions.inline : void 0)
+      );
+    }
+    return middlewares;
+  }
+  updatePosition() {
+    const { selection } = this.editor.state;
+    let virtualElement = {
+      getBoundingClientRect: () => posToDOMRect(this.view, selection.from, selection.to)
+    };
+    if (selection instanceof CellSelection) {
+      const { $anchorCell, $headCell } = selection;
+      const from = $anchorCell ? $anchorCell.pos : $headCell.pos;
+      const to = $headCell ? $headCell.pos : $anchorCell.pos;
+      const fromDOM = this.view.nodeDOM(from);
+      const toDOM = this.view.nodeDOM(to);
+      if (!fromDOM || !toDOM) {
+        return;
+      }
+      const clientRect = fromDOM === toDOM ? fromDOM.getBoundingClientRect() : combineDOMRects(
+        fromDOM.getBoundingClientRect(),
+        toDOM.getBoundingClientRect()
+      );
+      virtualElement = {
+        getBoundingClientRect: () => clientRect
+      };
+    }
+    floating_ui_dom_computePosition(virtualElement, this.element, {
+      placement: this.floatingUIOptions.placement,
+      strategy: this.floatingUIOptions.strategy,
+      middleware: this.middlewares
+    }).then(({ x, y, strategy }) => {
+      this.element.style.width = "max-content";
+      this.element.style.position = strategy;
+      this.element.style.left = `${x}px`;
+      this.element.style.top = `${y}px`;
+      if (this.isVisible && this.floatingUIOptions.onUpdate) {
+        this.floatingUIOptions.onUpdate();
+      }
+    });
+  }
+  update(view, oldState) {
+    const { state } = view;
+    const hasValidSelection = state.selection.from !== state.selection.to;
+    if (this.updateDelay > 0 && hasValidSelection) {
+      this.handleDebouncedUpdate(view, oldState);
+      return;
+    }
+    const selectionChanged = !(oldState == null ? void 0 : oldState.selection.eq(view.state.selection));
+    const docChanged = !(oldState == null ? void 0 : oldState.doc.eq(view.state.doc));
+    this.updateHandler(view, selectionChanged, docChanged, oldState);
+  }
+  getShouldShow(oldState) {
+    var _a;
+    const { state } = this.view;
+    const { selection } = state;
+    const { ranges } = selection;
+    const from = Math.min(...ranges.map((range) => range.$from.pos));
+    const to = Math.max(...ranges.map((range) => range.$to.pos));
+    const shouldShow = (_a = this.shouldShow) == null ? void 0 : _a.call(this, {
+      editor: this.editor,
+      element: this.element,
+      view: this.view,
+      state,
+      oldState,
+      from,
+      to
+    });
+    return shouldShow;
+  }
+  show() {
+    var _a;
+    if (this.isVisible) {
+      return;
+    }
+    this.element.style.visibility = "visible";
+    this.element.style.opacity = "1";
+    (_a = this.view.dom.parentElement) == null ? void 0 : _a.appendChild(this.element);
+    if (this.floatingUIOptions.onShow) {
+      this.floatingUIOptions.onShow();
+    }
+    this.isVisible = true;
+  }
+  hide() {
+    if (!this.isVisible) {
+      return;
+    }
+    this.element.style.visibility = "hidden";
+    this.element.style.opacity = "0";
+    this.element.remove();
+    if (this.floatingUIOptions.onHide) {
+      this.floatingUIOptions.onHide();
+    }
+    this.isVisible = false;
+  }
+  destroy() {
+    this.hide();
+    this.element.removeEventListener("mousedown", this.mousedownHandler, { capture: true });
+    this.view.dom.removeEventListener("dragstart", this.dragstartHandler);
+    this.editor.off("focus", this.focusHandler);
+    this.editor.off("blur", this.blurHandler);
+    if (this.floatingUIOptions.onDestroy) {
+      this.floatingUIOptions.onDestroy();
+    }
+  }
+};
+var BubbleMenuPlugin = (options) => {
+  return new dist_Plugin({
+    key: typeof options.pluginKey === "string" ? new PluginKey(options.pluginKey) : options.pluginKey,
+    view: (view) => new BubbleMenuView({ view, ...options })
+  });
+};
+
+// src/bubble-menu.ts
+var BubbleMenu = Extension.create({
+  name: "bubbleMenu",
+  addOptions() {
+    return {
+      element: null,
+      pluginKey: "bubbleMenu",
+      updateDelay: void 0,
+      shouldShow: null
+    };
+  },
+  addProseMirrorPlugins() {
+    if (!this.options.element) {
+      return [];
+    }
+    return [
+      BubbleMenuPlugin({
+        pluginKey: this.options.pluginKey,
+        editor: this.editor,
+        element: this.options.element,
+        updateDelay: this.options.updateDelay,
+        shouldShow: this.options.shouldShow
+      })
+    ];
+  }
+});
+
+// src/index.ts
+var extension_bubble_menu_dist_index_default = BubbleMenu;
 
 //# sourceMappingURL=index.js.map
 ;// ./node_modules/@tiptap/extension-document/dist/index.js
@@ -61158,13 +65877,13 @@ const dist_HorizontalRule = Node3.create({
                         const posAfter = $to.end();
                         if ($to.nodeAfter) {
                             if ($to.nodeAfter.isTextblock) {
-                                tr.setSelection(TextSelection.create(tr.doc, $to.pos + 1));
+                                tr.setSelection(dist_TextSelection.create(tr.doc, $to.pos + 1));
                             }
                             else if ($to.nodeAfter.isBlock) {
                                 tr.setSelection(NodeSelection.create(tr.doc, $to.pos));
                             }
                             else {
-                                tr.setSelection(TextSelection.create(tr.doc, $to.pos));
+                                tr.setSelection(dist_TextSelection.create(tr.doc, $to.pos));
                             }
                         }
                         else {
@@ -61172,7 +65891,7 @@ const dist_HorizontalRule = Node3.create({
                             const node = (_a = $to.parent.type.contentMatch.defaultType) === null || _a === void 0 ? void 0 : _a.create();
                             if (node) {
                                 tr.insert(posAfter, node);
-                                tr.setSelection(TextSelection.create(tr.doc, posAfter + 1));
+                                tr.setSelection(dist_TextSelection.create(tr.doc, posAfter + 1));
                             }
                         }
                         tr.scrollIntoView();
@@ -61447,7 +66166,7 @@ const dist_CodeBlock = Node3.create({
         return [
             // this plugin creates a code block for pasted content from VS Code
             // we can also detect the copied code language
-            new Plugin({
+            new dist_Plugin({
                 key: new PluginKey('codeBlockVSCodeHandler'),
                 props: {
                     handlePaste: (view, event) => {
@@ -61475,7 +66194,7 @@ const dist_CodeBlock = Node3.create({
                         tr.replaceSelectionWith(this.type.create({ language }, textNode));
                         if (tr.selection.$from.parent.type !== this.type) {
                             // put cursor inside the newly created code block
-                            tr.setSelection(TextSelection.near(tr.doc.resolve(Math.max(0, tr.selection.from - 2))));
+                            tr.setSelection(dist_TextSelection.near(tr.doc.resolve(Math.max(0, tr.selection.from - 2))));
                         }
                         // store meta information
                         // this is useful for other plugins that depends on the paste event
@@ -62019,6 +66738,9 @@ var TextStyleKit = Extension.create({
 
 
 
+// BubbleMenu extension for floating formatting toolbar
+
+
 // These may still be individual packages
 
 
@@ -62068,6 +66790,8 @@ var TiptapCollaboration = {
   // Collaboration extensions
   Collaboration: extension_collaboration_dist_index_default,
   CollaborationCaret: extension_collaboration_caret_dist_index_default,
+  // UI extensions
+  BubbleMenu: extension_bubble_menu_dist_index_default,
   // Basic extensions
   Document: dist_Document,
   Paragraph: dist_Paragraph,
@@ -62119,6 +66843,7 @@ if (typeof window !== 'undefined') {
     hasStarterKit: !!TiptapCollaboration.StarterKit,
     hasCollaboration: !!TiptapCollaboration.Collaboration,
     hasCollaborationCaret: !!TiptapCollaboration.CollaborationCaret,
+    hasBubbleMenu: !!TiptapCollaboration.BubbleMenu,
     extensionCount: Object.keys(TiptapCollaboration).length
   });
 }

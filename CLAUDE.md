@@ -302,6 +302,17 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Result**: "Saving locally..." message now appears immediately for all user inputs
 
 ## Recent Updates (v2025.06.25)
+### ✅ BubbleMenu Extension Integration - NEW FEATURE
+- **Feature Added**: TipTap BubbleMenu extension for floating formatting toolbar on text selection
+- **UI Enhancement**: Bubble menu appears when text is selected, providing quick access to Bold, Italic, and Strikethrough formatting
+- **Vue 3 Compliant**: Follows Vue 3 reactivity patterns with `markRaw()` and proper component lifecycle
+- **Responsive Design**: Integrates with existing dark theme using Bootstrap classes and CSS variables
+- **Smart Visibility**: TipTap extension controls visibility - only shows when text is selected and not in readonly mode
+- **Package**: Added `@tiptap/extension-bubble-menu@3.0.0-beta.15` to dependencies
+- **Bundle Update**: Included in collaboration bundle and exported via `window.TiptapCollaboration.BubbleMenu`
+- **Styling**: Added dark-themed bubble menu styles to `css/tiptap-editor.css` with `display: none` initial state
+- **Fixed**: Corrected visibility logic - let TipTap extension handle show/hide rather than Vue template conditions
+
 ### ✅ Document Duplicate Functionality - NEW FEATURE  
 - **Feature Added**: Duplicate button in File menu dropdown creates exact copy of current document
 - **Implementation**: Complete duplicate system for both local and collaborative documents

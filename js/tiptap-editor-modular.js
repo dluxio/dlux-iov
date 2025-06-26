@@ -1840,6 +1840,7 @@ class EditorFactory {
         const Collaboration = tiptapBundle.Collaboration;
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
+        const BubbleMenu = tiptapBundle.BubbleMenu;
 
         console.log('✅ FINAL COMPONENT CHECK:', {
             usingDefaultExport: tiptapBundle === window.TiptapCollaboration.default,
@@ -1847,7 +1848,8 @@ class EditorFactory {
             StarterKit: !!StarterKit,
             Collaboration: !!Collaboration,
             CollaborationCaret: !!CollaborationCaret,
-            Placeholder: !!Placeholder
+            Placeholder: !!Placeholder,
+            BubbleMenu: !!BubbleMenu
         });
 
         console.log('TipTap component access:', {
@@ -1906,6 +1908,22 @@ class EditorFactory {
                 placeholder: 'Start writing your content...'
             })
         ];
+
+        // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
+        if (this.component.$refs.bubbleMenu) {
+            bodyExtensions.push(
+                BubbleMenu.configure({
+                    element: this.component.$refs.bubbleMenu,
+                    shouldShow: ({ from, to }) => {
+                        // Only show when text is selected and not in readonly mode
+                        return !this.component.isReadOnlyMode && from !== to
+                    },
+                    updateDelay: 100  // Add small delay for better UX
+                })
+            );
+        } else {
+            console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
+        }
 
         // ✅ DEBUG: Log Y.js document state before creating editor
         console.log('🔍 Y.js document state before editor creation:', {
@@ -2182,6 +2200,7 @@ class EditorFactory {
         const Collaboration = tiptapBundle.Collaboration;
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
+        const BubbleMenu = tiptapBundle.BubbleMenu;
 
 
         if (!Editor || !StarterKit || !Collaboration) {
@@ -2193,6 +2212,9 @@ class EditorFactory {
             console.error('❌ DOM refs not available for editor creation');
             throw new Error('DOM refs not available - cannot create editors');
         }
+
+        // ✅ BUBBLE MENU: Wait for DOM to be ready since bubbleMenu depends on bodyEditor existing
+        await this.component.$nextTick();
 
         // Build body extensions array - single editor only (like Tier 1)
         const bodyExtensions = [
@@ -2207,6 +2229,22 @@ class EditorFactory {
                 placeholder: 'Start writing your content...'
             })
         ];
+
+        // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
+        if (this.component.$refs.bubbleMenu) {
+            bodyExtensions.push(
+                BubbleMenu.configure({
+                    element: this.component.$refs.bubbleMenu,
+                    shouldShow: ({ from, to }) => {
+                        // Only show when text is selected and not in readonly mode
+                        return !this.component.isReadOnlyMode && from !== to
+                    },
+                    updateDelay: 100  // Add small delay for better UX
+                })
+            );
+        } else {
+            console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
+        }
 
         // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret for all users (server will handle read-only awareness)
         if (webSocketProvider && CollaborationCaret) {
@@ -18850,6 +18888,58 @@ export default {
             <div class="editor-field-body bg-dark border border-secondary border-top-0 rounded-bottom">
               <div ref="bodyEditor" class="body-editor"></div>
             </div>
+            
+            <!-- Bubble Menu (floating toolbar) - Always in DOM for TipTap reference -->
+            <div ref="bubbleMenu" class="bubble-menu">
+              <div class="btn-group" role="group">
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('bold') }"
+                        @click="formatBold()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Bold">
+                  <i class="fas fa-bold"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('italic') }"
+                        @click="formatItalic()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Italic">
+                  <i class="fas fa-italic"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('strike') }"
+                        @click="formatStrike()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Strikethrough">
+                  <i class="fas fa-strikethrough"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('code') }"
+                        @click="formatCode()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Inline Code">
+                  <i class="fas fa-code"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('link') }"
+                        @click="insertLink()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Insert/Edit Link">
+                  <i class="fas fa-link"></i>
+                </button>
+              </div>
+            </div>
+            
             <small class="text-muted text-center mt-1">Full WYSIWYG editor with markdown export support.</small>
           </div>
 

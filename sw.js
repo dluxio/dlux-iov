@@ -1,4 +1,4 @@
-this.version = "2025.06.26.2";
+this.version = "2025.06.25.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.26.2",
-  "generated": "2025-06-25T23:48:40Z",
+  "version": "2025.06.25.18",
+  "generated": "2025-06-26T01:04:51Z",
   "files": {
-    "/js/buffer.js": {
-      "checksum": "e225d02cdfe4a776207cebd5e36052b0",
-      "size": 50387,
-      "priority": "important"
-    },
     "/js/cardvue.js": {
       "checksum": "39423715a5e7011068eb2b0511d59e2b",
       "size": 35865,
@@ -908,7 +903,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "2fedf9662e89671181e05e2a10517916",
+      "checksum": "5fc3853f9a5ae0f3829c0b707fadc3ee",
       "size": 36523,
       "priority": "important"
     },
@@ -923,8 +918,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "8392fbe66da327a717e0cb83a12d382f",
-      "size": 2074921,
+      "checksum": "c44c3726815381d3b93b6933f9a3eb8d",
+      "size": 2236966,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -1128,13 +1123,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "95f4a094bb5d43cfb4edc99e9ea499b4",
+      "checksum": "213dd57206307177f8ace57d5d565279",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "11321c49afee69526b58fbe769c2845e",
-      "size": 4113,
+      "checksum": "3fb1c80063e520fd82fea43be784d4bf",
+      "size": 4315,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1216,11 +1211,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/solidity/solidity.js": {
-      "checksum": "bfdd1ec8b7391d0dcb81b9635d251f5e",
-      "size": 19428,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
       "checksum": "122424f290eebd8629588833320d7b50",
@@ -1552,12 +1542,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

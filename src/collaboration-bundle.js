@@ -25,6 +25,9 @@ import {
 import Typography from '@tiptap/extension-typography';
 import Mention from '@tiptap/extension-mention';
 
+// BubbleMenu extension for floating formatting toolbar
+import BubbleMenu from '@tiptap/extension-bubble-menu';
+
 // These may still be individual packages
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
@@ -76,6 +79,9 @@ const TiptapCollaboration = {
   // Collaboration extensions
   Collaboration,
   CollaborationCaret,
+  
+  // UI extensions
+  BubbleMenu,
   
   // Basic extensions
   Document,
@@ -131,6 +137,7 @@ if (typeof window !== 'undefined') {
     hasStarterKit: !!TiptapCollaboration.StarterKit,
     hasCollaboration: !!TiptapCollaboration.Collaboration,
     hasCollaborationCaret: !!TiptapCollaboration.CollaborationCaret,
+    hasBubbleMenu: !!TiptapCollaboration.BubbleMenu,
     extensionCount: Object.keys(TiptapCollaboration).length
   });
 }
