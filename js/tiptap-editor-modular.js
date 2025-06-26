@@ -2709,8 +2709,10 @@ class SyncManager {
                         this.component.titleInput = newTitle;
 
                         // ✅ FIX: Set save indicator when title changes from Y.js
-                        // Only set user intent if not loading a document
-                        if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && !this.component.isLoadingDocument) {
+                        // Only set user intent if not loading a document and editor is initialized
+                        if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && 
+                            !this.component.isLoadingDocument && 
+                            this.component.editorInitialized) {
                             this.component.hasUnsavedChanges = true;
                             this.component.hasUserIntent = true;
                             this.component.updateSaveStatus();
@@ -2732,7 +2734,10 @@ class SyncManager {
 
                     // Only set flags if document is not temporary or already has persistence
                     // AND we're not in the middle of loading a document
-                    if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && !this.component.isLoadingDocument) {
+                    // AND the editor has been fully initialized
+                    if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && 
+                        !this.component.isLoadingDocument && 
+                        this.component.editorInitialized) {
                         this.component.hasUnsavedChanges = true;
                         this.component.hasUserIntent = true;
 
@@ -14584,6 +14589,15 @@ export default {
             const editorAge = Date.now() - (this.editorCreatedAt || 0);
             if (editorAge < 1000) { // Wait at least 1 second after editor creation
                 console.log('🔍 Editor too young, skipping persistence check:', editorAge);
+                return;
+            }
+
+            // ✅ FIX: Don't create persistence during initialization or document loading
+            if (!this.editorInitialized || this.isLoadingDocument) {
+                console.log('🔍 Skipping persistence - editor not fully initialized or document loading:', {
+                    editorInitialized: this.editorInitialized,
+                    isLoadingDocument: this.isLoadingDocument
+                });
                 return;
             }
 

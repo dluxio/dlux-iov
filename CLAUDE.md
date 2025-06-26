@@ -381,18 +381,22 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Root Cause**: 
   1. Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
   2. TipTap editor fires `onUpdate` events during initialization, triggering `debouncedUpdateContent`
-- **Solution**: Added two-layer protection to prevent false user intent detection:
+  3. Multiple code paths were triggering `debouncedCheckUserIntentAndCreatePersistence`
+- **Solution**: Added comprehensive protection to prevent false user intent detection:
   1. **isLoadingDocument flag**: Prevents intent detection during document loading
   2. **editorInitialized flag**: Prevents auto-save triggers during editor initialization
 - **Implementation Details**:
   - Added `editorInitialized = false` to data properties
   - Set `editorInitialized = true` after 1.5s delay in editor's `onCreate` callback
-  - Check both `editorInitialized && !isLoadingDocument` before calling `debouncedUpdateContent`
+  - Added checks for both flags in:
+    - `onUpdate` callback before calling `debouncedUpdateContent`
+    - `debouncedCheckUserIntentAndCreatePersistence` method
+    - Metadata observer for all metadata changes
+    - Title change handler in metadata observer
   - Reset both flags in `resetComponentState` and `newDocument`
   - Set `isLoadingDocument = true` at start of document loading methods
   - Reset `isLoadingDocument = false` after successful load
-  - Metadata and config observers check `!isLoadingDocument` before setting user intent
-- **Result**: Documents are only persisted when user actually interacts with editor, not on page load or initialization
+- **Result**: Documents are only persisted when user actually interacts with editor after initialization, not on page load
 
 ### ✅ Document Name Display Consistency Fix
 - **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names
