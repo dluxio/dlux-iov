@@ -352,8 +352,8 @@
                         <!-- Blog Post Content -->
                         <div v-show="postCustom_json.vrHash == 'blog'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-book fa-fw"></i>Blog Post</h6>
-                            <p>Blogs are the default post type and support publishing images and markdown
-                                text to the Hive blockchain. Perfect for articles, tutorials, and general content
+                            <p>Blogs are the default post type and support publishing markdown
+                                text with links for photos and videos to the Hive blockchain. Perfect for articles, tutorials, and general content
                                 sharing.</p>
                         </div>
 
@@ -361,7 +361,74 @@
                         <div v-show="postCustom_json.vrHash == 'video'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Video</h6>
                             <p>Decentralized video streaming on SPK Network. Upload your videos to create 
-                                streaming content accessible through the DLUX platform.</p>
+                                streaming content accessible through the DLUX platform as an 
+                              <pop-vue popover-id="streaming-info" title="Streaming Technology Stack">
+                                    <template #trigger>
+                                        <a class="text-info-50">
+                                            <span class="tooltip-text text-nowrap">M3U8 playlist</span>
+                                            <i class="fa-solid fa-circle-question fa-fw mx-1"></i>
+                                        </a>
+                                    </template>
+                                    <template #content>
+                                        <ul class="text-start list-unstyled mt-2">
+
+                                            <!-- HLS -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">HLS - HTTP Live
+                                                        Streaming
+                                                    </h6>
+                                                </div>
+                                                <p>A streaming protocol that breaks video into small segmented files and
+                                                    creates an M3U8 playlist supporting multiple resolutions.</p>
+                                            </li>
+                                            <!-- M3U8 -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">M3U8 - Media Playlist
+                                                    </h6>
+                                                </div>
+                                                <p>A playlist format that contains a list of video segments and their
+                                                    associated CIDs, allowing for adaptive bitrate streaming.</p>
+                                            </li>
+                                            <!-- CID -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CID - Content
+                                                        IDentifier
+                                                    </h6>
+                                                </div>
+                                                <p>A unique identifier for content in IPFS, generated from the content's
+                                                    cryptographic hash to ensure integrity.
+                                                </p>
+                                            </li>
+                                            <!-- IPFS -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">IPFS - InterPlanetary
+                                                        File
+                                                        System</h6>
+                                                </div>
+                                                <p>A decentralized, peer-to-peer file storage and sharing system where
+                                                    files are distributed across
+                                                    multiple nodes.
+                                                </p>
+                                            </li>
+                                            <!-- CDN -->
+                                            <li>
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CDN - Content
+                                                        Delivery
+                                                        Network</h6>
+                                                </div>
+                                                <p>A distributed network of servers that uses CIDs to locate and deliver
+                                                    IPFS content to users.</p>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                </pop-vue>
+                            </p>
+                                
                         </div>
 
                         <!-- ReMix dApp Content -->
