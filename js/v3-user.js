@@ -123,6 +123,7 @@ createApp({
       dataURLS: [],
       // ReMix dApp Properties
       currentRemixApp: null,
+      showRemixBrowser: false,
       remixSearch: "",
       availableLicenses: [],
       selectedLicense: "",
@@ -134,6 +135,17 @@ createApp({
       showRemixDetails: false,
       loadedRemixCid: null,
       remixApplicationDetails: null,
+      
+      // ReMix iframe messaging
+      remixDataSharingRequest: {
+        type: '', // 'share' or 'update'
+        field: '',
+        currentValue: null,
+        newValue: null,
+        resolve: null
+      },
+      remixSharedFields: new Set(['assets']), // Assets are automatically shared
+      remixIframeReady: false,
       debounceScroll: 0,
       rcCost: {
         time: 0,
@@ -6407,9 +6419,15 @@ function buyNFT(setname, uid, price, type, callback){
         console.log('📁 dApp post detected - using component method');
         return; // Use component-based method for dApp
       } else if (this.postCustom_json?.vrHash === 'remix') {
-        // Future: ReMix iframe if needed
-        console.log('📁 ReMix post detected - using component method');
-        return; // Use component-based method for ReMix
+        // ReMix iframe integration
+        console.log('📁 ReMix post detected - sending to ReMix iframe');
+        if (this.currentRemixApp) {
+          this.sendFileToRemixIframe(fileData);
+          return;
+        } else {
+          console.log('📁 No active ReMix app - file ignored');
+          return;
+        }
       }
       
       if (iframe && iframe.contentWindow) {
@@ -6600,6 +6618,12 @@ function buyNFT(setname, uid, price, type, callback){
     async selectRemixApp(app) {
       this.currentRemixApp = app;
       this.loadedRemixCid = app.remix_cid;
+      this.showRemixBrowser = false;
+      
+      // Update URL with remix info (if we can get author/permlink from API)
+      if (app.first_author && app.first_permlink) {
+        this.updateRemixUrl(app.first_author, app.first_permlink);
+      }
       
       try {
         const details = await window.dappApiHelpers.loadRemixApplicationDetails(app.remix_cid);
@@ -6622,6 +6646,16 @@ function buyNFT(setname, uid, price, type, callback){
       this.loadedRemixCid = null;
       this.remixApplicationDetails = null;
       this.showRemixDetails = false;
+      this.showRemixBrowser = false;
+      this.remixIframeReady = false;
+      
+      // Clean up message listener
+      if (this._remixMessageHandler) {
+        window.removeEventListener('message', this._remixMessageHandler);
+        this._remixMessageHandler = null;
+      }
+      
+      this.clearRemixUrl();
     },
 
     async loadManualRemix() {
@@ -6656,58 +6690,407 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
 
-    // ReMix Iframe Integration
+
+
+    // New methods for enhanced ReMix functionality
+    selectTestRemixApp() {
+      this.currentRemixApp = {
+        title: '360° Gallery Template',
+        author: 'markegiles',
+        first_author: 'markegiles',
+        description: 'A test application for creating 360° photo galleries with navigation',
+        license: 'CC BY-SA 4.0',
+        remix_cid: 'QmTestReMix123456789',
+        usage_count: 0,
+        isTest: true
+      };
+      this.showRemixBrowser = false;
+      this.updateRemixUrl('markegiles', 'coastal-bike-tour-in-buenos-aires');
+    },
+
+    getRemixIframeSrc() {
+      if (this.currentRemixApp?.isTest) {
+        return '/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html';
+      } else if (this.currentRemixApp?.remix_cid) {
+        return window.dappApiHelpers.getRemixIframeSrc(this.currentRemixApp.remix_cid);
+      }
+      return '';
+    },
+
+    updateRemixUrl(author, permlink) {
+      updateUrlParams(author, permlink);
+    },
+
+    clearRemixUrl() {
+      updateUrlParams(null, null);
+    },
+
+    // ReMix iframe messaging methods
     initRemixApplicationIframe() {
-      // Initialize communication with ReMix application iframe
-      if (this.$refs.remixApplicationIframe) {
-        // Send initialization data to iframe
-        this.$refs.remixApplicationIframe.onload = () => {
-          if (this.currentRemixApp) {
-            this.$refs.remixApplicationIframe.contentWindow.postMessage({
-              type: '360_gallery_init',
-              assets: [],
-              navigation: []
-            }, '*');
-          }
-        };
+      console.log('🎬 Initializing ReMix application iframe');
+      this.remixIframeReady = true;
+      
+      // Set up iframe message listener - use arrow function to preserve 'this' context
+      const messageHandler = (event) => this.handleRemixIframeMessage(event);
+      window.addEventListener('message', messageHandler);
+      
+      // Store handler reference for cleanup
+      this._remixMessageHandler = messageHandler;
+      
+      // Send initial data to iframe after a short delay to ensure it's ready
+      setTimeout(() => {
+        this.sendInitialDataToRemixIframe();
+      }, 500);
+    },
+
+    sendInitialDataToRemixIframe() {
+      if (!this.remixIframeReady || !this.$refs.remixApplicationIframe) return;
+      
+      // Send all custom JSON data to the iframe
+      const initData = {
+        type: 'dapp_init',
+        data: this.postCustom_json || {}
+      };
+      
+      console.log('📤 Sending initial data to ReMix iframe:', initData);
+      this.$refs.remixApplicationIframe.contentWindow.postMessage(initData, '*');
+    },
+
+    handleRemixIframeMessage(event) {
+      // Only process messages from our iframe
+      if (event.source !== this.$refs.remixApplicationIframe?.contentWindow) return;
+      
+      console.log('📥 Received message from ReMix iframe:', event.data);
+      
+      if (event.data.type === 'dapp_update') {
+        this.handleRemixDataUpdate(event.data);
+      } else if (event.data.type === 'request_field_access') {
+        this.handleRemixFieldRequest(event.data);
+      } else if (event.data.type === 'request_field_update') {
+        this.handleRemixFieldUpdateRequest(event.data);
       }
     },
 
+    async handleRemixDataUpdate(data) {
+      // If data.data exists, use that, otherwise use the data directly
+      const updateData = data.data || data;
+      
+      // Assets are automatically updated without user consent (backward compatibility)
+      if (updateData.assets) {
+        this.postCustom_json.assets = updateData.assets;
+        console.log('✅ Updated assets from ReMix iframe');
+      }
+      
+      if (updateData.navigation) {
+        this.postCustom_json.navigation = updateData.navigation;
+        console.log('✅ Updated navigation from ReMix iframe');
+      }
+      
+      // Handle other fields that require user consent
+      for (const [field, value] of Object.entries(updateData)) {
+        if (field !== 'assets' && field !== 'navigation' && field !== 'type') {
+          const approved = await this.requestUserConsentForUpdate(field, value);
+          if (approved) {
+            this.postCustom_json[field] = value;
+            console.log(`✅ Updated ${field} from ReMix iframe with user consent`);
+          } else {
+            console.log(`❌ User denied update to ${field} from ReMix iframe`);
+          }
+        }
+      }
+    },
+
+    async handleRemixFieldRequest(data) {
+      const { field } = data;
+      
+      // Assets are automatically shared
+      if (field === 'assets') {
+        this.sendFieldToRemixIframe(field, this.postCustom_json[field] || []);
+        return;
+      }
+      
+      // For other fields, request user consent
+      const approved = await this.requestUserConsentForShare(field);
+      if (approved) {
+        this.remixSharedFields.add(field);
+        this.sendFieldToRemixIframe(field, this.postCustom_json[field]);
+        console.log(`✅ Shared ${field} with ReMix iframe`);
+      } else {
+        console.log(`❌ User denied sharing ${field} with ReMix iframe`);
+      }
+    },
+
+    async handleRemixFieldUpdateRequest(data) {
+      const { field, value } = data;
+      
+      // Assets are automatically updated
+      if (field === 'assets') {
+        this.postCustom_json[field] = value;
+        return;
+      }
+      
+      // For other fields, request user consent
+      const approved = await this.requestUserConsentForUpdate(field, value);
+      if (approved) {
+        this.postCustom_json[field] = value;
+        console.log(`✅ Updated ${field} from ReMix iframe with user consent`);
+      } else {
+        console.log(`❌ User denied update to ${field} from ReMix iframe`);
+      }
+    },
+
+    sendFieldToRemixIframe(field, value) {
+      if (!this.remixIframeReady || !this.$refs.remixApplicationIframe) return;
+      
+      const message = {
+        type: 'field_data',
+        field: field,
+        value: value
+      };
+      
+      console.log(`📤 Sending ${field} to ReMix iframe:`, message);
+      this.$refs.remixApplicationIframe.contentWindow.postMessage(message, '*');
+    },
+
+    async requestUserConsentForShare(field) {
+      return new Promise((resolve) => {
+        this.remixDataSharingRequest = {
+          type: 'share',
+          field: field,
+          currentValue: this.postCustom_json[field],
+          newValue: null,
+          resolve: resolve
+        };
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('remixDataSharingModal'));
+        modal.show();
+      });
+    },
+
+    async requestUserConsentForUpdate(field, newValue) {
+      return new Promise((resolve) => {
+        this.remixDataSharingRequest = {
+          type: 'update',
+          field: field,
+          currentValue: this.postCustom_json[field],
+          newValue: newValue,
+          resolve: resolve
+        };
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('remixDataSharingModal'));
+        modal.show();
+      });
+    },
+
+    approveRemixDataRequest() {
+      if (this.remixDataSharingRequest.resolve) {
+        this.remixDataSharingRequest.resolve(true);
+      }
+      this.closeRemixDataSharingModal();
+    },
+
+    denyRemixDataRequest() {
+      if (this.remixDataSharingRequest.resolve) {
+        this.remixDataSharingRequest.resolve(false);
+      }
+      this.closeRemixDataSharingModal();
+    },
+
+    closeRemixDataSharingModal() {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('remixDataSharingModal'));
+      if (modal) modal.hide();
+      
+      // Reset request data
+      this.remixDataSharingRequest = {
+        type: '',
+        field: '',
+        currentValue: null,
+        newValue: null,
+        resolve: null
+      };
+    },
+
+    getFieldDescription(field) {
+      const descriptions = {
+        'assets': 'Image files and media content for the gallery',
+        'navigation': 'Navigation links between 360° images',
+        'tags': 'Tags and keywords for the post',
+        'title': 'Post title',
+        'description': 'Post description',
+        'settings': 'Application settings and configuration'
+      };
+      return descriptions[field] || 'Post data field';
+    },
+
+    // Handle SPK File addition from context menu  
+    handleSPKFileForRemix(fileData) {
+      console.log('📁 SPK file selected for ReMix from context menu:', fileData);
+      
+      // Convert SPK Drive file data to standard format
+      const standardFileData = {
+        cid: fileData.cid || fileData.f,
+        hash: fileData.cid || fileData.f,
+        url: fileData.cid ? `https://ipfs.dlux.io/ipfs/${fileData.cid}` : (fileData.url || fileData.gateway),
+        name: fileData.fileName || fileData.name || fileData.filename,
+        filename: fileData.fileName || fileData.name || fileData.filename,
+        size: fileData.size || fileData.s,
+        type: fileData.fileType || fileData.type || fileData.mime,
+        contractId: fileData.contractId || fileData.i
+      };
+      
+      this.sendFileToRemixIframe(standardFileData);
+    },
+
+    // Enhanced drop handling for SPK files
     handleRemixIframeDrop(event) {
       event.preventDefault();
       this.handleDragLeave(event);
       
-      // Handle drag and drop for remix iframe
+      // Check if this is an SPK Drive file drag
+      const singleFileId = event.dataTransfer.getData('fileid');
+      const multipleFileIds = event.dataTransfer.getData('fileids');
+      const contractId = event.dataTransfer.getData('contractid');
+      
+      // Handle both single file and multiple file drags
+      let fileIds = [];
+      if (singleFileId) {
+        fileIds = [singleFileId];
+      } else if (multipleFileIds) {
+        try {
+          fileIds = JSON.parse(multipleFileIds);
+        } catch (e) {
+          console.error('Error parsing multiple file IDs:', e);
+          fileIds = [];
+        }
+      }
+      
+      if (fileIds.length > 0 && contractId && this.currentRemixApp) {
+        console.log('📁 SPK Drive file(s) dropped on ReMix iframe:', fileIds, contractId);
+        
+        // Find the file data from SPK Drive
+        const spkDriveComponent = this.$refs.contractVue || this.$refs.spkDrive;
+        
+        // Process each file
+        fileIds.forEach(fileId => {
+          if (spkDriveComponent && spkDriveComponent.newMeta && spkDriveComponent.newMeta[contractId] && spkDriveComponent.newMeta[contractId][fileId]) {
+            const fileMetadata = spkDriveComponent.newMeta[contractId][fileId];
+            const fileData = {
+              cid: fileId,
+              f: fileId,
+              i: contractId,
+              name: fileMetadata.name || fileId,
+              filename: fileMetadata.name || fileId,
+              type: fileMetadata.type || fileMetadata.mime,
+              size: fileMetadata.size || 0,
+              url: `https://ipfs.dlux.io/ipfs/${fileId}`,
+              contractId: contractId,
+              meta: fileMetadata
+            };
+            
+            this.sendFileToRemixIframe(fileData);
+          } else {
+            console.error('Could not find file metadata for:', fileId, 'in contract:', contractId);
+          }
+        });
+        
+        return;
+      }
+      
+      // Check if this is SPK data transfer (legacy format)
+      const spkData = event.dataTransfer.getData('application/x-spk-file');
+      if (spkData && this.currentRemixApp) {
+        try {
+          const fileData = JSON.parse(spkData);
+          console.log('📁 SPK file dropped on ReMix iframe drop zone:', fileData);
+          this.sendFileToRemixIframe(fileData);
+          return;
+        } catch (e) {
+          console.error('Error parsing SPK file data:', e);
+        }
+      }
+      
+      // Handle regular file drops
       const files = Array.from(event.dataTransfer.files);
       if (files.length > 0) {
         this.handleRemixFileInput({ target: { files } });
       }
     },
 
+    sendFileToRemixIframe(fileData) {
+      if (!this.remixIframeReady || !this.$refs.remixApplicationIframe) {
+        console.error('ReMix iframe not ready for file transfer');
+        return;
+      }
+      
+      const message = {
+        type: 'dapp_file_added',
+        file: {
+          cid: fileData.cid || fileData.hash,
+          hash: fileData.cid || fileData.hash,
+          url: fileData.url || (fileData.cid ? `https://ipfs.dlux.io/ipfs/${fileData.cid}` : ''),
+          name: fileData.name || fileData.filename,
+          filename: fileData.name || fileData.filename,
+          size: fileData.size || 0,
+          type: fileData.type || 'application/octet-stream',
+          contractId: fileData.contractId,
+          metadata: fileData // Include full file data for app-specific handling
+        }
+      };
+      
+      console.log('📤 Sending file to ReMix iframe:', message);
+      this.$refs.remixApplicationIframe.contentWindow.postMessage(message, '*');
+    },
+
+    // Handle regular file input for ReMix iframe
     handleRemixFileInput(event) {
       const files = Array.from(event.target.files);
       
       // Process files for ReMix application
       files.forEach(file => {
         if (file.type.startsWith('image/')) {
-          // Send to iframe as spk_file_added message
-          if (this.$refs.remixApplicationIframe) {
-            this.$refs.remixApplicationIframe.contentWindow.postMessage({
-              type: 'spk_file_added',
-              file: {
-                fileName: file.name,
-                url: URL.createObjectURL(file),
-                size: file.size,
-                type: file.type
-              }
-            }, '*');
-          }
+          // Create a file data object for regular files
+          const fileData = {
+            name: file.name,
+            fileName: file.name,
+            url: URL.createObjectURL(file),
+            size: file.size,
+            type: file.type,
+            mimetype: file.type
+          };
+          
+          this.sendFileToRemixIframe(fileData);
         }
       });
       
       // Clear input
       if (event.target) {
         event.target.value = '';
+      }
+    },
+
+    // Load ReMix from URL params
+    async loadRemixFromUrl() {
+      const { remixAuthor, remixPermlink } = getUrlParams();
+      if (remixAuthor && remixPermlink) {
+        console.log('Loading ReMix from URL:', remixAuthor, remixPermlink);
+        
+        // Ensure this post is treated as a ReMix post
+        if (!this.postCustom_json) {
+          this.postCustom_json = {};
+        }
+        this.postCustom_json.vrHash = 'remix';
+        
+        // Check if it's the test case
+        if (remixAuthor === 'markegiles' && remixPermlink === 'coastal-bike-tour-in-buenos-aires') {
+          this.selectTestRemixApp();
+          return;
+        }
+        
+        // TODO: Implement API loading for real URLs
+        // For now, show test app for any URL params
+        this.selectTestRemixApp();
       }
     }
   },
@@ -6813,6 +7196,9 @@ function buyNFT(setname, uid, price, type, callback){
       }
     });
 
+    // Check for ReMix URL parameters and load if present
+    this.loadRemixFromUrl();
+    
     // Initialize ReMix apps if on remix post type
     if (this.postCustom_json.vrHash === 'remix') {
       this.$nextTick(() => {

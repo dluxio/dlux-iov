@@ -432,7 +432,7 @@
                                     :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                     :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                     @done="getSapi" :postpage="true" :post-type="postCustom_json.vrHash"
-                                    @add-to-post="handleSPKFileForAssets = $event"></contract-vue>
+                                    @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
                             </div>
                         </div>
                     </div>
@@ -750,8 +750,16 @@
                         <div id="remixManager" class="accordion-collapse collapse show"
                             data-bs-parent="#remixAccordion">
                             <div class="accordion-body">
-                                <!-- ReMix App Browser (when no app is loaded) -->
-                                <div v-if="!currentRemixApp">
+                                
+                                <!-- ReMix App Browser (collapsed when app is loaded) -->
+                                <div v-if="!currentRemixApp || showRemixBrowser">
+                                    <!-- Collapse header when app is loaded -->
+                                    <div v-if="currentRemixApp" class="mb-3">
+                                        <button class="btn btn-sm btn-outline-secondary" @click="showRemixBrowser = false">
+                                            <i class="fa-solid fa-chevron-up fa-fw me-1"></i>Hide Browser (Currently remixing: {{currentRemixApp.title || 'Test Application'}})
+                                        </button>
+                                    </div>
+                                    
                                     <!-- Search and Filters -->
                                     <div class="card mb-3">
                                         <div class="card-header">
@@ -792,7 +800,7 @@
                                                         @click="showAdvancedRemixOptions = !showAdvancedRemixOptions">
                                                     <i class="fa-solid fa-cogs fa-fw me-1"></i>Advanced Options
                                                 </button>
-                                </div>
+                                            </div>
                                             
                                             <!-- Advanced Manual Loading -->
                                             <div v-if="showAdvancedRemixOptions" class="mt-3 p-3 bg-dark-1 rounded">
@@ -803,10 +811,10 @@
                                                     <button class="btn btn-outline-primary" @click="loadManualRemix()">
                                                         <i class="fa-solid fa-download fa-fw me-1"></i>Load
                                                     </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <!-- Loading State -->
                                     <div v-if="loadingRemixApps" class="text-center py-4">
@@ -837,156 +845,130 @@
                                         </div>
                                     </div>
                                     
-                                                        <!-- No Results -->
-                    <div v-else-if="!loadingRemixApps" class="text-center py-4 text-muted">
-                        <i class="fa-solid fa-search fa-2x mb-3"></i>
-                        <h5>No ReMix Applications Found</h5>
-                        <p>Try adjusting your search criteria or create a new dApp instead.</p>
-                    </div>
-                </div>
-                
-                <!-- Hardcoded Test ReMix Application (Always Visible for Testing) -->
-                <div class="alert alert-info mb-3">
-                    <div class="d-flex align-items-center">
-                        <i class="fa-solid fa-flask fa-fw me-2"></i>
-                        <div class="flex-grow-1">
-                            <strong>Test Mode:</strong> Using hardcoded 360° Gallery ReMix application for testing
-                        </div>
-                        <button class="btn btn-sm btn-outline-info" onclick="alert('This is a hardcoded test application for development')">
-                            <i class="fa-solid fa-info fa-fw"></i>Info
-                        </button>
-                    </div>
-                </div>
-
-                <!-- SPK Drive Drop Zone (Always visible for testing) -->
-                <div class="iframe-drop-zone p-3 mb-3" 
-                     @drop="handleRemixIframeDrop($event)" 
-                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
-                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
-                     @dragleave="handleDragLeave($event)">
-                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
-                            <div>
-                                <h6 class="mb-1">Drop Files Here</h6>
-                                <p class="small text-muted mb-0">
-                                    Drag files from SPK Drive or use the context menu "Add to ReMix" option to test the iframe integration
-                                </p>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <button class="btn btn-outline-info btn-sm" @click="$refs.remixFileInput.click()">
-                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Hardcoded ReMix Application iframe (Always visible for testing) -->
-                <div class="mb-4">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">
-                                <i class="fa-solid fa-cube fa-fw me-2"></i>
-                                Test ReMix Builder: 360° Gallery Template
-                            </h6>
-                            <div>
-                                <button class="btn btn-sm btn-outline-secondary me-2" @click="showRemixDetails = !showRemixDetails">
-                                    <i class="fa-solid fa-info fa-fw"></i>Details
-                                </button>
-                                <span class="badge bg-success">Test Mode</span>
-                            </div>
-                        </div>
-                        
-                        <!-- ReMix Details (collapsible) -->
-                        <div v-if="showRemixDetails" class="card-body border-bottom">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <h6>360° Gallery Template</h6>
-                                    <p class="text-muted small mb-2">A hardcoded test application for creating 360° photo galleries with navigation</p>
-                                    <div class="d-flex gap-3 small">
-                                        <span><strong>Author:</strong> @markegiles</span>
-                                        <span><strong>License:</strong> CC BY-SA 4.0</span>
-                                        <span><strong>Status:</strong> Test Application</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 text-end">
-                                    <div class="small text-muted">
-                                        <div><strong>Test CID:</strong></div>
-                                        <code class="small">QmTestReMix123456789</code>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- iframe for hardcoded ReMix application -->
-                        <div style="height: 600px; min-height: 600px;">
-                            <iframe 
-                                ref="remixApplicationIframe"
-                                src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
-                                width="100%" 
-                                height="100%"
-                                frameborder="0"
-                                style="border-radius: 0 0 8px 8px;"
-                                @load="initRemixApplicationIframe">
-                            </iframe>
-                        </div>
-                    </div>
-                </div>
-                                
-                                <!-- Active ReMix Status (when app is loaded) -->
-                                <div v-if="currentRemixApp" class="alert alert-success mb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <i class="fa-solid fa-shuffle fa-fw me-2"></i>
-                                            <strong>Status:</strong> Remixing "{{currentRemixApp.title || 'Untitled Application'}}" 
-                                            by @{{currentRemixApp.first_author}}
+                                    <!-- Test Mode Application -->
+                                    <div v-if="!loadingRemixApps" class="row g-3 mt-1">
+                                        <div class="col-md-6 col-lg-4">
+                                            <div class="card bg-darker h-100 cursor-pointer border-info" @click="selectTestRemixApp()">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <h6 class="card-title mb-0">360° Gallery Template</h6>
+                                                        <span class="badge bg-info ms-2 small">Test</span>
+                                                    </div>
+                                                    <p class="card-text small text-muted">A test application for creating 360° photo galleries with navigation</p>
+                                                    <div class="d-flex justify-content-between align-items-end">
+                                                        <div class="small">
+                                                            <div><strong>@markegiles</strong></div>
+                                                            <div class="text-muted">CC BY-SA 4.0</div>
+                                                        </div>
+                                                        <div class="text-end small">
+                                                            <div class="text-info">Test Mode</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <button class="btn btn-sm btn-outline-success" @click="changeRemixApp()">
-                                            <i class="fa-solid fa-exchange-alt fa-fw me-1"></i>Change App
-                                        </button>
+                                    </div>
+                                    
+                                    <!-- No Results -->
+                                    <div v-if="!loadingRemixApps && availableRemixApps.length === 0" class="text-center py-4 text-muted">
+                                        <i class="fa-solid fa-search fa-2x mb-3"></i>
+                                        <h5>No ReMix Applications Found</h5>
+                                        <p>Try adjusting your search criteria or use the test application above.</p>
                                     </div>
                                 </div>
-
-                                <!-- SPK Drive Drop Zone (for active remix) -->
-                                <div v-if="currentRemixApp" class="iframe-drop-zone p-3 mb-3" 
-                                     @drop="handleRemixIframeDrop($event)" 
-                                     @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
-                                     @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
-                                     @dragleave="handleDragLeave($event)">
-                                    <div class="d-flex align-items-center justify-content-between bg-darker rounded p-3">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
+                                
+                                <!-- Collapsed Browser Button (when app is loaded and browser is hidden) -->
+                                <div v-if="currentRemixApp && !showRemixBrowser" class="mb-3">
+                                    <button class="btn btn-sm btn-outline-secondary" @click="showRemixBrowser = true">
+                                        <i class="fa-solid fa-chevron-down fa-fw me-1"></i>Browse Other Apps (Currently remixing: {{currentRemixApp.title || 'Test Application'}})
+                                    </button>
+                                </div>
+                                
+                                <!-- Active ReMix Application (when app is loaded) -->
+                                <div v-if="currentRemixApp">
+                                    <!-- Status Banner -->
+                                    <div class="alert alert-success mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
                                             <div>
+                                                <i class="fa-solid fa-shuffle fa-fw me-2"></i>
+                                                <strong>Status:</strong> Remixing "{{currentRemixApp.title || 'Test Application'}}" 
+                                                by @{{currentRemixApp.author || currentRemixApp.first_author || 'markegiles'}}
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-success" @click="closeRemixApp()">
+                                                <i class="fa-solid fa-times fa-fw me-1"></i>Change App
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- SPK Drive Drop Zone -->
+                                    <div class="iframe-drop-zone p-3 mb-3 d-none" 
+                                         @drop="handleRemixIframeDrop($event)" 
+                                         @dragover.prevent="$event.currentTarget.classList.add('dragover')" 
+                                         @dragenter.prevent="$event.currentTarget.classList.add('dragover')"
+                                         @dragleave="handleDragLeave($event)">
+                                        <div class="d-flex align-items-center bg-darker rounded p-3">
+                                            <i class="fa-solid fa-cloud-arrow-up fa-2x text-info me-3"></i>
+                                            <div class="flex-grow-1">
                                                 <h6 class="mb-1">Drop Files Here</h6>
                                                 <p class="small text-muted mb-0">
                                                     Drag files from SPK Drive or use the context menu "Add to ReMix" option
                                                 </p>
                                             </div>
                                         </div>
-                                        <div class="text-end">
-                                            <button class="btn btn-outline-info btn-sm" @click="$refs.remixFileInput.click()">
-                                                <i class="fa-solid fa-plus fa-fw me-1"></i>Choose Files
-                                            </button>
+                                    </div>
+
+                                    <!-- ReMix Data Sharing Modal -->
+                                    <div class="modal fade" id="remixDataSharingModal" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content bg-dark text-white">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        <i class="fa-solid fa-share fa-fw me-2"></i>Share Data with ReMix App
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p v-if="remixDataSharingRequest.type === 'share'">
+                                                        The ReMix app is requesting access to the following data:
+                                                    </p>
+                                                    <p v-else-if="remixDataSharingRequest.type === 'update'">
+                                                        The ReMix app wants to update the following fields:
+                                                    </p>
+                                                    <div class="alert alert-info">
+                                                        <strong>{{remixDataSharingRequest.field}}</strong>
+                                                        <div class="small text-muted mt-1">
+                                                            {{getFieldDescription(remixDataSharingRequest.field)}}
+                                                        </div>
+                                                    </div>
+                                                    <div v-if="remixDataSharingRequest.type === 'update' && remixDataSharingRequest.newValue">
+                                                        <h6>Proposed changes:</h6>
+                                                        <pre class="bg-darker p-2 rounded small">{{JSON.stringify(remixDataSharingRequest.newValue, null, 2)}}</pre>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" @click="denyRemixDataRequest()">
+                                                        <i class="fa-solid fa-times fa-fw me-1"></i>Deny
+                                                    </button>
+                                                    <button type="button" class="btn btn-primary" @click="approveRemixDataRequest()">
+                                                        <i class="fa-solid fa-check fa-fw me-1"></i>Allow
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <!-- ReMix Application iframe -->
-                                <div v-if="currentRemixApp" class="mb-4">
-                                    <div class="card">
+                                    <!-- ReMix Application iframe -->
+                                    <div class="card mb-4">
                                         <div class="card-header d-flex justify-content-between align-items-center">
                                             <h6 class="mb-0">
                                                 <i class="fa-solid fa-cube fa-fw me-2"></i>
-                                                ReMix Builder: {{currentRemixApp.title || 'Untitled Application'}}
+                                                ReMix Builder: {{currentRemixApp.title || 'Test Application'}}
                                             </h6>
                                             <div>
                                                 <button class="btn btn-sm btn-outline-secondary me-2" @click="showRemixDetails = !showRemixDetails">
                                                     <i class="fa-solid fa-info fa-fw"></i>Details
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger" @click="closeRemixApp()">
-                                                    <i class="fa-solid fa-times fa-fw"></i>Close
-                                                </button>
+                                                <span v-if="currentRemixApp.isTest" class="badge bg-info">Test Mode</span>
                                             </div>
                                         </div>
                                         
@@ -994,28 +976,29 @@
                                         <div v-if="showRemixDetails" class="card-body border-bottom">
                                             <div class="row">
                                                 <div class="col-md-8">
-                                                    <h6>{{currentRemixApp.title || 'Untitled Application'}}</h6>
-                                                    <p class="text-muted small mb-2">{{currentRemixApp.description || 'No description available'}}</p>
+                                                    <h6>{{currentRemixApp.title || 'Test Application'}}</h6>
+                                                    <p class="text-muted small mb-2">{{currentRemixApp.description || 'A test application for creating 360° photo galleries with navigation'}}</p>
                                                     <div class="d-flex gap-3 small">
-                                                        <span><strong>Author:</strong> @{{currentRemixApp.first_author}}</span>
-                                                        <span><strong>License:</strong> {{currentRemixApp.license || 'Not specified'}}</span>
-                                                        <span><strong>Usage:</strong> {{currentRemixApp.usage_count || 0}} derivatives</span>
+                                                        <span><strong>Author:</strong> @{{currentRemixApp.author || currentRemixApp.first_author || 'markegiles'}}</span>
+                                                        <span><strong>License:</strong> {{currentRemixApp.license || 'CC BY-SA 4.0'}}</span>
+                                                        <span v-if="!currentRemixApp.isTest"><strong>Usage:</strong> {{currentRemixApp.usage_count || 0}} derivatives</span>
+                                                        <span v-if="currentRemixApp.isTest"><strong>Status:</strong> Test Application</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 text-end">
                                                     <div class="small text-muted">
-                                                        <div><strong>ReMix CID:</strong></div>
-                                                        <code class="small">{{currentRemixApp.remix_cid}}</code>
+                                                        <div><strong>{{currentRemixApp.isTest ? 'Test' : 'ReMix'}} CID:</strong></div>
+                                                        <code class="small">{{currentRemixApp.remix_cid || 'QmTestReMix123456789'}}</code>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <!-- iframe for loaded ReMix application -->
+                                        <!-- iframe for ReMix application -->
                                         <div style="height: 600px; min-height: 600px;">
                                             <iframe 
                                                 ref="remixApplicationIframe"
-                                                src="/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html"
+                                                :src="getRemixIframeSrc()"
                                                 width="100%" 
                                                 height="100%"
                                                 frameborder="0"
@@ -1025,9 +1008,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Hidden File Input for ReMix uploads -->
-                                <input ref="remixFileInput" type="file" multiple @change="handleRemixFileInput" style="display: none;">
 
                                 
                             </div>
@@ -1148,6 +1128,28 @@
     </script>
     <script>
         var video_page = true
+        
+        // Parse URL parameters for remix loading
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                remixAuthor: params.get('remixAuthor'),
+                remixPermlink: params.get('remixPermlink')
+            };
+        }
+        
+        // Update URL parameters
+        function updateUrlParams(remixAuthor, remixPermlink) {
+            const url = new URL(window.location);
+            if (remixAuthor && remixPermlink) {
+                url.searchParams.set('remixAuthor', remixAuthor);
+                url.searchParams.set('remixPermlink', remixPermlink);
+            } else {
+                url.searchParams.delete('remixAuthor');
+                url.searchParams.delete('remixPermlink');
+            }
+            window.history.pushState({}, '', url);
+        }
         
         // Global functions for the new consolidated post structure
         window.dappApiHelpers = {
