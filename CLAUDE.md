@@ -302,12 +302,38 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Result**: "Saving locally..." message now appears immediately for all user inputs
 
 ## Recent Updates (v2025.06.25)
+### ✅ CRITICAL Security Fix - Local Document Permission Bypass
+- **Issue Fixed**: Username watcher was not validating permissions for local documents when switching users
+- **Root Cause**: Username watcher only checked collaborative documents, allowing cross-user access to local files
+- **Solution**: Added local document ownership validation in username watcher
+- **Result**: Users cannot access other users' local documents after switching accounts
+- **Additional Fix**: Unauthenticated users (no username or expired auth) now immediately lose access to all documents
+
+### ✅ Authentication Bypass Security Fix  
+- **Issue Fixed**: Unauthenticated users could maintain access via cached permissions
+- **Root Cause**: `validateCurrentDocumentPermissions()` fell back to cached permissions when not authenticated
+- **Solution**: Force `no-access` for unauthenticated users without cache fallback
+- **Result**: Expired/logged out users immediately lose document access
+
+### ✅ Editor Lock-Down Fix for Permission Changes
+- **Issue Fixed**: Editor remained editable when switching to readonly user in collaborative mode
+- **Root Cause**: 
+  1. `handlePermissionBroadcast` tried to directly set `isReadOnlyMode` (a computed property)
+  2. `validateCurrentDocumentPermissions` didn't update editor state when permissions changed
+  3. Vue reactivity wasn't detecting deep cache object changes
+- **Solution**: 
+  1. Remove invalid computed property assignments
+  2. Update cached permissions properly to trigger computed property
+  3. Add `$forceUpdate()` to ensure Vue recalculates `isReadOnlyMode`
+  4. Explicitly call `setEditable()` based on new permission level
+- **Result**: Editor properly locks/unlocks when user permissions change
+
 ### ✅ BubbleMenu Extension Integration - NEW FEATURE
 - **Feature Added**: TipTap BubbleMenu extension for floating formatting toolbar on text selection
-- **UI Enhancement**: Bubble menu appears when text is selected, providing quick access to Bold, Italic, and Strikethrough formatting
-- **Vue 3 Compliant**: Follows Vue 3 reactivity patterns with `markRaw()` and proper component lifecycle
-- **Responsive Design**: Integrates with existing dark theme using Bootstrap classes and CSS variables
-- **Smart Visibility**: TipTap extension controls visibility - only shows when text is selected and not in readonly mode
+- **UI Enhancement**: Bubble menu with Bold, Italic, Strike, Code, and Link buttons
+- **Vue 3 Compliant**: Fixed DOM timing issues with permanent element and safe event handling
+- **Button Fix**: Used `@mousedown.prevent` pattern to maintain text selection
+- **Smart Visibility**: CSS-based hiding with TipTap Floating UI control
 - **Package**: Added `@tiptap/extension-bubble-menu@3.0.0-beta.15` to dependencies
 - **Bundle Update**: Included in collaboration bundle and exported via `window.TiptapCollaboration.BubbleMenu`
 - **Styling**: Added dark-themed bubble menu styles to `css/tiptap-editor.css` with `display: none` initial state

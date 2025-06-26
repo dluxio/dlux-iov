@@ -2838,11 +2838,22 @@ class SyncManager {
                     
                     // If permission was revoked, handle immediate effects
                     if (broadcastType === 'permission_revoked') {
-                        // Force read-only mode
-                        this.component.isReadOnlyMode = true;
+                        // Update permission level to trigger computed property recalculation
                         this.component.currentFile.permissionLevel = 'readonly';
                         
-                        // Disable editors immediately
+                        // Update cached permissions to ensure computed property sees the change
+                        if (!this.component.currentFile.cachedPermissions) {
+                            this.component.currentFile.cachedPermissions = {};
+                        }
+                        this.component.currentFile.cachedPermissions[this.component.username] = {
+                            level: 'readonly',
+                            timestamp: Date.now()
+                        };
+                        
+                        // Force Vue to recalculate computed properties
+                        this.component.$forceUpdate();
+                        
+                        // Disable editors immediately (isReadOnlyMode watcher will also handle this)
                         if (this.component.bodyEditor && !this.component.bodyEditor.isDestroyed) {
                             this.component.bodyEditor.setEditable(false);
                         }
@@ -2852,10 +2863,22 @@ class SyncManager {
                     if (broadcastType === 'permission_granted' && oldReadOnlyMode) {
                         const canEdit = ['editable', 'postable', 'owner'].includes(newPermissionLevel);
                         if (canEdit) {
-                            this.component.isReadOnlyMode = false;
+                            // Update permission level to trigger computed property recalculation
                             this.component.currentFile.permissionLevel = newPermissionLevel;
                             
-                            // Enable editors
+                            // Update cached permissions
+                            if (!this.component.currentFile.cachedPermissions) {
+                                this.component.currentFile.cachedPermissions = {};
+                            }
+                            this.component.currentFile.cachedPermissions[this.component.username] = {
+                                level: newPermissionLevel,
+                                timestamp: Date.now()
+                            };
+                            
+                            // Force Vue to recalculate computed properties
+                            this.component.$forceUpdate();
+                            
+                            // Enable editors (isReadOnlyMode watcher will also handle this)
                             if (this.component.bodyEditor && !this.component.bodyEditor.isDestroyed) {
                                 this.component.bodyEditor.setEditable(true);
                             }
@@ -6741,25 +6764,50 @@ export default {
         username: {
             handler(newUsername, oldUsername) {
                 // Skip initial mount
-                if (!oldUsername) return;
+                if (!oldUsername && !this.currentFile) return;
                 
                 // Skip if username hasn't actually changed
                 if (newUsername === oldUsername) return;
                 
                 console.log('🔐 Username changed - invalidating permission caches:', {
                     from: oldUsername,
-                    to: newUsername
+                    to: newUsername,
+                    hasCurrentFile: !!this.currentFile
                 });
                 
                 // Clear all permission caches
                 this.clearAllPermissionCaches();
                 
-                // If we have a current collaborative document, re-validate permissions
-                if (this.currentFile && this.currentFile.type === 'collaborative') {
-                    console.log('🔐 Re-validating permissions for current collaborative document');
+                // ✅ SECURITY FIX: Re-validate permissions for ANY open document
+                if (this.currentFile) {
+                    // Handle logout scenario (username becomes null/empty)
+                    if (!newUsername) {
+                        console.log('🚫 User logged out - closing current document');
+                        this.handleDocumentAccessDenied();
+                        return;
+                    }
                     
-                    // Force immediate permission check
-                    this.validateCurrentDocumentPermissions();
+                    if (this.currentFile.type === 'collaborative') {
+                        console.log('🔐 Re-validating permissions for current collaborative document');
+                        // Force immediate permission check
+                        this.validateCurrentDocumentPermissions();
+                    } else if (this.currentFile.type === 'local' || !this.currentFile.type) {
+                        console.log('🔐 Re-validating ownership for current local document');
+                        
+                        // Check if new user owns this local document
+                        const fileOwner = this.currentFile.creator || this.currentFile.author || this.currentFile.owner;
+                        const hasAccess = !fileOwner || fileOwner === newUsername;
+                        
+                        if (!hasAccess) {
+                            console.log('🚫 Access denied - user does not own this local document', {
+                                fileOwner,
+                                currentUser: newUsername
+                            });
+                            
+                            // Handle access denial
+                            this.handleDocumentAccessDenied();
+                        }
+                    }
                 }
             }
         }
@@ -16517,10 +16565,21 @@ export default {
                     delete this.currentFile.cachedPermissions[this.username];
                 }
                 
-                // Fetch fresh permissions from server if authenticated
+                // ✅ SECURITY FIX: Declare permissionLevel in outer scope
                 let permissionLevel = 'no-access';
                 
-                if (this.isAuthenticated) {
+                // Check authentication first - unauthenticated users have no access
+                if (!this.isAuthenticated || !this.username) {
+                    console.log('🚫 User is not authenticated - denying access');
+                    // Force no-access for unauthenticated users
+                    permissionLevel = 'no-access';
+                    
+                    // Clear any stale cached permissions
+                    if (this.currentFile.cachedPermissions && this.username) {
+                        delete this.currentFile.cachedPermissions[this.username];
+                    }
+                } else {
+                    // User is authenticated - fetch fresh permissions from server
                     try {
                         // Try to fetch from server
                         const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${owner}/${permlink}`, {
@@ -16544,12 +16603,9 @@ export default {
                         }
                     } catch (error) {
                         console.warn('⚠️ Failed to fetch fresh permissions:', error);
+                        // ✅ SECURITY: Do NOT fall back to cache for authentication failures
+                        // permissionLevel remains 'no-access'
                     }
-                }
-                
-                // Fall back to cache check if server fetch failed
-                if (permissionLevel === 'no-access') {
-                    permissionLevel = this.getUserPermissionLevel(this.currentFile);
                 }
                 
                 console.log('🔐 Current permission level:', permissionLevel);
@@ -16572,16 +16628,48 @@ export default {
                     // Navigate to home or create new document
                     this.documentManager.newDocument();
                 }
-                // If permission level dropped, reconnect with new permissions
-                else if (this.provider && this.currentPermissionLevel !== permissionLevel) {
-                    console.log('🔄 Permission level changed - reconnecting with new permissions');
+                // If permission level changed, update editor state and reconnect
+                else if (this.currentPermissionLevel !== permissionLevel) {
+                    console.log('🔄 Permission level changed - updating editor state', {
+                        from: this.currentPermissionLevel,
+                        to: permissionLevel,
+                        canEditBefore: ['editable', 'postable', 'owner'].includes(this.currentPermissionLevel),
+                        canEditAfter: ['editable', 'postable', 'owner'].includes(permissionLevel)
+                    });
+                    
+                    // Update permission level
                     this.currentPermissionLevel = permissionLevel;
                     
-                    // Reconnect WebSocket with new permission level
-                    if (this.collaborationManager && this.collaborationManager.reconnectWebSocketForPermissionUpgrade) {
-                        await this.collaborationManager.reconnectWebSocketForPermissionUpgrade();
-                    } else {
-                        console.warn('⚠️ Cannot reconnect WebSocket - collaboration manager not available');
+                    // Update cached permissions to trigger computed property
+                    if (this.currentFile) {
+                        this.currentFile.permissionLevel = permissionLevel;
+                        
+                        if (!this.currentFile.cachedPermissions) {
+                            this.currentFile.cachedPermissions = {};
+                        }
+                        this.currentFile.cachedPermissions[this.username] = {
+                            level: permissionLevel,
+                            timestamp: Date.now()
+                        };
+                    }
+                    
+                    // Force Vue to recalculate computed properties by triggering reactivity
+                    this.$forceUpdate();
+                    
+                    // Update editor editable state based on new permission
+                    const canEdit = ['editable', 'postable', 'owner'].includes(permissionLevel);
+                    if (this.bodyEditor && !this.bodyEditor.isDestroyed) {
+                        console.log('🔒 Updating editor editable state:', canEdit);
+                        this.bodyEditor.setEditable(canEdit);
+                    }
+                    
+                    // Reconnect WebSocket with new permission level if we have a provider
+                    if (this.provider) {
+                        if (this.collaborationManager && this.collaborationManager.reconnectWebSocketForPermissionUpgrade) {
+                            await this.collaborationManager.reconnectWebSocketForPermissionUpgrade();
+                        } else {
+                            console.warn('⚠️ Cannot reconnect WebSocket - collaboration manager not available');
+                        }
                     }
                 }
             } catch (error) {
