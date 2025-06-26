@@ -376,6 +376,18 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Solution**: Added `permlinkInputTemp` update in `useGeneratedPermlink()`
 - **Result**: Users can click auto-generate while editing to reset to generated value and continue editing
 
+### ✅ Fix Persistent Document Creation on Page Refresh
+- **Issue Fixed**: Persistent documents were created immediately on page refresh without user interaction
+- **Root Cause**: Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
+- **Solution**: Added `isLoadingDocument` flag to prevent user intent detection during document loading
+- **Implementation Details**:
+  - Set `isLoadingDocument = true` at start of `autoConnectToLocalDocument` and `autoConnectToCollaborativeDocument`
+  - Reset `isLoadingDocument = false` after successful load (with 1s delay for local docs)
+  - Reset flag in WebSocket `onConnect` handler for collaborative documents
+  - Reset flag on errors to ensure proper state recovery
+  - Metadata and config observers check `!isLoadingDocument` before setting user intent
+- **Result**: Documents are only persisted when user actually interacts with editor, not on page load
+
 ### ✅ Document Name Display Consistency Fix
 - **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names
 - **Root Cause**: `getDocumentDisplayName()` method used fallback chains (`file.name || file.documentName`) that could show stale data

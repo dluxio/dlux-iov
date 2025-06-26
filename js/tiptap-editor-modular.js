@@ -947,6 +947,11 @@ class PersistenceManager {
                     console.log('🔌 WebSocket connected to collaboration server');
                     persistenceManager.component.connectionStatus = 'connected';
                     persistenceManager.component.connectionMessage = 'Connected to collaboration server';
+                    
+                    // ✅ FIX: Reset loading flag when WebSocket connects successfully
+                    // Document is now fully loaded and user interactions should be tracked
+                    persistenceManager.component.isLoadingDocument = false;
+                    console.log('📄 Document loading complete via WebSocket - user interactions will now be tracked');
 
                     // ✅ TIPTAP COMPLIANCE: Set awareness user info after connection
                     if (provider.awareness) {
@@ -2688,7 +2693,8 @@ class SyncManager {
                         this.component.titleInput = newTitle;
 
                         // ✅ FIX: Set save indicator when title changes from Y.js
-                        if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
+                        // Only set user intent if not loading a document
+                        if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && !this.component.isLoadingDocument) {
                             this.component.hasUnsavedChanges = true;
                             this.component.hasUserIntent = true;
                             this.component.updateSaveStatus();
@@ -2709,7 +2715,8 @@ class SyncManager {
                     }
 
                     // Only set flags if document is not temporary or already has persistence
-                    if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
+                    // AND we're not in the middle of loading a document
+                    if ((!this.component.isTemporaryDocument || this.component.indexeddbProvider) && !this.component.isLoadingDocument) {
                         this.component.hasUnsavedChanges = true;
                         this.component.hasUserIntent = true;
 
@@ -3943,6 +3950,9 @@ class DocumentManager {
     async newDocument(initialContent = null) {
         // ✅ TIPTAP BEST PRACTICE: Always start as Tier 1 (offline-first)
         const tier = TierDecisionManager.TierType.LOCAL;
+        
+        // Reset loading flag for new documents
+        this.component.isLoadingDocument = false;
 
         // STEP 1: Cleanup existing state
         await this.lifecycleManager.cleanupDocument();
@@ -4683,6 +4693,7 @@ export default {
             hasUnsavedChanges: false,
             saveError: false, // Track save errors for separate status indicators
             fileType: 'local', // 'local' or 'collaborative'
+            isLoadingDocument: false, // ✅ SECURITY: Prevent user intent detection during document loading
 
             // ===== SAVE STATUS DISPLAY =====
             saveMessageVisible: false,
@@ -6714,6 +6725,7 @@ export default {
                         this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
                             console.error('❌ Failed to auto-connect to collaborative document:', error);
                             this.isLoadingFromURL = false;
+                            this.isLoadingDocument = false; // Reset loading flag on error
 
                             // Check if it's a temporary error
                             const isTemporaryError = error.message.includes('fetch') ||
@@ -6747,6 +6759,7 @@ export default {
                         this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
                             console.error('❌ Failed to auto-connect to collaborative document:', error);
                             this.isLoadingFromURL = false;
+                            this.isLoadingDocument = false; // Reset loading flag on error
 
                             if (!this.currentFile) {
                                 this.documentManager.newDocument();
@@ -8466,6 +8479,8 @@ export default {
         },
 
         async autoConnectToLocalDocument(owner, permlink) {
+            // Set loading flag to prevent user intent detection during load
+            this.isLoadingDocument = true;
 
             try {
                 // ✅ AUTHENTICATION STATE CHECK: Wait for auth to load
@@ -8653,15 +8668,25 @@ export default {
 
                 // ✅ STEP 6: Reset loading flag after successful load
                 this.isLoadingFromURL = false;
+                
+                // Reset document loading flag with a small delay to allow Y.js sync to complete
+                setTimeout(() => {
+                    this.isLoadingDocument = false;
+                    console.log('📄 Document loading complete - user interactions will now be tracked');
+                }, 1000);
 
             } catch (error) {
                 console.error('❌ Failed to auto-connect to local document:', error);
                 this.clearLocalURLParams();
+                this.isLoadingDocument = false; // Reset flag on error
                 throw error;
             }
         },
 
         async autoConnectToCollaborativeDocument(owner, permlink) {
+            // Set loading flag to prevent user intent detection during load
+            this.isLoadingDocument = true;
+            
             console.log('🚦 autoConnectToCollaborativeDocument called:', {
                 owner,
                 permlink,
@@ -8901,6 +8926,12 @@ export default {
 
                 // ✅ STEP 5: Reset loading flag after successful load
                 this.isLoadingFromURL = false;
+                
+                // Reset document loading flag with a small delay to allow Y.js sync to complete
+                setTimeout(() => {
+                    this.isLoadingDocument = false;
+                    console.log('📄 Collaborative document loading complete - user interactions will now be tracked');
+                }, 1000);
 
             } catch (error) {
                 console.error('❌ Failed to auto-connect to collaborative document:', error);
@@ -8909,6 +8940,7 @@ export default {
                 this.connectionStatus = 'error';
                 this.isLoadingFromURL = false;
                 this.showLoadingMessage = '';
+                this.isLoadingDocument = false; // Reset flag on error
 
                 // ✅ SMART ERROR HANDLING: Only clear URL for invalid documents, not temporary errors
                 const isTemporaryError = error.message.includes('fetch') ||
