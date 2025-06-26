@@ -1992,6 +1992,13 @@ class EditorFactory {
                         editorCreatedAt: this.component.editorCreatedAt
                     });
 
+                    // ✅ FIX: Set editorInitialized flag after a delay to prevent false triggers
+                    // This ensures that initialization-triggered updates don't cause persistence
+                    setTimeout(() => {
+                        this.component.editorInitialized = true;
+                        console.log('✅ Editor fully initialized - ready for user interaction');
+                    }, 1500); // 1.5 second delay to allow all initialization to complete
+
                     // ✅ STATE MONITORING: Track ProseMirror state for debugging
                     if (this.component.enableStateMonitoring) {
                         console.log('🔍 ProseMirror initial state:', {
@@ -2101,7 +2108,16 @@ class EditorFactory {
                             // Don't set hasUserIntent yet - let content check determine this
                         }
 
-                        this.component.debouncedUpdateContent();
+                        // ✅ FIX: Only trigger auto-save after editor is fully initialized
+                        // This prevents false triggers during page load and document initialization
+                        if (this.component.editorInitialized && !this.component.isLoadingDocument) {
+                            this.component.debouncedUpdateContent();
+                        } else {
+                            console.log('🔍 Skipping debouncedUpdateContent - editor not fully initialized:', {
+                                editorInitialized: this.component.editorInitialized,
+                                isLoadingDocument: this.component.isLoadingDocument
+                            });
+                        }
                     }
 
                     // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
@@ -3537,6 +3553,10 @@ class LifecycleManager {
 
         // ✅ RECURSION PROTECTION: Clear recursion protection flags
         this.component._isUpdatingPermlink = false;
+        
+        // ✅ FIX: Reset editor initialization flags
+        this.component.editorInitialized = false;
+        this.component.isLoadingDocument = false;
 
         // ✅ DEBOUNCE CLEANUP: Clear all timers to prevent memory leaks and unwanted persistence
         if (this.component.autoNameTimeout) {
@@ -3953,6 +3973,8 @@ class DocumentManager {
         
         // Reset loading flag for new documents
         this.component.isLoadingDocument = false;
+        // Reset editor initialized flag for new documents
+        this.component.editorInitialized = false;
 
         // STEP 1: Cleanup existing state
         await this.lifecycleManager.cleanupDocument();
@@ -4694,6 +4716,7 @@ export default {
             saveError: false, // Track save errors for separate status indicators
             fileType: 'local', // 'local' or 'collaborative'
             isLoadingDocument: false, // ✅ SECURITY: Prevent user intent detection during document loading
+            editorInitialized: false, // ✅ FIX: Prevent false triggers during editor initialization
 
             // ===== SAVE STATUS DISPLAY =====
             saveMessageVisible: false,

@@ -378,15 +378,21 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 
 ### ✅ Fix Persistent Document Creation on Page Refresh
 - **Issue Fixed**: Persistent documents were created immediately on page refresh without user interaction
-- **Root Cause**: Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
-- **Solution**: Added `isLoadingDocument` flag to prevent user intent detection during document loading
+- **Root Cause**: 
+  1. Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
+  2. TipTap editor fires `onUpdate` events during initialization, triggering `debouncedUpdateContent`
+- **Solution**: Added two-layer protection to prevent false user intent detection:
+  1. **isLoadingDocument flag**: Prevents intent detection during document loading
+  2. **editorInitialized flag**: Prevents auto-save triggers during editor initialization
 - **Implementation Details**:
-  - Set `isLoadingDocument = true` at start of `autoConnectToLocalDocument` and `autoConnectToCollaborativeDocument`
-  - Reset `isLoadingDocument = false` after successful load (with 1s delay for local docs)
-  - Reset flag in WebSocket `onConnect` handler for collaborative documents
-  - Reset flag on errors to ensure proper state recovery
+  - Added `editorInitialized = false` to data properties
+  - Set `editorInitialized = true` after 1.5s delay in editor's `onCreate` callback
+  - Check both `editorInitialized && !isLoadingDocument` before calling `debouncedUpdateContent`
+  - Reset both flags in `resetComponentState` and `newDocument`
+  - Set `isLoadingDocument = true` at start of document loading methods
+  - Reset `isLoadingDocument = false` after successful load
   - Metadata and config observers check `!isLoadingDocument` before setting user intent
-- **Result**: Documents are only persisted when user actually interacts with editor, not on page load
+- **Result**: Documents are only persisted when user actually interacts with editor, not on page load or initialization
 
 ### ✅ Document Name Display Consistency Fix
 - **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names
