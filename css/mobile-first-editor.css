@@ -1,0 +1,905 @@
+/* Mobile-First Editor Styles for DLUX IOV */
+
+/* Base Mobile Styles */
+.editor-layout {
+  min-height: 100vh;
+  padding: 1rem;
+  position: relative;
+}
+
+/* Full Width Container */
+.full-width-container {
+  width: 100%;
+  padding: 0 1rem;
+}
+
+@media (min-width: 1024px) {
+  .full-width-container {
+    padding: 0 2rem;
+  }
+}
+
+/* Remove post type selection - single flow */
+.post-type-selector {
+  display: none;
+}
+
+/* Main Editor Container */
+.editor-container {
+  max-width: 100%;
+  margin-bottom: 80px; /* Space for floating buttons */
+}
+
+/* Full Width Container Adjustments */
+.container-fluid {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Floating Action Buttons (Mobile) */
+.floating-actions {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  z-index: 900;
+}
+
+.btn-floating {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 1.25rem;
+}
+
+.btn-floating.btn-primary {
+  background-color: #5C94FE;
+  border-color: #5C94FE;
+}
+
+.btn-floating.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+/* Media Panel - Bottom Sheet Pattern */
+.media-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background-color: #212529;
+  border-top: 1px solid #495057;
+  border-radius: 1rem 1rem 0 0;
+  transition: height 0.3s ease;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.media-panel.active {
+  height: 70vh;
+}
+
+.media-panel-header {
+  padding: 0.5rem 1rem;
+  background-color: #2f3133;
+  border-bottom: 1px solid #495057;
+  cursor: grab;
+  position: relative;
+}
+
+.media-panel-handle {
+  width: 40px;
+  height: 4px;
+  background-color: #6c757d;
+  border-radius: 2px;
+  margin: 0.5rem auto;
+}
+
+.media-panel-content {
+  height: calc(100% - 60px);
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+/* Media Grid for Mobile */
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.media-item {
+  aspect-ratio: 1;
+  border: 1px solid #495057;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background-color: #2f3133;
+}
+
+.media-item img,
+.media-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-item-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.media-item:active .media-item-overlay {
+  opacity: 1;
+}
+
+/* DLUX Enhancement Hub */
+.dlux-enhancement-hub {
+  margin: 0 0 0 0;
+  background: linear-gradient(135deg, #212529 0%, #2f3133 100%);
+  border: 1px solid #5C94FE;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(92, 148, 254, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* SPK Network Header */
+.spk-network-header {
+  background: rgba(92, 148, 254, 0.1);
+  border-bottom: 1px solid rgba(92, 148, 254, 0.3);
+  padding: 0.75rem 1.5rem;
+  backdrop-filter: blur(10px);
+}
+
+.spk-network-header h6 {
+  color: #5C94FE;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.spk-network-header .fa-network-wired {
+  color: #5C94FE;
+  font-size: 1.5rem;
+}
+
+/* SPK File Pipeline */
+.spk-file-pipeline .card {
+  overflow: hidden;
+}
+
+.spk-file-pipeline .card-header {
+  border-bottom: 1px solid rgba(92, 148, 254, 0.3);
+}
+
+.universal-drop-zone {
+  border: 2px dashed #495057;
+  border-radius: 0.5rem;
+  background-color: rgba(33, 37, 41, 0.5);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.universal-drop-zone:hover {
+  border-color: #5C94FE;
+  background-color: rgba(92, 148, 254, 0.05);
+}
+
+.universal-drop-zone.drag-active {
+  border-color: #5C94FE;
+  background-color: rgba(92, 148, 254, 0.1);
+  transform: scale(1.02);
+}
+
+.drop-zone-content {
+  user-select: none;
+}
+
+.detected-file-info {
+  border: 1px solid #495057;
+}
+
+/* File type icons color coding */
+.fa-video { color: #FF6B6B; }
+.fa-image { color: #4ECDC4; }
+.fa-file { color: #5C94FE; }
+.fa-cube { color: #764BA2; }
+
+/* Add padding only to builder views */
+.dlux-enhancement-hub .builder-view {
+  padding: 1.5rem;
+}
+
+/* SPK Sidebar - Sticky Panel */
+.spk-sidebar {
+  position: sticky;
+  top: 80px; /* Account for navbar */
+  height: calc(100vh - 100px);
+}
+
+.spk-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.spk-panel .card-header {
+  flex-shrink: 0;
+}
+
+.spk-panel .card-body {
+  flex: 1;
+  overflow: hidden; /* Prevent panel body from scrolling */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for nested flex containers */
+}
+
+/* Pass scroll  */
+.vfs-scroll-pass {
+  flex: 1;
+  overflow: hidden; /* Changed to hidden to contain children */
+  min-height: 0; /* Important for flexbox overflow */
+  display: flex;
+  flex-direction: column;
+}
+
+.vfs-scroll {
+  flex: 1;
+  overflow: scroll; /* Contain children */
+  min-height: 0; /* Important for flexbox overflow */
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.spk-quick-drop {
+  border: 2px dashed #495057;
+  border-radius: 0.375rem;
+  background-color: rgba(33, 37, 41, 0.3);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.spk-quick-drop:hover {
+  border-color: #5C94FE;
+  background-color: rgba(92, 148, 254, 0.05);
+}
+
+.spk-quick-drop.drag-active {
+  border-color: #5C94FE;
+  background-color: rgba(92, 148, 254, 0.1);
+}
+
+.file-processing-status {
+  border: 1px solid #495057;
+  font-size: 0.875rem;
+}
+
+.video-transcode-inline {
+  border: 1px solid #FF6B6B;
+}
+
+/* SPK Flow Indicators */
+.spk-flow-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: rgba(92, 148, 254, 0.05);
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.spk-flow-indicator .badge {
+  padding: 0.25rem 0.75rem;
+  font-weight: normal;
+}
+
+.spk-flow-indicator .fa-arrow-right {
+  font-size: 0.875rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 991.98px) {
+  .spk-sidebar {
+    position: relative;
+    top: 0;
+    height: auto;
+    margin-top: 2rem;
+  }
+  
+  .spk-panel {
+    max-height: 400px;
+  }
+}
+
+/* Carousel View */
+.carousel-view {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Builder View */
+.builder-view {
+  animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dlux-enhancement-hub h5 {
+  color: #5C94FE;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+/* Carousel Styles */
+#dluxCarousel {
+  overflow: hidden;
+  background: #212529;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.carousel-inner {
+  flex: 1;
+}
+
+.carousel-slide-content {
+  position: relative;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.carousel-content-wrapper {
+  width: 100%;
+  padding: 1rem 2rem;
+}
+
+.carousel-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-content-wrapper h3 {
+  color: #fff;
+  margin-bottom: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.carousel-content-wrapper p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 767.98px) {
+  .carousel-icon {
+    margin-bottom: 1rem;
+  }
+  
+  .carousel-content-wrapper h3 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .carousel-content-wrapper p {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Desktop-specific adjustments */
+@media (min-width: 768px) {
+  .carousel-slide-content {
+    height: 90px;
+  }
+  
+  .carousel-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0;
+  }
+}
+
+.carousel-indicators {
+  bottom: 1rem;
+  position: absolute;
+  margin-bottom: 0;
+}
+
+.carousel-indicators [data-bs-target] {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  border: none;
+}
+
+.carousel-indicators .active {
+  background-color: #5C94FE;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  width: 10%;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  padding: 1rem;
+}
+
+/* ReMix Browser Section */
+.remix-browser-section {
+  margin-top: 1.5rem;
+}
+
+.remix-apps-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.remix-app-card {
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+
+.remix-app-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #5C94FE !important;
+}
+
+.remix-app-card .card-body {
+  padding: 1rem;
+}
+
+.remix-app-card .card-title {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.remix-app-card .card-text {
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dlux-app-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin: 1rem auto;
+  max-width: 800px;
+}
+
+.dlux-app-card {
+  padding: 1rem;
+  text-align: center;
+  border: 1px solid #495057;
+  border-radius: 0.375rem;
+  background-color: #212529;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dlux-app-card:hover {
+  border-color: #5C94FE;
+  transform: translateY(-2px);
+}
+
+.dlux-app-card i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Enhancement Modal (Mobile) */
+.enhancement-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #212529;
+  z-index: 1100;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.enhancement-modal.active {
+  transform: translateY(0);
+}
+
+.enhancement-modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #495057;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.enhancement-modal-content {
+  padding: 1rem;
+  height: calc(100% - 60px);
+  overflow-y: auto;
+}
+
+/* Backdrop for modals */
+.modal-backdrop-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.modal-backdrop-custom.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Tablet Styles (768px+) */
+@media (min-width: 768px) {
+
+  
+  .editor-container {
+    margin-bottom: 0;
+  }
+  
+  .floating-actions {
+    display: none;
+  }
+  
+  .media-panel {
+    position: relative;
+    height: auto;
+    border-radius: 0.5rem;
+    border: 1px solid #495057;
+    margin-top: 1rem;
+  }
+  
+  .media-panel.active {
+    height: auto;
+  }
+  
+  .media-panel-handle {
+    display: none;
+  }
+  
+  .dlux-app-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1000px;
+  }
+  
+  .remix-apps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .enhancement-modal {
+    position: relative;
+    transform: none;
+    background-color: transparent;
+  }
+}
+
+/* Desktop Styles (1024px+) */
+@media (min-width: 1024px) {
+  .editor-layout {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .editor-container {
+    order: 1;
+  }
+  
+  .media-sidebar {
+    order: 2;
+    position: sticky;
+    top: 2rem;
+    max-height: calc(100vh - 4rem);
+  }
+  
+  .carousel-slide-content {
+    height: 200px;
+  }
+  
+  .carousel-caption h3 {
+    font-size: 2rem;
+  }
+  
+  .carousel-caption p {
+    font-size: 1.125rem;
+  }
+  
+  .media-panel {
+    margin-top: 0;
+    height: auto;
+    max-height: 600px;
+  }
+  
+  .media-panel-content {
+    height: auto;
+    max-height: 500px;
+  }
+  
+  .media-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dlux-enhancement-banner {
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .dlux-enhancement-banner h5 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .dlux-enhancement-banner > button {
+    max-width: 300px;
+    margin: 1.5rem auto 0;
+  }
+  
+  .dlux-app-card {
+    padding: 1.5rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .dlux-app-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(92, 148, 254, 0.3);
+  }
+  
+  .dlux-app-card i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .remix-apps-grid {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+    margin: 0 auto 1rem;
+  }
+}
+
+/* Collapsible Media Sidebar (Desktop) */
+.media-sidebar-toggle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  font-size: 1.25rem;
+  cursor: pointer;
+  z-index: 10;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .media-sidebar-toggle {
+    display: block;
+  }
+  
+  .media-sidebar.collapsed .media-panel {
+    width: 60px;
+    overflow: hidden;
+  }
+  
+  .media-sidebar.collapsed .media-panel-content {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .media-sidebar.collapsed .media-sidebar-toggle {
+    transform: rotate(180deg);
+  }
+}
+
+/* Touch-optimized elements */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* File Upload Area */
+.upload-area {
+  border: 2px dashed #495057;
+  border-radius: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+  border-color: #5C94FE;
+  background-color: rgba(92, 148, 254, 0.1);
+}
+
+/* Video Tools Tab Content */
+.video-tools-content {
+  padding: 1rem;
+}
+
+.ffmpeg-install-prompt {
+  background-color: #2f3133;
+  border: 1px solid #ffc107;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.ffmpeg-install-prompt h6 {
+  color: #ffc107;
+  margin-bottom: 1rem;
+}
+
+/* Responsive Typography */
+.editor-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+  .editor-title {
+    font-size: 2rem;
+  }
+}
+
+/* Transitions */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-up-enter-from {
+  transform: translateY(100%);
+}
+
+.slide-up-leave-to {
+  transform: translateY(100%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Ensure proper scrolling on mobile */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Tab Navigation */
+.media-tabs {
+  display: flex;
+  border-bottom: 1px solid #495057;
+  margin-bottom: 1rem;
+}
+
+.media-tab {
+  flex: 1;
+  padding: 0.75rem;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.media-tab.active {
+  color: #5C94FE;
+  border-bottom: 2px solid #5C94FE;
+}
+
+/* Accessibility improvements */
+:focus-visible {
+  outline: 2px solid #5C94FE;
+  outline-offset: 2px;
+}
+
+/* Dark mode scrollbars */
+.media-panel-content::-webkit-scrollbar,
+.enhancement-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.media-panel-content::-webkit-scrollbar-track,
+.enhancement-modal-content::-webkit-scrollbar-track {
+  background: #212529;
+}
+
+.media-panel-content::-webkit-scrollbar-thumb,
+.enhancement-modal-content::-webkit-scrollbar-thumb {
+  background: #495057;
+  border-radius: 4px;
+}
+
+.media-panel-content::-webkit-scrollbar-thumb:hover,
+.enhancement-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}

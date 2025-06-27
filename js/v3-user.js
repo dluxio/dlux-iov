@@ -120,6 +120,23 @@ createApp({
       showLine: true,
       videoUploadContract: false,
       showvideoupload: false,
+      
+      // Mobile-First UI Properties
+      mediaPanelOpen: false,
+      showEnhanceModal: false,
+      activeMediaTab: 'files',
+      isMobile: window.innerWidth < 768,
+      mediaSidebarExpanded: true,
+      ffmpegReady: false,
+      ffmpegSkipped: false,
+      
+      // Component Display Properties
+      showDappManager: false,
+      showRemixManager: false,
+      showDappBuilder: false,
+      showRemixBuilder: false,
+      show360Gallery: false,
+      selectedRemixDapp: null,
       dataURLS: [],
       // ReMix dApp Properties
       currentRemixApp: null,
@@ -131,6 +148,9 @@ createApp({
       showAdvancedRemixOptions: false,
       loadingRemixApps: false,
       availableRemixApps: [],
+      remixSort: 'newest', // Sort order for ReMix apps
+      displayedRemixApps: [], // Currently displayed ReMix apps
+      hasMoreRemixApps: false, // Whether more apps can be loaded
       manualRemixInput: "",
       showRemixDetails: false,
       loadedRemixCid: null,
@@ -146,6 +166,11 @@ createApp({
       },
       remixSharedFields: new Set(['assets']), // Assets are automatically shared
       remixIframeReady: false,
+      
+      // Unified File Detection
+      detectedFileType: null,
+      detectedFileName: null,
+      showTranscodeOptions: false,
       debounceScroll: 0,
       rcCost: {
         time: 0,
@@ -1155,6 +1180,201 @@ PORT=3000
   },
   methods: {
     ...MCommon,
+    
+    // Mobile-First UI Methods
+    toggleMediaPanel() {
+      this.mediaPanelOpen = !this.mediaPanelOpen;
+      if (this.isMobile && this.mediaPanelOpen) {
+        document.body.classList.add('modal-open');
+      } else {
+        document.body.classList.remove('modal-open');
+      }
+    },
+    
+    handleResize() {
+      this.isMobile = window.innerWidth < 768;
+      if (!this.isMobile) {
+        this.mediaPanelOpen = false;
+        document.body.classList.remove('modal-open');
+      }
+    },
+    
+    addDluxApp(appType) {
+      // Handle adding DLUX apps
+      console.log('Adding DLUX app:', appType);
+      // TODO: Implement app addition logic
+      if (appType === '3speak') {
+        // Add 3speak video app
+      } else if (appType === 'gallery') {
+        // Add gallery app
+      } else if (appType === 'shop') {
+        // Add shop app
+      } else if (appType === 'poll') {
+        // Add poll app
+      }
+    },
+    
+    loadFFmpeg() {
+      // Initialize FFmpeg for video transcoding
+      console.log('Loading FFmpeg...');
+      this.ffmpegLoading = true;
+      // TODO: Implement FFmpeg loading
+      setTimeout(() => {
+        this.ffmpegReady = true;
+        this.ffmpegLoading = false;
+      }, 2000);
+    },
+    
+    // Component Management Methods
+    openDappManager() {
+      this.showDappManager = true;
+      this.showRemixManager = false;
+      this.postCustom_json.vrHash = 'dapp';
+    },
+    
+    openRemixManager(specificDapp = null) {
+      this.showRemixManager = true;
+      this.showDappManager = false;
+      this.selectedRemixDapp = specificDapp;
+      this.postCustom_json.vrHash = 'remix';
+      
+      // If specific dapp requested, set it
+      if (specificDapp === '360-gallery') {
+        this.selectedRemixDapp = {
+          title: '360° Photo Gallery',
+          author: 'dlux',
+          CID: '360-gallery-template',
+          '.lic': 'CC BY-SA 4.0'
+        };
+      }
+    },
+    
+    handleDappUpdate(customJson) {
+      // Handle updates from dApp manager
+      console.log('dApp Manager Update:', customJson);
+      Object.assign(this.postCustom_json, customJson);
+    },
+    
+    handleRemixUpdate(customJson) {
+      // Handle updates from remix manager
+      console.log('ReMix Manager Update:', customJson);
+      Object.assign(this.postCustom_json, customJson);
+    },
+    
+    // Carousel methods
+    showDappForNew() {
+      this.showDappBuilder = true;
+      this.showRemixBuilder = false;
+      this.postCustom_json.vrHash = 'dapp';
+    },
+    
+    showRemixForGallery() {
+      this.showRemixBuilder = true;
+      this.showDappBuilder = false;
+      this.postCustom_json.vrHash = 'remix';
+      // Pre-configure for 360 gallery
+      this.postCustom_json.title = '360° Photo Gallery';
+      this.postCustom_json.description = 'Immersive 360° photo experience';
+      // Load the hardcoded 360° gallery test app
+      this.selectTestRemixApp();
+    },
+    
+    showRemixForNAF() {
+      // Show remix for NAF Playground
+      this.showRemixBuilder = true;
+      this.showDappBuilder = false;
+      this.postCustom_json.vrHash = 'remix';
+      // TODO: Pre-select NAF template when available
+    },
+    
+    backToCarousel() {
+      // Reset all section visibility
+      this.showDappBuilder = false;
+      this.showRemixBuilder = false;
+      this.show360Gallery = false;
+      this.postCustom_json.vrHash = null;
+      this.selectedRemixDapp = null;
+      // Clear the current remix app selection
+      this.currentRemixApp = null;
+      this.showRemixBrowser = false;
+      
+      // Restart carousel autoplay when returning to carousel view
+      this.$nextTick(() => {
+        const carouselElement = document.getElementById('dluxCarousel');
+        if (carouselElement) {
+          const carousel = bootstrap.Carousel.getInstance(carouselElement);
+          if (carousel) {
+            // Restart the carousel cycling
+            carousel.cycle();
+          } else {
+            // If no instance exists, create a new one with autoplay
+            new bootstrap.Carousel(carouselElement, {
+              interval: 5000, // 5 seconds between slides
+              ride: 'carousel'
+            });
+          }
+        }
+      });
+    },
+    
+    // Unified File Handling Methods
+    handleUniversalDrop(event) {
+      event.preventDefault();
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        this.processDroppedFiles(files);
+      }
+    },
+    
+    processDroppedFiles(files) {
+      for (let file of files) {
+        const fileType = this.detectFileType(file);
+        this.detectedFileType = fileType;
+        this.detectedFileName = file.name;
+        
+        // Handle based on file type
+        if (fileType === 'video') {
+          // Show transcode options if FFmpeg is ready
+          if (this.ffmpegReady) {
+            this.showTranscodeOptions = true;
+          }
+          // Pass to SPK for upload
+          this.handleSPKFileForAssets(file);
+        } else {
+          // Direct upload for other file types
+          this.handleSPKFileForAssets(file);
+        }
+      }
+    },
+    
+    detectFileType(file) {
+      const mimeType = file.type;
+      if (mimeType.startsWith('video/')) return 'video';
+      if (mimeType.startsWith('image/')) return 'image';
+      if (mimeType.includes('javascript') || mimeType.includes('html')) return 'dapp';
+      return 'file';
+    },
+    
+    getFileTypeIcon(fileType) {
+      const icons = {
+        'video': 'fa-solid fa-video',
+        'image': 'fa-solid fa-image',
+        'dapp': 'fa-solid fa-cube',
+        'file': 'fa-solid fa-file'
+      };
+      return icons[fileType] || 'fa-solid fa-file';
+    },
+    
+    openFileBrowser() {
+      // Create temporary file input
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.multiple = true;
+      input.onchange = (e) => {
+        this.processDroppedFiles(e.target.files);
+      };
+      input.click();
+    },
     handleDistFileUpload(event) {
       this.csvError = "";
       const file = event.target.files[0];
@@ -7110,6 +7330,9 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
+    // Handle responsive behavior
+    window.addEventListener('resize', this.handleResize);
+    
     // Check for active service worker
     if ('serviceWorker' in navigator) {
       if (navigator.onLine) {
@@ -7253,6 +7476,9 @@ function buyNFT(setname, uid, price, type, callback){
     });
   },
   unmounted() {
+    // Remove resize handler
+    window.removeEventListener('resize', this.handleResize);
+    
     // Remove all scroll handlers
     document.body.removeEventListener('scroll', this.boundScrollHandler);
     window.removeEventListener('scroll', this.boundScrollHandler);

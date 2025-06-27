@@ -25,7 +25,7 @@ export default {
         "contracts-vue": ContractsModal,
     },
     template: `
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column vfs-scroll-pass">
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'">
         <div class="mx-xl-5">
@@ -43,7 +43,7 @@ export default {
         </div>
     </div>
     <!-- tabs nav -->
-    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column square rounded-bottom p-0">
+    <div v-if="saccountapi.pubKey != 'NA'" class="vfs-scroll-pass d-flex flex-column square rounded-bottom p-0">
         <!-- top menu -->
         <div class="">
             <div class="d-flex flex-wrap align-items-center">
@@ -150,7 +150,7 @@ export default {
                 </div>
             </div>
             <!-- has files -->
-            <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
+            <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center vfs-scroll-pass">
                 <contracts-vue :contracts="contracts" :account="account" :saccountapi="saccountapi" :protocol="protocol"
                     :stats="stats" :nodeview="nodeview" :title="title" :test="test" :new-meta="newMeta" :links="links"
                     :post-body-adder="postBodyAdder" :postpage="postpage" :spkapi="spkapi" :sstats="sstats"
@@ -165,7 +165,7 @@ export default {
             </div>
         </div>
         <!-- file system view -->
-        <div v-if="!cc">
+        <div v-if="!cc" class="vfs-scroll-pass">
             
 
             <!-- no files -->
@@ -200,7 +200,7 @@ export default {
                 </div>
             </div>
             <!-- has files -->
-            <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
+            <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center vfs-scroll-pass">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
                     @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"

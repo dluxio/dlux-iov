@@ -18629,7 +18629,7 @@ export default {
     template: `
     <div class="tiptap-editor-modular">
         <!-- ==================== TOP TOOLBAR ==================== -->
-        <div class="d-flex bg-dark mb-3 px-2 py-1 justify-content-between align-items-center">
+        <div class="d-flex rounded-top bg-dark mb-3 px-2 py-1 justify-content-between align-items-center">
           <!-- File Menu -->
           <div class="btn-group me-3">
             <button class="btn btn-primary bg-card dropdown-toggle no-caret" data-bs-toggle="dropdown">

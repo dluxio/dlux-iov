@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <!-- Tiptap Editor Styles -->
     <link href="/css/tiptap-editor.css" rel="stylesheet" />
+    <!-- Mobile-First Editor Styles -->
+    <link href="/css/mobile-first-editor.css" rel="stylesheet" />
     <script src="/reg-sw.js"></script>
     <script src="/js/diff.js"></script>
     <script>
@@ -340,176 +342,564 @@
                 </div>
             </div>
 
-            <div class="container text-center">
-                <!-- Post Type Information Banners -->
-                <div class="mt-3">
-                    <div class="neon-banner pt-3 px-3 pb-2" :class="{
-                        'blog': postCustom_json.vrHash == 'blog',
-                        'video': postCustom_json.vrHash == 'video',
-                        'dapp': postCustom_json.vrHash == 'dapp',
-                        'remix': postCustom_json.vrHash == 'remix'
-                    }">
-                        <!-- Blog Post Content -->
-                        <div v-show="postCustom_json.vrHash == 'blog'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-book fa-fw"></i>Blog Post</h6>
-                            <p>Blogs are the default post type and support publishing markdown
-                                text with links for photos and videos to the Hive blockchain. Perfect for articles, tutorials, and general content
-                                sharing.</p>
-                        </div>
+            <!-- Mobile-First Layout -->
+            <div class="editor-layout">
+                <!-- Floating Action Buttons for Mobile -->
+                <div class="floating-actions d-lg-none">
+                    <button class="btn btn-primary btn-floating" @click="mediaPanelOpen = true">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </button>
+                    <button class="btn btn-secondary btn-floating" @click="showEnhanceModal = true">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </button>
+                </div>
+                
+                <!-- Main Content Container - Full Width -->
+                <div class="full-width-container">
 
-                        <!-- Video Content -->
-                        <div v-show="postCustom_json.vrHash == 'video'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Video</h6>
-                            <p>Decentralized video streaming on SPK Network. Upload your videos to create 
-                                streaming content accessible through the DLUX platform as an 
-                              <pop-vue popover-id="streaming-info" title="Streaming Technology Stack">
-                                    <template #trigger>
-                                        <a class="text-info-50">
-                                            <span class="tooltip-text text-nowrap">M3U8 playlist</span>
-                                            <i class="fa-solid fa-circle-question fa-fw mx-1"></i>
-                                        </a>
-                                    </template>
-                                    <template #content>
-                                        <ul class="text-start list-unstyled mt-2">
-
-                                            <!-- HLS -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">HLS - HTTP Live
-                                                        Streaming
-                                                    </h6>
-                                                </div>
-                                                <p>A streaming protocol that breaks video into small segmented files and
-                                                    creates an M3U8 playlist supporting multiple resolutions.</p>
-                                            </li>
-                                            <!-- M3U8 -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">M3U8 - Media Playlist
-                                                    </h6>
-                                                </div>
-                                                <p>A playlist format that contains a list of video segments and their
-                                                    associated CIDs, allowing for adaptive bitrate streaming.</p>
-                                            </li>
-                                            <!-- CID -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CID - Content
-                                                        IDentifier
-                                                    </h6>
-                                                </div>
-                                                <p>A unique identifier for content in IPFS, generated from the content's
-                                                    cryptographic hash to ensure integrity.
-                                                </p>
-                                            </li>
-                                            <!-- IPFS -->
-                                            <li class="border border-0 border-bottom pb-2 mb-2">
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">IPFS - InterPlanetary
-                                                        File
-                                                        System</h6>
-                                                </div>
-                                                <p>A decentralized, peer-to-peer file storage and sharing system where
-                                                    files are distributed across
-                                                    multiple nodes.
-                                                </p>
-                                            </li>
-                                            <!-- CDN -->
-                                            <li>
-                                                <div>
-                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CDN - Content
-                                                        Delivery
-                                                        Network</h6>
-                                                </div>
-                                                <p>A distributed network of servers that uses CIDs to locate and deliver
-                                                    IPFS content to users.</p>
-                                            </li>
-                                        </ul>
-                                    </template>
-                                </pop-vue>
-                            </p>
+                    
+                    <!-- Simple Two Column Layout -->
+                    <div class="row g-4">
+                        <!-- Left Column: All Content (Blog Editor, dApp Builders) -->
+                        <div class="col-lg-8">
+                            <!-- DLUX Enhancement Hub -->
+                            <div class="dlux-enhancement-hub p-0 mb-2">
                                 
+                                
+                                <!-- Carousel View (shown when no builder active) -->
+                                <div v-if="!showDappBuilder && !showRemixBuilder && !currentRemixApp" class="carousel-view">
+                                      <!-- Bootstrap Carousel -->
+                                    <div id="dluxCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-pause="hover">
+                                        <!-- Indicators -->
+                                        <div class="carousel-indicators">
+                                            <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="0" class="active"></button>
+                                            <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="1"></button>
+                                            <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="2"></button>
+                                            <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="3"></button>
+                                        </div>
+                                        
+                                        <!-- Carousel Items -->
+                                        <div class="carousel-inner">
+                                            <!-- HIVE Blog -->
+                                            <div class="carousel-item active">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #E31337 0%, #5C94FE 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span>📺</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>HIVE Blog</h3>
+                                                                    <p>Now Supports IPFS Video Streaming</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-secondary" disabled>
+                                                                        <i class="fa-solid fa-check me-2"></i>Standard
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 360 Photo Gallery -->
+                                            <div class="carousel-item">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A3AA 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span>🌐</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>360° Photo Gallery</h3>
+                                                                    <p>Explore on Desktop, Mobile, and VR Headsets</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-primary" @click="showRemixForGallery()">
+                                                                        <i class="fa-solid fa-shuffle me-2"></i>Remix Now
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- NAF Playground -->
+                                            <div class="carousel-item">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #FF6B6B 0%, #C44569 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span>🥽</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>NAF Playground</h3>
+                                                                    <p>Build in Networked A-Frame together</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-secondary" disabled>
+                                                                        <i class="fa-solid fa-clock me-2"></i>Coming Soon
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Custom dApp -->
+                                            <div class="carousel-item">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span>🚀</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>Custom dApp</h3>
+                                                                    <p>Interactive apps with SPK storage</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-primary" @click="showDappBuilder = true; postCustom_json.vrHash = 'dapp'">
+                                                                        <i class="fa-solid fa-plus me-2"></i>Create Now
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Controls -->
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#dluxCarousel" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon"></span>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#dluxCarousel" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon"></span>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+                                    </div>
+                                    
+                                    </div>
+
+                                    <!-- SPK Network Integration Header -->
+                                    <div class="spk-network-header">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fa-solid fa-network-wired me-2"></i>
+                                                <div>
+                                                    <h6 class="mb-0">dApps Powered by SPK Network</h6>
+                                                    <small class="text-muted">Decentralized storage for all your content</small>
+                                                </div>
+                                            </div>
+                                            <div class="text-end gap-2 d-flex">
+                                                <!-- Remix Button State -->
+                                                <button v-if="currentRemixApp" class="btn btn-primary rounded-pill bg-card" @click="closeRemixApp()">
+                                                   Cancel <i class="fa-solid fa-xmark ms-2"></i>
+                                                </button>
+                                                <button v-else-if="showRemixBuilder && !showDappBuilder" class="btn btn-primary rounded-pill bg-card" @click="backToCarousel()">
+                                                    <i class="fa-solid fa-chevron-left me-2"></i>Back
+                                                </button>
+                                                <button v-else-if="!showDappBuilder" class="btn btn-primary rounded-pill bg-card" @click="showRemixBuilder = true; postCustom_json.vrHash = 'remix'; loadRemixApps()">
+                                                    <i class="fa-solid fa-shuffle me-2 d-none"></i>Browse
+                                                </button>
+
+                                                 
+
+                                                <button v-if="!showDappBuilder && !currentRemixApp" class="btn btn-primary rounded-pill bg-card" @click="showDappBuilder = true; postCustom_json.vrHash = 'dapp';">
+                                                    <i class="fa-solid fa-plus me-2 d-none"></i>New
+                                                </button>
+
+                                                <button v-if="showDappBuilder && !currentRemixApp" class="btn btn-primary rounded-pill bg-card" @click="backToCarousel()">
+                                                    Cancel<i class="fa-solid fa-xmark ms-2"></i>
+                                                </button>
+                                    
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <!-- remixable -->
+                                    <div v-if="showRemixBuilder && postCustom_json.vrHash == 'remix'">
+                                        <div  v-if="!currentRemixApp || showRemixBrowser">
+                                        
+                                        <!-- ReMix App Browser (collapsed when app is loaded) -->
+                                        <div class="builder-view">
+                                            <!-- Search and Filters -->
+                                            <div class="card mb-3">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">
+                                                        <i class="fa-solid fa-search fa-fw me-2"></i>
+                                                        Browse ReMix Applications
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Search</label>
+                                                            <input type="text" class="form-control" v-model="remixSearch" 
+                                                                    placeholder="Search by title, author, or tags..." 
+                                                                    @input="searchRemixApps()">
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">License</label>
+                                                            <select class="form-select" v-model="selectedLicense" @change="filterRemixApps()">
+                                                                <option value="">All Licenses</option>
+                                                                <option value="MIT">MIT</option>
+                                                                <option value="GPLv3">GPLv3</option>
+                                                                <option value="Apache-2.0">Apache 2.0</option>
+                                                                <option value="BSD-3-Clause">BSD 3-Clause</option>
+                                                                <option value="CC0-1.0">CC0 (Public Domain)</option>
+                                                                <option value="ISC">ISC</option>
+                                                                <option value="MPL-2.0">Mozilla Public License 2.0</option>
+                                                                <option value="AGPL-3.0">AGPL 3.0</option>
+                                                                <option value="Unlicense">Unlicense</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Sort By</label>
+                                                            <select class="form-select" v-model="remixSort" @change="sortRemixApps()">
+                                                                <option value="newest">Newest First</option>
+                                                                <option value="oldest">Oldest First</option>
+                                                                <option value="popular">Most Popular</option>
+                                                                <option value="author">Author</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- ReMix Apps Grid -->
+                                            <div class="remix-apps-grid">
+                                                <!-- Test 360° Gallery Card -->
+                                                <div class="remix-app-card card h-100 border-info bg-dark-gradient">
+                                                    <div class="card-body d-flex flex-column">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <h5 class="card-title text-white mb-0">360° Gallery Template</h5>
+                                                            <span class="badge bg-info ms-2">Test</span>
+                                                        </div>
+                                                        <p class="card-text text-muted flex-grow-1">
+                                                            A test application for creating 360° photo galleries with navigation
+                                                        </p>
+                                                        <div class="mt-auto">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <small class="text-muted">by @markegiles</small>
+                                                                <span class="badge bg-secondary">CC BY-SA 4.0</span>
+                                                            </div>
+                                                            <button class="btn btn-primary btn-sm w-100" 
+                                                                    @click="selectTestRemixApp()">
+                                                                <i class="fa-solid fa-shuffle me-2"></i>ReMix This App
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Dynamic ReMix Apps -->
+                                                <div v-for="app in displayedRemixApps" :key="app.author + '/' + app.permlink" 
+                                                        class="remix-app-card card h-100 border-dark bg-dark-gradient">
+                                                    <div class="card-body d-flex flex-column">
+                                                        <h5 class="card-title text-white">{{ app.json_metadata?.title || app.permlink }}</h5>
+                                                        <p class="card-text text-muted flex-grow-1">
+                                                            {{ app.json_metadata?.description || 'No description available' }}
+                                                        </p>
+                                                        <div class="mt-auto">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <small class="text-muted">by @{{ app.author }}</small>
+                                                                <span v-if="app.json_metadata?.license" class="badge bg-secondary">
+                                                                    {{ app.json_metadata.license }}
+                                                                </span>
+                                                            </div>
+                                                            <button class="btn btn-primary btn-sm w-100" 
+                                                                    @click="loadRemixApp(app)">
+                                                                <i class="fa-solid fa-shuffle me-2"></i>ReMix This App
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Load More Button -->
+                                            <div v-if="hasMoreRemixApps" class="text-center mt-4">
+                                                <button class="btn btn-outline-primary" @click="loadMoreRemixApps()">
+                                                    <i class="fa-solid fa-plus me-2"></i>Load More Apps
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Active ReMix Application (when app is loaded) -->
+                            <div v-if="currentRemixApp">
+                                
+                                <!-- ReMix Application iframe -->
+                                <div class="card mb-4">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">
+                                            <i class="fa-solid fa-cube fa-fw me-2"></i>
+                                            ReMix Builder: {{currentRemixApp.title || 'Test Application'}}
+                                        </h6>
+                                        <div>
+                                            <span v-if="currentRemixApp.isTest" class="badge bg-info">Test Mode</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- iframe for ReMix application -->
+                                    <div style="height: 600px; min-height: 600px;">
+                                        <iframe 
+                                            ref="remixApplicationIframe"
+                                            :src="getRemixIframeSrc()"
+                                            width="100%" 
+                                            height="100%"
+                                            frameborder="0"
+                                            style="border-radius: 0 0 8px 8px;"
+                                            @load="initRemixApplicationIframe">
+                                        </iframe>
+                                    </div>
+                                </div>
+                            </div>
+                                
+                            <!-- New dApp (replace carousel when active) -->
+                            <div v-if="showDappBuilder && postCustom_json.vrHash == 'dapp'" class="builder-view">
+                              
+                                <dapp-manager
+                                    v-if="account"
+                                    :account="account"
+                                    :spk-api="spkapi"
+                                    :initial-custom-json="postCustom_json || {}"
+                                    :spk-file-to-add="handleSPKFileForAssets"
+                                    :mode="'create'"
+                                    @dapp-updated="handleDappUpdated($event)"
+                                    @tosign="sendIt($event)">
+                                </dapp-manager>
+                                <div v-else class="text-center text-muted py-5">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to build original dApps.</p>
+                                </div>
+                            </div>
+                            
+                           
+                            
+                            
+
+                            <!-- Blog Editor (always shown) -->
+                            <div class="bg-dark-1 rounded">
+                                <tiptap-editor-modular v-if="account" :username="account"
+                                    :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
+                                    :post-custom-json="postCustom_json" :initial-content="{
+                                        title: postTitle,
+                                        body: postBody,
+                                        tags: postTags,
+                                        permlink: postPermlink,
+                                        beneficiaries: postBens,
+                                        custom_json: postCustom_json
+                                    }" @content-changed="handlePostContentChanged" @publish-post="handlePostPublish"
+                                    @update:file-to-add="fileToAddToPost = null" @tosign="sendIt($event)"
+                                    @request-auth-headers="ensureCollaborationAuth"></tiptap-editor-modular>
+                                <div v-else class="text-center text-muted py-5">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to create and edit posts.</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- ReMix dApp Content -->
-                        <div v-show="postCustom_json.vrHash == 'remix'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-shuffle fa-fw"></i>ReMix dApp</h6>
-                            <p>Create derivative works by remixing existing dApps and templates. Build upon the work of others while
-                                maintaining proper attribution and licensing. A user-friendly dApp builder that loads existing applications for customization.</p>
-                        </div>
-
-                        <!-- New dApp Content -->
-                        <div v-show="postCustom_json.vrHash == 'dapp'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New
-                                dApp</h6>
-                            <p>Build original decentralized applications using any modern web technology you're familiar with.
-                                Deploy your dApp to IPFS and make it accessible through the Hive blockchain. Advanced builder for creating new applications from scratch.</p>
-                        </div>
-
-                        <!-- Post Type Selection -->
-                        <div class="d-flex justify-content-center mx-auto gap-1 gap-md-2 mt-3">
-                            <!-- Blog Post -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'blog'}"
-                                @click="postCustom_json.vrHash = 'blog';types='img,vid'">
-                                <i class="fa-solid fa-book fa-fw"></i><span class="d-none d-md-block ms-2">Blog</span>
-                            </button>
-                            <!-- Video -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'video'}"
-                                @click="postCustom_json.vrHash = 'video';types='img,vid'">
-                                <i class="fa-solid fa-film fa-fw"></i><span class="d-none d-md-block ms-2">Video</span>
-                            </button>
-                            <!-- ReMix dApp -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'remix'}"
-                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-shuffle fa-fw"></i><span
-                                    class="d-none d-md-flex ms-2 align-items-center">ReMix<span
-                                        class="d-none d-xl-block ms-1">dApp</span></span>
-                            </button>
-                            <!-- New dApp -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
-                                :class="{active: postCustom_json.vrHash == 'dapp'}"
-                                @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-mobile-screen-button fa-fw"></i><span
-                                    class="d-none d-md-flex ms-2 align-items-center"><span
-                                        class="d-none d-xl-block me-1">New</span>dApp</span>
-                            </button>
+                        <!-- Right Column: SPK Network (Always Visible) -->
+                        <div class="col-lg-4 spk-sidebar">
+                            <div class="spk-panel card bg-dark border-primary">
+                                <div class="card-header bg-primary bg-opacity-10">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h5 class="mb-0">
+                                            <i class="fa-solid fa-network-wired me-2"></i>SPK Network
+                                        </h5>
+                                        <small class="text-success">
+                                            <i class="fa-solid fa-circle me-1"></i>Connected
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <!-- Quick Drop Zone -->
+                                    <div class="spk-quick-drop mb-3" 
+                                         @drop.prevent="handleUniversalDrop($event)"
+                                         @dragover.prevent="$event.currentTarget.classList.add('drag-active')"
+                                         @dragleave="$event.currentTarget.classList.remove('drag-active')">
+                                        <div class="text-center p-3">
+                                            <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
+                                            <p class="mb-0 small">Drop files here or click browse below</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- File Processing Status -->
+                                    <div v-if="detectedFileType" class="file-processing-status mb-3 p-2 bg-dark rounded">
+                                        <div class="d-flex align-items-center">
+                                            <i :class="getFileTypeIcon(detectedFileType)" class="me-2"></i>
+                                            <div class="flex-grow-1">
+                                                <small class="text-muted d-block">Processing</small>
+                                                <strong class="small">{{detectedFileName}}</strong>
+                                            </div>
+                                            <div v-if="detectedFileType === 'video' && ffmpegReady">
+                                                <button class="btn btn-sm btn-primary" @click="showTranscodeOptions = true">
+                                                    <i class="fa-solid fa-film"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- SPK Drive Integration -->
+                                    <div class="vfs-scroll-pass">
+                                        <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
+                                            :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
+                                            :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
+                                            @done="getSapi" :postpage="true" :post-type="'blog'"
+                                            @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
+                                    </div>
+                                    
+                                    <!-- Contextual Video Tools -->
+                                    <div v-if="showTranscodeOptions && ffmpegReady" class="video-transcode-inline mt-3 p-3 bg-dark rounded">
+                                        <h6 class="mb-2">
+                                            <i class="fa-solid fa-film me-2"></i>Video Transcoding
+                                        </h6>
+                                        <p class="small text-muted">Convert to streaming format for better playback</p>
+                                        <button class="btn btn-sm btn-primary w-100" @click="transcode()">
+                                            Start Transcoding
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                </div>
-            </div>
-            <!-- Main Content Container -->
-            <div class="container mb-5">
-                <!-- SPK Network IPFS Drive -->
-                <div class="accordion border-white-50 rounded mt-3" id="accordionExample">
-                    <div class="accordion-item bg-img-none bg-dark-1">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button bg-card collapsed hero-subtitle fs-3 p-3" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#ipfsDrive" aria-expanded="false"
-                                aria-controls="ipfsDrive">
-                                <i class="fa-solid fa-hard-drive fa-fw me-2"></i>Your Files
+                <!-- SPK Network Panel for Mobile (Bottom Sheet) -->
+                <div class="media-panel d-lg-none" :class="{ active: mediaPanelOpen }">
+                    <div class="media-panel-header bg-primary bg-opacity-10">
+                        <div class="media-panel-handle" @click="mediaPanelOpen = false"></div>
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-network-wired me-2"></i>SPK Network Storage
+                        </h5>
+                    </div>
+                    <div class="media-panel-content">
+                        <!-- Quick Drop Zone -->
+                        <div class="spk-quick-drop mb-3" 
+                             @drop.prevent="handleUniversalDrop($event)"
+                             @dragover.prevent="$event.currentTarget.classList.add('drag-active')"
+                             @dragleave="$event.currentTarget.classList.remove('drag-active')">
+                            <div class="text-center p-3">
+                                <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
+                                <p class="mb-0 small">Drop files here for decentralized storage</p>
+                            </div>
+                        </div>
+                        <!-- Same content as desktop media sidebar -->
+                        <!-- Media Tabs -->
+                        <div class="media-tabs">
+                            <button class="media-tab" :class="{ active: activeMediaTab === 'files' }" 
+                                    @click="activeMediaTab = 'files'">
+                                <i class="fa-solid fa-folder me-1"></i>Files
                             </button>
-                        </h2>
-                        <div id="ipfsDrive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
-                                    :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
-                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                    @done="getSapi" :postpage="true" :post-type="postCustom_json.vrHash"
-                                    @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
+                            <button class="media-tab" :class="{ active: activeMediaTab === 'video' }" 
+                                    @click="activeMediaTab = 'video'">
+                                <i class="fa-solid fa-video me-1"></i>Video Tools
+                            </button>
+                        </div>
+
+                        <!-- Files Tab -->
+                        <div v-show="activeMediaTab === 'files'">
+                            <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
+                                :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
+                                :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
+                                @done="getSapi" :postpage="true" :post-type="'blog'"
+                                @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
+                        </div>
+
+                        <!-- Video Tools Tab -->
+                        <div v-show="activeMediaTab === 'video'">
+                            <div class="video-tools-content">
+                                <!-- Same FFmpeg content as desktop -->
+                                <div v-if="!ffmpegReady && !ffmpegSkipped" class="ffmpeg-install-prompt">
+                                    <h6><i class="fa-solid fa-triangle-exclamation me-2"></i>FFmpeg Required</h6>
+                                    <p>Video transcoding requires FFmpeg to convert videos for streaming.</p>
+                                    <button class="btn btn-primary w-100" @click="loadFFmpeg()">
+                                        <i class="fa-solid fa-download me-2"></i>Install FFmpeg (~32MB)
+                                    </button>
+                                    <button class="btn btn-link text-muted w-100" @click="ffmpegSkipped = true">
+                                        Skip for now
+                                    </button>
+                                </div>
+
+                                <div v-else-if="ffmpegReady">
+                                    <p class="text-muted">Video transcoding interface will appear here</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Modal Backdrop -->
+                <div class="modal-backdrop-custom" :class="{ active: mediaPanelOpen && isMobile }" 
+                     @click="mediaPanelOpen = false"></div>
+
+                <!-- Enhancement Modal for Mobile -->
+                <div class="enhancement-modal d-lg-none" :class="{ active: showEnhanceModal }">
+                    <div class="enhancement-modal-header">
+                        <h5 class="mb-0"><i class="fa-solid fa-sparkles me-2"></i>Enhance Your Blog</h5>
+                        <button class="btn btn-link text-white" @click="showEnhanceModal = false">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="enhancement-modal-content">
+                        <p class="text-muted mb-4">Add interactive apps to your blog post:</p>
+                        
+                        <div class="dlux-app-grid">
+                            <div class="dlux-app-card" @click="addDluxApp('3speak'); showEnhanceModal = false">
+                                <i class="fa-solid fa-video"></i>
+                                <span>3Speak Video</span>
+                            </div>
+                            <div class="dlux-app-card" @click="addDluxApp('gallery'); showEnhanceModal = false">
+                                <i class="fa-solid fa-images"></i>
+                                <span>Photo Gallery</span>
+                            </div>
+                            <div class="dlux-app-card" @click="addDluxApp('shop'); showEnhanceModal = false">
+                                <i class="fa-solid fa-store"></i>
+                                <span>Shop</span>
+                            </div>
+                            <div class="dlux-app-card" @click="addDluxApp('poll'); showEnhanceModal = false">
+                                <i class="fa-solid fa-square-poll-vertical"></i>
+                                <span>Poll</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mt-4" @click="showDappBuilder = true; showEnhanceModal = false">
+                            <i class="fa-solid fa-plus me-2"></i>Create Custom App
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            <!-- End of Mobile-First Layout -->
 
 
 
-                <!-- Video Transcoding Section (Only show for video posts) -->
-                <div v-if="postCustom_json.vrHash == 'video' && spkapi.pubKey != 'NA'"
+                <!-- Old Video Transcoding Section - Hidden (content moved to media manager) -->
+                <div v-if="false && postCustom_json.vrHash == 'video' && spkapi.pubKey != 'NA'"
                     class="accordion border-white-50 rounded mt-3" id="videoAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
@@ -756,8 +1146,8 @@
                     </div>
                 </div>
 
-                <!-- New dApp Asset Management (Only show for dApp posts) -->
-                <div v-if="postCustom_json.vrHash == 'dapp'"
+                <!-- Old dApp Asset Management - Hidden (functionality moved to DLUX enhancement hub) -->
+                <div v-if="false && showDappBuilder && postCustom_json.vrHash == 'dapp'"
                     class="accordion border-white-50 rounded mt-3" id="dappAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
@@ -770,6 +1160,12 @@
                         <div id="dappManager" class="accordion-collapse collapse show"
                             data-bs-parent="#dappAccordion">
                             <div class="accordion-body">
+                                <!-- Back to Carousel Button -->
+                                <div class="text-center mb-3">
+                                    <button class="btn btn-secondary btn-sm" @click="backToCarousel()">
+                                        <i class="fas fa-chevron-left me-2"></i>Back to Options
+                                    </button>
+                                </div>
                                 <!-- New dApp Manager Component -->
                                 <!-- 
                                     Integration Notes:
@@ -803,8 +1199,8 @@
                     </div>
                 </div>
 
-                <!-- ReMix dApp Management (Only show for remix posts) -->
-                <div v-if="postCustom_json.vrHash == 'remix'"
+                <!-- Old ReMix dApp Management - Hidden (functionality moved to DLUX enhancement hub) -->
+                <div v-if="false && showRemixBuilder && postCustom_json.vrHash == 'remix'"
                     class="accordion border-white-50 rounded mt-3" id="remixAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
@@ -817,6 +1213,12 @@
                         <div id="remixManager" class="accordion-collapse collapse show"
                             data-bs-parent="#remixAccordion">
                             <div class="accordion-body">
+                                <!-- Back to Carousel Button -->
+                                <div class="text-center mb-3">
+                                    <button class="btn btn-secondary btn-sm" @click="backToCarousel()">
+                                        <i class="fas fa-chevron-left me-2"></i>Back to Options
+                                    </button>
+                                </div>
                                 
                                 <!-- ReMix App Browser (collapsed when app is loaded) -->
                                 <div v-if="!currentRemixApp || showRemixBrowser">
@@ -1085,8 +1487,8 @@
 
 
 
-                <!-- TipTap Post Editor -->
-                <div class="accordion border-white-50 rounded mt-3" id="postEditorAccordion">
+                <!-- Old TipTap Post Editor - Hidden (moved inline to main editor) -->
+                <div v-if="false" class="accordion border-white-50 rounded mt-3" id="postEditorAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
                             <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
@@ -1163,14 +1565,11 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
                             </div>
-
                         </div>
                     </div>
                 </div>
-            </div>
         </main>
-        <!-- Footer -->
-        <foot-vue />
+
     </div>
     <!-- Bootstrap -->
     <script src="/js/bootstrap.bundle.min.js"></script>

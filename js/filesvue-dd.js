@@ -11,7 +11,7 @@ export default {
         "choices-vue": ChoicesVue,
         "upload-everywhere": Upload
     },
-    template: `<div ref="container" class="d-flex flex-grow-1 flex-column rounded">
+    template: `<div ref="container" class="vfs-scroll-pass d-flex flex-grow-1 flex-column rounded">
     <!-- warning message -->
     <div v-if="computedData.usedBytes > computedData.availableBytes">
         <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center mb-3"
@@ -225,7 +225,7 @@ export default {
         </template>
     </div>
     <!-- Filesystem View -->
-    <div class="d-flex flex-column flex-grow-1 flex-wrap">
+    <div class="d-flex flex-column flex-grow-1 flex-wrap vfs-scroll-pass">
         <h3 class="d-none">@{{ selectedUser }}</h3>
 
         <div class="d-flex flex-wrap justify-content-end w-100 my-2">
@@ -264,7 +264,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div v-if="filesSelect.search" class="table-responsive">
+        <div v-if="filesSelect.search" class="table-responsive vfs-scroll">
             <table class="table table-dark table-striped table-hover">
                 <thead>
                     <tr>
@@ -377,8 +377,9 @@ export default {
             <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
             <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
-        <div v-if="!filesSelect.search" class="d-flex flex-grow-1">
-            <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)"
+        <!-- Files -->
+        <div v-if="!filesSelect.search" class="d-flex flex-grow-1 vfs-scroll-pass">
+            <div class="d-flex flex-grow-1 vfs-scroll" @contextmenu.prevent="showContextMenu($event, 'background', null)"
                 @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)"
                 @mousedown="startSelectionBox($event)" @mousemove="updateSelectionBox($event)"
                 @mouseup="endSelectionBox" 
