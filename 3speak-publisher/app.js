@@ -124,8 +124,8 @@ function handleSPKFile(fileData) {
     updateVideoInfo();
     showVideoPlayer();
     
-    // Send reactive update
-    sendReactiveUpdate();
+    // Send reactive update with intent trigger (user selected a video file)
+    sendReactiveUpdate(true);
 }
 
 // Handle local file (for testing)
@@ -187,7 +187,6 @@ function showVideoPlayer() {
     document.getElementById('dropZone').classList.add('d-none');
     document.getElementById('videoContainer').classList.remove('d-none');
     document.getElementById('thumbnailSection').classList.remove('d-none');
-    document.getElementById('publishBtn').disabled = false;
     
     // Show sync indicator
     document.getElementById('syncIndicator').classList.remove('d-none');
@@ -210,6 +209,16 @@ function updateVideoInfo() {
 
 // Form handlers
 function setupFormHandlers() {
+    // Custom metadata toggle handler
+    document.getElementById('customMetadataToggle').addEventListener('change', function(e) {
+        const metadataFields = document.getElementById('customMetadataFields');
+        if (e.target.checked) {
+            metadataFields.style.display = 'block';
+        } else {
+            metadataFields.style.display = 'none';
+        }
+    });
+    
     // Add reactive update handlers to all form fields
     document.getElementById('videoTitle').addEventListener('input', function() {
         if (!isUpdatingFromParent) sendReactiveUpdate();
@@ -273,20 +282,6 @@ function setupFormHandlers() {
         }
     });
     
-    // Beneficiaries sync - now uses Y.js subscriptions
-    document.getElementById('syncBeneficiaries').addEventListener('change', function(e) {
-        const addlBenDiv = document.getElementById('additionalBeneficiaries');
-        const lockIcon = document.getElementById('beneficiariesLockIcon');
-        if (e.target.checked) {
-            subscribeToYjsField('beneficiaries');
-            if (addlBenDiv) addlBenDiv.style.display = 'block';
-            if (lockIcon) lockIcon.style.display = 'inline';
-        } else {
-            unsubscribeFromYjsField('beneficiaries');
-            if (addlBenDiv) addlBenDiv.style.display = 'none';
-            if (lockIcon) lockIcon.style.display = 'none';
-        }
-    });
     
     // Capture thumbnail
     document.getElementById('captureThumbnail').addEventListener('click', function() {
@@ -306,13 +301,8 @@ function setupFormHandlers() {
 
 // Button handlers
 function setupButtonHandlers() {
-    // Cancel button
-    document.getElementById('cancelBtn').addEventListener('click', function() {
-        sendToParent({ type: 'cancel' });
-    });
-    
-    // Done button (was publish)
-    document.getElementById('publishBtn').addEventListener('click', handleDone);
+    // No buttons to set up since they were removed from the HTML
+    // The app now works purely through reactive updates
 }
 
 // Capture thumbnail from video
@@ -343,7 +333,7 @@ function captureThumbnail() {
 let isUpdatingFromParent = false;
 
 // Send reactive update to parent
-function sendReactiveUpdate() {
+function sendReactiveUpdate(triggerIntent = false) {
     if (isInitializing || isUpdatingFromParent) return; // Don't send updates during initialization or parent updates
     
     // Clear existing timer
@@ -368,15 +358,18 @@ function sendReactiveUpdate() {
         }
         
         // Send update to parent
+        console.log('📤 Sending custom JSON update to parent:', customJson);
         sendToParent({
             type: 'dapp_update',
-            data: customJson
+            data: customJson,
+            triggerIntent: triggerIntent
         });
         
         // Also send beneficiaries info
         sendToParent({
             type: 'beneficiaries_update',
-            beneficiaries: getAllBeneficiaries()
+            beneficiaries: getAllBeneficiaries(),
+            triggerIntent: triggerIntent
         });
         
         // Update sync indicator
@@ -391,7 +384,9 @@ function sendReactiveUpdate() {
     }, 500); // 500ms debounce
 }
 
-// Close/Done button handler (replaces publish)
+// Close/Done handler - no longer used since buttons were removed
+// The app now works purely through reactive updates
+// Parent can still call this via message if needed
 function handleDone() {
     // Send final update
     sendReactiveUpdate();
@@ -433,12 +428,8 @@ function generateCustomJson() {
 let yjsFieldSubscriptions = {
     title: false,
     body: false,
-    tags: false,
-    beneficiaries: false
+    tags: false
 };
-
-// Track additional beneficiaries from Y.js
-let additionalBeneficiaries = [];
 
 // Parent window communication
 function setupParentCommunication() {
@@ -467,6 +458,12 @@ function handleParentMessage(data) {
                 // Load existing 3Speak data
                 const videoInfo = data.data.data;
                 if (videoInfo) {
+                    // Check if we have custom metadata and show fields if so
+                    if (videoInfo.title || videoInfo.description || (videoInfo.tags && videoInfo.tags.length > 0)) {
+                        document.getElementById('customMetadataToggle').checked = true;
+                        document.getElementById('customMetadataFields').style.display = 'block';
+                    }
+                    
                     // Set video metadata
                     if (videoInfo.title) {
                         document.getElementById('videoTitle').value = videoInfo.title;
@@ -616,15 +613,10 @@ function setupYjsFieldHandlers() {
             if (tagsLock) tagsLock.style.display = 'inline';
         }
         
-        // Check beneficiaries sync
-        const syncBen = document.getElementById('syncBeneficiaries');
-        if (syncBen && syncBen.checked) {
-            subscribeToYjsField('beneficiaries');
-            const addlBenDiv = document.getElementById('additionalBeneficiaries');
-            const benLock = document.getElementById('beneficiariesLockIcon');
-            if (addlBenDiv) addlBenDiv.style.display = 'block';
-            if (benLock) benLock.style.display = 'inline';
-        }
+        // After subscriptions are set up, check if we should create initial custom JSON
+        setTimeout(() => {
+            checkAndCreateInitialCustomJson();
+        }, 1000); // Wait a bit more to ensure Y.js data has arrived
     }, 500); // Small delay to ensure parent is ready
 }
 
@@ -683,24 +675,11 @@ function handleYjsFieldUpdate(field, value) {
                 console.log('✅ Updated video tags from Y.js:', tagsString);
             }
             break;
-            
-        case 'beneficiaries':
-            if (document.getElementById('syncBeneficiaries').checked) {
-                // Store additional beneficiaries (excluding 3Speak required ones)
-                additionalBeneficiaries = Array.isArray(value) ? value.filter(ben => 
-                    ben.account !== 'spk.beneficiary' && ben.account !== 'threespeakleader'
-                ) : [];
-                
-                // Update UI to show additional beneficiaries
-                updateBeneficiariesDisplay();
-                console.log('✅ Updated beneficiaries from Y.js:', additionalBeneficiaries);
-            }
-            break;
     }
     
     // Re-enable reactive updates after a short delay
     setTimeout(() => { 
-        isUpdatingFromParent = false; 
+        isUpdatingFromParent = false;
     }, 200);
 }
 
@@ -719,8 +698,9 @@ function requestParentData(field) {
 
 // Check for initial data
 function checkInitialData() {
-    // Request initial data from parent
-    sendToParent({ type: 'ready' });
+    // Notify parent that iframe is ready
+    console.log('🚀 3Speak iframe ready, notifying parent');
+    sendToParent({ type: 'iframe_ready' });
 }
 
 // Utility functions
@@ -757,34 +737,31 @@ function showStatus(message, type = 'info') {
     }
 }
 
-// Update beneficiaries display
-function updateBeneficiariesDisplay() {
-    const listEl = document.getElementById('additionalBeneficiariesList');
-    if (!listEl) return;
-    
-    listEl.innerHTML = '';
-    
-    if (additionalBeneficiaries.length === 0) {
-        listEl.innerHTML = '<li class="text-muted">None</li>';
-    } else {
-        additionalBeneficiaries.forEach(ben => {
-            const li = document.createElement('li');
-            li.innerHTML = `<i class="fas fa-user me-1"></i>${ben.account}: ${(ben.weight / 100).toFixed(1)}%`;
-            listEl.appendChild(li);
-        });
-    }
+
+// Get all beneficiaries (3Speak required)
+function getAllBeneficiaries() {
+    return [
+        { account: 'spk.beneficiary', weight: 900, required: true },
+        { account: 'threespeakleader', weight: 100, required: true }
+    ];
 }
 
-// Get all beneficiaries (3Speak required + additional)
-function getAllBeneficiaries() {
-    const required = [
-        { account: 'spk.beneficiary', weight: 900 },
-        { account: 'threespeakleader', weight: 100 }
-    ];
+// Check if we have enough data to create initial custom JSON
+function checkAndCreateInitialCustomJson() {
+    // Always send beneficiaries first
+    sendBeneficiariesUpdate();
     
-    if (document.getElementById('syncBeneficiaries').checked) {
-        return [...required, ...additionalBeneficiaries];
-    }
-    
-    return required;
+    // Always create initial custom JSON even with empty fields
+    // This ensures the app structure is in place
+    console.log('📝 Creating initial 3Speak custom JSON');
+    sendReactiveUpdate();
+}
+
+// Send beneficiaries update to parent
+function sendBeneficiariesUpdate() {
+    console.log('📤 Sending required 3Speak beneficiaries to parent');
+    sendToParent({
+        type: 'beneficiaries_update',
+        beneficiaries: getAllBeneficiaries()
+    });
 }

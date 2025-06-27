@@ -2646,7 +2646,15 @@ class SyncManager {
 
                 // ✅ PROPER REACTIVITY: Update reactive properties for Vue to track
                 this.component.reactiveTags = tags;
-                this.component.reactiveBeneficiaries = beneficiaries;
+                // Force Vue reactivity for beneficiaries array
+                this.component.reactiveBeneficiaries = [...beneficiaries]; // Create new array for Vue reactivity
+                
+                // Debug beneficiaries update
+                if (event.keysChanged.has('beneficiaries')) {
+                    console.log('🎯 Beneficiaries changed in Y.js metadata:', beneficiaries);
+                    console.log('🎯 Updated reactiveBeneficiaries to:', this.component.reactiveBeneficiaries);
+                    console.log('🎯 displayBeneficiaries computed:', this.component.displayBeneficiaries);
+                }
                 // ✅ REMOVED: reactivePermlink - not used, actualPermlink() computed handles display
 
                 // Sync custom JSON to reactive property
@@ -2655,8 +2663,12 @@ class SyncManager {
 
                 // Also sync custom JSON string for the editor
                 if (event.keysChanged.has('customJson')) {
+                    console.log('🔄 Custom JSON changed in Y.js, updating UI:', customJson);
                     this.component.customJsonString = JSON.stringify(customJson, null, 2);
                     this.component.content.custom_json = customJson; // Legacy support
+                    
+                    // Force Vue to update the UI
+                    this.component.$forceUpdate();
                     
                     // ✅ IFRAME INTEGRATION: Broadcast custom JSON changes to registered iframes
                     if (this.component.customJsonMessageHandler) {
@@ -3602,6 +3614,12 @@ class LifecycleManager {
 
         // ✅ ADVANCED SETTINGS: Clear all advanced settings inputs and UI state
         this.clearAdvancedSettings();
+        
+        // ✅ FIX: Clear remix application state if present
+        // This ensures File > New closes any open remix apps and clears the URL
+        if (this.component.$parent && this.component.$parent.closeRemixApp) {
+            this.component.$parent.closeRemixApp();
+        }
     }
 
     clearAdvancedSettings() {
@@ -13721,6 +13739,11 @@ export default {
                     const metadata = this.ydoc.getMap('metadata');
                     const currentBeneficiaries = metadata.get('beneficiaries') || [];
                     if (index >= 0 && index < currentBeneficiaries.length) {
+                        // Check if this beneficiary is required (can't be removed)
+                        if (currentBeneficiaries[index].required) {
+                            console.warn('⚠️ Cannot remove required beneficiary:', currentBeneficiaries[index]);
+                            return;
+                        }
                         currentBeneficiaries.splice(index, 1);
                         metadata.set('beneficiaries', currentBeneficiaries);
                     }
@@ -19225,8 +19248,14 @@ export default {
                   <div v-if="displayBeneficiaries.length > 0" class="mt-2">
                     <div v-for="(ben, index) in displayBeneficiaries" :key="index"
                          class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
-                      <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
-                      <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger" :disabled="isReadOnlyMode">
+                      <span>
+                        <i v-if="ben.required" class="fas fa-lock text-warning me-1" title="Required beneficiary"></i>
+                        @{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%
+                      </span>
+                      <button @click="removeBeneficiary(index)" 
+                              class="btn btn-sm btn-outline-danger" 
+                              :disabled="isReadOnlyMode || ben.required"
+                              :title="ben.required ? 'Cannot remove required beneficiary' : ''">
                         <i class="fas fa-trash"></i>
                       </button>
                     </div>
