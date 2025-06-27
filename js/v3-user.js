@@ -6904,6 +6904,30 @@ function buyNFT(setname, uid, price, type, callback){
       
       this.clearRemixUrl();
     },
+    
+    handle3SpeakBeneficiariesUpdate(data) {
+      // Handle 3Speak-specific beneficiaries
+      if (data.beneficiaries && Array.isArray(data.beneficiaries)) {
+        console.log('📺 Updating 3Speak beneficiaries:', data.beneficiaries);
+        
+        // Merge 3Speak beneficiaries with existing ones
+        const existingBeneficiaries = this.reactiveBeneficiaries.filter(b => 
+          !['spk.beneficiary', 'threespeakleader'].includes(b.account)
+        );
+        
+        // Add 3Speak required beneficiaries
+        this.reactiveBeneficiaries = [...existingBeneficiaries, ...data.beneficiaries];
+        
+        // Update content object for legacy support
+        this.content.beneficiaries = this.reactiveBeneficiaries;
+        
+        // Trigger Y.js update if document exists
+        if (this.ydoc) {
+          const metadata = this.ydoc.getMap('metadata');
+          metadata.set('beneficiaries', this.reactiveBeneficiaries);
+        }
+      }
+    },
 
     async loadManualRemix() {
       if (!this.manualRemixInput.trim()) return;
@@ -6970,10 +6994,28 @@ function buyNFT(setname, uid, price, type, callback){
       this.showRemixBrowser = false;
       this.updateRemixUrl('dlux-io', 'naf-playground');
     },
+    
+    show3SpeakPublisher() {
+      this.currentRemixApp = {
+        title: '3Speak Publisher',
+        author: 'dlux-io',
+        first_author: 'dlux-io',
+        description: 'Publish videos to 3Speak using m3u8 files from SPK Network',
+        license: 'MIT',
+        remix_cid: 'Qm3SpeakPublisher123456789',
+        usage_count: 0,
+        isTest: true,
+        is3Speak: true
+      };
+      this.showRemixBrowser = false;
+      this.updateRemixUrl('dlux-io', '3speak-publisher');
+    },
 
     getRemixIframeSrc() {
       if (this.currentRemixApp?.isNAF) {
         return '/naf-playground/index.html';
+      } else if (this.currentRemixApp?.is3Speak) {
+        return '/3speak-publisher/index.html';
       } else if (this.currentRemixApp?.isTest) {
         return '/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html';
       } else if (this.currentRemixApp?.remix_cid) {
@@ -7033,12 +7075,31 @@ function buyNFT(setname, uid, price, type, callback){
         this.handleRemixFieldRequest(event.data);
       } else if (event.data.type === 'request_field_update') {
         this.handleRemixFieldUpdateRequest(event.data);
+      } else if (event.data.type === 'beneficiaries_update') {
+        // Handle 3Speak beneficiaries update
+        this.handle3SpeakBeneficiariesUpdate(event.data);
+      } else if (event.data.type === 'done' || event.data.type === 'cancel') {
+        // Handle close request from 3Speak Publisher
+        this.closeRemixApp();
       }
     },
 
     async handleRemixDataUpdate(data) {
       // If data.data exists, use that, otherwise use the data directly
       const updateData = data.data || data;
+      
+      // Check if this is 3Speak data - auto-update without consent
+      if (updateData.app === '3speak/0.3') {
+        this.postCustom_json = updateData;
+        console.log('✅ Updated 3Speak video data from iframe');
+        
+        // Update Y.js if available
+        if (this.ydoc) {
+          const metadata = this.ydoc.getMap('metadata');
+          metadata.set('customJson', this.postCustom_json);
+        }
+        return;
+      }
       
       // Assets are automatically updated without user consent (backward compatibility)
       if (updateData.assets) {

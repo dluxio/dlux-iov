@@ -458,6 +458,32 @@
                                                 </div>
                                             </div>
                                             
+                                            <!-- 3Speak Publisher -->
+                                            <div class="carousel-item">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span>📹</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>3Speak Publisher</h3>
+                                                                    <p>Publish videos to 3Speak with SPK Network</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-primary" @click="show3SpeakPublisher()">
+                                                                        <i class="fa-solid fa-video me-2"></i>Publish
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
                                             <!-- Custom dApp -->
                                             <div class="carousel-item">
                                                 <div class="carousel-slide-content" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);">
@@ -627,6 +653,29 @@
                                                             <button class="btn btn-primary btn-sm w-100" 
                                                                     @click="selectTestNAFApp()">
                                                                 <i class="fa-solid fa-eye me-2"></i>Preview App
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Test 3Speak Publisher Card -->
+                                                <div class="remix-app-card card h-100 border-success bg-dark-gradient">
+                                                    <div class="card-body d-flex flex-column">
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <h5 class="card-title text-white mb-0">3Speak Publisher</h5>
+                                                            <span class="badge bg-success ms-2">dApp</span>
+                                                        </div>
+                                                        <p class="card-text text-muted flex-grow-1">
+                                                            Publish videos to 3Speak using m3u8 files from SPK Network
+                                                        </p>
+                                                        <div class="mt-auto">
+                                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                <small class="text-muted">by @dlux-io</small>
+                                                                <span class="badge bg-secondary">MIT</span>
+                                                            </div>
+                                                            <button class="btn btn-primary btn-sm w-100" 
+                                                                    @click="show3SpeakPublisher()">
+                                                                <i class="fa-solid fa-video me-2"></i>Open Publisher
                                                             </button>
                                                         </div>
                                                     </div>

@@ -1,0 +1,271 @@
+/* 3Speak Publisher dApp Styles */
+
+:root {
+    --primary-color: #e74c3c;
+    --secondary-color: #2c3e50;
+    --success-color: #27ae60;
+    --dark-bg: #1a1a1a;
+    --dark-card: #2d2d2d;
+    --border-color: #444;
+}
+
+body {
+    background-color: var(--dark-bg) !important;
+    min-height: 100vh;
+}
+
+/* Card styling */
+.card {
+    border-color: var(--border-color) !important;
+}
+
+.card-header.bg-primary {
+    background-color: var(--primary-color) !important;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Drop zone */
+.drop-zone {
+    border: 3px dashed var(--border-color);
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.drop-zone:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background-color: rgba(231, 76, 60, 0.1);
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    pointer-events: none;
+}
+
+.drop-zone-content i {
+    color: var(--primary-color);
+    opacity: 0.7;
+}
+
+/* Video container */
+.video-container {
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.video-player {
+    width: 100%;
+    max-height: 400px;
+    background-color: #000;
+}
+
+.video-info {
+    padding: 10px;
+    background-color: var(--dark-card);
+    border-radius: 0 0 8px 8px;
+}
+
+/* Thumbnail section */
+.thumbnail-section {
+    padding: 15px;
+    background-color: var(--dark-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.thumbnail-preview {
+    background-color: #000;
+    border-radius: 4px;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+}
+
+.thumbnail-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Form styling */
+.form-control,
+.form-select {
+    background-color: var(--dark-card) !important;
+    border-color: var(--border-color) !important;
+    color: #fff !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--dark-card) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25) !important;
+}
+
+.form-control-plaintext {
+    background-color: transparent;
+    border: none;
+    color: #fff !important;
+}
+
+.form-check-input {
+    background-color: var(--dark-card);
+    border-color: var(--border-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #c0392b;
+    border-color: #c0392b;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* Sections */
+.metadata-section,
+.beneficiaries-section {
+    padding: 20px;
+    background-color: var(--dark-card);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.beneficiaries-section {
+    background-color: rgba(39, 174, 96, 0.1);
+    border-color: var(--success-color);
+}
+
+/* SPK File Browser */
+.spk-file-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.spk-file-item {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.spk-file-item:hover {
+    background-color: var(--dark-card);
+    border-color: var(--primary-color);
+}
+
+.spk-file-item.selected {
+    background-color: rgba(231, 76, 60, 0.2);
+    border-color: var(--primary-color);
+}
+
+/* Status messages */
+.text-danger {
+    color: #e74c3c !important;
+}
+
+.text-success {
+    color: #27ae60 !important;
+}
+
+/* Debug panel */
+#debugPanel pre {
+    background-color: #000;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .drop-zone {
+        padding: 30px;
+    }
+    
+    .video-section,
+    .metadata-section {
+        margin-bottom: 20px;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* Loading spinner */
+.spinner-border {
+    color: var(--primary-color);
+}
+
+/* Modal styling */
+.modal-content {
+    background-color: var(--dark-card) !important;
+    border: 1px solid var(--border-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+.modal-footer {
+    border-top-color: var(--border-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.video-container,
+.thumbnail-section {
+    animation: fadeIn 0.3s ease-out;
+}

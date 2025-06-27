@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3Speak Publisher - DLUX dApp</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- HLS.js -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-dark text-light">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+
+
+                       
+                            <!-- Video Preview Section -->
+                            <div class="mb-4">
+                                <div class="video-section">
+                                    <h5 class="mb-3">Video Preview</h5>
+                                    
+                                    <!-- Drop Zone -->
+                                    <div id="dropZone" class="drop-zone mb-3">
+                                        <div class="drop-zone-content text-light">
+                                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                            <p class="mb-2">Drag and drop m3u8 file here</p>
+                                            <small class="">or browse from SPK Network files</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Video Player -->
+                                    <div id="videoContainer" class="video-container d-none">
+                                        <video id="videoPlayer" class="video-player" controls></video>
+                                        <div class="video-info mt-2">
+                                            <small class="text-muted">
+                                                <span id="videoFileName"></span> | 
+                                                Duration: <span id="videoDuration">--:--</span> | 
+                                                Size: <span id="videoSize">-- MB</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Thumbnail Selection -->
+                                    <div id="thumbnailSection" class="thumbnail-section d-none mt-3">
+                                        <h6>Thumbnail</h6>
+                                        <div class="row g-2">
+                                            <div class="col-md-6">
+                                                <div class="thumbnail-preview">
+                                                    <img id="thumbnailPreview" src="" alt="Thumbnail" class="img-fluid rounded">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <button id="captureThumbnail" class="btn btn-sm btn-primary mb-2 w-100">
+                                                    <i class="fas fa-camera me-1"></i>Capture from Video
+                                                </button>
+                                                <button id="browseThumbnail" class="btn btn-sm btn-secondary w-100">
+                                                    <i class="fas fa-folder-open me-1"></i>Browse from SPK
+                                                </button>
+                                                <input type="hidden" id="thumbnailIPFS" value="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Metadata Form Section -->
+                            <div class="">
+                                <div class="metadata-section">
+                                    <h5 class="mb-3">Video Metadata</h5>
+                                    
+                                    <form id="metadataForm">
+                                        <!-- Title -->
+                                        <div class="mb-3">
+                                            <label for="videoTitle" class="form-label">Title *</label>
+                                            <input type="text" class="form-control bg-dark text-light" id="videoTitle" required>
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" id="syncTitle" checked>
+                                                <label class="form-check-label small" for="syncTitle">
+                                                    Sync with Hive post title
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Description -->
+                                        <div class="mb-3">
+                                            <label for="videoDescription" class="form-label">Description *</label>
+                                            <textarea class="form-control bg-dark text-light" id="videoDescription" rows="4" required></textarea>
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" id="syncDescription" checked>
+                                                <label class="form-check-label small" for="syncDescription">
+                                                    Sync with Hive post body
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tags -->
+                                        <div class="mb-3">
+                                            <label for="videoTags" class="form-label">Tags (comma separated)</label>
+                                            <input type="text" class="form-control bg-dark text-light" id="videoTags" 
+                                                   placeholder="video, 3speak, blockchain">
+                                        </div>
+                                        
+                                        <!-- NSFW Toggle -->
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="isNSFW">
+                                                <label class="form-check-label" for="isNSFW">
+                                                    NSFW Content
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Video Info (readonly) -->
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">Duration</label>
+                                                <input type="text" class="form-control-plaintext text-light" id="durationDisplay" readonly value="--:--">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small text-muted">File Size</label>
+                                                <input type="text" class="form-control-plaintext text-light" id="sizeDisplay" readonly value="-- MB">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Hidden fields for actual values -->
+                                        <input type="hidden" id="videoDurationSeconds" value="0">
+                                        <input type="hidden" id="videoSizeBytes" value="0">
+                                        <input type="hidden" id="videoIPFS" value="">
+                                        <input type="hidden" id="videoFilename" value="">
+                                    </form>
+                                </div>
+                                
+                                <!-- Beneficiaries Section -->
+                                <div class="beneficiaries-section mt-4">
+                                    <h6 class="mb-3">Beneficiaries</h6>
+                                    <div class="small text-muted mb-2">Required for 3Speak:</div>
+                                    <ul class="list-unstyled small">
+                                        <li><i class="fas fa-check text-success me-1"></i>spk.beneficiary: 9%</li>
+                                        <li><i class="fas fa-check text-success me-1"></i>threespeakleader: 1%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span id="statusMessage" class="text-muted small me-2"></span>
+                                        <span id="syncIndicator" class="badge bg-success small d-none">
+                                            <i class="fas fa-sync fa-spin me-1"></i>Auto-syncing
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <button id="cancelBtn" class="btn btn-secondary me-2">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </button>
+                                        <button id="publishBtn" class="btn btn-primary" disabled>
+                                            <i class="fas fa-check me-1"></i>Done
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+      
+        </div>
+        
+        <!-- Debug Panel (hidden by default) -->
+        <div class="row mt-3 d-none" id="debugPanel">
+            <div class="col-12">
+                <div class="card bg-dark border-secondary">
+                    <div class="card-header">
+                        <h6 class="mb-0">Debug - Generated Custom JSON</h6>
+                    </div>
+                    <div class="card-body">
+                        <pre id="debugJson" class="text-light mb-0"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPK File Browser Modal -->
+    <div class="modal fade" id="spkBrowserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title">Browse SPK Network Files</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="spkFileList" class="spk-file-list">
+                        <!-- SPK files will be loaded here -->
+                        <p class="text-muted text-center">Loading files...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- App JS -->
+    <script src="app.js"></script>
+</body>
+</html>
