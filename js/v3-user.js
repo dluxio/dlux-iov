@@ -7408,9 +7408,15 @@ function buyNFT(setname, uid, price, type, callback){
         }
         this.postCustom_json.vrHash = 'remix';
         
-        // Check if it's the test case
+        // Check if it's one of the test cases
         if (remixAuthor === 'markegiles' && remixPermlink === 'coastal-bike-tour-in-buenos-aires') {
           this.selectTestRemixApp();
+          return;
+        } else if (remixAuthor === 'dlux-io' && remixPermlink === 'naf-playground') {
+          this.selectTestNAFApp();
+          return;
+        } else if (remixAuthor === 'dlux-io' && remixPermlink === '3speak-publisher') {
+          this.show3SpeakPublisher();
           return;
         }
         

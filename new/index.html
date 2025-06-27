@@ -567,53 +567,50 @@
                                         <!-- ReMix App Browser (collapsed when app is loaded) -->
                                         <div class="builder-view">
                                             <!-- Search and Filters -->
-                                            <div class="card mb-3">
-                                                <div class="card-header">
-                                                    <h6 class="mb-0">
-                                                        <i class="fa-solid fa-search fa-fw me-2"></i>
-                                                        Browse ReMix Applications
-                                                    </h6>
+
+                                            <div class="row g-3 mb-2">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Search</label>
+                                                    <input type="text" class="form-control" v-model="remixSearch" 
+                                                            placeholder="Search by title, author, or tags..." 
+                                                            @input="searchRemixApps()">
                                                 </div>
-                                                <div class="card-body">
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label">Search</label>
-                                                            <input type="text" class="form-control" v-model="remixSearch" 
-                                                                    placeholder="Search by title, author, or tags..." 
-                                                                    @input="searchRemixApps()">
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <label class="form-label">License</label>
-                                                            <select class="form-select" v-model="selectedLicense" @change="filterRemixApps()">
-                                                                <option value="">All Licenses</option>
-                                                                <option value="MIT">MIT</option>
-                                                                <option value="GPLv3">GPLv3</option>
-                                                                <option value="Apache-2.0">Apache 2.0</option>
-                                                                <option value="BSD-3-Clause">BSD 3-Clause</option>
-                                                                <option value="CC0-1.0">CC0 (Public Domain)</option>
-                                                                <option value="ISC">ISC</option>
-                                                                <option value="MPL-2.0">Mozilla Public License 2.0</option>
-                                                                <option value="AGPL-3.0">AGPL 3.0</option>
-                                                                <option value="Unlicense">Unlicense</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-3">
-                                                            <label class="form-label">Sort By</label>
-                                                            <select class="form-select" v-model="remixSort" @change="sortRemixApps()">
-                                                                <option value="newest">Newest First</option>
-                                                                <option value="oldest">Oldest First</option>
-                                                                <option value="popular">Most Popular</option>
-                                                                <option value="author">Author</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">License</label>
+                                                    <select class="form-select" v-model="selectedLicense" @change="filterRemixApps()">
+                                                        <option value="">All Licenses</option>
+                                                        <option value="MIT">MIT</option>
+                                                        <option value="GPLv3">GPLv3</option>
+                                                        <option value="Apache-2.0">Apache 2.0</option>
+                                                        <option value="BSD-3-Clause">BSD 3-Clause</option>
+                                                        <option value="CC0-1.0">CC0 (Public Domain)</option>
+                                                        <option value="ISC">ISC</option>
+                                                        <option value="MPL-2.0">Mozilla Public License 2.0</option>
+                                                        <option value="AGPL-3.0">AGPL 3.0</option>
+                                                        <option value="Unlicense">Unlicense</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Sort By</label>
+                                                    <select class="form-select" v-model="remixSort" @change="sortRemixApps()">
+                                                        <option value="newest">Newest First</option>
+                                                        <option value="oldest">Oldest First</option>
+                                                        <option value="popular">Most Popular</option>
+                                                        <option value="author">Author</option>
+                                                    </select>
                                                 </div>
                                             </div>
-
+                                            <hr />
+     
                                             <!-- ReMix Apps Grid -->
                                             <div class="remix-apps-grid">
                                                 <!-- Test 360° Gallery Card -->
                                                 <div class="remix-app-card card h-100 border-info bg-dark-gradient">
+                                                    <!-- Placeholder Image -->
+                                                    <div class="card-img-top d-flex align-items-center justify-content-center" 
+                                                         style="height: 150px; background: linear-gradient(135deg, #4ECDC4 0%, #44A3AA 100%);">
+                                                        <span style="font-size: 4rem;">🌐</span>
+                                                    </div>
                                                     <div class="card-body d-flex flex-column">
                                                         <div class="d-flex align-items-center mb-2">
                                                             <h5 class="card-title text-white mb-0">360° Gallery Template</h5>
@@ -637,6 +634,11 @@
                                                 
                                                 <!-- Test NAF Playground Card -->
                                                 <div class="remix-app-card card h-100 border-danger bg-dark-gradient">
+                                                    <!-- Placeholder Image -->
+                                                    <div class="card-img-top d-flex align-items-center justify-content-center" 
+                                                         style="height: 150px; background: linear-gradient(135deg, #FF6B6B 0%, #C44569 100%);">
+                                                        <span style="font-size: 4rem;">🥽</span>
+                                                    </div>
                                                     <div class="card-body d-flex flex-column">
                                                         <div class="d-flex align-items-center mb-2">
                                                             <h5 class="card-title text-white mb-0">NAF Playground</h5>
@@ -660,6 +662,11 @@
                                                 
                                                 <!-- Test 3Speak Publisher Card -->
                                                 <div class="remix-app-card card h-100 border-success bg-dark-gradient">
+                                                    <!-- Placeholder Image -->
+                                                    <div class="card-img-top d-flex align-items-center justify-content-center" 
+                                                         style="height: 150px; background: linear-gradient(135deg, #27AE60 0%, #229954 100%);">
+                                                        <span style="font-size: 4rem;">📹</span>
+                                                    </div>
                                                     <div class="card-body d-flex flex-column">
                                                         <div class="d-flex align-items-center mb-2">
                                                             <h5 class="card-title text-white mb-0">3Speak Publisher</h5>
