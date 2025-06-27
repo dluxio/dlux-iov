@@ -29,6 +29,23 @@ export default {
 </div>
 <div class="ms-auto me-auto w-100 px-2" style="max-width: 750px">
 <div class="">
+<!-- Parent Post Information -->
+<div v-if="isReply" class="alert alert-info d-flex align-items-center mb-3" style="background-color: rgba(13, 110, 253, 0.1); border: 1px solid rgba(13, 110, 253, 0.25);">
+  <i class="fa-solid fa-reply me-2"></i>
+  <div>
+    <span v-if="isReplyToComment">
+      This is a reply to 
+      <a @click.prevent="navigateToParent" href="#" class="text-info text-decoration-none fw-bold">@{{post.parent_author}}</a>,
+      <span v-if="parentPost"> a thread on 
+        <a @click.prevent="navigateToRootPost" href="#" class="text-info text-decoration-none fw-bold">{{getRootPostTitle}}</a>
+      </span>
+    </span>
+    <span v-else>
+      This is a reply to: 
+      <a @click.prevent="navigateToParent" href="#" class="text-info text-decoration-none fw-bold">{{getParentTitle}}</a>
+    </span>
+  </div>
+</div>
 <div class="d-flex">
 <div><a class=" no-decoration" :href="'/blog/@' + post.author + '/' + post.permlink">
 <h3 class="card-title" id="modal_title">{{post.title}}</h3>
@@ -234,6 +251,23 @@ export default {
 <div v-else class="w-100">
 <div class="ms-auto me-auto w-100 px-2" style="max-width: 750px">
 <div class="">
+<!-- Parent Post Information -->
+<div v-if="isReply" class="alert alert-info d-flex align-items-center mb-3" style="background-color: rgba(13, 110, 253, 0.1); border: 1px solid rgba(13, 110, 253, 0.25);">
+  <i class="fa-solid fa-reply me-2"></i>
+  <div>
+    <span v-if="isReplyToComment">
+      This is a reply to 
+      <a @click.prevent="navigateToParent" href="#" class="text-info text-decoration-none fw-bold">@{{post.parent_author}}</a>,
+      <span v-if="parentPost"> a thread on 
+        <a @click.prevent="navigateToRootPost" href="#" class="text-info text-decoration-none fw-bold">{{getRootPostTitle}}</a>
+      </span>
+    </span>
+    <span v-else>
+      This is a reply to: 
+      <a @click.prevent="navigateToParent" href="#" class="text-info text-decoration-none fw-bold">{{getParentTitle}}</a>
+    </span>
+  </div>
+</div>
 <div class="d-flex">
 <div><a class=" no-decoration" :href="'/blog/@' + post.author + '/' + post.permlink">
 <h3 class="card-title" id="solo_title">{{post.title}}</h3>
@@ -512,6 +546,8 @@ data() {
         },
         modalRep: "...",
         modalAuthorInfo: null,
+        parentPost: null,
+        rootPost: null,
     };
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
@@ -521,6 +557,31 @@ computed: {
     },
     postCommunityTitle() {
         return this.post.community_title || (this.post.json_metadata && this.post.json_metadata.community_title);
+    },
+    isReply() {
+        return this.post.parent_author && this.post.parent_permlink && 
+               this.post.parent_author !== '' && this.post.parent_permlink !== '';
+    },
+    isReplyToComment() {
+        // If this is a reply, check if the parent post also has a parent (making it a nested comment)
+        if (!this.isReply) return false;
+        return this.parentPost && this.parentPost.parent_author && 
+               this.parentPost.parent_author !== '' && this.parentPost.parent_permlink !== '';
+    },
+    getParentTitle() {
+        if (this.parentPost && this.parentPost.title) {
+            return this.parentPost.title;
+        }
+        return `@${this.post.parent_author}/${this.post.parent_permlink}`;
+    },
+    getRootPostTitle() {
+        if (this.rootPost && this.rootPost.title) {
+            return this.rootPost.title;
+        }
+        if (this.parentPost && this.parentPost.root_title) {
+            return this.parentPost.root_title;
+        }
+        return 'original post';
     }
 },
 methods: {
@@ -942,6 +1003,96 @@ methods: {
         console.log(`Navigating to community: ${community}`);
         window.location.href = `/hub/#community/${community}`;
     },
+    async navigateToParent() {
+        // Navigate to the immediate parent post/comment
+        if (!this.post.parent_author || !this.post.parent_permlink) return;
+        
+        try {
+            // Use the modalSelect method to update the current view
+            const parentUrl = `/@${this.post.parent_author}/${this.post.parent_permlink}`;
+            
+            // Update the URL and emit the event to load the parent post
+            window.history.pushState("Parent Post", `${this.post.parent_author}/${this.post.parent_permlink}`, `/blog${parentUrl}`);
+            this.$emit('modalselect', parentUrl);
+        } catch (error) {
+            console.error('Error navigating to parent:', error);
+        }
+    },
+    async navigateToRootPost() {
+        // Navigate to the root post (original post in the thread)
+        if (!this.parentPost || !this.parentPost.parent_author || !this.parentPost.parent_permlink) {
+            // If we don't have root post info, just navigate to parent
+            this.navigateToParent();
+            return;
+        }
+        
+        try {
+            const rootUrl = `/@${this.parentPost.parent_author}/${this.parentPost.parent_permlink}`;
+            
+            // Update the URL and emit the event to load the root post
+            window.history.pushState("Root Post", `${this.parentPost.parent_author}/${this.parentPost.parent_permlink}`, `/blog${rootUrl}`);
+            this.$emit('modalselect', rootUrl);
+        } catch (error) {
+            console.error('Error navigating to root post:', error);
+        }
+    },
+    async loadParentPost() {
+        // Load parent post data if this is a reply
+        if (!this.isReply) return;
+        
+        try {
+            const response = await fetch("https://hive-api.dlux.io", {
+                body: JSON.stringify({
+                    "jsonrpc": "2.0",
+                    "method": "condenser_api.get_content",
+                    "params": [this.post.parent_author, this.post.parent_permlink],
+                    "id": 1
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+            });
+            
+            const data = await response.json();
+            if (data.result && data.result.author) {
+                this.parentPost = data.result;
+                
+                // If parent post also has a parent, load the root post
+                if (this.parentPost.parent_author && this.parentPost.parent_permlink) {
+                    this.loadRootPost();
+                }
+            }
+        } catch (error) {
+            console.error('Error loading parent post:', error);
+        }
+    },
+    async loadRootPost() {
+        // Load root post data if parent is also a comment
+        if (!this.parentPost || !this.parentPost.parent_author || !this.parentPost.parent_permlink) return;
+        
+        try {
+            const response = await fetch("https://hive-api.dlux.io", {
+                body: JSON.stringify({
+                    "jsonrpc": "2.0",
+                    "method": "condenser_api.get_content",
+                    "params": [this.parentPost.parent_author, this.parentPost.parent_permlink],
+                    "id": 1
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+            });
+            
+            const data = await response.json();
+            if (data.result && data.result.author) {
+                this.rootPost = data.result;
+            }
+        } catch (error) {
+            console.error('Error loading root post:', error);
+        }
+    },
     handleReplySigning(op) {
         this.$emit('tosign', op);
     }
@@ -951,6 +1102,7 @@ watch: {
         handler() {
             this.updateModalReputation();
             this.hideLowRep();
+            this.loadParentPost();
             try{
                 if(this.post?.replies?.length != 0)this.first_replier_permlink = this.post.replies[0].permlink
             } catch (e) {}
@@ -964,6 +1116,7 @@ mounted() {
     this.getModalAuthorReputation();
     this.hideLowRep();
     this.getContracts();
+    this.loadParentPost();
 },
 };
 
