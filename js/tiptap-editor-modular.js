@@ -2637,7 +2637,7 @@ class SyncManager {
 
                 // Update Vue reactive content object
                 this.component.content.tags = tags;
-                this.component.content.beneficiaries = beneficiaries;
+                this.component.content.beneficiaries = [...beneficiaries]; // Create new array for content object
                 this.component.content.permlink = permlink;
 
                 // ✅ RECURSION FIX: Do NOT update permlinkInput from metadata
@@ -2646,14 +2646,30 @@ class SyncManager {
 
                 // ✅ PROPER REACTIVITY: Update reactive properties for Vue to track
                 this.component.reactiveTags = tags;
-                // Force Vue reactivity for beneficiaries array
-                this.component.reactiveBeneficiaries = [...beneficiaries]; // Create new array for Vue reactivity
                 
-                // Debug beneficiaries update
+                // ✅ VUE 3 BEST PRACTICE: Clear array first, then push new items
+                // This ensures Vue 3 detects the change properly
                 if (event.keysChanged.has('beneficiaries')) {
                     console.log('🎯 Beneficiaries changed in Y.js metadata:', beneficiaries);
+                    
+                    // Clear the array first
+                    this.component.reactiveBeneficiaries.length = 0;
+                    
+                    // Then push new items
+                    beneficiaries.forEach(ben => {
+                        this.component.reactiveBeneficiaries.push(ben);
+                    });
+                    
                     console.log('🎯 Updated reactiveBeneficiaries to:', this.component.reactiveBeneficiaries);
-                    console.log('🎯 displayBeneficiaries computed:', this.component.displayBeneficiaries);
+                    
+                    // Use nextTick to log after DOM update
+                    this.component.$nextTick(() => {
+                        console.log('🔄 After nextTick - displayBeneficiaries:', this.component.displayBeneficiaries);
+                        console.log('🔄 DOM should be updated now');
+                    });
+                } else {
+                    // For other fields, use spread operator
+                    this.component.reactiveBeneficiaries = [...beneficiaries];
                 }
                 // ✅ REMOVED: reactivePermlink - not used, actualPermlink() computed handles display
 
@@ -15536,9 +15552,12 @@ export default {
             const tags = metadata.get('tags') || [];
             this.reactiveTags = tags; // ✅ REACTIVE PATTERN
 
-            // Load beneficiaries
+            // Load beneficiaries - use array mutation for Vue 3 reactivity
             const beneficiaries = metadata.get('beneficiaries') || [];
-            this.reactiveBeneficiaries = beneficiaries; // ✅ REACTIVE PATTERN
+            this.reactiveBeneficiaries.length = 0;
+            beneficiaries.forEach(ben => {
+                this.reactiveBeneficiaries.push(ben);
+            });
 
             // Load comment options - ✅ REACTIVE PATTERN
             this.reactiveCommentOptions = {

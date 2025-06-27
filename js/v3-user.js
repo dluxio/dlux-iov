@@ -7176,9 +7176,17 @@ function buyNFT(setname, uid, price, type, callback){
         this.reactiveBeneficiaries = [...this.postBens];
         
         // Update Y.js
-        if (this.ydoc) {
-          const metadata = this.ydoc.getMap('metadata');
+        const editorComponent = this.$refs.tiptapEditor;
+        if (editorComponent && editorComponent.ydoc) {
+          const metadata = editorComponent.ydoc.getMap('metadata');
+          console.log('🧹 Clearing required beneficiaries on close, remaining:', this.postBens);
           metadata.set('beneficiaries', this.postBens);
+          
+          // Force Vue reactivity update
+          this.$nextTick(() => {
+            console.log('🔄 After nextTick - Y.js beneficiaries:', metadata.get('beneficiaries'));
+            console.log('🔄 After nextTick - Editor reactiveBeneficiaries:', editorComponent.reactiveBeneficiaries);
+          });
         }
       }
       
@@ -7416,7 +7424,14 @@ function buyNFT(setname, uid, price, type, callback){
             const editorComponent = this.$refs.tiptapEditor;
             if (editorComponent && editorComponent.ydoc) {
               const metadata = editorComponent.ydoc.getMap('metadata');
+              console.log('🧹 Clearing required beneficiaries on cancel, remaining:', this.postBens);
               metadata.set('beneficiaries', this.postBens);
+              
+              // Force Vue reactivity update
+              this.$nextTick(() => {
+                console.log('🔄 After nextTick - Y.js beneficiaries:', metadata.get('beneficiaries'));
+                console.log('🔄 After nextTick - Editor reactiveBeneficiaries:', editorComponent.reactiveBeneficiaries);
+              });
             }
           }
         }
