@@ -78,33 +78,54 @@
                                     <form id="metadataForm">
                                         <!-- Title -->
                                         <div class="mb-3">
-                                            <label for="videoTitle" class="form-label">Title *</label>
+                                            <label for="videoTitle" class="form-label">
+                                                Title *
+                                                <span id="titleLockIcon" class="ms-2 text-muted" style="display: none;">
+                                                    <i class="fas fa-lock" title="Synced from Hive post"></i>
+                                                </span>
+                                            </label>
                                             <input type="text" class="form-control bg-dark text-light" id="videoTitle" required>
                                             <div class="form-check mt-1">
                                                 <input class="form-check-input" type="checkbox" id="syncTitle" checked>
                                                 <label class="form-check-label small" for="syncTitle">
-                                                    Sync with Hive post title
+                                                    <i class="fas fa-link me-1"></i>Use Hive post title (read-only when checked)
                                                 </label>
                                             </div>
                                         </div>
                                         
                                         <!-- Description -->
                                         <div class="mb-3">
-                                            <label for="videoDescription" class="form-label">Description *</label>
+                                            <label for="videoDescription" class="form-label">
+                                                Description *
+                                                <span id="descriptionLockIcon" class="ms-2 text-muted" style="display: none;">
+                                                    <i class="fas fa-lock" title="Synced from Hive post"></i>
+                                                </span>
+                                            </label>
                                             <textarea class="form-control bg-dark text-light" id="videoDescription" rows="4" required></textarea>
                                             <div class="form-check mt-1">
                                                 <input class="form-check-input" type="checkbox" id="syncDescription" checked>
                                                 <label class="form-check-label small" for="syncDescription">
-                                                    Sync with Hive post body
+                                                    <i class="fas fa-link me-1"></i>Use Hive post body (read-only when checked)
                                                 </label>
                                             </div>
                                         </div>
                                         
                                         <!-- Tags -->
                                         <div class="mb-3">
-                                            <label for="videoTags" class="form-label">Tags (comma separated)</label>
+                                            <label for="videoTags" class="form-label">
+                                                Tags (comma separated)
+                                                <span id="tagsLockIcon" class="ms-2 text-muted" style="display: none;">
+                                                    <i class="fas fa-lock" title="Synced from Hive post"></i>
+                                                </span>
+                                            </label>
                                             <input type="text" class="form-control bg-dark text-light" id="videoTags" 
                                                    placeholder="video, 3speak, blockchain">
+                                            <div class="form-check mt-1">
+                                                <input class="form-check-input" type="checkbox" id="syncTags">
+                                                <label class="form-check-label small" for="syncTags">
+                                                    <i class="fas fa-link me-1"></i>Use Hive post tags (read-only when checked)
+                                                </label>
+                                            </div>
                                         </div>
                                         
                                         <!-- NSFW Toggle -->
@@ -139,12 +160,29 @@
                                 
                                 <!-- Beneficiaries Section -->
                                 <div class="beneficiaries-section mt-4">
-                                    <h6 class="mb-3">Beneficiaries</h6>
+                                    <h6 class="mb-3">
+                                        Beneficiaries
+                                        <span id="beneficiariesLockIcon" class="ms-2 text-muted" style="display: none;">
+                                            <i class="fas fa-lock" title="Additional beneficiaries from Hive post"></i>
+                                        </span>
+                                    </h6>
                                     <div class="small text-muted mb-2">Required for 3Speak:</div>
-                                    <ul class="list-unstyled small">
+                                    <ul class="list-unstyled small mb-3">
                                         <li><i class="fas fa-check text-success me-1"></i>spk.beneficiary: 9%</li>
                                         <li><i class="fas fa-check text-success me-1"></i>threespeakleader: 1%</li>
                                     </ul>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="syncBeneficiaries">
+                                        <label class="form-check-label small" for="syncBeneficiaries">
+                                            <i class="fas fa-link me-1"></i>Include additional beneficiaries from Hive post
+                                        </label>
+                                    </div>
+                                    <div id="additionalBeneficiaries" class="mt-2" style="display: none;">
+                                        <div class="small text-muted mb-1">Additional from post:</div>
+                                        <ul id="additionalBeneficiariesList" class="list-unstyled small">
+                                            <!-- Populated via JavaScript -->
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>

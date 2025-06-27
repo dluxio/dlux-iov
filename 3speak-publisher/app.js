@@ -211,22 +211,80 @@ function updateVideoInfo() {
 // Form handlers
 function setupFormHandlers() {
     // Add reactive update handlers to all form fields
-    document.getElementById('videoTitle').addEventListener('input', sendReactiveUpdate);
-    document.getElementById('videoDescription').addEventListener('input', sendReactiveUpdate);
-    document.getElementById('videoTags').addEventListener('input', sendReactiveUpdate);
+    document.getElementById('videoTitle').addEventListener('input', function() {
+        if (!isUpdatingFromParent) sendReactiveUpdate();
+    });
+    document.getElementById('videoDescription').addEventListener('input', function() {
+        if (!isUpdatingFromParent) sendReactiveUpdate();
+    });
+    document.getElementById('videoTags').addEventListener('input', function() {
+        if (!isUpdatingFromParent) sendReactiveUpdate();
+    });
     document.getElementById('isNSFW').addEventListener('change', sendReactiveUpdate);
     
-    // Title sync
+    // Title sync - now uses Y.js subscriptions
     document.getElementById('syncTitle').addEventListener('change', function(e) {
+        const titleInput = document.getElementById('videoTitle');
+        const lockIcon = document.getElementById('titleLockIcon');
         if (e.target.checked) {
-            requestParentData('title');
+            subscribeToYjsField('title');
+            titleInput.disabled = true;
+            titleInput.classList.add('synced-field');
+            if (lockIcon) lockIcon.style.display = 'inline';
+        } else {
+            unsubscribeFromYjsField('title');
+            titleInput.disabled = false;
+            titleInput.classList.remove('synced-field');
+            if (lockIcon) lockIcon.style.display = 'none';
         }
     });
     
-    // Description sync
+    // Description sync - now uses Y.js subscriptions
     document.getElementById('syncDescription').addEventListener('change', function(e) {
+        const descInput = document.getElementById('videoDescription');
+        const lockIcon = document.getElementById('descriptionLockIcon');
         if (e.target.checked) {
-            requestParentData('body');
+            subscribeToYjsField('body');
+            descInput.disabled = true;
+            descInput.classList.add('synced-field');
+            if (lockIcon) lockIcon.style.display = 'inline';
+        } else {
+            unsubscribeFromYjsField('body');
+            descInput.disabled = false;
+            descInput.classList.remove('synced-field');
+            if (lockIcon) lockIcon.style.display = 'none';
+        }
+    });
+    
+    // Tags sync - now uses Y.js subscriptions
+    document.getElementById('syncTags').addEventListener('change', function(e) {
+        const tagsInput = document.getElementById('videoTags');
+        const lockIcon = document.getElementById('tagsLockIcon');
+        if (e.target.checked) {
+            subscribeToYjsField('tags');
+            tagsInput.disabled = true;
+            tagsInput.classList.add('synced-field');
+            if (lockIcon) lockIcon.style.display = 'inline';
+        } else {
+            unsubscribeFromYjsField('tags');
+            tagsInput.disabled = false;
+            tagsInput.classList.remove('synced-field');
+            if (lockIcon) lockIcon.style.display = 'none';
+        }
+    });
+    
+    // Beneficiaries sync - now uses Y.js subscriptions
+    document.getElementById('syncBeneficiaries').addEventListener('change', function(e) {
+        const addlBenDiv = document.getElementById('additionalBeneficiaries');
+        const lockIcon = document.getElementById('beneficiariesLockIcon');
+        if (e.target.checked) {
+            subscribeToYjsField('beneficiaries');
+            if (addlBenDiv) addlBenDiv.style.display = 'block';
+            if (lockIcon) lockIcon.style.display = 'inline';
+        } else {
+            unsubscribeFromYjsField('beneficiaries');
+            if (addlBenDiv) addlBenDiv.style.display = 'none';
+            if (lockIcon) lockIcon.style.display = 'none';
         }
     });
     
@@ -281,9 +339,12 @@ function captureThumbnail() {
     }, 'image/jpeg', 0.9);
 }
 
+// Track if we're updating from parent to prevent loops
+let isUpdatingFromParent = false;
+
 // Send reactive update to parent
 function sendReactiveUpdate() {
-    if (isInitializing) return; // Don't send updates during initialization
+    if (isInitializing || isUpdatingFromParent) return; // Don't send updates during initialization or parent updates
     
     // Clear existing timer
     if (updateDebounceTimer) {
@@ -315,10 +376,7 @@ function sendReactiveUpdate() {
         // Also send beneficiaries info
         sendToParent({
             type: 'beneficiaries_update',
-            beneficiaries: [
-                { account: 'spk.beneficiary', weight: 900 },
-                { account: 'threespeakleader', weight: 100 }
-            ]
+            beneficiaries: getAllBeneficiaries()
         });
         
         // Update sync indicator
@@ -371,15 +429,34 @@ function generateCustomJson() {
     };
 }
 
+// Y.js field subscriptions
+let yjsFieldSubscriptions = {
+    title: false,
+    body: false,
+    tags: false,
+    beneficiaries: false
+};
+
+// Track additional beneficiaries from Y.js
+let additionalBeneficiaries = [];
+
 // Parent window communication
 function setupParentCommunication() {
     window.addEventListener('message', function(event) {
         // Verify origin in production
         handleParentMessage(event.data);
     });
+    
+    // Set up Y.js field update handler
+    setupYjsFieldHandlers();
 }
 
 function handleParentMessage(data) {
+    // Ignore metamask messages
+    if (data.target && data.target.includes('metamask')) {
+        return;
+    }
+    
     console.log('Received from parent:', data);
     
     switch (data.type) {
@@ -471,7 +548,160 @@ function handleParentMessage(data) {
                 document.getElementById('videoDescription').value = data.value;
             }
             break;
+            
+        case 'dapp_sync':
+            // Handle Y.js sync updates from parent
+            if (data.data && data.data.app === '3speak/0.3') {
+                isInitializing = true;
+                const videoInfo = data.data.data;
+                if (videoInfo) {
+                    // Update fields without triggering reactive updates
+                    if (videoInfo.title) {
+                        document.getElementById('videoTitle').value = videoInfo.title;
+                    }
+                    if (videoInfo.description) {
+                        document.getElementById('videoDescription').value = videoInfo.description;
+                    }
+                    if (videoInfo.tags && Array.isArray(videoInfo.tags)) {
+                        document.getElementById('videoTags').value = videoInfo.tags.join(', ');
+                    }
+                    if (videoInfo.isNsfwContent !== undefined) {
+                        document.getElementById('isNSFW').checked = videoInfo.isNsfwContent;
+                    }
+                }
+                setTimeout(() => { isInitializing = false; }, 100);
+                console.log('✅ Synced 3Speak data from Y.js');
+            }
+            break;
+            
+        case 'YDOC_FIELD_UPDATE':
+            // Handle Y.js field updates
+            handleYjsFieldUpdate(data.field, data.value);
+            break;
     }
+}
+
+// Set up Y.js field handlers
+function setupYjsFieldHandlers() {
+    console.log('🔗 Setting up Y.js field handlers');
+    
+    // Check initial state of sync checkboxes and subscribe if needed
+    setTimeout(() => {
+        const syncTitle = document.getElementById('syncTitle');
+        const syncDesc = document.getElementById('syncDescription');
+        const syncTags = document.getElementById('syncTags');
+        const titleInput = document.getElementById('videoTitle');
+        const descInput = document.getElementById('videoDescription');
+        const tagsInput = document.getElementById('videoTags');
+        const titleLock = document.getElementById('titleLockIcon');
+        const descLock = document.getElementById('descriptionLockIcon');
+        const tagsLock = document.getElementById('tagsLockIcon');
+        
+        if (syncTitle.checked) {
+            subscribeToYjsField('title');
+            titleInput.disabled = true;
+            titleInput.classList.add('synced-field');
+            if (titleLock) titleLock.style.display = 'inline';
+        }
+        if (syncDesc.checked) {
+            subscribeToYjsField('body');
+            descInput.disabled = true;
+            descInput.classList.add('synced-field');
+            if (descLock) descLock.style.display = 'inline';
+        }
+        if (syncTags.checked) {
+            subscribeToYjsField('tags');
+            tagsInput.disabled = true;
+            tagsInput.classList.add('synced-field');
+            if (tagsLock) tagsLock.style.display = 'inline';
+        }
+        
+        // Check beneficiaries sync
+        const syncBen = document.getElementById('syncBeneficiaries');
+        if (syncBen && syncBen.checked) {
+            subscribeToYjsField('beneficiaries');
+            const addlBenDiv = document.getElementById('additionalBeneficiaries');
+            const benLock = document.getElementById('beneficiariesLockIcon');
+            if (addlBenDiv) addlBenDiv.style.display = 'block';
+            if (benLock) benLock.style.display = 'inline';
+        }
+    }, 500); // Small delay to ensure parent is ready
+}
+
+// Subscribe to Y.js field
+function subscribeToYjsField(field) {
+    console.log(`📡 Subscribing to Y.js field: ${field}`);
+    yjsFieldSubscriptions[field] = true;
+    
+    sendToParent({
+        type: 'SUBSCRIBE_YDOC_FIELD',
+        field: field
+    });
+}
+
+// Unsubscribe from Y.js field
+function unsubscribeFromYjsField(field) {
+    console.log(`🔕 Unsubscribing from Y.js field: ${field}`);
+    yjsFieldSubscriptions[field] = false;
+    
+    sendToParent({
+        type: 'UNSUBSCRIBE_YDOC_FIELD',
+        field: field
+    });
+}
+
+// Handle Y.js field update
+function handleYjsFieldUpdate(field, value) {
+    console.log(`📥 Y.js field update: ${field} =`, value);
+    
+    // Only update if we're subscribed and sync is enabled
+    if (!yjsFieldSubscriptions[field]) return;
+    
+    // Set flag to prevent feedback loop
+    isUpdatingFromParent = true;
+    
+    switch(field) {
+        case 'title':
+            if (document.getElementById('syncTitle').checked) {
+                document.getElementById('videoTitle').value = value || '';
+                console.log('✅ Updated video title from Y.js:', value);
+            }
+            break;
+            
+        case 'body':
+            if (document.getElementById('syncDescription').checked) {
+                document.getElementById('videoDescription').value = value || '';
+                console.log('✅ Updated video description from Y.js:', value);
+            }
+            break;
+            
+        case 'tags':
+            if (document.getElementById('syncTags').checked) {
+                // Convert tags array to comma-separated string
+                const tagsString = Array.isArray(value) ? value.join(', ') : '';
+                document.getElementById('videoTags').value = tagsString;
+                console.log('✅ Updated video tags from Y.js:', tagsString);
+            }
+            break;
+            
+        case 'beneficiaries':
+            if (document.getElementById('syncBeneficiaries').checked) {
+                // Store additional beneficiaries (excluding 3Speak required ones)
+                additionalBeneficiaries = Array.isArray(value) ? value.filter(ben => 
+                    ben.account !== 'spk.beneficiary' && ben.account !== 'threespeakleader'
+                ) : [];
+                
+                // Update UI to show additional beneficiaries
+                updateBeneficiariesDisplay();
+                console.log('✅ Updated beneficiaries from Y.js:', additionalBeneficiaries);
+            }
+            break;
+    }
+    
+    // Re-enable reactive updates after a short delay
+    setTimeout(() => { 
+        isUpdatingFromParent = false; 
+    }, 200);
 }
 
 function sendToParent(message) {
@@ -525,4 +755,36 @@ function showStatus(message, type = 'info') {
             statusEl.textContent = '';
         }, 3000);
     }
+}
+
+// Update beneficiaries display
+function updateBeneficiariesDisplay() {
+    const listEl = document.getElementById('additionalBeneficiariesList');
+    if (!listEl) return;
+    
+    listEl.innerHTML = '';
+    
+    if (additionalBeneficiaries.length === 0) {
+        listEl.innerHTML = '<li class="text-muted">None</li>';
+    } else {
+        additionalBeneficiaries.forEach(ben => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-user me-1"></i>${ben.account}: ${(ben.weight / 100).toFixed(1)}%`;
+            listEl.appendChild(li);
+        });
+    }
+}
+
+// Get all beneficiaries (3Speak required + additional)
+function getAllBeneficiaries() {
+    const required = [
+        { account: 'spk.beneficiary', weight: 900 },
+        { account: 'threespeakleader', weight: 100 }
+    ];
+    
+    if (document.getElementById('syncBeneficiaries').checked) {
+        return [...required, ...additionalBeneficiaries];
+    }
+    
+    return required;
 }

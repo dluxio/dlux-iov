@@ -1253,12 +1253,238 @@ PORT=3000
       // Handle updates from dApp manager
       console.log('dApp Manager Update:', customJson);
       Object.assign(this.postCustom_json, customJson);
+      // Sync with Y.js if TipTap editor is available
+      this.syncCustomJsonToYjs();
     },
     
     handleRemixUpdate(customJson) {
       // Handle updates from remix manager
       console.log('ReMix Manager Update:', customJson);
       Object.assign(this.postCustom_json, customJson);
+      // Sync with Y.js if TipTap editor is available
+      this.syncCustomJsonToYjs();
+    },
+    
+    // Sync custom JSON to Y.js metadata map
+    syncCustomJsonToYjs(skipCheck = false) {
+      // Check if TipTap editor component is available
+      const editorComponent = this.$refs.tiptapEditor;
+      console.log('🔍 Checking TipTap editor ref:', editorComponent ? 'Found' : 'Not found');
+      
+      if (editorComponent && editorComponent.ydoc) {
+        console.log('📝 Y.js document found, syncing custom JSON');
+        const metadata = editorComponent.ydoc.getMap('metadata');
+        
+        try {
+          // Deep clone to ensure we only pass serializable data
+          const cleanCustomJson = JSON.parse(JSON.stringify(this.postCustom_json));
+          
+          // Check if this is actually different from Y.js unless skipCheck is true
+          if (!skipCheck) {
+            const currentYjsJson = metadata.get('customJson');
+            if (currentYjsJson && JSON.stringify(currentYjsJson) === JSON.stringify(cleanCustomJson)) {
+              console.log('⏭️ Skipping Y.js sync - no changes detected');
+              return;
+            }
+          }
+          
+          // Use Y.js transaction with origin tag for proper tracking
+          editorComponent.ydoc.transact(() => {
+            metadata.set('customJson', cleanCustomJson);
+          }, 'v3-user-customjson-sync');
+          console.log('✅ Synced custom JSON to Y.js metadata map', cleanCustomJson);
+        } catch (err) {
+          console.error('❌ Error syncing custom JSON to Y.js:', err);
+          console.log('Custom JSON that failed:', this.postCustom_json);
+        }
+      } else {
+        console.warn('⚠️ Cannot sync to Y.js: TipTap editor or ydoc not available');
+      }
+    },
+    
+    // Get custom JSON from Y.js metadata map
+    getCustomJsonFromYjs() {
+      const editorComponent = this.$refs.tiptapEditor;
+      if (editorComponent && editorComponent.ydoc) {
+        const metadata = editorComponent.ydoc.getMap('metadata');
+        const yjsCustomJson = metadata.get('customJson');
+        if (yjsCustomJson) {
+          // Check if this is actually different from what we have
+          const isDifferent = JSON.stringify(this.postCustom_json) !== JSON.stringify(yjsCustomJson);
+          
+          if (isDifferent) {
+            // Update local state from Y.js
+            Object.assign(this.postCustom_json, yjsCustomJson);
+            console.log('✅ Loaded custom JSON from Y.js metadata map');
+            
+            // Update any active iframes with the new data
+            this.updateIframesWithCustomJson();
+          }
+        }
+      }
+    },
+    
+    // Update all active iframes when custom JSON changes
+    updateIframesWithCustomJson() {
+      try {
+        // Update 360 Gallery iframe if active
+        if (this.show360Gallery && this.$refs.gallery360Iframe) {
+          const galleryData = {
+            type: '360_gallery_update_from_parent',
+            assets: JSON.parse(JSON.stringify(this.postCustom_json.assets || [])),
+            navigation: JSON.parse(JSON.stringify(this.postCustom_json.navigation || []))
+          };
+          this.$refs.gallery360Iframe.contentWindow.postMessage(galleryData, '*');
+          console.log('📤 Updated 360 Gallery iframe with Y.js data');
+        }
+        
+        // Update 3Speak Publisher iframe if active
+        if (this.currentRemixApp?.is3Speak && this.$refs.remixApplicationIframe) {
+          const threeSpeakData = {
+            type: 'dapp_sync',
+            data: JSON.parse(JSON.stringify(this.postCustom_json))
+          };
+          this.$refs.remixApplicationIframe.contentWindow.postMessage(threeSpeakData, '*');
+          console.log('📤 Updated 3Speak iframe with Y.js data');
+        }
+      } catch (err) {
+        console.error('❌ Error updating iframes:', err);
+      }
+    },
+    
+    // Set up Y.js observer for custom JSON changes
+    setupYjsCustomJsonObserver() {
+      const editorComponent = this.$refs.tiptapEditor;
+      if (editorComponent && editorComponent.ydoc) {
+        const metadata = editorComponent.ydoc.getMap('metadata');
+        
+        // Remove existing observer if any
+        if (this.yjsCustomJsonObserver) {
+          metadata.unobserve(this.yjsCustomJsonObserver);
+        }
+        
+        // Create new observer
+        this.yjsCustomJsonObserver = (event) => {
+          if (event.keysChanged.has('customJson')) {
+            console.log('📡 Y.js custom JSON changed, updating local state and iframes');
+            this.getCustomJsonFromYjs();
+          }
+        };
+        
+        metadata.observe(this.yjsCustomJsonObserver);
+        console.log('✅ Set up Y.js custom JSON observer');
+        
+        // Also set up field subscription system
+        this.setupYjsFieldSubscriptions();
+      }
+    },
+    
+    // Y.js Field Subscription System for iframes
+    setupYjsFieldSubscriptions() {
+      // Initialize subscription tracking
+      this.yjsFieldSubscriptions = this.yjsFieldSubscriptions || new Map();
+      this.yjsFieldObservers = this.yjsFieldObservers || new Map();
+      
+      // Set up message handler for subscription requests
+      if (!this.fieldSubscriptionHandler) {
+        this.fieldSubscriptionHandler = (event) => {
+          // Only process messages from our iframes
+          if (!this.$refs.remixApplicationIframe || event.source !== this.$refs.remixApplicationIframe.contentWindow) {
+            return;
+          }
+          
+          if (event.data.type === 'SUBSCRIBE_YDOC_FIELD') {
+            this.handleFieldSubscription(event.data.field, event.source);
+          } else if (event.data.type === 'UNSUBSCRIBE_YDOC_FIELD') {
+            this.handleFieldUnsubscription(event.data.field, event.source);
+          }
+        };
+        
+        window.addEventListener('message', this.fieldSubscriptionHandler);
+      }
+      
+      console.log('✅ Y.js field subscription system ready');
+    },
+    
+    // Handle field subscription from iframe
+    handleFieldSubscription(field, source) {
+      const editorComponent = this.$refs.tiptapEditor;
+      if (!editorComponent || !editorComponent.ydoc) {
+        console.warn('⚠️ Cannot subscribe to field - Y.js not available');
+        return;
+      }
+      
+      const metadata = editorComponent.ydoc.getMap('metadata');
+      
+      // Track subscription
+      if (!this.yjsFieldSubscriptions.has(field)) {
+        this.yjsFieldSubscriptions.set(field, new Set());
+      }
+      this.yjsFieldSubscriptions.get(field).add(source);
+      
+      // Create observer if not exists
+      if (!this.yjsFieldObservers.has(field)) {
+        const observer = (event) => {
+          if (event.keysChanged.has(field)) {
+            const value = metadata.get(field);
+            this.broadcastFieldUpdate(field, value);
+          }
+        };
+        
+        metadata.observe(observer);
+        this.yjsFieldObservers.set(field, observer);
+      }
+      
+      // Send initial value
+      const currentValue = metadata.get(field);
+      source.postMessage({
+        type: 'YDOC_FIELD_UPDATE',
+        field: field,
+        value: currentValue ? JSON.parse(JSON.stringify(currentValue)) : null
+      }, '*');
+      
+      console.log(`✅ Iframe subscribed to Y.js field: ${field}`);
+    },
+    
+    // Handle field unsubscription
+    handleFieldUnsubscription(field, source) {
+      if (this.yjsFieldSubscriptions.has(field)) {
+        this.yjsFieldSubscriptions.get(field).delete(source);
+        
+        // Remove observer if no more subscribers
+        if (this.yjsFieldSubscriptions.get(field).size === 0) {
+          const editorComponent = this.$refs.tiptapEditor;
+          if (editorComponent && editorComponent.ydoc) {
+            const metadata = editorComponent.ydoc.getMap('metadata');
+            const observer = this.yjsFieldObservers.get(field);
+            if (observer) {
+              metadata.unobserve(observer);
+              this.yjsFieldObservers.delete(field);
+            }
+          }
+          this.yjsFieldSubscriptions.delete(field);
+        }
+      }
+    },
+    
+    // Broadcast field update to subscribed iframes
+    broadcastFieldUpdate(field, value) {
+      if (this.yjsFieldSubscriptions.has(field)) {
+        const subscribers = this.yjsFieldSubscriptions.get(field);
+        const message = {
+          type: 'YDOC_FIELD_UPDATE',
+          field: field,
+          value: value ? JSON.parse(JSON.stringify(value)) : null
+        };
+        
+        subscribers.forEach(source => {
+          try {
+            source.postMessage(message, '*');
+          } catch (err) {
+            console.error(`Failed to send field update to iframe:`, err);
+          }
+        });
+      }
     },
     
     // Carousel methods
@@ -6621,6 +6847,9 @@ function buyNFT(setname, uid, price, type, callback){
       this.postCustom_json.assets = data.assets || [];
       this.postCustom_json.navigation = data.navigation || [];
       
+      // Sync with Y.js if TipTap editor is available
+      this.syncCustomJsonToYjs();
+      
       // Trigger mock update for preview
       this.dluxMock();
       
@@ -6641,8 +6870,8 @@ function buyNFT(setname, uid, price, type, callback){
       setTimeout(() => {
         const initData = {
           type: '360_gallery_init',
-          assets: this.postCustom_json?.assets || [],
-          navigation: this.postCustom_json?.navigation || []
+          assets: JSON.parse(JSON.stringify(this.postCustom_json?.assets || [])),
+          navigation: JSON.parse(JSON.stringify(this.postCustom_json?.navigation || []))
         };
         
         console.log('📤 Sending init data to 360° iframe:', initData);
@@ -6910,21 +7139,28 @@ function buyNFT(setname, uid, price, type, callback){
       if (data.beneficiaries && Array.isArray(data.beneficiaries)) {
         console.log('📺 Updating 3Speak beneficiaries:', data.beneficiaries);
         
+        // Initialize beneficiaries if undefined
+        if (!this.postBens) {
+          this.postBens = [];
+        }
+        
         // Merge 3Speak beneficiaries with existing ones
-        const existingBeneficiaries = this.reactiveBeneficiaries.filter(b => 
+        const existingBeneficiaries = this.postBens.filter(b => 
           !['spk.beneficiary', 'threespeakleader'].includes(b.account)
         );
         
         // Add 3Speak required beneficiaries
-        this.reactiveBeneficiaries = [...existingBeneficiaries, ...data.beneficiaries];
+        this.postBens = [...existingBeneficiaries, ...data.beneficiaries];
         
         // Update content object for legacy support
-        this.content.beneficiaries = this.reactiveBeneficiaries;
+        if (this.content) {
+          this.content.beneficiaries = this.postBens;
+        }
         
         // Trigger Y.js update if document exists
         if (this.ydoc) {
           const metadata = this.ydoc.getMap('metadata');
-          metadata.set('beneficiaries', this.reactiveBeneficiaries);
+          metadata.set('beneficiaries', this.postBens);
         }
       }
     },
@@ -7053,10 +7289,13 @@ function buyNFT(setname, uid, price, type, callback){
     sendInitialDataToRemixIframe() {
       if (!this.remixIframeReady || !this.$refs.remixApplicationIframe) return;
       
+      // Clone the data to avoid Vue proxy issues
+      const customJsonData = this.postCustom_json ? JSON.parse(JSON.stringify(this.postCustom_json)) : {};
+      
       // Send all custom JSON data to the iframe
       const initData = {
         type: 'dapp_init',
-        data: this.postCustom_json || {}
+        data: customJsonData
       };
       
       console.log('📤 Sending initial data to ReMix iframe:', initData);
@@ -7093,11 +7332,8 @@ function buyNFT(setname, uid, price, type, callback){
         this.postCustom_json = updateData;
         console.log('✅ Updated 3Speak video data from iframe');
         
-        // Update Y.js if available
-        if (this.ydoc) {
-          const metadata = this.ydoc.getMap('metadata');
-          metadata.set('customJson', this.postCustom_json);
-        }
+        // Sync with Y.js if TipTap editor is available
+        this.syncCustomJsonToYjs();
         return;
       }
       
@@ -7361,7 +7597,7 @@ function buyNFT(setname, uid, price, type, callback){
           size: fileData.size || 0,
           type: fileData.type || 'application/octet-stream',
           contractId: fileData.contractId,
-          metadata: fileData // Include full file data for app-specific handling
+          metadata: JSON.parse(JSON.stringify(fileData)) // Clone to ensure serializability
         }
       };
       
@@ -7543,6 +7779,14 @@ function buyNFT(setname, uid, price, type, callback){
     this.loadRemixFromUrl();
     
     // Initialize ReMix apps if on remix post type
+    
+    // Set up Y.js observer when TipTap editor is ready
+    this.$nextTick(() => {
+      // Wait a bit for TipTap to initialize
+      setTimeout(() => {
+        this.setupYjsCustomJsonObserver();
+      }, 1000);
+    });
     if (this.postCustom_json.vrHash === 'remix') {
       this.$nextTick(() => {
         this.loadRemixApps();

@@ -782,7 +782,7 @@
 
                             <!-- Blog Editor (always shown) -->
                             <div class="bg-dark-1 rounded">
-                                <tiptap-editor-modular v-if="account" :username="account"
+                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username="account"
                                     :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
@@ -1579,7 +1579,7 @@
                         <div id="postEditor" class="accordion-collapse collapse show"
                             data-bs-parent="#postEditorAccordion">
                             <div class="accordion-body p-0">
-                                <tiptap-editor-modular v-if="account" :username="account"
+                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username="account"
                                     :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
