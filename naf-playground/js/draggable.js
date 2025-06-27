@@ -56,7 +56,7 @@ const WindowManager = {
     windows: new Set(),
     closedWindows: new Map(),
     windowStates: new Map(),
-    windowIds: ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel', 'engine-panel'],
+    windowIds: ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel', 'engine-panel', 'asset-manager-panel'],
     activeWindow: null,
     
     /**
@@ -510,12 +510,15 @@ export function initializeDraggableWindows() {
     // Initialize dock as well
     initDock();
     
-    // Ensure engine-panel is hidden by default using WindowManager
-    const enginePanel = document.getElementById('engine-panel');
-    if (enginePanel) {
-        console.log('Setting engine-panel to hidden by default');
-        WindowManager.closeWindow(enginePanel);
-    }
+    // Hide specific windows by default (all except Scene Controls)
+    const windowsToHide = ['editor-window', 'state-debug-panel', 'watcher-panel', 'engine-panel', 'asset-manager-panel'];
+    windowsToHide.forEach(windowId => {
+        const windowElement = document.getElementById(windowId);
+        if (windowElement) {
+            console.log(`Setting ${windowId} to hidden by default`);
+            WindowManager.closeWindow(windowElement);
+        }
+    });
     
     // Update all dock icons to reflect initial window visibility
     WindowManager.windowIds.forEach(windowId => {

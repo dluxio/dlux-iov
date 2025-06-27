@@ -1287,6 +1287,18 @@ PORT=3000
       // TODO: Pre-select NAF template when available
     },
     
+    showNAFPreview() {
+      // Show NAF Playground preview
+      this.showRemixBuilder = true;
+      this.showDappBuilder = false;
+      this.postCustom_json.vrHash = 'remix';
+      // Pre-configure for NAF Playground
+      this.postCustom_json.title = 'NAF Playground';
+      this.postCustom_json.description = 'Build in Networked A-Frame together';
+      // Load the NAF Playground test app
+      this.selectTestNAFApp();
+    },
+    
     backToCarousel() {
       // Reset all section visibility
       this.showDappBuilder = false;
@@ -6942,9 +6954,27 @@ function buyNFT(setname, uid, price, type, callback){
       this.showRemixBrowser = false;
       this.updateRemixUrl('markegiles', 'coastal-bike-tour-in-buenos-aires');
     },
+    
+    selectTestNAFApp() {
+      this.currentRemixApp = {
+        title: 'NAF Playground',
+        author: 'dlux-io',
+        first_author: 'dlux-io',
+        description: 'Build in Networked A-Frame together - collaborative VR/AR experiences',
+        license: 'MIT',
+        remix_cid: 'QmTestNAF123456789',
+        usage_count: 0,
+        isTest: true,
+        isNAF: true
+      };
+      this.showRemixBrowser = false;
+      this.updateRemixUrl('dlux-io', 'naf-playground');
+    },
 
     getRemixIframeSrc() {
-      if (this.currentRemixApp?.isTest) {
+      if (this.currentRemixApp?.isNAF) {
+        return '/naf-playground/index.html';
+      } else if (this.currentRemixApp?.isTest) {
         return '/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html';
       } else if (this.currentRemixApp?.remix_cid) {
         return window.dappApiHelpers.getRemixIframeSrc(this.currentRemixApp.remix_cid);
