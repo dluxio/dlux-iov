@@ -383,7 +383,7 @@
                                         <div class="carousel-inner">
                                             <!-- HIVE Blog -->
                                             <div class="carousel-item active">
-                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #E31337 0%, #5C94FE 100%);">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #b41e2f 0%, #d43e3e 100%);">
                                                     <div class="carousel-content-wrapper">
                                                         <div class="container-fluid">
                                                             <div class="row align-items-center">
@@ -397,7 +397,7 @@
                                                                     <p>Now Supports IPFS Video Streaming</p>
                                                                 </div>
                                                                 <div class="col-12 col-md-3 text-center text-md-start">
-                                                                    <button class="btn btn-secondary" disabled>
+                                                                    <button class="btn btn-dark" disabled>
                                                                         <i class="fa-solid fa-check me-2"></i>Standard
                                                                     </button>
                                                                 </div>
@@ -409,7 +409,7 @@
                                             
                                             <!-- 360 Photo Gallery -->
                                             <div class="carousel-item">
-                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #4ECDC4 0%, #44A3AA 100%);">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #0BA56F  0%, #239380 100%);">
                                                     <div class="carousel-content-wrapper">
                                                         <div class="container-fluid">
                                                             <div class="row align-items-center">
@@ -423,8 +423,35 @@
                                                                     <p>Explore on Desktop, Mobile, and VR Headsets</p>
                                                                 </div>
                                                                 <div class="col-12 col-md-3 text-center text-md-start">
-                                                                    <button class="btn btn-primary" @click="showRemixForGallery()">
-                                                                        <i class="fa-solid fa-shuffle me-2"></i>Remix Now
+                                                                    <button class="btn btn-dark" @click="showRemixForGallery()">
+                                                                        <i class="fa-solid fa-plus me-2"></i>Add to Post
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 3Speak Publisher -->
+                                            <div class="carousel-item">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #458998 0%, #5DB9CD 100%);">
+                                                    <div class="carousel-content-wrapper">
+                                                        <div class="container-fluid">
+                                                            <div class="row align-items-center">
+                                                                <div class="col-12 col-md-3 text-center text-md-end">
+                                                                    <div class="carousel-icon">
+                                                                        <span class="">📹</span>
+                                                                        <img src="/img/dapps/3speak.png" alt="3Speak" class="img-fluid ms-auto d-none" style="height: 80px;">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 col-md-6 text-center text-md-start">
+                                                                    <h3>3Speak Video</h3>
+                                                                    <p>Publish IPFS videos to 3Speak.tv</p>
+                                                                </div>
+                                                                <div class="col-12 col-md-3 text-center text-md-start">
+                                                                    <button class="btn btn-dark" @click="show3SpeakPublisher()">
+                                                                        <i class="fa-solid fa-plus me-2"></i>Add to Post
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -435,7 +462,7 @@
                                             
                                             <!-- NAF Playground -->
                                             <div class="carousel-item">
-                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #FF6B6B 0%, #C44569 100%);">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #d55a5a 0%, #C44569 100%);">
                                                     <div class="carousel-content-wrapper">
                                                         <div class="container-fluid">
                                                             <div class="row align-items-center">
@@ -449,8 +476,8 @@
                                                                     <p>Build in Networked A-Frame together</p>
                                                                 </div>
                                                                 <div class="col-12 col-md-3 text-center text-md-start">
-                                                                    <button class="btn btn-primary" @click="showNAFPreview()">
-                                                                        <i class="fa-solid fa-eye me-2"></i>Preview
+                                                                    <button class="btn btn-dark" @click="showNAFPreview()">
+                                                                        <i class="fa-solid fa-flask me-2"></i>Preview
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -459,35 +486,11 @@
                                                 </div>
                                             </div>
                                             
-                                            <!-- 3Speak Publisher -->
-                                            <div class="carousel-item">
-                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #27AE60 0%, #229954 100%);">
-                                                    <div class="carousel-content-wrapper">
-                                                        <div class="container-fluid">
-                                                            <div class="row align-items-center">
-                                                                <div class="col-12 col-md-3 text-center text-md-end">
-                                                                    <div class="carousel-icon">
-                                                                        <span>📹</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-12 col-md-6 text-center text-md-start">
-                                                                    <h3>3Speak Publisher</h3>
-                                                                    <p>Publish videos to 3Speak with SPK Network</p>
-                                                                </div>
-                                                                <div class="col-12 col-md-3 text-center text-md-start">
-                                                                    <button class="btn btn-primary" @click="show3SpeakPublisher()">
-                                                                        <i class="fa-solid fa-video me-2"></i>Publish
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            
                                             
                                             <!-- Custom dApp -->
                                             <div class="carousel-item">
-                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);">
+                                                <div class="carousel-slide-content" style="background: linear-gradient(135deg, #6178df 0%, #764BA2 100%);">
                                                     <div class="carousel-content-wrapper">
                                                         <div class="container-fluid">
                                                             <div class="row align-items-center">
@@ -498,11 +501,11 @@
                                                                 </div>
                                                                 <div class="col-12 col-md-6 text-center text-md-start">
                                                                     <h3>Custom dApp</h3>
-                                                                    <p>Interactive apps with SPK storage</p>
+                                                                    <p>Build your own dApp with SPK Network</p>
                                                                 </div>
                                                                 <div class="col-12 col-md-3 text-center text-md-start">
-                                                                    <button class="btn btn-primary" @click="showDappBuilder = true; postCustom_json.vrHash = 'dapp'">
-                                                                        <i class="fa-solid fa-plus me-2"></i>Create Now
+                                                                    <button class="btn btn-dark" @click="showDappBuilder = true; postCustom_json.vrHash = 'dapp'">
+                                                                        <i class="fa fa-hammer me-2"></i>Start Building
                                                                     </button>
                                                                 </div>
                                                             </div>
