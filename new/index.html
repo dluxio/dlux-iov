@@ -369,13 +369,14 @@
                                 <!-- Carousel View (shown when no builder active) -->
                                 <div v-if="!showDappBuilder && !showRemixBuilder && !currentRemixApp" class="carousel-view">
                                       <!-- Bootstrap Carousel -->
-                                    <div id="dluxCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-pause="hover">
+                                    <div id="dluxCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-pause="hover" data-bs-wrap="true">
                                         <!-- Indicators -->
                                         <div class="carousel-indicators">
                                             <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="0" class="active"></button>
                                             <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="1"></button>
                                             <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="2"></button>
                                             <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="3"></button>
+                                            <button type="button" data-bs-target="#dluxCarousel" data-bs-slide-to="4"></button>
                                         </div>
                                         
                                         <!-- Carousel Items -->
@@ -528,7 +529,7 @@
                                     <div class="spk-network-header">
                                         <div class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex align-items-center">
-                                                <i class="fa-solid fa-network-wired me-2"></i>
+                                                <i class="fa-solid fa-puzzle-piece text-primary fs-2 me-2"></i>
                                                 <div>
                                                     <h6 class="mb-0">dApps Powered by SPK Network</h6>
                                                     <small class="text-muted">Decentralized storage for all your content</small>
@@ -818,7 +819,7 @@
                                 
                                 <div class="card-body">
                                     <!-- Quick Drop Zone -->
-                                    <div class="spk-quick-drop mb-3" 
+                                    <!-- <div class="spk-quick-drop mb-3" 
                                          @drop.prevent="handleUniversalDrop($event)"
                                          @dragover.prevent="$event.currentTarget.classList.add('drag-active')"
                                          @dragleave="$event.currentTarget.classList.remove('drag-active')">
@@ -826,10 +827,10 @@
                                             <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2 text-primary"></i>
                                             <p class="mb-0 small">Drop files here or click browse below</p>
                                         </div>
-                                    </div>
+                                    </div> -->
                                     
                                     <!-- File Processing Status -->
-                                    <div v-if="detectedFileType" class="file-processing-status mb-3 p-2 bg-dark rounded">
+                                    <div v-if="detectedFileType" class="file-processing-status mb-3 p-2 bg-dark rounded vfs-scroll-pass">
                                         <div class="d-flex align-items-center">
                                             <i :class="getFileTypeIcon(detectedFileType)" class="me-2"></i>
                                             <div class="flex-grow-1">
@@ -850,7 +851,8 @@
                                             :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                             :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                             @done="getSapi" :postpage="true" :post-type="'blog'"
-                                            @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
+                                            @add-to-post="handleSPKFileForAssets($event)"
+                                            :update-url="false"></contract-vue>
                                     </div>
                                     
                                     <!-- Contextual Video Tools -->
@@ -906,13 +908,13 @@
                                 :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                 :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                 @done="getSapi" :postpage="true" :post-type="'blog'"
-                                @add-to-post="handleSPKFileForAssets($event)"></contract-vue>
+                                @add-to-post="handleSPKFileForAssets($event)"
+                                :update-url="false"></contract-vue>
                         </div>
 
                         <!-- Video Tools Tab -->
-                        <div v-show="activeMediaTab === 'video'">
+                        <!-- <div v-show="activeMediaTab === 'video'">
                             <div class="video-tools-content">
-                                <!-- Same FFmpeg content as desktop -->
                                 <div v-if="!ffmpegReady && !ffmpegSkipped" class="ffmpeg-install-prompt">
                                     <h6><i class="fa-solid fa-triangle-exclamation me-2"></i>FFmpeg Required</h6>
                                     <p>Video transcoding requires FFmpeg to convert videos for streaming.</p>
@@ -928,7 +930,7 @@
                                     <p class="text-muted">Video transcoding interface will appear here</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

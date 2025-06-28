@@ -1,5 +1,6 @@
 import ModalVue from '/js/modal-manager.js';
 import UploadVue from '/js/uploadvue-dd.js';
+import VideoTranscoder from '/js/video-transcoder.js';
 import MCommon from '/js/methods-common.js';
 import Watchers from '/js/watchers-common.js';
 
@@ -8,6 +9,7 @@ export default {
     components: {
         'modal-vue': ModalVue,
         'upload-vue': UploadVue,
+        'video-transcoder': VideoTranscoder,
     },
     template: `
   <div class="d-flex flex-column">
@@ -30,9 +32,34 @@ export default {
             <div v-if="droppedFiles.length > 0" class="mb-3">
                 <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
                 <ul class="m-0">
-                    <li v-for="(file, index) in droppedFiles" :key="index" class="my-1 p-1 bg-card rounded d-flex justify-content-between align-items-center">
-                        {{ file.name }} ({{ fancyBytes(file.size) }})
-                        <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
+                    <li v-for="(file, index) in droppedFiles" :key="index" class="my-1 p-2 bg-card rounded d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <!-- File type icon -->
+                            <i :class="getFileIcon(file)" class="me-2"></i>
+                            <div>
+                                <div>{{ getFileName(file) }}</div>
+                                <small class="text-muted">{{ fancyBytes(getFileSize(file)) }}</small>
+                                <!-- Streaming badge for m3u8 files -->
+                                <span v-if="isStreamableVideo(file)" class="badge bg-success ms-2">
+                                    <i class="fa-solid fa-play fa-xs"></i> Streamable
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-1">
+                            <!-- Play button for streamable videos -->
+                            <button v-if="isStreamableVideo(file)" 
+                                    class="btn btn-sm btn-primary" 
+                                    @click="previewVideo(file, index)"
+                                    title="Preview Video">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" 
+                                    @click="removeFile(index)" 
+                                    :disabled="!canDeleteFile(file, index)"
+                                    :title="getDeleteTooltip(file, index)">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -78,6 +105,51 @@ export default {
         </div>
     </teleport>
 
+    <!-- Video Preview Modal -->
+    <teleport to="body">
+        <div v-if="showVideoPreview" 
+             class="modal-overlay d-flex justify-content-center align-items-center"
+             @click.self="closeVideoPreview"
+             style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.9); z-index: 1056;">
+            
+            <div class="modal-content bg-dark text-white rounded shadow-lg p-4" 
+                 style="max-width: 900px; width: 95%;">
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">
+                        <i class="fa-solid fa-video me-2"></i>
+                        Video Preview: {{ previewFile?.name }}
+                    </h4>
+                    <button type="button" class="btn-close btn-close-white" @click="closeVideoPreview"></button>
+                </div>
+                
+                <!-- Video Player -->
+                <div class="video-container mb-3 position-relative" style="background: #000; border-radius: 8px; overflow: hidden;">
+                    <video ref="videoPlayer" 
+                           controls 
+                           style="width: 100%; max-height: 500px;"
+                           @loadedmetadata="onVideoLoaded">
+                    </video>
+                    <!-- Loading Overlay -->
+                    <div v-if="videoLoading" 
+                         class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                         style="background: rgba(0,0,0,0.5); z-index: 10;">
+                        <div class="spinner-border text-white" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-secondary" @click="closeVideoPreview">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </teleport>
+
     <!-- Upload Modal (Teleported to body using div overlay pattern) -->
     <teleport to="body">
       <div v-if="showUploadModal"
@@ -98,6 +170,38 @@ export default {
             :prop-structured-files="structuredFilesForUpload"
             @tosign="sendIt($event)"
             @done="handleUploadDone"
+          />
+        </div>
+      </div>
+    </teleport>
+    
+    <!-- Video Transcoding Modal -->
+    <teleport to="body">
+      <div v-if="showVideoTranscoder" 
+           class="modal-overlay d-flex justify-content-center align-items-center"
+           @click.self="closeVideoTranscoder"
+           style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1056;">
+        
+        <div class="modal-content bg-dark text-white rounded shadow-lg p-4" 
+             style="max-width: 600px; width: 90%;">
+          
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">
+              <i class="fa-solid fa-video me-2"></i>
+              Video File Detected
+            </h4>
+            <button type="button" class="btn-close btn-close-white" @click="closeVideoTranscoder"></button>
+          </div>
+          
+          <video-transcoder
+            v-if="videoToTranscode"
+            :file="videoToTranscode.file"
+            :file-name="videoToTranscode.fileName"
+            :file-size="videoToTranscode.fileSize"
+            @complete="handleTranscodeComplete"
+            @skip="skipVideoTranscoding"
+            @cancel="closeVideoTranscoder"
+            @error="handleTranscodeError"
           />
         </div>
       </div>
@@ -162,6 +266,11 @@ export default {
             type: Boolean,
             default: false,
         },
+        videoHandlingMode: {
+            type: String,
+            default: 'internal',
+            validator: value => ['internal', 'external'].includes(value)
+        },
     },
     data() {
         return {
@@ -175,6 +284,18 @@ export default {
             loading: false, // Specifically for contract building transaction
             structuredFilesForUpload: [],
             showUploadModal: false, // Controls the upload modal visibility
+            // Video transcoding
+            showVideoTranscoder: false,
+            videoToTranscode: null,
+            pendingVideoFiles: [],
+            pendingNonVideoFiles: [],
+            // Video preview
+            showVideoPreview: false,
+            previewFile: null,
+            previewFileIndex: null,
+            videoLoading: false,
+            hlsInstance: null,
+            blobUrls: {}, // Store blob URLs for transcoded files
         };
     },
     computed: {
@@ -199,11 +320,28 @@ export default {
                 if (newDrop && newDrop.files && newDrop.files.length > 0) {
                     console.log('externalDrop watcher triggered, accumulating files:', newDrop);
                      // Extract just the File objects for addFiles UI update
-                    const fileObjects = newDrop.files.map(item => item.file); 
+                    // Handle both raw File objects and wrapper objects with .file property
+                    const fileObjects = newDrop.files.map(item => {
+                        return item instanceof File ? item : (item.file || item);
+                    }); 
                     this.addFiles(fileObjects); // Add the plain File objects to the UI list
 
+                    // Ensure all files are properly structured before adding
+                    const structuredDropFiles = newDrop.files.map(item => {
+                        // If it's already a structured object, use it as-is
+                        if (item && typeof item === 'object' && item.file) {
+                            return item;
+                        }
+                        // If it's a raw File, wrap it
+                        return {
+                            file: item,
+                            targetPath: item.targetPath || null,
+                            fullAppPath: item.fullAppPath || null
+                        };
+                    });
+                    
                     // Append the new structured files to the existing list for upload
-                    this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...newDrop.files]; 
+                    this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredDropFiles]; 
                     console.log('Accumulated structuredFilesForUpload:', this.structuredFilesForUpload);
 
                     // Clear the prop in the parent immediately after processing
@@ -215,14 +353,272 @@ export default {
     },
     methods: {
         ...MCommon,
+        
+        // File property getters - handle both raw File objects and wrapper objects
+        getFileName(file) {
+            if (!file) return 'Unknown';
+            return file.name || file.fileName || file.file?.name || 'Unknown';
+        },
+        
+        getFileSize(file) {
+            if (!file) return 0;
+            return file.size || file.fileSize || file.file?.size || 0;
+        },
+        
+        getFileObject(file) {
+            return file.file || file; // Return inner file object or the file itself
+        },
+        
+        // Video preview methods
+        isStreamableVideo(file) {
+            const fileName = this.getFileName(file);
+            // Only m3u8 files are actually streamable (HLS format)
+            return fileName.toLowerCase().endsWith('.m3u8');
+        },
+        
+        getFileIcon(file) {
+            const fileName = this.getFileName(file);
+            if (this.isStreamableVideo(file)) {
+                return 'fa-solid fa-video text-primary';
+            } else if (fileName.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|svg)$/)) {
+                return 'fa-solid fa-image text-info';
+            } else if (fileName.toLowerCase().match(/\.(mp3|wav|ogg|m4a)$/)) {
+                return 'fa-solid fa-music text-warning';
+            } else if (fileName.toLowerCase().match(/\.(pdf|doc|docx|txt)$/)) {
+                return 'fa-solid fa-file-text text-secondary';
+            } else {
+                return 'fa-solid fa-file text-muted';
+            }
+        },
+        
+        previewVideo(file, index) {
+            // Store the actual File object for preview
+            this.previewFile = this.getFileObject(file);
+            this.previewFileIndex = index;
+            this.showVideoPreview = true;
+            this.videoLoading = true;
+            
+            this.$nextTick(() => {
+                this.initializeVideoPlayer();
+            });
+        },
+        
+        closeVideoPreview() {
+            this.showVideoPreview = false;
+            this.cleanupVideoPlayer();
+            this.previewFile = null;
+            this.previewFileIndex = null;
+        },
+        
+        initializeVideoPlayer() {
+            const video = this.$refs.videoPlayer;
+            if (!video || !this.previewFile) return;
+            
+            this.videoLoading = true;
+            
+            // For m3u8 files, use processed blob URL if available
+            let fileUrl;
+            if (this.previewFile.name.endsWith('.m3u8') && this.blobUrls[this.previewFile.name]) {
+                // Use the processed blob URL with updated segment references
+                fileUrl = this.blobUrls[this.previewFile.name];
+                console.log('Using processed m3u8 blob URL for preview');
+            } else {
+                // Create object URL for the file
+                fileUrl = URL.createObjectURL(this.previewFile);
+            }
+            
+            // For m3u8 files, check if HLS.js is available
+            if (this.previewFile.name.endsWith('.m3u8') && typeof Hls !== 'undefined' && Hls.isSupported()) {
+                // Use HLS.js for m3u8 files
+                if (this.hlsInstance) {
+                    this.hlsInstance.destroy();
+                }
+                
+                this.hlsInstance = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    startPosition: 0.1,    // Skip first 0.1s to avoid buffer hole
+                    backBufferLength: 0,   // Don't retain old buffer
+                    maxBufferHole: 0.5     // Tolerate small gaps
+                });
+                
+                this.hlsInstance.loadSource(fileUrl);
+                this.hlsInstance.attachMedia(video);
+                
+                this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    this.videoLoading = false;
+                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                });
+                
+                this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        console.error('HLS error:', data);
+                        this.videoLoading = false;
+                    } else if (data.details !== 'bufferSeekOverHole' && data.details !== 'bufferNudgeOnHole') {
+                        // Log other non-fatal errors except common buffer holes
+                        console.warn('HLS warning:', data.details);
+                    }
+                });
+            } else {
+                // Use native video for other formats
+                video.src = fileUrl;
+                video.load();
+                video.addEventListener('canplay', () => {
+                    this.videoLoading = false;
+                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                }, { once: true });
+            }
+        },
+        
+        onVideoLoaded() {
+            this.videoLoading = false;
+        },
+        
+        cleanupVideoPlayer() {
+            if (this.hlsInstance) {
+                this.hlsInstance.destroy();
+                this.hlsInstance = null;
+            }
+            
+            const video = this.$refs.videoPlayer;
+            if (video && video.pause) {  // Add check for pause method
+                video.pause();
+                if (video.src && video.src.startsWith('blob:')) {
+                    URL.revokeObjectURL(video.src);
+                }
+                video.src = '';
+                video.load();
+            }
+        },
+        
+        // Blob URL processing for transcoded files (copied from video-transcoder.js)
+        async createBlobUrls(files) {
+            // First, create blob URLs for all segment files
+            const m3u8Files = [];
+            
+            for (const file of files) {
+                if (file.name.endsWith('.ts')) {
+                    // Create blob URL for segment
+                    const url = URL.createObjectURL(file);
+                    this.blobUrls[file.name] = url;
+                } else if (file.name.endsWith('.m3u8')) {
+                    // Store m3u8 files for processing later
+                    m3u8Files.push(file);
+                }
+            }
+            
+            // Now process m3u8 files with updated segment URLs
+            for (const m3u8File of m3u8Files) {
+                try {
+                    // Update the m3u8 content with blob URLs
+                    const updatedBlob = await this.updateM3u8WithBlobUrls(m3u8File);
+                    const updatedUrl = URL.createObjectURL(updatedBlob);
+                    
+                    // Store the updated blob URL
+                    this.blobUrls[m3u8File.name] = updatedUrl;
+                    
+                    console.log(`Created updated m3u8 blob URL for ${m3u8File.name}`);
+                } catch (error) {
+                    console.error(`Error processing m3u8 file ${m3u8File.name}:`, error);
+                }
+            }
+        },
+        
+        readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsText(file);
+            });
+        },
+        
+        async updateM3u8WithBlobUrls(m3u8File) {
+            // Read the m3u8 content
+            const content = await this.readFileAsText(m3u8File);
+            
+            // Replace segment references with blob URLs
+            const lines = content.split('\n');
+            const updatedLines = lines.map(line => {
+                if (!line.trim() || line.startsWith('#')) {
+                    return line;
+                }
+                
+                // This is a segment reference
+                const segmentName = line.trim();
+                const blobUrl = this.blobUrls[segmentName];
+                
+                if (blobUrl) {
+                    console.log(`Replaced segment ${segmentName} with blob URL`);
+                    return blobUrl;
+                }
+                
+                console.warn('No blob URL found for segment:', segmentName);
+                return line;
+            });
+            
+            const updatedContent = updatedLines.join('\n');
+            
+            // Create a new blob for the updated m3u8
+            const blob = new Blob([updatedContent], { type: 'application/x-mpegURL' });
+            return blob;
+        },
+        
+        async processTranscodedFiles(files) {
+            // Check if we have transcoded files (m3u8 + segments)
+            const hasM3u8 = files.some(file => this.getFileName(file).endsWith('.m3u8'));
+            const hasSegments = files.some(file => this.getFileName(file).endsWith('.ts'));
+            
+            if (hasM3u8 && hasSegments) {
+                console.log('Processing transcoded files for blob URLs');
+                try {
+                    // Extract actual File objects for blob URL processing
+                    const fileObjects = files.map(file => this.getFileObject(file));
+                    await this.createBlobUrls(fileObjects);
+                    console.log('Blob URLs created for transcoded files');
+                } catch (error) {
+                    console.error('Error processing transcoded files:', error);
+                }
+            }
+        },
+        
+        // Deletion protection for segment files
+        canDeleteFile(file, index) {
+            // If this is a .ts segment file, check if its m3u8 playlist exists
+            const fileName = this.getFileName(file);
+            if (fileName.endsWith('.ts')) {
+                const m3u8Exists = this.droppedFiles.some(f => this.getFileName(f).endsWith('.m3u8'));
+                if (m3u8Exists) {
+                    return false; // Cannot delete segment if playlist exists
+                }
+            }
+            return true; // Can delete all other files
+        },
+        
+        getDeleteTooltip(file, index) {
+            if (!this.canDeleteFile(file, index)) {
+                return 'Cannot delete segment file - required by video playlist';
+            }
+            return 'Remove file';
+        },
+        
         addFiles(files) {
             // Filter out potential duplicates if necessary, based on name and size
-            const newFilesToAdd = files.filter(newFile =>
-                !this.droppedFiles.some(existingFile =>
-                    existingFile.name === newFile.name && existingFile.size === newFile.size
-                )
+            const newFilesToAdd = files.filter(newFile => {
+                const newFileName = this.getFileName(newFile);
+                const newFileSize = this.getFileSize(newFile);
+                return !this.droppedFiles.some(existingFile => 
+                    this.getFileName(existingFile) === newFileName && 
+                    this.getFileSize(existingFile) === newFileSize
+                );
+            }
             );
-            if (newFilesToAdd.length > 0) {
+            
+            if (newFilesToAdd.length === 0) return;
+            
+            // If video handling is external, skip video separation
+            if (this.videoHandlingMode === 'external') {
+                // Add all files without video separation
                 this.droppedFiles = [...this.droppedFiles, ...newFilesToAdd];
                 
                 // Structure the files for upload
@@ -237,7 +633,137 @@ export default {
                 this.calculateFileSizes();
                 this.showContractButton = true; // Show button whenever files are added
                 this.pickContract('addFiles'); // Re-evaluate contract after adding files
+                
+                // Process transcoded files for blob URL creation
+                this.processTranscodedFiles(newFilesToAdd);
+                return;
             }
+            
+            // Internal video handling - separate video files from other files
+            const videoFiles = [];
+            const otherFiles = [];
+            
+            newFilesToAdd.forEach(file => {
+                const fileName = this.getFileName(file);
+                if (this.isVideoFile(fileName)) {
+                    videoFiles.push(file);
+                } else {
+                    otherFiles.push(file);
+                }
+            });
+            
+            // Handle non-video files immediately
+            if (otherFiles.length > 0) {
+                this.droppedFiles = [...this.droppedFiles, ...otherFiles];
+                
+                // Structure the files for upload
+                const structuredFiles = otherFiles.map(file => ({
+                    file: file,
+                    targetPath: null // or set a default path if needed
+                }));
+                
+                // Add to structured files array
+                this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredFiles];
+                
+                this.calculateFileSizes();
+                this.showContractButton = true; // Show button whenever files are added
+                this.pickContract('addFiles'); // Re-evaluate contract after adding files
+                
+                // Process transcoded files for blob URL creation
+                this.processTranscodedFiles(otherFiles);
+            }
+            
+            // Queue video files for transcoding (only in internal mode)
+            if (videoFiles.length > 0) {
+                this.pendingVideoFiles = [...this.pendingVideoFiles, ...videoFiles];
+                this.processNextVideoFile();
+            }
+        },
+        
+        isVideoFile(fileName) {
+            if (!fileName) return false;
+            const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
+            return videoExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+        },
+        
+        processNextVideoFile() {
+            if (this.pendingVideoFiles.length === 0) {
+                // All video files processed
+                return;
+            }
+            
+            const videoFile = this.pendingVideoFiles[0];
+            this.videoToTranscode = {
+                file: videoFile,
+                fileName: videoFile.name,
+                fileSize: videoFile.size
+            };
+            this.showVideoTranscoder = true;
+        },
+        
+        handleTranscodeComplete(result) {
+            // Remove the processed video from queue
+            this.pendingVideoFiles.shift();
+            
+            // Add the transcoded files to upload queue
+            const filesToAdd = result.files || [];
+            
+            if (filesToAdd.length > 0) {
+                this.droppedFiles = [...this.droppedFiles, ...filesToAdd];
+                
+                // Structure the files for upload
+                const structuredFiles = filesToAdd.map(file => ({
+                    file: file,
+                    targetPath: null,
+                    isStreamable: file.name.endsWith('.m3u8') // Mark m3u8 files
+                }));
+                
+                // Add to structured files array
+                this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredFiles];
+                
+                this.calculateFileSizes();
+                this.showContractButton = true;
+                this.pickContract('video transcoding complete');
+            }
+            
+            // Close transcoder and process next video
+            this.closeVideoTranscoder();
+            this.processNextVideoFile();
+        },
+        
+        skipVideoTranscoding() {
+            // User chose to skip transcoding, add original file
+            const videoFile = this.pendingVideoFiles.shift();
+            
+            this.droppedFiles = [...this.droppedFiles, videoFile];
+            
+            // Structure the file for upload - ensure it's not a raw File
+            const structuredFile = videoFile instanceof File ? {
+                file: videoFile,
+                targetPath: null,
+                fullAppPath: null
+            } : videoFile;
+            
+            this.structuredFilesForUpload = [...this.structuredFilesForUpload, structuredFile];
+            
+            this.calculateFileSizes();
+            this.showContractButton = true;
+            this.pickContract('video skip');
+            
+            // Close transcoder and process next video
+            this.closeVideoTranscoder();
+            this.processNextVideoFile();
+        },
+        
+        closeVideoTranscoder() {
+            this.showVideoTranscoder = false;
+            this.videoToTranscode = null;
+        },
+        
+        handleTranscodeError(error) {
+            console.error('Video transcoding error:', error);
+            alert('Video transcoding failed: ' + (error.message || 'Unknown error'));
+            this.skipVideoTranscoding();
         },
         handleDrop(event) {
             event.preventDefault();
@@ -306,9 +832,11 @@ export default {
 
             this.droppedFiles.splice(index, 1);
 
-            const structuredIndex = this.structuredFilesForUpload.findIndex(
-                sf => sf.file.name === fileToRemove.name && sf.file.size === fileToRemove.size
-            );
+            const structuredIndex = this.structuredFilesForUpload.findIndex(sf => {
+                // Handle both raw File objects and wrapper objects
+                const file = sf instanceof File ? sf : (sf.file || sf);
+                return file && file.name === fileToRemove.name && file.size === fileToRemove.size;
+            });
             if (structuredIndex > -1) {
                 this.structuredFilesForUpload.splice(structuredIndex, 1);
                 console.log('Removed corresponding structured file:', fileToRemove.name);
@@ -390,6 +918,16 @@ export default {
         } else {
             this.pickContract('mounted'); // Check for existing contracts even if no files initially
         }
+    },
+    beforeUnmount() {
+        // Clean up video player resources
+        this.cleanupVideoPlayer();
+        
+        // Clean up all blob URLs
+        Object.values(this.blobUrls).forEach(url => {
+            URL.revokeObjectURL(url);
+        });
+        this.blobUrls = {};
     },
     emits: ['tosign', 'done', 'update:externalDrop'], // Removed targetPath from done payload
 };

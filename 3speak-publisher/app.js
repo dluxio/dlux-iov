@@ -70,10 +70,11 @@ function setupDropZone() {
     
     // Handle click to browse
     dropZone.addEventListener('click', function() {
-        // Send message to parent to open SPK file browser
+        // Send message to parent to open SPK file browser for any video format
         sendToParent({
             type: 'requestSPKBrowser',
-            fileType: 'm3u8'
+            fileType: 'video',
+            fileTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv']
         });
     });
 }
@@ -103,10 +104,29 @@ function handleDrop(e) {
 function handleSPKFile(fileData) {
     console.log('Handling SPK file:', fileData);
     
-    if (!fileData.url || !fileData.url.includes('.m3u8')) {
-        showStatus('Please select a valid m3u8 file', 'error');
+    // Check if it's a video file
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
+    const isVideo = videoExtensions.some(ext => fileData.url.toLowerCase().includes(ext) || 
+                                               (fileData.name && fileData.name.toLowerCase().endsWith(ext)));
+    
+    if (!fileData.url || !isVideo) {
+        showStatus('Please select a valid video file', 'error');
         return;
     }
+    
+    // Check if it's already transcoded (m3u8)
+    if (fileData.url.includes('.m3u8')) {
+        // Direct m3u8 file - proceed as normal
+        processTranscodedVideo(fileData);
+        return;
+    }
+    
+    // Non-m3u8 video file - offer transcoding
+    showTranscodingPrompt(fileData);
+}
+
+// Process already transcoded video
+function processTranscodedVideo(fileData) {
     
     // Extract IPFS hash from URL
     const ipfsMatch = fileData.url.match(/ipfs:\/\/([a-zA-Z0-9]+)/);
@@ -128,20 +148,32 @@ function handleSPKFile(fileData) {
     sendReactiveUpdate(true);
 }
 
-// Handle local file (for testing)
+// Handle local file
 function handleLocalFile(file) {
-    if (!file.name.endsWith('.m3u8')) {
-        showStatus('Please select a valid m3u8 file', 'error');
+    // Check if it's a video file
+    const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
+    const isVideo = videoExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+    
+    if (!isVideo) {
+        showStatus('Please select a valid video file', 'error');
         return;
     }
     
-    const url = URL.createObjectURL(file);
-    videoData.filename = file.name;
-    videoData.size = file.size;
+    // Check if it's already transcoded (m3u8)
+    if (file.name.endsWith('.m3u8')) {
+        // Direct m3u8 file - proceed as normal
+        const url = URL.createObjectURL(file);
+        videoData.filename = file.name;
+        videoData.size = file.size;
+        
+        loadVideo(url);
+        updateVideoInfo();
+        showVideoPlayer();
+        return;
+    }
     
-    loadVideo(url);
-    updateVideoInfo();
-    showVideoPlayer();
+    // Non-m3u8 video file - offer transcoding
+    showTranscodingPrompt({ file: file, name: file.name, size: file.size });
 }
 
 // Load video using HLS.js
@@ -575,6 +607,22 @@ function handleParentMessage(data) {
             // Handle Y.js field updates
             handleYjsFieldUpdate(data.field, data.value);
             break;
+            
+        case 'videoTranscodingComplete':
+            // Handle transcoded video result
+            handleTranscodedVideo(data);
+            break;
+            
+        case 'spkFileSelected':
+            // Handle SPK file selection
+            if (data.file && data.url) {
+                handleSPKFile({
+                    url: data.url,
+                    name: data.file,
+                    size: data.size || 0
+                });
+            }
+            break;
     }
 }
 
@@ -764,4 +812,33 @@ function sendBeneficiariesUpdate() {
         type: 'beneficiaries_update',
         beneficiaries: getAllBeneficiaries()
     });
+}
+
+// Show transcoding prompt for non-m3u8 video files
+function showTranscodingPrompt(fileData) {
+    // Send message to parent to handle video transcoding
+    sendToParent({
+        type: 'requestVideoTranscoding',
+        file: fileData,
+        target: '3speak'
+    });
+}
+
+// Handle transcoded video result from parent
+function handleTranscodedVideo(data) {
+    if (data.choice === 'skip' || data.choice === 'original') {
+        // User skipped transcoding or chose original only
+        showStatus('Please select an m3u8 streaming file for 3Speak', 'error');
+        return;
+    }
+    
+    // Find the m3u8 file in the transcoded results
+    const m3u8File = data.files.find(f => f.name.endsWith('.m3u8'));
+    if (m3u8File) {
+        processTranscodedVideo({
+            url: m3u8File.url,
+            name: m3u8File.name,
+            size: m3u8File.size
+        });
+    }
 }

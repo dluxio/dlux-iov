@@ -1582,19 +1582,24 @@ PORT=3000
       
       // Restart carousel autoplay when returning to carousel view
       this.$nextTick(() => {
-        const carouselElement = document.getElementById('dluxCarousel');
-        if (carouselElement) {
-          const carousel = bootstrap.Carousel.getInstance(carouselElement);
-          if (carousel) {
-            // Restart the carousel cycling
-            carousel.cycle();
-          } else {
-            // If no instance exists, create a new one with autoplay
-            new bootstrap.Carousel(carouselElement, {
-              interval: 5000, // 5 seconds between slides
-              ride: 'carousel'
-            });
+        try {
+          const carouselElement = document.getElementById('dluxCarousel');
+          if (carouselElement && typeof bootstrap !== 'undefined' && bootstrap.Carousel) {
+            const carousel = bootstrap.Carousel.getInstance(carouselElement);
+            if (carousel) {
+              // Restart the carousel cycling
+              carousel.cycle();
+            } else {
+              // If no instance exists, create a new one with autoplay
+              new bootstrap.Carousel(carouselElement, {
+                interval: 5000, // 5 seconds between slides
+                ride: 'carousel',
+                wrap: true // Enable looping
+              });
+            }
           }
+        } catch (error) {
+          console.warn('Error restarting carousel:', error);
         }
       });
     },
@@ -1609,24 +1614,17 @@ PORT=3000
     },
     
     processDroppedFiles(files) {
-      for (let file of files) {
+      // Convert FileList to Array
+      const fileArray = Array.from(files);
+      
+      // For now, just process all files the same way
+      // Let SPK components handle video detection and transcoding
+      fileArray.forEach(file => {
         const fileType = this.detectFileType(file);
         this.detectedFileType = fileType;
         this.detectedFileName = file.name;
-        
-        // Handle based on file type
-        if (fileType === 'video') {
-          // Show transcode options if FFmpeg is ready
-          if (this.ffmpegReady) {
-            this.showTranscodeOptions = true;
-          }
-          // Pass to SPK for upload
-          this.handleSPKFileForAssets(file);
-        } else {
-          // Direct upload for other file types
-          this.handleSPKFileForAssets(file);
-        }
-      }
+        this.handleSPKFileForAssets(file);
+      });
     },
     
     detectFileType(file) {

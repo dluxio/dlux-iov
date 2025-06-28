@@ -437,12 +437,23 @@ export default {
     } else {
       this.error = "Feature not found";
     }
-    this.getIPFSproviders().then(() => {
-      this.fetchProviderStats();
-      this.filteredBrokerOptions = { ...this.ipfsProviders };
-      this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
-      this.isLoading = false;
-      this.prefillToField()
-    });
+    this.getIPFSproviders()
+      .then(() => {
+        this.fetchProviderStats();
+        this.filteredBrokerOptions = { ...this.ipfsProviders };
+        this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
+        this.isLoading = false;
+        this.prefillToField()
+      })
+      .catch(error => {
+        console.warn('Failed to fetch IPFS providers, using defaults:', error.message || error);
+        // Set reasonable defaults when fetch fails
+        this.ipfsProviders = {};
+        this.filteredBrokerOptions = {};
+        this.availableProvidersCount = 0;
+        this.isLoading = false;
+        // Try to continue with prefill even without providers
+        this.prefillToField();
+      });
   }
 };

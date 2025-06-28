@@ -7098,6 +7098,38 @@ export default {
                 }
             }
         });
+        
+        // ✅ MESSAGE HANDLER: Listen for SPK file selections from parent
+        this.handleSPKFileSelection = (event) => {
+            if (!event.data || typeof event.data !== 'object') return;
+            
+            const { type, file, url } = event.data;
+            
+            // Handle SPK file selection for video
+            if (type === 'spkFileSelected' && event.data.target === 'editor') {
+                console.log('📹 Received video file selection:', { file, url });
+                
+                // Check if it's a video file
+                const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
+                const isVideo = file && videoExtensions.some(ext => file.toLowerCase().endsWith(ext));
+                
+                if (isVideo && url) {
+                    this.insertVideoEmbed(url);
+                }
+            }
+        };
+        
+        window.addEventListener('message', this.handleSPKFileSelection);
+    },
+    
+    beforeUnmount() {
+        // Clean up message listener
+        if (this.handleSPKFileSelection) {
+            window.removeEventListener('message', this.handleSPKFileSelection);
+        }
+        
+        // Clean up editors and providers
+        this.cleanup();
     },
 
     watch: {
@@ -13250,6 +13282,62 @@ export default {
             alert('Table insertion is not available in this editor configuration.');
             return;
         },
+        
+        insertVideo() {
+            // Open SPK file browser with video filter
+            if (window.parent && window.parent !== window) {
+                // Send message to parent to open SPK browser for video files
+                window.parent.postMessage({
+                    type: 'requestSPKBrowser',
+                    filter: 'video',
+                    fileTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'],
+                    target: 'editor'
+                }, '*');
+            } else {
+                // Fallback for standalone editor
+                const url = prompt('Enter video URL (streaming m3u8 or direct video file):');
+                if (url) {
+                    this.insertVideoEmbed(url);
+                }
+            }
+        },
+        
+        insertVideoEmbed(url) {
+            if (!this.bodyEditor || !url) return;
+            
+            // Determine if it's a streaming video (m3u8)
+            const isStreaming = url.toLowerCase().includes('.m3u8');
+            
+            // Insert appropriate HTML based on video type
+            let html;
+            if (isStreaming) {
+                // For HLS streaming videos, add a special class
+                html = `<div class="video-container hls-video" data-src="${url}">
+                    <video controls class="w-100">
+                        <source src="${url}" type="application/x-mpegURL">
+                        Your browser does not support HLS video playback.
+                    </video>
+                </div>`;
+            } else {
+                // For regular video files
+                html = `<div class="video-container">
+                    <video controls class="w-100">
+                        <source src="${url}">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>`;
+            }
+            
+            // Insert the HTML at current cursor position
+            this.bodyEditor.chain()
+                .focus()
+                .insertContent(html)
+                .run();
+                
+            // Mark document as having unsaved changes
+            this.hasUnsavedChanges = true;
+            this.hasUserIntent = true;
+        },
 
         // ===== TEMPLATE UTILITY METHODS =====
         isActive(name, attrs = {}) {
@@ -19101,6 +19189,10 @@ export default {
                   <button @click="insertImage()" class="btn btn-sm btn-dark" title="Insert Image"
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-image"></i>
+                  </button>
+                  <button @click="insertVideo()" class="btn btn-sm btn-dark" title="Insert Video"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-video"></i>
                   </button>
                   <button @click="insertTable()" class="btn btn-sm btn-dark" title="Insert Table"
                           :disabled="isReadOnlyMode">

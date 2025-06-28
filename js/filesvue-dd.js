@@ -1,6 +1,8 @@
 import ChoicesVue from '/js/choices-vue.js';
 import Pop from "/js/pop.js";
 import Upload from '/js/upload-everywhere.js';
+import VideoChoiceModal from '/js/video-choice-modal.js';
+import VideoTranscoder from '/js/video-transcoder.js';
 import common from './methods-common.js';
 import spk from './methods-spk.js';
 import watchers from './watchers-common.js';
@@ -9,7 +11,9 @@ export default {
     components: {
         "pop-vue": Pop,
         "choices-vue": ChoicesVue,
-        "upload-everywhere": Upload
+        "upload-everywhere": Upload,
+        "video-transcoder": VideoTranscoder,
+        "video-choice-modal": VideoChoiceModal
     },
     template: `<div ref="container" class="vfs-scroll-pass d-flex flex-grow-1 flex-column rounded">
     <!-- warning message -->
@@ -247,7 +251,8 @@ export default {
             <div class="d-flex flex-wrap ms-auto">
                 <upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
                     :external-drop="droppedExternalFiles" @update:externalDrop="droppedExternalFiles = $event"
-                    @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController" />
+                    @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController"
+                    :video-handling-mode="'external'" />
                 <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i
                         class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
                 <button class="btn btn-outline-secondary btn-sm ms-1" @click="refreshDrive" title="Refresh Drive"><i
@@ -264,6 +269,54 @@ export default {
                 </div>
             </div>
         </div>
+        
+        <!-- Video Processing Section -->
+        <div v-if="processingFiles.length > 0" class="mb-3 border-bottom pb-3 vfs-scroll-pass">
+            <h5 class="mb-2">
+                <i class="fa-solid fa-gear fa-spin me-2"></i>
+                Processing Files
+            </h5>
+            <div class="row g-2">
+                <div v-for="pFile in processingFiles" :key="pFile.id" class="col-12 col-md-6 col-lg-4">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-start mb-2">
+                                <i class="fa-solid fa-video text-primary me-2 mt-1"></i>
+                                <div class="flex-grow-1 text-truncate">
+                                    <h6 class="mb-0 text-truncate">{{ pFile.fileName }}</h6>
+                                    <small class="text-muted">{{ fancyBytes(pFile.fileSize) }}</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div v-if="pFile.status === 'transcoding'" class="mb-2">
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                         :style="'width: ' + pFile.progress + '%'">
+                                    </div>
+                                </div>
+                                <small class="text-muted">Transcoding... {{ pFile.progress }}%</small>
+                            </div>
+                            
+                            <!-- Failed State -->
+                            <div v-else-if="pFile.status === 'failed'" class="text-danger mb-2">
+                                <i class="fa-solid fa-exclamation-circle me-1"></i>
+                                <small>{{ pFile.error || 'Transcoding failed' }}</small>
+                            </div>
+                            
+                            <!-- Complete State -->
+                            <div v-else-if="pFile.status === 'complete'" class="text-success mb-2">
+                                <i class="fa-solid fa-check-circle me-1"></i>
+                                <small>Ready to upload</small>
+                            </div>
+                            
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div v-if="filesSelect.search" class="table-responsive vfs-scroll">
             <table class="table table-dark table-striped table-hover">
                 <thead>
@@ -452,6 +505,11 @@ export default {
                             class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
                             <i class="fa-solid fa-lock fa-sm"></i>
                         </div>
+                        <!-- Streaming badge for m3u8 files -->
+                        <div v-if="isStreamableVideo(file.f)"
+                            class="position-absolute top-0 end-0 bg-success rounded-circle p-1" style="margin: 2px;">
+                            <i class="fa-solid fa-play fa-sm text-white"></i>
+                        </div>
                     </div>
 
                     <!-- Empty state for grid view -->
@@ -579,6 +637,14 @@ export default {
                                                 :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
                                                 :title="lic.l" trigger="hover">
                                                 <i :class="lic.fa"></i>
+                                            </pop-vue>
+                                        </div>
+                                        <!-- Streaming badge for m3u8 files -->
+                                        <div v-if="isStreamableVideo(file.f)">
+                                            <pop-vue 
+                                                :id="'popper-Stream' + file.i + file.index"
+                                                title="Streaming Video" trigger="hover">
+                                                <i class="fa-solid fa-play-circle text-success"></i>
                                             </pop-vue>
                                         </div>
                                     </div>
@@ -1016,6 +1082,32 @@ export default {
             </div>
         </div>
     </teleport>
+    
+    <!-- Video Choice Modal -->
+    <video-choice-modal
+        :show="showVideoChoiceModal"
+        :file-name="videoToTranscode?.fileName || ''"
+        :file-size="videoToTranscode?.fileSize || 0"
+        @choice="handleVideoChoice"
+        @cancel="cancelVideoChoice"
+    />
+    
+    <!-- Hidden Video Transcoders for Processing -->
+    <div v-show="false">
+        <video-transcoder
+            v-for="pFile in processingFiles"
+            :key="pFile.id"
+            :ref="'transcoder_' + pFile.id"
+            :file="pFile.file"
+            :file-name="pFile.fileName || pFile.file?.name"
+            :file-size="pFile.fileSize || pFile.file?.size"
+            :auto-start="true"
+            :headless="true"
+            @complete="handleProcessingComplete(pFile.id, $event)"
+            @error="handleProcessingError(pFile.id, $event)"
+            @progress="handleProcessingProgress(pFile.id, $event)"
+        />
+    </div>
 </div>`,
     props: {
         signedtx: Array,
@@ -1080,6 +1172,10 @@ export default {
         postType: {
             type: String,
             default: 'blog',
+        },
+        updateUrl: {
+            type: Boolean,
+            default: true,  // Keep current behavior by default
         },
     },
     data() {
@@ -1211,6 +1307,13 @@ export default {
                 show: false,
                 file: null
             },
+            // Video transcoding
+            showVideoTranscoder: false,
+            showVideoChoiceModal: false,
+            videoToTranscode: null,
+            pendingVideoFiles: [], // Queue of video files to process
+            processingFiles: [], // Files currently being transcoded
+            processedVideoFiles: [], // Completed video files ready for upload
         };
     },
     emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
@@ -1652,8 +1755,13 @@ export default {
             this.currentFolderPath = path;
 
             // Update URL hash to reflect the current folder path
-            const newHash = path ? `#drive/${path}` : '#drive';
-            history.replaceState(null, null, newHash);
+            if (this.updateUrl) {
+                const newHash = path ? `#drive/${path}` : '#drive';
+                history.replaceState(null, null, newHash);
+            } else if (window.location.hash.startsWith('#drive')) {
+                // If updateUrl is false but we still have a #drive hash, remove it
+                history.replaceState(null, null, window.location.pathname + window.location.search);
+            }
 
             // Load thumbnails for the new folder
             this.$nextTick(() => {
@@ -1853,8 +1961,8 @@ export default {
                         });
 
                         console.log(`External items processed (dropped on folder "${targetPath}"):`, filesWithFullPath);
-                        // Update the state passed to upload-everywhere - targetPath is implicitly included now
-                        this.droppedExternalFiles = { files: filesWithFullPath };
+                        // Check for video files and show transcoding options
+                        this.processFilesWithVideoCheck(filesWithFullPath);
                         // Prevent internal D&D logic from running for external files
                         return;
                     }
@@ -3452,8 +3560,8 @@ export default {
                         });
 
                         console.log(`External items processed (dropped on background, target: "${targetPath}"):`, filesWithFullPath);
-                        // Update the state passed to upload-everywhere - targetPath is implicitly included now
-                        this.droppedExternalFiles = { files: filesWithFullPath };
+                        // Check for video files and show transcoding options
+                        this.processFilesWithVideoCheck(filesWithFullPath);
                     }
                 }).catch(error => {
                     console.error("Error processing dropped items:", error);
@@ -4742,10 +4850,17 @@ export default {
             return { valid: true, message: "" };
         },
         handleUploadDone(payload) {
+            console.log('📤 Upload completed, updating contract data...', payload);
+            
+            // Emit update-contract with the payload containing the new files
             this.$emit('update-contract', payload);
-            this.$emit('refresh-contracts'); // Also emit a simple refresh-contracts event
+            
+            // Instead of triggering a full refresh, just update the local file list
+            // Call init() to reload the file data without a page refresh
+            this.init();
+            
             // Clear the dropped files state after upload is handled by child
-            this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
+            this.droppedExternalFiles = { files: [] };
         },
         hasStorage() {
             if (this.saccountapi && typeof this.saccountapi.storage === "string" && this.saccountapi.storage) {
@@ -5155,6 +5270,330 @@ export default {
                     return 'Add to Post';
             }
         },
+        
+        // Video transcoding methods
+        isVideoFileName(fileName) {
+            if (!fileName) return false;
+            const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
+            return videoExtensions.some(ext => fileName.toLowerCase().endsWith(ext));
+        },
+        
+        isStreamableVideo(fileName) {
+            if (!fileName) return false;
+            return fileName.toLowerCase().endsWith('.m3u8');
+        },
+        
+        processFilesWithVideoCheck(files) {
+            // Separate video files from other files
+            const videoFiles = [];
+            const otherFiles = [];
+            
+            files.forEach(fileInfo => {
+                if (this.isVideoFileName(fileInfo.file.name)) {
+                    videoFiles.push(fileInfo);
+                } else {
+                    otherFiles.push(fileInfo);
+                }
+            });
+            
+            // If we have video files, add them to the queue and show choice modal
+            if (videoFiles.length > 0) {
+                console.log('Found video files:', videoFiles);
+                this.pendingVideoFiles = videoFiles;
+                // Show choice modal for first video instead of old transcoder modal
+                const firstVideo = this.pendingVideoFiles[0];
+                console.log('First video:', firstVideo);
+                this.videoToTranscode = {
+                    file: firstVideo.file,
+                    fileName: firstVideo.file.name,
+                    fileSize: firstVideo.file.size,
+                    fullAppPath: firstVideo.fullAppPath
+                };
+                console.log('Setting showVideoChoiceModal to true');
+                this.showVideoChoiceModal = true;
+            }
+            
+            // If we have other files, pass them directly to upload
+            if (otherFiles.length > 0) {
+                // Extract just the File objects since upload-everywhere expects raw files
+                const rawFiles = otherFiles.map(fileInfo => fileInfo.file);
+                this.droppedExternalFiles = { files: rawFiles };
+            }
+        },
+        
+        processNextVideoFile() {
+            if (this.pendingVideoFiles.length === 0) {
+                // All video files processed
+                return;
+            }
+            
+            const videoFileInfo = this.pendingVideoFiles[0];
+            this.videoToTranscode = {
+                file: videoFileInfo.file,
+                fileName: videoFileInfo.file.name,
+                fileSize: videoFileInfo.file.size,
+                fullAppPath: videoFileInfo.fullAppPath
+            };
+            this.showVideoChoiceModal = true;
+        },
+        
+        handleTranscodeComplete(result) {
+            // Remove the processed video from queue
+            const processedVideo = this.pendingVideoFiles.shift();
+            
+            // Add raw files directly - upload-everywhere expects File objects
+            const filesToAdd = result.files || [];
+            
+            // Add to upload queue
+            const currentFiles = this.droppedExternalFiles?.files || [];
+            this.droppedExternalFiles = { 
+                files: [...currentFiles, ...filesToAdd] 
+            };
+            
+            // Close transcoder and process next video using choice modal
+            this.closeVideoTranscoder();
+            if (this.pendingVideoFiles.length > 0) {
+                const nextVideo = this.pendingVideoFiles[0];
+                this.videoToTranscode = {
+                    file: nextVideo.file,
+                    fileName: nextVideo.file.name,
+                    fileSize: nextVideo.file.size,
+                    fullAppPath: nextVideo.fullAppPath
+                };
+                this.showVideoChoiceModal = true;
+            }
+        },
+        
+        skipVideoTranscoding() {
+            // User chose to skip transcoding, upload original
+            const processedVideo = this.pendingVideoFiles.shift();
+            
+            // Add just the raw File object
+            const currentFiles = this.droppedExternalFiles?.files || [];
+            this.droppedExternalFiles = { 
+                files: [...currentFiles, processedVideo.file] 
+            };
+            
+            // Close transcoder and process next video using choice modal
+            this.closeVideoTranscoder();
+            if (this.pendingVideoFiles.length > 0) {
+                const nextVideo = this.pendingVideoFiles[0];
+                this.videoToTranscode = {
+                    file: nextVideo.file,
+                    fileName: nextVideo.file.name,
+                    fileSize: nextVideo.file.size,
+                    fullAppPath: nextVideo.fullAppPath
+                };
+                this.showVideoChoiceModal = true;
+            }
+        },
+        
+        closeVideoTranscoder() {
+            this.showVideoTranscoder = false;
+            this.showVideoChoiceModal = false;
+            this.videoToTranscode = null;
+        },
+        
+        closeVideoChoiceModal() {
+            this.showVideoChoiceModal = false;
+            this.videoToTranscode = null;
+        },
+        
+        cancelVideoChoice() {
+            // Skip current video without processing
+            const skippedVideo = this.pendingVideoFiles.shift();
+            console.log('User cancelled video choice for:', skippedVideo?.file?.name);
+            
+            // Close the modal
+            this.closeVideoChoiceModal();
+            
+            // Process next video if any
+            if (this.pendingVideoFiles.length > 0) {
+                this.processNextVideoFile();
+            }
+        },
+        
+        handleTranscodeError(error) {
+            console.error('Video transcoding error:', error);
+            alert('Video transcoding failed: ' + (error.message || 'Unknown error'));
+            this.skipVideoTranscoding();
+        },
+        
+        // New video processing methods
+        handleVideoChoice(choice) {
+            // Get current video from queue
+            const video = this.pendingVideoFiles.shift();
+            
+            // Guard clause: check if video exists
+            if (!video) {
+                console.warn('No video to process in handleVideoChoice');
+                this.closeVideoChoiceModal();
+                return;
+            }
+            
+            // Close the choice modal
+            this.closeVideoChoiceModal();
+            
+            if (choice === 'original') {
+                // Add just the raw File object - upload-everywhere expects this
+                const currentFiles = this.droppedExternalFiles?.files || [];
+                this.droppedExternalFiles = { 
+                    files: [...currentFiles, video.file] 
+                };
+            } else {
+                // For "both" option, add original file to ready section too
+                if (choice === 'both') {
+                    // Add just the raw File object
+                    const currentFiles = this.droppedExternalFiles?.files || [];
+                    this.droppedExternalFiles = { 
+                        files: [...currentFiles, video.file] 
+                    };
+                }
+                
+                // Add to processing queue for transcoding
+                const processingId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                this.processingFiles.push({
+                    id: processingId,
+                    file: video.file,
+                    fileName: video.file.name,    // Extract from inner file object
+                    fileSize: video.file.size,    // Extract from inner file object
+                    choice: choice,
+                    status: 'transcoding',
+                    progress: 0,
+                    error: null,
+                    transcodedFiles: [],
+                    thumbnailUrl: null,
+                    transcoderInstance: null
+                });
+                
+                // Start transcoding in the background
+                this.$nextTick(() => {
+                    this.startVideoTranscoding(processingId);
+                });
+            }
+            
+            // Process next video if any using the new choice modal system
+            if (this.pendingVideoFiles.length > 0) {
+                // Show choice modal for next video instead of old transcoder modal
+                const nextVideo = this.pendingVideoFiles[0];
+                this.videoToTranscode = {
+                    file: nextVideo.file,
+                    fileName: nextVideo.file.name,
+                    fileSize: nextVideo.file.size,
+                    fullAppPath: nextVideo.fullAppPath
+                };
+                this.showVideoChoiceModal = true;
+            }
+        },
+        
+        async startVideoTranscoding(processingId) {
+            const processingFile = this.processingFiles.find(f => f.id === processingId);
+            if (!processingFile) return;
+            
+            // The transcoder component will auto-start
+            // Events will be handled by the handlers below
+        },
+        
+        handleProcessingProgress(processingId, progress) {
+            const processingFile = this.processingFiles.find(f => f.id === processingId);
+            if (processingFile) {
+                processingFile.progress = progress;
+            }
+        },
+        
+        handleProcessingComplete(processingId, result) {
+            const processingFile = this.processingFiles.find(f => f.id === processingId);
+            if (processingFile) {
+                processingFile.status = 'complete';
+                processingFile.transcodedFiles = result.files;
+                processingFile.thumbnailUrl = result.thumbnail ? URL.createObjectURL(result.thumbnail) : null;
+                // Emit progress 100 to ensure UI updates
+                processingFile.progress = 100;
+                
+                console.log('Processing complete for:', processingId, 'Auto-moving to ready section');
+                
+                // Auto-move to ready section after a brief moment to show completion
+                setTimeout(() => {
+                    this.moveToReady(processingFile);
+                }, 500);
+            }
+        },
+        
+        handleProcessingError(processingId, error) {
+            const processingFile = this.processingFiles.find(f => f.id === processingId);
+            if (processingFile) {
+                processingFile.status = 'failed';
+                processingFile.error = error.message || 'Transcoding failed';
+            }
+        },
+        
+        retryProcessing(processingId) {
+            const processingFile = this.processingFiles.find(f => f.id === processingId);
+            if (!processingFile) return;
+            
+            // Reset status and progress
+            processingFile.status = 'transcoding';
+            processingFile.progress = 0;
+            processingFile.error = null;
+            
+            // Start transcoding again
+            this.startVideoTranscoding(processingId);
+        },
+        
+        cancelProcessing(processingId) {
+            const index = this.processingFiles.findIndex(f => f.id === processingId);
+            if (index === -1) return;
+            
+            const processingFile = this.processingFiles[index];
+            
+            // Clean up transcoder instance if it exists
+            if (processingFile.transcoderInstance) {
+                processingFile.transcoderInstance.$destroy();
+            }
+            
+            // Remove from processing queue
+            this.processingFiles.splice(index, 1);
+        },
+        
+        previewProcessedVideo(processingFile) {
+            // Create a temporary video transcoder instance just for preview
+            // We'll reuse the existing video transcoder component's preview functionality
+            const tempTranscoder = {
+                state: 'complete',
+                outputFiles: {
+                    m3u8: processingFile.transcodedFiles.find(f => f.name.endsWith('.m3u8')),
+                    segments: processingFile.transcodedFiles.filter(f => f.name.endsWith('.ts')),
+                    thumbnail: processingFile.thumbnailUrl
+                },
+                transcodedFiles: processingFile.transcodedFiles,
+                thumbnailUrl: processingFile.thumbnailUrl,
+                fileName: processingFile.fileName,
+                showPreview: true
+            };
+            
+            // Store for modal display
+            this.videoPreviewData = tempTranscoder;
+            
+            // You would need to add a video preview modal to the template
+            // For now, we'll just log
+            console.log('Preview video:', processingFile);
+            alert('Video preview functionality will be integrated with the existing video player modal.');
+        },
+        
+        moveToReady(processingFile) {
+            // Add transcoded files to upload queue - just raw files
+            const filesToAdd = processingFile.transcodedFiles;
+            
+            // Add to upload queue with raw File objects
+            const currentFiles = this.droppedExternalFiles?.files || [];
+            this.droppedExternalFiles = { 
+                files: [...currentFiles, ...filesToAdd] 
+            };
+            
+            // Remove from processing queue
+            this.cancelProcessing(processingFile.id);
+        },
     },
     computed: {
         hasFiles() {
@@ -5345,6 +5784,11 @@ export default {
         this.localStorageKey = this.account ? `fileVuePendingChanges_${this.account}` : '';
         // Load any pending changes from previous sessions
         this.loadPendingChanges();
+
+        // Clear the hash if updateUrl is false and we're at #drive
+        if (!this.updateUrl && window.location.hash === '#drive') {
+            history.replaceState(null, null, window.location.pathname + window.location.search);
+        }
 
         // Existing mounted code
         this.init()

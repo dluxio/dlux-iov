@@ -203,12 +203,14 @@ export default {
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center vfs-scroll-pass">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
+                    @update-contract="handleUpdateContract($event)"
                     @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"
                     :file-slots="fileSlots"
                     @set-logo="handleFileSlot('logo', $event)"
                     @set-featured="handleFileSlot('featured', $event)"
                     @set-banner="handleFileSlot('banner', $event)"
-                    @set-wrapped="handleFileSlot('wrapped', $event)"></files-vue>
+                    @set-wrapped="handleFileSlot('wrapped', $event)"
+                    :update-url="updateUrl"></files-vue>
             </div>
         </div>
     </div>
@@ -312,6 +314,11 @@ export default {
         postType: {
             type: String,
             default: 'blog',
+            required: false
+        },
+        updateUrl: {
+            type: Boolean,
+            default: true,
             required: false
         }
     },
@@ -1611,17 +1618,14 @@ export default {
                 console.log("Updated URL hash to:", newHash);
             }
             
-            // Clear current contracts data to prevent duplication
-            this.contracts = [];
-            this.contractIDs = {};
-            this.usedBytes = 0;
-            
-            // Refresh contracts from API
-            this.getSapi();
-            console.log("Refreshing contracts...");
+            // Don't clear data aggressively - let getSapi update incrementally
+            console.log("Refreshing contracts data...");
             
             // Set a flag to restore path after refresh
             this.pathToRestore = currentPath;
+            
+            // Refresh contracts from API without clearing existing data
+            this.getSapi();
         },
         handleRefreshDrive() {
             console.log('🔄 Refreshing SPK Drive data...');
@@ -1640,6 +1644,19 @@ export default {
                 size: fileData.size || fileData.s,
                 type: fileData.type || fileData.mime || 'application/octet-stream'
             });
+        },
+        handleUpdateContract(payload) {
+            console.log('📥 Handling contract update:', payload);
+            
+            // Find the contract in our data
+            const contractIndex = this.contracts.findIndex(c => c.i === payload.contractId);
+            if (contractIndex !== -1) {
+                // Update the contract's file count and size if available
+                // The actual file data will be refreshed by filesvue-dd's init() call
+                console.log('Contract found, data will be refreshed by child component');
+            }
+            
+            // Don't trigger a full refresh here - the child component handles it
         },
     },
     watch: {

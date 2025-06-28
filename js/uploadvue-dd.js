@@ -34,6 +34,18 @@ export default {
 
 
         <div v-if="File.length" class="rounded p-2" style="background-color:rgba(0,0,0,0.1)"> 
+            <!-- Duplicate files warning -->
+            <div v-if="duplicateFiles.length > 0 && !allowDuplicates" class="alert alert-warning mb-2">
+                <i class="fa-solid fa-exclamation-triangle fa-fw me-1"></i>
+                <strong>{{duplicateFiles.length}} file{{duplicateFiles.length > 1 ? 's' : ''}} already exist on the network:</strong>
+                <ul class="mb-1 mt-2">
+                    <li v-for="dup in duplicateFiles.slice(0, 5)" :key="dup.cid">
+                        {{dup.name}} ({{dup.cid.substring(0, 8)}}...)
+                    </li>
+                    <li v-if="duplicateFiles.length > 5">...and {{duplicateFiles.length - 5}} more</li>
+                </ul>
+                <small>Enable "Force re-upload" below to upload anyway.</small>
+            </div>
             <!-- Always visible summary -->
             <div class="d-flex mx-1 align-items-center">
                 <div class="lead fs-5">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
@@ -69,25 +81,25 @@ export default {
                                             class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</div>
                             </div>
                             <div class="flex-grow-1 mx-5" >
-                             <!--v-if="File[FileInfo[file.name].index].actions.cancel"-->
+                             <!--v-if="getFileActions(file.name).cancel"-->
                                 <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="25"
                                     aria-valuemin="0" aria-valuemax="100">
                                     <div class="progress-bar"
-                                        :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
-                                        {{Math.round(File[FileInfo[file.name].index].progress)}}%
+                                        :style="'width: ' + getFileProgress(file.name) + '%'">
+                                        {{Math.round(getFileProgress(file.name))}}%
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex-shrink" v-if="File.length">
+                            <div class="flex-shrink" v-if="File.length && getFileData(file.name)">
                                 <button type="button" class="me-2 btn btn-secondary"
-                                    v-if="File[FileInfo[file.name].index].actions.pause"
-                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
+                                    v-if="getFileActions(file.name).pause"
+                                    @click="fileRequest[FileInfo[file.name].index] && fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
                                 <button type="button" class="me-2 btn btn-secondary"
-                                    v-if="File[FileInfo[file.name].index].actions.resume"
-                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
+                                    v-if="getFileActions(file.name).resume"
+                                    @click="fileRequest[FileInfo[file.name].index] && fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
                                 <button type="button" class="me-2 btn btn-secondary"
-                                    v-if="File[FileInfo[file.name].index].actions.cancel"
-                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
+                                    v-if="getFileActions(file.name).cancel"
+                                    @click="fileRequest[FileInfo[file.name].index] && fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
                             </div>
                             <div class="ms-auto my-1">
                                 <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
@@ -241,25 +253,25 @@ export default {
                             <h6 class="m-0 text-break"><span class="px-2 py-1 me-2 bg-darkg rounded"><i
                                         class="fa-solid fa-lock fa-fw"></i></span>{{file.name}}</h6>
                         </div>
-                        <div class="flex-grow-1 mx-5" v-if="File[FileInfo[file.name].enc_index].actions.cancel">
+                        <div class="flex-grow-1 mx-5" v-if="getEncryptedFileActions(file.name).cancel">
                             <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="25"
                                 aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar"
-                                    :style="'width: ' + File[FileInfo[file.name].enc_index].progress + '%'">
-                                    {{File[FileInfo[file.name].enc_index].progress}}%
+                                    :style="'width: ' + getEncryptedFileProgress(file.name) + '%'">
+                                    {{Math.round(getEncryptedFileProgress(file.name))}}%
                                 </div>
                             </div>
                         </div>
-                        <div class="flex-shrink" v-if="File.length">
+                        <div class="flex-shrink" v-if="File.length && getEncryptedFileData(file.name)">
                             <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].enc_index].actions.pause"
-                                @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
+                                v-if="getEncryptedFileActions(file.name).pause"
+                                @click="fileRequest[FileInfo[file.name].enc_index] && fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Pause</button>
                             <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].enc_index].actions.resume"
-                                @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
+                                v-if="getEncryptedFileActions(file.name).resume"
+                                @click="fileRequest[FileInfo[file.name].enc_index] && fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Resume</button>
                             <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].enc_index].actions.cancel"
-                                @click="fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
+                                v-if="getEncryptedFileActions(file.name).cancel"
+                                @click="fileRequest[FileInfo[file.name].enc_index] && fileRequest[FileInfo[file.name].enc_index].resumeFileUpload()">Cancel</button>
                         </div>
                         <div class="ms-auto">
                             <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].enc_index, file.name)"
@@ -365,6 +377,16 @@ export default {
                                 class="fa-solid fa-fw fa-user-lock me-2"></i>Encrypt Keys</button>
                     </div>
                 </div>
+                <!-- Force re-upload option -->
+                <div class="d-flex justify-content-center mb-2" v-if="contract.c == 1 && duplicateFiles.length > 0">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" v-model="allowDuplicates" id="forceReuploadCheck">
+                        <label class="form-check-label text-warning" for="forceReuploadCheck">
+                            <i class="fa-solid fa-exclamation-triangle fa-fw me-1"></i>
+                            Force re-upload ({{duplicateFiles.length}} file{{duplicateFiles.length > 1 ? 's' : ''}} already exist)
+                        </label>
+                    </div>
+                </div>
                 <div class="d-flex mb-1" v-if="contract.c == 1">
                     <button class="ms-auto me-auto mt-2 btn btn-lg" 
                         :class="[
@@ -448,13 +470,30 @@ export default {
           };
 
           newFilesArray.forEach(newItem => {
-            if (!newItem || !newItem.file || typeof newItem.file.name !== 'string' || typeof newItem.file.size !== 'number') {
+            // Handle both raw File objects and structured objects
+            let file, itemPath;
+            
+            if (newItem instanceof File) {
+                // Raw File object - wrap it
+                file = newItem;
+                itemPath = null;
+            } else if (newItem && newItem.file) {
+                // Structured object
+                file = newItem.file;
+                itemPath = newItem.fullAppPath || newItem.targetPath || null;
+            } else {
                 console.warn('Skipping malformed item in propStructuredFiles:', newItem);
                 return;
             }
-            const fileKey = `${newItem.file.name}_${newItem.file.size}`;
+            
+            if (typeof file.name !== 'string' || typeof file.size !== 'number') {
+                console.warn('Skipping item with invalid file properties:', file);
+                return;
+            }
+            
+            const fileKey = `${file.name}_${file.size}`;
             // Prefer fullAppPath, fallback to targetPath, then to null if neither exists
-            const newItemPath = newItem.fullAppPath || newItem.targetPath || null;
+            const newItemPath = itemPath;
 
 
             if (seenFiles.has(fileKey)) {
@@ -464,12 +503,20 @@ export default {
               const existingItemPath = existingItem.fullAppPath || existingItem.targetPath || null;
 
               if (isNewPathBetter(newItemPath, existingItemPath)) {
-                consolidatedNewFiles[existingItemIndex] = { ...newItem, fullAppPath: newItemPath, targetPath: newItem.targetPath }; // Ensure fullAppPath is set
-                console.log(`Consolidated file ${newItem.file.name}: using new path '${newItemPath}' over '${existingItemPath}'`);
+                // Create properly structured object
+                const structuredItem = newItem instanceof File ? 
+                    { file: file, fullAppPath: newItemPath, targetPath: null } : 
+                    { ...newItem, fullAppPath: newItemPath };
+                consolidatedNewFiles[existingItemIndex] = structuredItem;
+                console.log(`Consolidated file ${file.name}: using new path '${newItemPath}' over '${existingItemPath}'`);
               }
             } else {
               seenFiles.set(fileKey, consolidatedNewFiles.length);
-              consolidatedNewFiles.push({ ...newItem, fullAppPath: newItemPath, targetPath: newItem.targetPath }); // Ensure fullAppPath is set
+              // Create properly structured object
+              const structuredItem = newItem instanceof File ? 
+                  { file: file, fullAppPath: newItemPath, targetPath: null } : 
+                  { ...newItem, fullAppPath: newItemPath };
+              consolidatedNewFiles.push(structuredItem);
             }
           });
           
@@ -508,6 +555,7 @@ export default {
         }
       }
     }
+    // Removed allowDuplicates watcher to prevent infinite loop
   },
   data() {
     return {
@@ -534,12 +582,56 @@ export default {
       fileProgress: {}, // Tracks progress for each file by CID
       completedFiles: 0,
       thumbnailsGenerating: 0, // Count of thumbnails currently being generated
+      allowDuplicates: false, // Allow uploading files even if they exist
+      duplicateFiles: [] // Track files that were detected as duplicates
     };
   },
   emits: ["tosign", "done"],
   methods: {
     ...MCommon,
     ...Mspk,
+    // Safe getter for file data to prevent undefined errors
+    getFileData(fileName) {
+      if (!this.FileInfo[fileName] || this.FileInfo[fileName].index === undefined) {
+        return null;
+      }
+      const index = this.FileInfo[fileName].index;
+      return this.File[index] || null;
+    },
+    
+    // Safe getter for file actions
+    getFileActions(fileName) {
+      const fileData = this.getFileData(fileName);
+      return fileData?.actions || {};
+    },
+    
+    // Safe getter for file progress
+    getFileProgress(fileName) {
+      const fileData = this.getFileData(fileName);
+      return fileData?.progress || 0;
+    },
+    
+    // Safe getter for encrypted file data
+    getEncryptedFileData(fileName) {
+      if (!this.FileInfo[fileName] || this.FileInfo[fileName].enc_index === undefined) {
+        return null;
+      }
+      const index = this.FileInfo[fileName].enc_index;
+      return this.File[index] || null;
+    },
+    
+    // Safe getter for encrypted file actions
+    getEncryptedFileActions(fileName) {
+      const fileData = this.getEncryptedFileData(fileName);
+      return fileData?.actions || {};
+    },
+    
+    // Safe getter for encrypted file progress
+    getEncryptedFileProgress(fileName) {
+      const fileData = this.getEncryptedFileData(fileName);
+      return fileData?.progress || 0;
+    },
+    
     pollBundleStatus(contractID, since = 0) {
       const contractInstanceId = contractID; 
 
@@ -588,17 +680,7 @@ export default {
     },
     processSingleFile(file, fullAppPath = null) {
         return new Promise((resolveProcess, rejectProcess) => { 
-            // Skip duplicate files
-            if (this.File.some(existingFile => existingFile.name === file.name && existingFile.size === file.size)) {
-                // skipped file may have correct fullAppPath, must be appended to existing file before skipping
-                const existingIndex = this.File.findIndex(f => f.name === file.name);
-                if (fullAppPath && existingIndex !== -1) {
-                    this.File[existingIndex].fullAppPath = fullAppPath;
-                }
-                console.log(`Skipping duplicate file: ${file.name}`);
-                resolveProcess();
-                return; 
-            }
+            // Removed local duplicate check - let the network CID check handle duplicates
             
             // Security check: skip hidden files (starting with .)
             if (file.name.startsWith('.')) {
@@ -645,8 +727,15 @@ export default {
                         status: 'Pending Signature' 
                     };
                     
-                    fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
-                        if (res.result == "Not found") {
+                    // Skip duplicate check for M3U8 and TS files (video segments)
+                    const isVideoSegment = dict.name.toLowerCase().endsWith('.m3u8') || dict.name.toLowerCase().endsWith('.ts');
+                    
+                    const duplicateCheckPromise = isVideoSegment || this.allowDuplicates
+                        ? Promise.resolve({ result: "Not found" }) // Skip API check for video segments or if duplicates allowed
+                        : fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json());
+                    
+                    duplicateCheckPromise.then(res => {
+                        if (res.result == "Not found" || this.allowDuplicates) {
                             this.FileInfo[dict.name] = dict;
                             const names = dict.name.replaceAll(',', '-').split('.');
                             const ext = names.length > 1 ? names.pop() : '';
@@ -683,7 +772,44 @@ export default {
                             resolveProcess();
 
                         } else {
-                            alert(`${target.File.name} already uploaded`);
+                            // Enhanced error messaging - log instead of alert for batch uploads
+                            console.warn(`File "${ret.opts.originalFile.name}" appears to be already uploaded (CID: ${ret.hash})`);
+                            
+                            // Track duplicate files only if force upload is not enabled
+                            if (!this.allowDuplicates) {
+                                this.duplicateFiles.push({
+                                    name: ret.opts.originalFile.name,
+                                    cid: ret.hash,
+                                    file: ret.opts.originalFile
+                                });
+                            }
+                            
+                            // Only show alert for non-video segment files
+                            const isVideoSegment = ret.opts.originalFile.name.toLowerCase().endsWith('.m3u8') || 
+                                                 ret.opts.originalFile.name.toLowerCase().endsWith('.ts');
+                            
+                            if (!isVideoSegment && !this.allowDuplicates) {
+                                // For regular files, show more informative message with option to force upload
+                                const forceUpload = confirm(
+                                    `File "${ret.opts.originalFile.name}" appears to be already uploaded.\n\n` +
+                                    `This file has the same content (CID: ${ret.hash.substring(0, 8)}...) as a file already on the network.\n\n` +
+                                    `Do you want to force upload anyway?`
+                                );
+                                
+                                if (forceUpload) {
+                                    // Set flag and re-process the file
+                                    this.allowDuplicates = true;
+                                    this.processSingleFile(ret.opts.originalFile, dict.fullAppPath).then(() => {
+                                        this.allowDuplicates = false; // Reset flag after processing
+                                        resolveProcess();
+                                    }).catch(err => {
+                                        this.allowDuplicates = false; // Reset flag on error
+                                        rejectProcess(err);
+                                    });
+                                    return; // Don't continue with normal flow
+                                }
+                            }
+                            
                             const existingIndex = this.File.findIndex(f => f === ret.opts.originalFile);
                             if(existingIndex !== -1) this.File.splice(existingIndex, 1); 
                             resolveProcess();
@@ -1081,7 +1207,7 @@ export default {
             originalImage.src = ev.target.result
             originalImage.onload = () => {
                 var thumbnailImage = createThumbnail(originalImage);
-                var newThumbFile = dataURLtoFile(thumbnailImage.src, 'thumb_' + originalFile.name);
+                var newThumbFile = dataURLtoFile(thumbnailImage.src, '_' + originalFile.name);
                 
                 newThumbFile.progress = 0;
                 newThumbFile.status = 'Pending Signature';
@@ -1093,12 +1219,25 @@ export default {
                     const buf = buffer.Buffer(thumbFileContent);
                     that.hashOf(buf, {}).then((ret) => {
                         const newIndex = that.File.length;
+                        // Smart truncation that preserves file extension
+                        let thumbName = '_' + originalFile.name;
+                        if (thumbName.length > 32) {
+                            const lastDotIndex = thumbName.lastIndexOf('.');
+                            if (lastDotIndex > -1) {
+                                const ext = thumbName.substring(lastDotIndex);
+                                const nameWithoutExt = thumbName.substring(0, lastDotIndex);
+                                thumbName = nameWithoutExt.substring(0, 32 - ext.length) + ext;
+                            } else {
+                                thumbName = thumbName.substring(0, 32);
+                            }
+                        }
+                        
                         const thumbDict = {
                             fileContent: thumbnailImage.src,
                             hash: ret.hash,
                             index: newIndex,
                             size: buf.byteLength,
-                            name: ('thumb_' + originalFile.name).substring(0, 32),
+                            name: thumbName,
                             progress: 0,
                             status: 'Pending Signature',
                             is_thumb: true,
@@ -1109,12 +1248,12 @@ export default {
                             that.FileInfo[fileInfoKey].thumb_index = newIndex;
                             that.FileInfo[fileInfoKey].thumb = ret.hash;
                             that.FileInfo[fileInfoKey].meta.thumb = ret.hash;
-                            that.FileInfo['thumb_' + fileInfoKey] = thumbDict;
+                            that.FileInfo['_' + fileInfoKey] = thumbDict;
                             
                             const names = thumbDict.name.replaceAll(',', '-').split('.');
                             const ext = names.length > 1 ? names.pop() : '';
                             const name = names.join('.');
-                            that.FileInfo['thumb_' + fileInfoKey].meta = {
+                            that.FileInfo['_' + fileInfoKey].meta = {
                                 name,
                                 ext,
                                 flag: "2",
@@ -1313,6 +1452,138 @@ export default {
 
       return { folderListString, pathToIndexMap: pathToIndex };
     },
+    async processPlaylistsBeforeUpload() {
+      console.log("Processing playlists before upload...");
+      
+      // Find all M3U8 files in FileInfo
+      const m3u8Files = [];
+      const fileHashMap = new Map();
+      
+      // Build hash map and find playlists
+      for (const [name, info] of Object.entries(this.FileInfo)) {
+        // Add to hash map if file has IPFS hash
+        const hash = this.encryption.encrypted ? info.enc_hash : info.hash;
+        if (hash) {
+          fileHashMap.set(name, hash);
+        }
+        
+        // Check if it's an M3U8 file
+        if (name.endsWith('.m3u8') && !info.is_thumb) {
+          m3u8Files.push({ name, info, fileIndex: info.index });
+        }
+      }
+      
+      if (m3u8Files.length === 0) {
+        console.log("No M3U8 files found to process");
+        return;
+      }
+      
+      console.log(`Found ${m3u8Files.length} playlist(s) to process`);
+      
+      // Process each playlist
+      for (const playlist of m3u8Files) {
+        try {
+          // Get the File object
+          const file = this.File[playlist.fileIndex];
+          if (!file) {
+            console.error(`File not found at index ${playlist.fileIndex} for ${playlist.name}`);
+            continue;
+          }
+          
+          // Read the file content
+          const content = await this.readFileAsText(file);
+          
+          // Process the content to update segment references
+          const updatedContent = this.updatePlaylistContent(content, fileHashMap);
+          
+          // Create new file with updated content
+          const updatedFile = new File([updatedContent], file.name, { type: file.type });
+          
+          // Replace the file in the array
+          this.File[playlist.fileIndex] = updatedFile;
+          
+          // Re-hash the updated file
+          const buffer = await this.fileToBuffer(updatedFile);
+          const hashResult = await this.hashOf(buffer, {});
+          
+          // Update FileInfo with new hash
+          if (this.encryption.encrypted) {
+            playlist.info.enc_hash = hashResult.hash;
+          } else {
+            playlist.info.hash = hashResult.hash;
+          }
+          
+          // IMPORTANT: Also update the File array's CID so it matches during upload
+          if (this.File[playlist.fileIndex]) {
+            this.File[playlist.fileIndex].cid = hashResult.hash;
+          }
+          
+          console.log(`Updated playlist ${playlist.name} with new hash ${hashResult.hash}`);
+          
+        } catch (error) {
+          console.error(`Error processing playlist ${playlist.name}:`, error);
+        }
+      }
+    },
+    readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    },
+    fileToBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(buffer.Buffer(e.target.result));
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    },
+    updatePlaylistContent(content, fileHashMap) {
+      const lines = content.split('\n');
+      let replacementCount = 0;
+      const ipfsGateway = 'https://ipfs.dlux.io/ipfs/';
+      
+      const updatedLines = lines.map(line => {
+        // Skip empty lines and M3U8 directives
+        if (!line.trim() || line.startsWith('#')) {
+          return line;
+        }
+        
+        // This line should be a segment reference
+        const segmentName = line.trim();
+        
+        // Check if we have this segment in our hash map
+        if (fileHashMap.has(segmentName)) {
+          const hash = fileHashMap.get(segmentName);
+          const ipfsUrl = `${ipfsGateway}${hash}?filename=${segmentName}`;
+          replacementCount++;
+          console.log(`Replaced ${segmentName} with ${ipfsUrl}`);
+          return ipfsUrl;
+        }
+        
+        // Fuzzy matching for segments
+        for (const [fileName, hash] of fileHashMap) {
+          if (fileName.endsWith('.ts') && 
+              (segmentName === fileName || 
+               segmentName.endsWith(fileName) ||
+               fileName.endsWith(segmentName))) {
+            const ipfsUrl = `${ipfsGateway}${hash}?filename=${fileName}`;
+            replacementCount++;
+            console.log(`Replaced ${segmentName} with ${ipfsUrl} (fuzzy match)`);
+            return ipfsUrl;
+          }
+        }
+        
+        console.warn(`No hash found for segment ${segmentName}`);
+        return line;
+      });
+      
+      console.log(`Updated ${replacementCount} segment references`);
+      return updatedLines.join('\n');
+    },
     deleteImg(index, name) {
       for (var item in this.FileInfo) {
         if (this.FileInfo[item].index > index) {
@@ -1326,10 +1597,6 @@ export default {
     signNUpload() {
       console.log(this.contract.i)
       var header = `${this.contract.i}`
-      var body = ""
-      var names = Object.keys(this.FileInfo)
-      var cids = []
-      var meta = {}
       const { folderListString, pathToIndexMap } = this.makePaths();
 
       // Ensure makePaths actually returned the map
@@ -1341,34 +1608,107 @@ export default {
 
       // Reset upload tracking
       this.uploadInProgress = false
+      
+      // Clear duplicate files if force re-upload is enabled
+      if (this.allowDuplicates && this.duplicateFiles.length > 0) {
+        console.log(`Force re-upload enabled. Clearing ${this.duplicateFiles.length} duplicate files.`);
+        this.duplicateFiles = [];
+      }
       this.fileProgress = {}
       this.completedFiles = 0
 
-      if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
-        if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
-          meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
-          body += `,${this.FileInfo[names[i]].hash}`
-          cids.push(this.FileInfo[names[i]].hash)
+      // Process any M3U8 playlists FIRST to update segment references with IPFS URLs
+      this.processPlaylistsBeforeUpload().then(() => {
+        // NOW collect CIDs and metadata after playlists have been updated
+        var body = ""
+        var names = Object.keys(this.FileInfo)
+        var cids = []
+        var meta = {}
+
+        if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
+          if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+            meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].hash}`
+            cids.push(this.FileInfo[names[i]].hash)
+          }
         }
-      }
-      else for (var i = 0; i < names.length; i++) {
-        if (this.FileInfo[names[i]].enc_hash) {
-          meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
-          body += `,${this.FileInfo[names[i]].enc_hash}`
-          cids.push(this.FileInfo[names[i]].enc_hash)
+        else for (var i = 0; i < names.length; i++) {
+          if (this.FileInfo[names[i]].enc_hash) {
+            meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].enc_hash}`
+            cids.push(this.FileInfo[names[i]].enc_hash)
+          }
         }
-      }
-      this.contract.files = body
-      
-      this.signText(this.user.name + ':' + header + body).then(res => {
-        console.log("signText response:", res);
-        this.meta = meta
-        // Extract signature from challenge:signature format
-        const lastColonIndex = res.lastIndexOf(':');
-        this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
-        console.log("Extracted signature:", this.contract.fosig);
-        this.upload(cids, this.contract, folderListString, pathToIndexMap)
-        this.ready = false
+        // Create challenge with original body (including comma)
+        const challenge = this.user.name + ':' + header + body;
+        
+        // Keep the body as-is with the leading comma for contract.files
+        this.contract.files = body;
+        console.log("Signing challenge:", challenge);
+        console.log("Contract details:", {
+          id: this.contract.i,
+          broker: this.contract.b,
+          account: this.contract.t,
+          api: this.contract.api
+        });
+        
+        this.signText(challenge).then(res => {
+          console.log("signText response:", res);
+          this.meta = meta
+          // Extract signature from challenge:signature format
+          const lastColonIndex = res.lastIndexOf(':');
+          this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+          console.log("Extracted signature:", this.contract.fosig);
+          
+          this.upload(cids, this.contract, folderListString, pathToIndexMap)
+          this.ready = false
+        })
+      }).catch(err => {
+        console.error("Error processing playlists:", err);
+        // If playlist processing fails, still try to upload with original hashes
+        var body = ""
+        var names = Object.keys(this.FileInfo)
+        var cids = []
+        var meta = {}
+
+        if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
+          if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+            meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].hash}`
+            cids.push(this.FileInfo[names[i]].hash)
+          }
+        }
+        else for (var i = 0; i < names.length; i++) {
+          if (this.FileInfo[names[i]].enc_hash) {
+            meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].enc_hash}`
+            cids.push(this.FileInfo[names[i]].enc_hash)
+          }
+        }
+        // Create challenge with original body (including comma)
+        const challenge = this.user.name + ':' + header + body;
+        
+        // Keep the body as-is with the leading comma for contract.files
+        this.contract.files = body;
+        console.log("Signing challenge:", challenge);
+        console.log("Contract details:", {
+          id: this.contract.i,
+          broker: this.contract.b,
+          account: this.contract.t,
+          api: this.contract.api
+        });
+        
+        this.signText(challenge).then(res => {
+          console.log("signText response:", res);
+          this.meta = meta
+          // Extract signature from challenge:signature format
+          const lastColonIndex = res.lastIndexOf(':');
+          this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+          console.log("Extracted signature:", this.contract.fosig);
+          
+          this.upload(cids, this.contract, folderListString, pathToIndexMap)
+          this.ready = false
+        })
       })
     },
     appendFile(file, id) {
@@ -1451,7 +1791,7 @@ export default {
         if (a < b) { return -1; }
         if (a > b) { return 1; }
         return 0;
-      })
+      }) // Sort CIDs alphabetically to save bytes in metadata
       
       // Format: "1|folderList|file1,ext.pathIndex,thumb,flags|file2,ext.pathIndex,thumb,flags|..."
       var metaString = `1${this.stringOfKeys()}`;
@@ -1463,6 +1803,22 @@ export default {
 
       console.log("Path to index map in upload:", pathToIndexMap);
 
+      // First pass: Assign CIDs to files
+      for (var name in this.FileInfo) {
+        const fileInfo = this.FileInfo[name];
+        
+        for (var i = 0; i < cids.length; i++) {
+          if (fileInfo.hash == cids[i]) {
+            this.File[fileInfo.index].cid = cids[i];
+            break;
+          } else if (fileInfo.enc_hash == cids[i]) {
+            this.File[fileInfo.enc_index].cid = cids[i];
+            break;
+          }
+        }
+      }
+
+      // Second pass: Generate metadata entries
       for (var name in this.FileInfo) {
         const fileInfo = this.FileInfo[name];
 
@@ -1499,7 +1855,7 @@ export default {
         const pathIndex = pathToIndexMap[folderPath] || '0';
         
         // Format extension with path suffix: ext.pathIndex
-        // But only add the pathIndex if it's not the root (0)
+        // Root files (index '0') get no path suffix, only folder files get suffixes
         const extWithPath = sanitizedExt + (pathIndex !== '1' ? '.' + pathIndex : '');
         
         console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
@@ -1507,12 +1863,10 @@ export default {
         // --- End Sanitization and Path Index ---
         for (var i = 0; i < cids.length; i++) {
           if (fileInfo.hash == cids[i]) {
-            this.File[fileInfo.index].cid = cids[i];
             // Format: name,ext.pathIndex,thumb,flags
             fileMetaEntries[cids[i]] = `${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`
             break;
           } else if (fileInfo.enc_hash == cids[i]) {
-            this.File[fileInfo.enc_index].cid = cids[i];
             // Same format for encrypted files
             fileMetaEntries[cids[i]] = `${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`
             break;
@@ -1523,7 +1877,7 @@ export default {
       // Add file metadata entries to the string
       if (cids.length > 0) {
         
-        cids = cids.sort();
+        cids = cids.sort(); // Re-sort to ensure metadata entries are added in alphabetical CID order
         for (var i = 0; i < cids.length; i++) {
           metaString += (metaString.endsWith(',') ? '' : ',') + fileMetaEntries[cids[i]]
         }
@@ -1531,12 +1885,15 @@ export default {
       this.finalMetadataString = metaString; // Store it on the instance
       
       console.log({metaString});
+      console.log('CIDs being uploaded:', cids);
+      console.log('File metadata entries:', fileMetaEntries);
       // return // for testing without actual upload
       
+      const apiUrl = this.contract.api;
       const ENDPOINTS = {
-        UPLOAD: `${this.contract.api}/upload`,
-        UPLOAD_STATUS: `${this.contract.api}/upload-check`,
-        UPLOAD_REQUEST: `${this.contract.api}/upload-authorize`
+        UPLOAD: `${apiUrl}/upload`,
+        UPLOAD_STATUS: `${apiUrl}/upload-check`,
+        UPLOAD_REQUEST: `${apiUrl}/upload-authorize`
       };
       const defaultOptions = {
         url: ENDPOINTS.UPLOAD,
@@ -1555,35 +1912,84 @@ export default {
           this.completedFiles = 0
         },
         onProgress: (e, f) => {
-          console.log('options.onProgress', e, f, this.FileInfo, this.File, this.File[this.FileInfo[f.name].index])
-          this.File[this.FileInfo[f.name].index].actions.pause = true
-          this.File[this.FileInfo[f.name].index].actions.resume = false
-          this.File[this.FileInfo[f.name].index].actions.cancel = true
-          this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total * 100
-          this.FileInfo[f.name].status = this.File[this.FileInfo[f.name].index].progress < 100 ? `uploading(${this.File[this.FileInfo[f.name].index].progress}%)` : 'done'
+          console.log('options.onProgress', e, f)
+          
+          // Safety check - ensure FileInfo entry exists
+          if (!this.FileInfo[f.name]) {
+            console.warn(`FileInfo entry not found for file: ${f.name}`);
+            return;
+          }
+          
+          const fileIndex = this.FileInfo[f.name].index;
+          const fileData = this.File[fileIndex];
+          
+          // Safety check - ensure File array entry exists
+          if (!fileData) {
+            console.warn(`File array entry not found at index ${fileIndex} for file: ${f.name}`);
+            return;
+          }
+          
+          // Update file actions and progress
+          if (fileData.actions) {
+            fileData.actions.pause = true;
+            fileData.actions.resume = false;
+            fileData.actions.cancel = true;
+          }
+          
+          const progress = e.loaded / e.total * 100;
+          fileData.progress = progress;
+          this.FileInfo[f.name].status = progress < 100 ? `uploading(${Math.round(progress)}%)` : 'done';
           
           // Update combined progress tracking
-          this.uploadInProgress = true
+          this.uploadInProgress = true;
           if (f.cid) {
             this.fileProgress[f.cid] = {
               loaded: e.loaded,
               total: e.total,
-              percentage: e.loaded / e.total * 100,
+              percentage: progress,
               size: f.size
-            }
+            };
           }
         },
         onError: (e, f) => {
           console.log('options.onError', e, f)
-          if (e.name) {
-            this.FileInfo[e.name].status = '!!ERROR!!'
-            this.File[this.FileInfo[e.name].index].actions.pause = false
-            this.File[this.FileInfo[e.name].index].actions.resume = true
-            this.File[this.FileInfo[e.name].index].actions.cancel = true
+          
+          const fileName = f?.name || e?.file?.name || e?.name;
+          if (!fileName) {
+            console.error('Error occurred but could not determine file name', e);
+            return;
+          }
+          
+          // Log detailed error information
+          if (e.type === 'timeout') {
+            console.error(`Upload timeout for ${fileName}:`, e.message);
+          } else if (e.type === 'network') {
+            console.error(`Network error for ${fileName}:`, e.message);
+          } else if (e.status) {
+            console.error(`HTTP error ${e.status} for ${fileName}:`, e.response || e.statusText);
+          } else {
+            console.error(`Unknown error for ${fileName}:`, e);
+          }
+          
+          // Update FileInfo status if it exists
+          if (this.FileInfo[fileName]) {
+            this.FileInfo[fileName].status = '!!ERROR!!';
+            
+            const fileIndex = this.FileInfo[fileName].index;
+            const fileData = this.File[fileIndex];
+            
+            // Update file actions if the file entry exists
+            if (fileData && fileData.actions) {
+              fileData.actions.pause = false;
+              fileData.actions.resume = true;
+              fileData.actions.cancel = true;
+            }
           }
         },
         onComplete: (e, f) => {
           console.log('options.onComplete', e, f)
+          
+          // Mark file as fully uploaded
           this.File[this.FileInfo[f.name].index].actions.pause = false
           this.File[this.FileInfo[f.name].index].actions.resume = false
           this.File[this.FileInfo[f.name].index].actions.cancel = false
@@ -1602,6 +2008,7 @@ export default {
             this.completedFiles++
           }
           
+          // Check if all files are uploaded
           var done = true
           for (var file in this.FileInfo) {
             if (this.FileInfo[file].status != 'done') {
@@ -1609,20 +2016,21 @@ export default {
               break;
             }
           }
+          
+          // If all files are uploaded, perform final actions
           if (done) {
             setTimeout(() => {
               this.uploadInProgress = false
-              this.$emit('done', { // Emit 'done' with the necessary payload
-                  contractId: this.contract.i,
-                  metadata: this.finalMetadataString, // Assuming this is available or can be made available
-                  // diff: optional if using diffs
+              this.$emit('done', {
+                contractId: this.contract.i,
+                metadata: this.finalMetadataString
               });
-              // Clear file arrays after successful upload and emitting 'done'
+              
+              // Reset component state
               this.File = [];
               this.FileInfo = {};
-              this.fileInput = []; // also clear the fileInput if it's being used to track original files
-              this.showFileDetails = false; // Optionally hide details view
-              // any other cleanup specific to your component's data
+              this.fileInput = [];
+              this.showFileDetails = false;
             }, 5000)
           }
         }
@@ -1633,27 +2041,53 @@ export default {
         const chunk = file.slice(options.startingByte);
 
         formData.append('chunk', chunk);
-        // Add cids and meta to the form data instead of headers
-        formData.append('cids', options.cids);
-        formData.append('meta', options.meta);
-        console.log(options)
+        
+        console.log('uploadFileChunks options:', options)
+        console.log(`Uploading chunk for file: ${file.name}, CID: ${options.cid}, Contract: ${options.contract.i}`);
         req.open('POST', options.url, true);
         req.setRequestHeader(
-          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size}/${file.size}`
+          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size - 1}/${file.size}`
         );
         req.setRequestHeader('X-Cid', options.cid);
         req.setRequestHeader('X-Contract', options.contract.i);
         req.setRequestHeader('X-Sig', options.contract.fosig);
         req.setRequestHeader('X-Account', options.contract.t);
-        // req.setRequestHeader('X-Files', options.cids); // Removed
-        // req.setRequestHeader('X-Meta', options.meta); // Removed
-
 
         req.onload = (e) => {
           if (req.status === 200) {
+            console.log(`Upload chunk successful for ${file.name}`, req.responseText);
+            
+            // Log all response headers for debugging
+            const allHeaders = req.getAllResponseHeaders();
+            console.log(`All response headers for ${file.name}:`, allHeaders);
+            
+            // Log specific headers
+            console.log(`Response headers for ${file.name}:`, {
+              'content-type': req.getResponseHeader('content-type'),
+              'x-upload-status': req.getResponseHeader('x-upload-status'),
+              'x-file-persisted': req.getResponseHeader('x-file-persisted'),
+              'x-cid': req.getResponseHeader('x-cid'),
+              'x-contract': req.getResponseHeader('x-contract')
+            });
+            
+            // Parse response if it's JSON
+            let responseData = req.responseText;
+            try {
+              responseData = JSON.parse(req.responseText);
+              console.log(`Parsed response for ${file.name}:`, responseData);
+            } catch (err) {
+              console.log(`Response is not JSON for ${file.name}, raw text:`, req.responseText);
+            }
+            
             options.onComplete(e, file);
           } else {
-            options.onError(e, file);
+            console.error(`Upload chunk failed for ${file.name}. Status: ${req.status}`, req.responseText);
+            options.onError({
+              status: req.status,
+              statusText: req.statusText,
+              response: req.responseText,
+              file: file
+            }, file);
           }
         };
 
@@ -1667,11 +2101,19 @@ export default {
           }, file);
         };
 
-        req.ontimeout = (e) => options.onError(e, file);
+        req.timeout = 30000; // 30 second timeout per chunk
+
+        req.ontimeout = (e) => {
+          console.error(`Upload timeout for ${file.name} after 30 seconds`);
+          options.onError({ type: 'timeout', message: 'Upload timed out after 30 seconds', file: file }, file);
+        };
 
         req.onabort = (e) => options.onAbort(e, file);
 
-        req.onerror = (e) => options.onError(e, file);
+        req.onerror = (e) => {
+          console.error(`Upload network error for ${file.name}`, e);
+          options.onError({ type: 'network', message: 'Network error during upload', file: file }, file);
+        };
 
         this.fileRequests[options.cid].request = req;
 
@@ -1679,34 +2121,70 @@ export default {
       };
       const uploadFile = (file, options, cid) => {
         console.log('Uploading', cid, options, file)
+        console.log('Upload authorization headers:', {
+          'Content-Type': 'application/json',
+          'X-Sig': options.contract.fosig,
+          'X-Account': options.contract.t,
+          'X-Contract': options.contract.i,
+          'X-Cid': cid,
+          'X-Chain': 'HIVE'
+        });
+        console.log('Contract files string:', options.contract.files);
+        console.log('CIDs array:', options.cids);
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
-          method: 'POST', // Changed from GET to POST
+          method: 'POST', // Changed back to POST as per GitHub reference
           headers: {
-            'Content-Type': 'application/json', // Added Content-Type
+            'Content-Type': 'application/json',
             'X-Sig': options.contract.fosig,
             'X-Account': options.contract.t,
             'X-Contract': options.contract.i,
             'X-Cid': cid,
-            // 'X-Files': options.contract.files, // Moved to body
-            // 'X-Meta': options.meta, // Moved to body
             'X-Chain': 'HIVE'
           },
-          body: JSON.stringify({ // Added body with cids and meta
-            files: options.contract.files, 
+          body: JSON.stringify({ // Added body with files and meta
+            files: options.contract.files,
             meta: options.meta
           })
         })
-          .then(res => res.json())
           .then(res => {
-            console.log('Chunking', options, file)
-            options = { ...options, ...res };
+            console.log(`Upload authorization response status: ${res.status}`);
+            
+            // Log response headers before parsing JSON
+            const responseHeaders = {};
+            res.headers.forEach((value, key) => {
+              responseHeaders[key] = value;
+            });
+            console.log('Upload authorization response headers:', responseHeaders);
+            
+            if (!res.ok) {
+              // Try to get error details from response body
+              return res.text().then(errorText => {
+                console.error('Upload authorization error response:', errorText);
+                throw new Error(`Upload authorization failed with status ${res.status}: ${errorText || res.statusText}`);
+              });
+            }
+            return res.json();
+          })
+          .then(jsonData => {
+            console.log('Upload authorization JSON response:', jsonData);
+            console.log('Authorized CIDs from server:', jsonData.authorized);
+            console.log('Attempting to upload CID:', cid);
+            console.log('Is this CID authorized?', jsonData.authorized && jsonData.authorized.includes(cid));
+            console.log('Starting chunked upload for file:', file.name);
+            
+            options = { ...options, ...jsonData };
             options.cid = cid
             this.fileRequests[cid] = { request: null, options }
             uploadFileChunks(file, options);
           })
           .catch(e => {
-            console.log(e)
-            options.onError({ ...e, file })
+            console.error('Upload authorization failed:', e);
+            options.onError({ 
+              type: 'authorization', 
+              message: e.message || 'Failed to authorize upload',
+              error: e,
+              file: file 
+            });
           })
       };
       const abortFileUpload = (file) => {
