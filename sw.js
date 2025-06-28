@@ -1,4 +1,4 @@
-this.version = "2025.06.28.3";
+this.version = "2025.06.28.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.28.09",
-  "generated": "2025-06-28T16:18:25Z",
+  "version": "2025.06.28.4",
+  "generated": "2025-06-28T16:18:37Z",
   "files": {
-    "/js/indexvue.js": {
-      "checksum": "361f81aaa9cf5523af1a4e8a03e53267",
-      "size": 28461,
-      "priority": "important"
-    },
     "/js/ipfs-video-init.js": {
       "checksum": "c75d1369a0ad094a5fbda2cc3471c8f0",
       "size": 847,
@@ -1052,11 +1047,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
-      "checksum": "73423967cc7656f344cf497626de181f",
-      "size": 157372,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
       "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
       "size": 161126,
@@ -1222,12 +1212,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
