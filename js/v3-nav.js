@@ -3,6 +3,10 @@ import StWidget from "/js/stwidget.js";
 import SwMonitor from "/js/sw-monitor.js";
 import Mcommon from "/js/methods-common.js";
 
+// Add VR Presence component import (add this near other imports)
+// VR Presence component for managing VR spaces
+import VRPresence from '/js/vr-presence.js';
+
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
 export default {
@@ -141,11 +145,16 @@ export default {
       pendingConfirmResolve: null,
       pendingConfirmReject: null,
       walletState: Date.now(), // Add this to force reactivity
+      
+      // VR-specific data
+      vrActiveSpace: null,
+      showVRPresence: false // Control VR presence visibility
     };
   },
   components: {
     "toast-vue": ToastVue,
     "sw-monitor": SwMonitor,
+    VRPresence
   },
   emits: ["login", "logout", "refresh", "ack", "store-new-account"],
   props: {
@@ -571,6 +580,46 @@ export default {
           break;
         case 'sign-transaction':
           this.handleSignTransactionRequest(event.data, event.source, event.origin);
+          break;
+        case 'sign-only':
+          this.handleSignOnlyRequest(event.data, event.source, event.origin);
+          break;
+        case 'sign-challenge':
+          this.handleSignChallengeRequest(event.data, event.source, event.origin);
+          break;
+        case 'request-navigation':
+          this.handleNavigationRequest(event.data, event.source, event.origin);
+          break;
+        case 'requestVRAuth':
+          this.handleVRAuthRequest(event.data, event.source, event.origin);
+          break;
+        case 'vr-show-presence':
+          this.handleVRShowPresenceRequest(event.data, event.source, event.origin);
+          break;
+        case 'vr-hide-presence':
+          this.handleVRHidePresenceRequest(event.data, event.source, event.origin);
+          break;
+        // Device pairing and connection
+        case 'request-device-pairing':
+          this.handleDevicePairingRequest(event.data, event.source, event.origin);
+          break;
+        case 'connect-to-device':
+          this.handleDeviceConnectionRequest(event.data, event.source, event.origin);
+          break;
+        case 'disconnect-device':
+          this.handleDeviceDisconnectionRequest(event.data, event.source, event.origin);
+          break;
+        case 'request-remote-sign':
+          this.handleRemoteSignRequest(event.data, event.source, event.origin);
+          break;
+        case 'request-remote-sign-challenge':
+          this.handleRemoteSignChallengeRequest(event.data, event.source, event.origin);
+          break;
+        case 'poll-device-requests':
+          this.handleDeviceRequestsPolling(event.data, event.source, event.origin);
+          break;
+        case 'respond-to-device-request':
+          this.handleDeviceRequestResponse(event.data, event.source, event.origin);
           break;
         default:
           console.warn('[NavVue] Unhandled message type:', event.data.type);
@@ -5357,6 +5406,176 @@ export default {
       }
       this.walletState = Date.now();
     },
+
+    /**
+     * Handle VR authentication requests from child component
+     */
+    async handleVRAuthRequest(challenge, spaceType, spaceId) {
+      try {
+        // Use existing signing infrastructure
+        const signature = await this.signChallenge(challenge, 'posting');
+        return signature;
+      } catch (error) {
+        console.error('VR authentication failed:', error);
+        throw error;
+      }
+    },
+
+    /**
+     * Send wallet message for VR operations
+     */
+    sendWalletMessage(type, data) {
+      return new Promise((resolve, reject) => {
+        const messageId = data.messageId || ('vr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9));
+        
+        // Handle different VR message types
+        if (type === 'sign_challenge' && data.challenge) {
+          this.signChallenge(data.challenge, data.keyType || 'posting')
+            .then(signature => resolve({ signature }))
+            .catch(reject);
+          return;
+        }
+
+        if (type === 'requestVRAuth') {
+          this.handleVRAuthRequest(data.challenge, data.spaceType, data.spaceId)
+            .then(signature => resolve({ signature }))
+            .catch(reject);
+          return;
+        }
+
+        // Fallback to existing wallet message handling
+        this.sendWalletResponse(messageId, null, 'Unknown VR message type', window, window.location.origin);
+        reject(new Error('Unknown VR message type: ' + type));
+      });
+    },
+
+    /**
+     * Initialize VR presence system
+     */
+    initVRPresence() {
+      // Set up VR-related event listeners
+      window.addEventListener('vr:auth_required', this.handleVRAuthRequired);
+      window.addEventListener('vr:space_joined', this.handleVRSpaceJoined);
+      window.addEventListener('vr:space_left', this.handleVRSpaceLeft);
+    },
+
+    /**
+     * Handle VR authentication required event
+     */
+    handleVRAuthRequired(event) {
+      const { challenge, spaceType, spaceId } = event.detail;
+      this.handleVRAuthRequest(challenge, spaceType, spaceId)
+        .then(signature => {
+          window.dispatchEvent(new CustomEvent('vr:auth_success', {
+            detail: { signature, challenge }
+          }));
+        })
+        .catch(error => {
+          window.dispatchEvent(new CustomEvent('vr:auth_error', {
+            detail: { error: error.message }
+          }));
+        });
+    },
+
+    /**
+     * Handle VR space joined event
+     */
+    handleVRSpaceJoined(event) {
+      const { space, credentials } = event.detail;
+      console.log('VR space joined:', space);
+      
+      // Optionally update UI to show VR active state
+      this.vrActiveSpace = space;
+      
+      // Show toast notification
+      this.showToast({
+        title: 'VR Space Joined',
+        message: `Successfully joined ${space.display_name || space.spaceId}`,
+        type: 'success'
+      });
+    },
+
+    /**
+     * Handle VR space left event
+     */
+    handleVRSpaceLeft(event) {
+      console.log('VR space left');
+      this.vrActiveSpace = null;
+      
+      this.showToast({
+        title: 'VR Session Ended',
+        message: 'You have left the VR space',
+        type: 'info'
+      });
+    },
+
+    /**
+     * Handle VR show presence request from apps
+     */
+    async handleVRShowPresenceRequest(message, sourceWindow, sourceOrigin) {
+      try {
+        const { source } = message.data;
+        console.log('[NavVue] VR presence show requested by:', source || sourceOrigin);
+        
+        this.showVRPresence = true;
+        
+        this.sendWalletResponse(message.id, { success: true }, null, sourceWindow, sourceOrigin);
+      } catch (error) {
+        console.error('[NavVue] Error showing VR presence:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    /**
+     * Handle VR hide presence request from apps
+     */
+    async handleVRHidePresenceRequest(message, sourceWindow, sourceOrigin) {
+      try {
+        const { source } = message.data;
+        console.log('[NavVue] VR presence hide requested by:', source || sourceOrigin);
+        
+        this.showVRPresence = false;
+        
+        this.sendWalletResponse(message.id, { success: true }, null, sourceWindow, sourceOrigin);
+      } catch (error) {
+        console.error('[NavVue] Error hiding VR presence:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    /**
+     * Handle VR presence component events
+     */
+    onVRPresenceShown(data) {
+      console.log('[NavVue] VR presence shown:', data);
+    },
+
+    onVRPresenceHidden(data) {
+      console.log('[NavVue] VR presence hidden:', data);
+    },
+
+    /**
+     * Show toast notification (enhanced for VR presence component)
+     */
+    showToast(data) {
+      // Add to ops array for toast display
+      const toastOp = {
+        id: Date.now(),
+        txid: null,
+        status: data.type || 'info',
+        result: data.message,
+        ts: Date.now(),
+        type: data.title || 'Notification',
+        api: null
+      };
+      
+      this.ops.unshift(toastOp);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        this.ops = this.ops.filter(op => op.id !== toastOp.id);
+      }, 5000);
+    }
   },
   async mounted() {
 
@@ -5499,6 +5718,9 @@ export default {
       window.removeEventListener("resize", handleResize);
       removeDropdownHoverListeners();
     };
+
+    // Initialize VR presence system
+    this.initVRPresence();
   },
   beforeUnmount() {
     if (this._cleanup) {
@@ -5508,6 +5730,11 @@ export default {
     // Cleanup device connections
     this.stopDevicePolling();
     this.disconnectDeviceWebSocket();
+    
+    // Clean up VR event listeners
+    window.removeEventListener('vr:auth_required', this.handleVRAuthRequired);
+    window.removeEventListener('vr:space_joined', this.handleVRSpaceJoined);
+    window.removeEventListener('vr:space_left', this.handleVRSpaceLeft);
   },
   computed: {
     avatar: {
@@ -5650,6 +5877,15 @@ export default {
           </li>
         </ul>
       </li>
+      <!-- VR Presence Component (conditional based on app requests) -->
+      <VRPresence 
+        v-if="showVRPresence && user" 
+        :user="user" 
+        :parentComponent="this"
+        ref="vrPresence" 
+        @vr-presence-shown="onVRPresenceShown"
+        @vr-presence-hidden="onVRPresenceHidden"
+      />
       <li class="nav-bell dropdown nav-dropdown dropdown-end">
         <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center justify-content-center nav-link nav-highlight" href="#" role="button" 
            data-bs-toggle="dropdown" aria-expanded="false">
@@ -6604,7 +6840,7 @@ export default {
           </div>
         </div>
       </div>
-    </div>
-  </teleport>
-</div>`,
+          </div>
+    </teleport>
+  </div>`,
 };

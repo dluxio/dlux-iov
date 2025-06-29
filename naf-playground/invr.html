@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<!--
+    InVR - Collaborative VR Scene Editor
+    
+    Full VR experience with:
+    - WebXR support for VR headsets
+    - Networked A-Frame for VR avatars and presence
+    - Spatial audio for communication
+    - Hand tracking for entity manipulation
+    - Integration with DLUX VR presence system
+    
+    URL Parameters:
+    - room: Collaboration room ID (e.g., ?room=project-alpha)
+    - invite: Invitation token for private sessions
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>InVR - Collaborative VR Scene Editor</title>
+    <meta name="description" content="Real-time collaborative VR scene building in virtual reality">
+    
+    <!-- A-Frame Core -->
+    <script src="aframe/aframe.min.js"></script>
+    <!-- A-Frame Environment Component -->
+    <script src="js/aframe-environment-component.min.js"></script>
+    <!-- A-Frame Extras for Controls -->
+    <script src="js/aframe-extras.min.js"></script>
+    <!-- Networked A-Frame for VR Presence -->
+    <script src="aframe/networked-aframe.min.js"></script>
+    
+    <!-- YDoc for Real-time Collaboration -->
+    <script src="https://cdn.jsdelivr.net/npm/yjs@13.6.8/dist/yjs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/y-websocket@1.5.0/dist/y-websocket.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/y-protocols@1.0.6/dist/y-protocols.js"></script>
+    
+    <!-- DLUX Wallet for Secure Communication -->
+    <script src="/js/dlux-wallet.js"></script>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/invr-styles.css">
+    <link href="/css/font-awesome.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+        
+        /* VR-Ready UI Overlay */
+        .vr-ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        /* VR Status Panel */
+        .vr-status-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: auto;
+            min-width: 250px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .vr-status-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+        
+        .vr-status-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.connected { background: #00ff88; }
+        .status-indicator.connecting { background: #ffaa00; }
+        .status-indicator.disconnected { background: #ff4444; }
+        
+        /* VR Entry Button */
+        .vr-entry-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            pointer-events: auto;
+            max-width: 400px;
+        }
+        
+        .vr-entry-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+        
+        .vr-entry-description {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .vr-enter-btn {
+            background: linear-gradient(45deg, #00ff88, #0088ff);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .vr-enter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        .vr-enter-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Desktop Fallback Controls */
+        .desktop-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            pointer-events: auto;
+        }
+        
+        .control-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border: 2px solid #00ff88;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* User List in VR */
+        .vr-user-list {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            pointer-events: auto;
+            max-width: 200px;
+        }
+        
+        .vr-user-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .user-avatar-small {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        /* VR Hand Menus */
+        .hand-menu {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #00ff88;
+        }
+        
+        .hand-menu-item {
+            padding: 8px;
+            margin: 4px 0;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .hand-menu-item:hover {
+            background: rgba(0, 255, 136, 0.3);
+        }
+        
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 2000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 136, 0.3);
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div>Initializing InVR Collaborative Editor...</div>
+        <div style="font-size: 14px; opacity: 0.7; margin-top: 10px;">
+            Connecting to VR presence system...
+        </div>
+    </div>
+
+    <!-- VR UI Overlay -->
+    <div class="vr-ui-overlay" id="vr-overlay">
+        <!-- VR Entry Panel -->
+        <div id="vr-entry-panel" class="vr-entry-panel">
+            <div class="vr-entry-title">🥽 InVR Collaborative Editor</div>
+            <div class="vr-entry-description">
+                Build VR scenes together in real-time with spatial presence, 
+                hand tracking, and voice communication.
+            </div>
+            <button id="enter-vr-btn" class="vr-enter-btn">Enter VR</button>
+            <button id="enter-desktop-btn" class="vr-enter-btn">Desktop Mode</button>
+            <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                Room: <span id="current-room">Loading...</span>
+            </div>
+        </div>
+
+        <!-- VR Status Panel -->
+        <div id="vr-status-panel" class="vr-status-panel" style="display: none;">
+            <div class="vr-status-title">🔗 Connection Status</div>
+            <div class="vr-status-item">
+                <span class="status-indicator disconnected" id="collab-status"></span>
+                Collaboration: <span id="collab-text">Connecting...</span>
+            </div>
+            <div class="vr-status-item">
+                <span class="status-indicator disconnected" id="presence-status"></span>
+                VR Presence: <span id="presence-text">Connecting...</span>
+            </div>
+            <div class="vr-status-item">
+                <span class="status-indicator disconnected" id="audio-status"></span>
+                Spatial Audio: <span id="audio-text">Initializing...</span>
+            </div>
+        </div>
+
+        <!-- VR User List -->
+        <div id="vr-user-list" class="vr-user-list" style="display: none;">
+            <div style="font-weight: bold; margin-bottom: 10px; color: #00ff88;">
+                👥 Users (<span id="user-count">1</span>)
+            </div>
+            <div id="user-list-content">
+                <!-- Users will be populated here -->
+            </div>
+        </div>
+
+        <!-- Desktop Controls -->
+        <div id="desktop-controls" class="desktop-controls" style="display: none;">
+            <button class="control-btn" id="create-box-btn">📦 Add Box</button>
+            <button class="control-btn" id="create-sphere-btn">⚪ Add Sphere</button>
+            <button class="control-btn" id="create-light-btn">💡 Add Light</button>
+            <button class="control-btn" id="toggle-physics-btn">⚡ Physics</button>
+            <button class="control-btn" id="save-scene-btn">💾 Save</button>
+        </div>
+    </div>
+
+    <!-- A-Frame VR Scene -->
+    <a-scene
+        id="invr-vr-scene"
+        networked-scene="
+            room: invr-collab;
+            connectOnLoad: false;
+            adapter: wseasyrtc;
+            serverURL: wss://presence.dlux.io/api/naf;
+        "
+        vr-mode-ui="enabled: true"
+        device-orientation-permission-ui="enabled: false"
+        background="color: #001122">
+        
+        <!-- Assets -->
+        <a-assets>
+            <!-- Avatar Templates -->
+            <template id="avatar-template">
+                <a-entity class="vr-avatar" networked-audio-source>
+                    <!-- Head -->
+                    <a-sphere 
+                        class="avatar-head"
+                        radius="0.15"
+                        position="0 0 0"
+                        material="color: #00ff88; metalness: 0.2; roughness: 0.8">
+                    </a-sphere>
+                    
+                    <!-- Body -->
+                    <a-cylinder 
+                        class="avatar-body"
+                        radius="0.1"
+                        height="0.6"
+                        position="0 -0.4 0"
+                        material="color: #0088ff; metalness: 0.2; roughness: 0.8">
+                    </a-cylinder>
+                    
+                    <!-- Name Tag -->
+                    <a-text 
+                        class="avatar-nametag"
+                        position="0 0.4 0"
+                        align="center"
+                        scale="0.8 0.8 0.8"
+                        value=""
+                        color="#ffffff"
+                        background>
+                    </a-text>
+                    
+                    <!-- Voice Indicator -->
+                    <a-sphere 
+                        class="voice-indicator"
+                        radius="0.05"
+                        position="0.2 0.1 0"
+                        material="color: #00ff00; transparent: true; opacity: 0"
+                        animation__pulse="
+                            property: scale;
+                            to: 1.5 1.5 1.5;
+                            dur: 500;
+                            easing: easeInOutQuad;
+                            loop: true;
+                            dir: alternate;
+                            pauseEvents: voice-started;
+                            resumeEvents: voice-stopped">
+                    </a-sphere>
+                </a-entity>
+            </template>
+
+            <!-- Hand Templates -->
+            <template id="left-hand-template">
+                <a-entity class="vr-hand left-hand">
+                    <a-sphere radius="0.05" material="color: #00ff88"></a-sphere>
+                    <a-text 
+                        position="0 0.1 0" 
+                        align="center" 
+                        scale="0.3 0.3 0.3" 
+                        value="L"
+                        color="#ffffff">
+                    </a-text>
+                </a-entity>
+            </template>
+
+            <template id="right-hand-template">
+                <a-entity class="vr-hand right-hand">
+                    <a-sphere radius="0.05" material="color: #ff8800"></a-sphere>
+                    <a-text 
+                        position="0 0.1 0" 
+                        align="center" 
+                        scale="0.3 0.3 0.3" 
+                        value="R"
+                        color="#ffffff">
+                    </a-text>
+                </a-entity>
+            </template>
+
+            <!-- Entity Creation Templates -->
+            <template id="entity-box-template">
+                <a-box class="collab-entity grabbable" 
+                       material="color: #4CC3D9" 
+                       networked-transform>
+                </a-box>
+            </template>
+
+            <template id="entity-sphere-template">
+                <a-sphere class="collab-entity grabbable" 
+                          radius="0.5"
+                          material="color: #EF2D5E" 
+                          networked-transform>
+                </a-sphere>
+            </template>
+
+            <!-- Environment Assets -->
+            <a-mixin id="checkpoint" 
+                     geometry="primitive: ring; radiusInner: 1.5; radiusOuter: 2"
+                     material="color: #00ff88; transparent: true; opacity: 0.6"
+                     rotation="-90 0 0">
+            </a-mixin>
+        </a-assets>
+
+        <!-- VR Camera Rig with Hand Tracking -->
+        <a-entity id="vr-camera-rig" 
+                  networked="template: #avatar-template; attachTemplateToLocal: false"
+                  position="0 1.6 3">
+            
+            <!-- VR Camera -->
+            <a-camera 
+                id="vr-camera"
+                look-controls="pointerLockEnabled: false"
+                wasd-controls="fly: false; acceleration: 20"
+                networked="template: #head-template; attachTemplateToLocal: false">
+                
+                <!-- Spatial Audio Listener -->
+                <a-sound id="spatial-audio-listener" 
+                         positional="true"
+                         pool="size: 10">
+                </a-sound>
+            </a-camera>
+
+            <!-- Left Hand Controller -->
+            <a-entity id="left-hand" 
+                      hand-controls="hand: left; handModelStyle: lowPoly; color: #00ff88"
+                      networked="template: #left-hand-template; attachTemplateToLocal: false"
+                      laser-controls="hand: left"
+                      raycaster="objects: .grabbable, .ui-element; far: 50"
+                      line="color: #00ff88; opacity: 0.5">
+                
+                <!-- Hand Menu -->
+                <a-entity id="left-hand-menu" 
+                          class="hand-menu"
+                          position="0 0.2 -0.3"
+                          rotation="-45 0 0"
+                          visible="false">
+                    <a-plane width="0.4" height="0.6" color="#000000" opacity="0.8"></a-plane>
+                    <a-text position="0 0.25 0.01" align="center" value="CREATE" scale="0.8 0.8 0.8" color="#00ff88"></a-text>
+                    <a-text position="0 0.1 0.01" align="center" value="📦 Box" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="create-box"></a-text>
+                    <a-text position="0 0 0.01" align="center" value="⚪ Sphere" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="create-sphere"></a-text>
+                    <a-text position="0 -0.1 0.01" align="center" value="💡 Light" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="create-light"></a-text>
+                    <a-text position="0 -0.2 0.01" align="center" value="🗑️ Delete" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="delete-selected"></a-text>
+                </a-entity>
+            </a-entity>
+
+            <!-- Right Hand Controller -->
+            <a-entity id="right-hand" 
+                      hand-controls="hand: right; handModelStyle: lowPoly; color: #ff8800"
+                      networked="template: #right-hand-template; attachTemplateToLocal: false"
+                      laser-controls="hand: right"
+                      raycaster="objects: .grabbable, .ui-element; far: 50"
+                      line="color: #ff8800; opacity: 0.5">
+                
+                <!-- Transform Controls -->
+                <a-entity id="right-hand-menu" 
+                          class="hand-menu"
+                          position="0 0.2 -0.3"
+                          rotation="-45 0 0"
+                          visible="false">
+                    <a-plane width="0.4" height="0.6" color="#000000" opacity="0.8"></a-plane>
+                    <a-text position="0 0.25 0.01" align="center" value="TRANSFORM" scale="0.8 0.8 0.8" color="#ff8800"></a-text>
+                    <a-text position="0 0.1 0.01" align="center" value="📐 Scale" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="scale-mode"></a-text>
+                    <a-text position="0 0 0.01" align="center" value="🔄 Rotate" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="rotate-mode"></a-text>
+                    <a-text position="0 -0.1 0.01" align="center" value="📍 Move" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="move-mode"></a-text>
+                    <a-text position="0 -0.2 0.01" align="center" value="🎨 Color" scale="0.6 0.6 0.6" class="hand-menu-item" data-action="color-picker"></a-text>
+                </a-entity>
+            </a-entity>
+        </a-entity>
+
+        <!-- Scene Content Container -->
+        <a-entity id="vr-scene-content">
+            <!-- Collaborative entities will be spawned here -->
+        </a-entity>
+
+        <!-- Environment -->
+        <a-entity environment="
+            preset: forest;
+            groundColor: #445;
+            grid: 2x2;
+            gridColor: #00ff88;
+            playArea: 20">
+        </a-entity>
+
+        <!-- Lighting -->
+        <a-light type="ambient" color="#404040" intensity="0.4"></a-light>
+        <a-light type="directional" position="1 4 2" color="#ffffff" intensity="0.8" 
+                 shadow="type: pcfsoft; autoUpdate: true; cascade: true"></a-light>
+
+        <!-- Workspace Grid -->
+        <a-plane id="workspace-grid" 
+                 position="0 0 0" 
+                 rotation="-90 0 0" 
+                 width="20" 
+                 height="20" 
+                 material="
+                    wireframe: true; 
+                    color: #00ff88; 
+                    opacity: 0.3; 
+                    transparent: true"
+                 visible="true">
+        </a-plane>
+
+        <!-- Spawn Points for New Users -->
+        <a-entity id="spawn-point-1" mixin="checkpoint" position="2 0.1 2"></a-entity>
+        <a-entity id="spawn-point-2" mixin="checkpoint" position="-2 0.1 2"></a-entity>
+        <a-entity id="spawn-point-3" mixin="checkpoint" position="0 0.1 -2"></a-entity>
+
+        <!-- Voice Chat Zones -->
+        <a-sphere id="voice-zone" 
+                  position="0 2 0" 
+                  radius="10" 
+                  material="color: #00ff88; transparent: true; opacity: 0.1"
+                  class="voice-zone">
+        </a-sphere>
+    </a-scene>
+
+    <!-- Scripts -->
+    <script type="module">
+        import { InVRCollaborativeVREditor } from './js/invr-vr-editor.js';
+        
+        // Initialize the VR collaborative editor
+        const vrEditor = new InVRCollaborativeVREditor();
+        
+        // Make it globally available for debugging
+        window.invrVREditor = vrEditor;
+        
+        // Start the VR application
+        vrEditor.initialize().then(() => {
+            console.log('InVR VR Editor initialized successfully');
+            document.getElementById('loading-screen').style.display = 'none';
+        }).catch(error => {
+            console.error('Failed to initialize InVR VR:', error);
+            document.getElementById('loading-screen').innerHTML = `
+                <div style="color: #ff4444; text-align: center;">
+                    <h2>Failed to Initialize VR Editor</h2>
+                    <p>${error.message}</p>
+                    <button onclick="location.reload()" style="
+                        background: #ff4444; 
+                        color: white; 
+                        border: none; 
+                        padding: 10px 20px; 
+                        border-radius: 4px; 
+                        cursor: pointer;">
+                        Retry
+                    </button>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html> 

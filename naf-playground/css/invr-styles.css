@@ -1,0 +1,1150 @@
+/**
+ * InVR Collaborative Editor Styles
+ * Additional styles for enhanced collaboration features
+ */
+
+/* Entity Selection and Highlighting */
+.collab-entity {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.collab-entity:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+.collab-entity.selected {
+    outline: 3px solid #007bff !important;
+    outline-offset: 3px;
+    animation: pulse-selection 2s infinite;
+}
+
+@keyframes pulse-selection {
+    0% { outline-color: #007bff; }
+    50% { outline-color: #0056b3; }
+    100% { outline-color: #007bff; }
+}
+
+/* Real-time User Cursors */
+.user-cursor {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border: 2px solid white;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1000;
+    transition: all 0.1s ease;
+}
+
+.user-cursor::after {
+    content: attr(data-username);
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+/* Collaboration Status Enhancements */
+.connection-indicator.connecting {
+    background: #ffc107;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.3; }
+}
+
+.user-avatar.owner {
+    border: 2px solid #ffd700;
+}
+
+.user-avatar.editor {
+    border: 2px solid #28a745;
+}
+
+.user-avatar.viewer {
+    border: 2px solid #6c757d;
+}
+
+/* Entity Property Inspector Enhancements */
+.property-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.property-input.syncing {
+    border-color: #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.property-input.error {
+    border-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Activity Feed Enhancements */
+.activity-item.user-join {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.activity-item.user-leave {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.activity-item.entity-created {
+    color: #007bff;
+}
+
+.activity-item.entity-modified {
+    color: #ffc107;
+}
+
+.activity-item.entity-deleted {
+    color: #dc3545;
+}
+
+.activity-timestamp {
+    color: #6c757d;
+    font-size: 10px;
+}
+
+/* Conflict Resolution UI */
+.conflict-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conflict-dialog {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+}
+
+.conflict-title {
+    color: #dc3545;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.conflict-options {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.conflict-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.conflict-btn.accept {
+    background: #28a745;
+    color: white;
+}
+
+.conflict-btn.reject {
+    background: #dc3545;
+    color: white;
+}
+
+.conflict-btn.merge {
+    background: #007bff;
+    color: white;
+}
+
+/* Entity Transformation Handles */
+.transform-handle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #007bff;
+    border: 2px solid white;
+    border-radius: 2px;
+    cursor: pointer;
+    z-index: 500;
+}
+
+.transform-handle.position {
+    background: #28a745;
+}
+
+.transform-handle.rotation {
+    background: #ffc107;
+    border-radius: 50%;
+}
+
+.transform-handle.scale {
+    background: #dc3545;
+}
+
+/* Loading States */
+.entity-loading {
+    opacity: 0.5;
+    animation: loading-pulse 1s infinite;
+}
+
+@keyframes loading-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 0.8; }
+}
+
+/* Room Management UI */
+.room-info-expanded {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 600;
+    min-width: 300px;
+}
+
+.room-code {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 4px;
+}
+
+.invite-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.invite-link input {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.copy-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Voice Chat Indicators */
+.voice-indicator {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 12px;
+    height: 12px;
+    background: #28a745;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: voice-pulse 1s infinite;
+}
+
+.voice-indicator.muted {
+    background: #dc3545;
+    animation: none;
+}
+
+@keyframes voice-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Performance Monitoring */
+.performance-indicator {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    z-index: 500;
+}
+
+.performance-indicator.good {
+    border-left: 3px solid #28a745;
+}
+
+.performance-indicator.warning {
+    border-left: 3px solid #ffc107;
+}
+
+.performance-indicator.poor {
+    border-left: 3px solid #dc3545;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .entity-palette {
+        left: 5px;
+        width: 150px;
+        top: 45px;
+    }
+    
+    .entity-inspector {
+        right: 5px;
+        width: 200px;
+        top: 45px;
+    }
+    
+    .entity-buttons {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+    
+    .entity-btn {
+        padding: 6px;
+        font-size: 11px;
+    }
+    
+    .activity-feed {
+        bottom: 5px;
+        left: 5px;
+        width: calc(100% - 10px);
+        max-height: 100px;
+    }
+    
+    .collab-status-bar {
+        font-size: 12px;
+        padding: 0 10px;
+    }
+    
+    .user-avatars {
+        display: none; /* Hide on mobile to save space */
+    }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+    .entity-palette,
+    .entity-inspector,
+    .room-info-expanded {
+        background: rgba(33, 37, 41, 0.95);
+        color: white;
+    }
+    
+    .property-input {
+        background: #495057;
+        color: white;
+        border-color: #6c757d;
+    }
+    
+    .entity-btn {
+        background: #495057;
+        border-color: #6c757d;
+    }
+    
+    .entity-btn:hover {
+        background: #6c757d;
+    }
+}
+
+/* Accessibility Improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.entity-btn:focus,
+.property-input:focus,
+.copy-btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .collab-entity.selected {
+        outline: 5px solid #000000;
+    }
+    
+    .connection-indicator.connected {
+        background: #000000;
+    }
+    
+    .user-avatar {
+        border: 3px solid #000000;
+    }
+}
+
+/**
+ * InVR VR Collaborative Editor Styles
+ * Enhanced for full VR experience with spatial presence and hand interactions
+ */
+
+/* Global VR Styles */
+:root {
+    --invr-primary: #00ff88;
+    --invr-secondary: #0088ff;
+    --invr-accent: #ff8800;
+    --invr-error: #ff4444;
+    --invr-warning: #ffaa00;
+    --invr-success: #00ff88;
+    --invr-background: rgba(0, 0, 0, 0.8);
+    --invr-glass: rgba(255, 255, 255, 0.1);
+    --invr-border: rgba(0, 255, 136, 0.3);
+}
+
+/* Body and Scene Setup */
+body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: white;
+}
+
+/* VR Scene Styles */
+a-scene {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* VR UI Overlay System */
+.vr-ui-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1000;
+    font-family: inherit;
+}
+
+.vr-ui-overlay * {
+    box-sizing: border-box;
+}
+
+/* Glass Morphism Effects */
+.glass-panel {
+    background: var(--invr-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--invr-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* VR Entry Panel */
+.vr-entry-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--invr-background);
+    color: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    pointer-events: auto;
+    max-width: 500px;
+    width: 90%;
+    border: 2px solid var(--invr-primary);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+}
+
+.vr-entry-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--invr-primary);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.vr-entry-description {
+    margin-bottom: 30px;
+    line-height: 1.6;
+    opacity: 0.9;
+    font-size: 16px;
+}
+
+.vr-enter-btn {
+    background: linear-gradient(135deg, var(--invr-primary), var(--invr-secondary));
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.vr-enter-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.vr-enter-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 255, 136, 0.4);
+}
+
+.vr-enter-btn:hover::before {
+    left: 100%;
+}
+
+.vr-enter-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* VR Status Panel */
+.vr-status-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: var(--invr-background);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    pointer-events: auto;
+    min-width: 280px;
+    border: 1px solid var(--invr-border);
+    backdrop-filter: blur(10px);
+}
+
+.vr-status-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--invr-primary);
+    font-size: 16px;
+}
+
+.vr-status-item {
+    margin: 8px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 0 0 6px currentColor;
+    transition: all 0.3s ease;
+}
+
+.status-indicator.connected { 
+    background: var(--invr-success);
+    animation: pulse-success 2s infinite;
+}
+
+.status-indicator.connecting { 
+    background: var(--invr-warning);
+    animation: pulse-warning 1s infinite;
+}
+
+.status-indicator.disconnected { 
+    background: var(--invr-error);
+    animation: pulse-error 1.5s infinite;
+}
+
+@keyframes pulse-success {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes pulse-warning {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+@keyframes pulse-error {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* VR User List */
+.vr-user-list {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--invr-background);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    pointer-events: auto;
+    max-width: 250px;
+    border: 1px solid var(--invr-border);
+    backdrop-filter: blur(10px);
+}
+
+.vr-user-item {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 14px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.vr-user-item:hover {
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.user-avatar-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--invr-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+}
+
+/* Desktop Controls */
+.desktop-controls {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    pointer-events: auto;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    background: var(--invr-background);
+    color: white;
+    border: 2px solid var(--invr-primary);
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.control-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(0, 255, 136, 0.1) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.control-btn:hover {
+    background: rgba(0, 255, 136, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+}
+
+.control-btn:hover::before {
+    opacity: 1;
+}
+
+.control-btn:active {
+    transform: translateY(-1px);
+}
+
+/* VR Hand Menu Styles (for in-world VR menus) */
+.hand-menu {
+    background: var(--invr-background);
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid var(--invr-primary);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.hand-menu-item {
+    padding: 10px 15px;
+    margin: 6px 0;
+    background: rgba(0, 255, 136, 0.15);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.hand-menu-item:hover {
+    background: rgba(0, 255, 136, 0.35);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #000 0%, #001122 50%, #000 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 2000;
+    font-family: inherit;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(0, 255, 136, 0.3);
+    border-top: 4px solid var(--invr-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 25px;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-screen > div {
+    margin: 8px 0;
+    text-align: center;
+}
+
+.loading-screen > div:first-of-type {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--invr-primary);
+}
+
+/* VR Entity Interaction Styles */
+.collab-entity {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.collab-entity:hover {
+    filter: brightness(1.2);
+}
+
+.collab-entity.selected {
+    animation: selection-pulse 1s infinite alternate;
+}
+
+@keyframes selection-pulse {
+    0% { 
+        filter: brightness(1); 
+        transform: scale(1);
+    }
+    100% { 
+        filter: brightness(1.3) hue-rotate(20deg); 
+        transform: scale(1.05);
+    }
+}
+
+.collab-entity.grabbed {
+    filter: brightness(1.5) saturate(1.3);
+    animation: grab-wobble 0.5s ease-in-out;
+}
+
+@keyframes grab-wobble {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(1deg); }
+    75% { transform: scale(1.1) rotate(-1deg); }
+}
+
+/* VR Spatial UI Elements */
+.spatial-ui-panel {
+    background: var(--invr-background);
+    border: 2px solid var(--invr-primary);
+    border-radius: 8px;
+    padding: 10px;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.spatial-button {
+    background: rgba(0, 255, 136, 0.2);
+    border: 1px solid var(--invr-primary);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.spatial-button:hover {
+    background: rgba(0, 255, 136, 0.4);
+    transform: scale(1.05);
+}
+
+/* Voice Indicators */
+.voice-indicator {
+    animation: voice-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes voice-pulse {
+    0% { 
+        opacity: 0.3; 
+        transform: scale(0.8);
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1.2);
+    }
+}
+
+/* VR Avatar Enhancements */
+.vr-avatar .avatar-head {
+    animation: avatar-idle 3s ease-in-out infinite;
+}
+
+@keyframes avatar-idle {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-0.02px) rotate(0.5deg); }
+}
+
+.vr-avatar .avatar-nametag {
+    background: var(--invr-background);
+    border: 1px solid var(--invr-primary);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* Hand Tracking Visualization */
+.vr-hand {
+    transition: all 0.2s ease;
+}
+
+.vr-hand.grabbing {
+    animation: hand-grab 0.3s ease-out;
+}
+
+@keyframes hand-grab {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Workspace Grid Enhancements */
+#workspace-grid {
+    animation: grid-pulse 4s ease-in-out infinite;
+}
+
+@keyframes grid-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.5; }
+}
+
+/* Error and Notification Styles */
+.vr-notification {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--invr-background);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    border: 2px solid var(--invr-error);
+    z-index: 1500;
+    pointer-events: auto;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(255, 68, 68, 0.3);
+}
+
+.vr-notification.success {
+    border-color: var(--invr-success);
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.3);
+}
+
+.vr-notification.warning {
+    border-color: var(--invr-warning);
+    box-shadow: 0 0 25px rgba(255, 170, 0, 0.3);
+}
+
+/* Responsive Design for VR */
+@media (max-width: 768px) {
+    .vr-entry-panel {
+        width: 95%;
+        padding: 30px 20px;
+    }
+    
+    .vr-status-panel,
+    .vr-user-list {
+        position: relative;
+        margin: 10px;
+        width: auto;
+    }
+    
+    .desktop-controls {
+        bottom: 20px;
+        gap: 10px;
+    }
+    
+    .control-btn {
+        padding: 10px 15px;
+        font-size: 12px;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    :root {
+        --invr-primary: #00ff00;
+        --invr-background: rgba(0, 0, 0, 0.95);
+        --invr-border: rgba(0, 255, 0, 0.8);
+    }
+    
+    .status-indicator,
+    .user-avatar-small,
+    .control-btn {
+        border-width: 3px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus States for Accessibility */
+.vr-enter-btn:focus,
+.control-btn:focus,
+.hand-menu-item:focus {
+    outline: 3px solid var(--invr-primary);
+    outline-offset: 2px;
+}
+
+/* VR Performance Optimizations */
+.vr-optimized {
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+}
+
+/* Custom Scrollbar for VR UI */
+.vr-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.vr-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.vr-scrollable::-webkit-scrollbar-thumb {
+    background: var(--invr-primary);
+    border-radius: 4px;
+}
+
+.vr-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 136, 0.8);
+}
+
+/* Activity Feed for VR */
+.vr-activity-feed {
+    position: absolute;
+    bottom: 100px;
+    left: 20px;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--invr-background);
+    border: 1px solid var(--invr-border);
+    border-radius: 8px;
+    padding: 15px;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+}
+
+.activity-item {
+    font-size: 12px;
+    margin: 5px 0;
+    opacity: 0.8;
+    animation: activity-fadeIn 0.5s ease-out;
+}
+
+.activity-item.new {
+    opacity: 1;
+    font-weight: 600;
+    color: var(--invr-primary);
+}
+
+@keyframes activity-fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateX(-20px); 
+    }
+    to { 
+        opacity: 0.8; 
+        transform: translateX(0); 
+    }
+}
+
+/* VR Hand Menu Animations */
+.hand-menu {
+    animation: menu-appear 0.3s ease-out;
+}
+
+@keyframes menu-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Spatial Audio Visualizations */
+.audio-visualization {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 20px;
+    background: var(--invr-background);
+    border: 1px solid var(--invr-border);
+    border-radius: 10px;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.audio-level {
+    height: 100%;
+    background: linear-gradient(90deg, var(--invr-success), var(--invr-warning), var(--invr-error));
+    transition: width 0.1s ease;
+    border-radius: 10px;
+}
+
+/* VR Environment Indicators */
+.environment-indicator {
+    position: absolute;
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    background: var(--invr-background);
+    border: 1px solid var(--invr-border);
+    border-radius: 8px;
+    padding: 10px;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+}
+
+.environment-indicator .compass {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--invr-primary);
+    border-radius: 50%;
+    position: relative;
+    margin: 0 auto;
+}
+
+.environment-indicator .compass::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 15px;
+    background: var(--invr-error);
+    border-radius: 1px;
+}
+
+/* Print Styles (for documentation) */
+@media print {
+    .vr-ui-overlay,
+    .loading-screen {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+} 
