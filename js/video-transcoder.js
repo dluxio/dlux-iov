@@ -227,8 +227,9 @@ export default {
             transcodeStartTime: null,
             unsubscribeProgress: null,
             showPreview: false,
-            availableQualities: ['720p'], // Default, will be updated based on transcoding
-            currentQuality: '720p',
+            availableQualities: ['Auto'], // Default, will be updated from HLS manifest
+            currentQuality: 'Auto',
+            qualityLevels: [], // Store level data for quality switching
             blobUrls: {},
             hlsInstance: null,
             transcodedFiles: [],
@@ -995,12 +996,36 @@ export default {
                 
                 this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                     debugLogger.debug('Video manifest loaded and parsed');
+                    
+                    // Populate quality options from HLS levels
+                    const qualities = this.hlsInstance.levels.map((level, index) => ({
+                        index: index,
+                        height: level.height,
+                        bitrate: level.bitrate,
+                        label: `${level.height}p`
+                    }));
+                    
+                    // Add auto option at the beginning
+                    this.availableQualities = ['Auto', ...qualities.map(q => q.label)];
+                    this.currentQuality = 'Auto'; // Start with auto
+                    
+                    // Store level data for switching
+                    this.qualityLevels = [
+                        { index: -1, label: 'Auto' },
+                        ...qualities
+                    ];
+                    
                     // Video is ready to play, hide loading spinner
                     this.videoLoading = false;
                     // Autoplay the video
                     video.play().catch(e => {
                         debugLogger.debug('Autoplay prevented:', e);
                     });
+                });
+                
+                // Listen for quality changes
+                this.hlsInstance.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+                    debugLogger.debug('Quality level switched to:', data.level);
                 });
                 
                 this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
@@ -1049,13 +1074,24 @@ export default {
         },
         
         switchQuality() {
-            // For future implementation when we have multiple qualities
             debugLogger.debug('Switching to quality:', this.currentQuality);
-            // Re-initialize player with new quality
-            this.cleanupPlayer();
-            this.$nextTick(() => {
-                this.initializeHlsPlayer();
-            });
+            
+            if (!this.hlsInstance || !this.qualityLevels) {
+                return;
+            }
+            
+            // Find the selected quality level
+            const selectedLevel = this.qualityLevels.find(q => q.label === this.currentQuality);
+            if (selectedLevel !== undefined) {
+                // Set the quality level (-1 for auto, 0+ for specific levels)
+                this.hlsInstance.currentLevel = selectedLevel.index;
+                
+                if (selectedLevel.index === -1) {
+                    debugLogger.debug('Switched to automatic quality selection');
+                } else {
+                    debugLogger.debug(`Switched to ${selectedLevel.label} (${selectedLevel.bitrate} bps)`);
+                }
+            }
         },
         
         onVideoLoaded() {

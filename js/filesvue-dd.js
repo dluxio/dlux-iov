@@ -1002,10 +1002,7 @@ export default {
                 
                 <!-- Modal Header -->
                 <div class="modal-header border-bottom border-secondary p-3">
-                    <h5 class="modal-title mb-0">
-                        <i class="fa-solid fa-eye me-2"></i>
-                        {{ previewModal.file?.name || 'File Preview' }}
-                    </h5>
+                    <h5 class="modal-title mb-0"> <i class="fa-solid fa-eye me-2"></i> {{ previewModal.file?.name || 'File Preview' }}</h5>
                     <button type="button" class="btn-close btn-close-white" @click="closeFilePreview"></button>
                 </div>
                 
@@ -1023,7 +1020,7 @@ export default {
                     
                     <!-- Video Preview -->
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
-                         class="text-center p-3">
+                         class="hls-video-wrapper text-center p-3">
                         <video :src="getFileUrlWithType(previewModal.file)" 
                                :type="getVideoMimeType(previewModal.file)"
                                controls 

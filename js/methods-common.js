@@ -605,6 +605,17 @@ export default {
   // These methods provide HLS.js integration for loading M3U8 playlists and video segments from IPFS
   // Usage: Call initIpfsVideoSupport() in your Vue component's mounted() lifecycle
   // or use the standalone js/ipfs-video-init.js for non-Vue pages
+  // Import quality selector if available
+  async loadQualitySelector() {
+    try {
+      const module = await import('./utils/hls-quality-selector.js');
+      return module.createQualitySelector;
+    } catch (e) {
+      console.log('Quality selector not available:', e);
+      return null;
+    }
+  },
+
   createIpfsLoader(gatewayUrl = 'https://ipfs.dlux.io') {
     class IpfsLoader {
       constructor(config) {
@@ -860,9 +871,24 @@ export default {
       // Attaching media to video element
       hls.attachMedia(videoElement);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      hls.on(Hls.Events.MANIFEST_PARSED, async () => {
         // HLS initialized successfully
         console.log('✅ HLS playback ready for:', videoSrc);
+        
+        // Add quality selector if available
+        try {
+          const createQualitySelector = await this.loadQualitySelector();
+          if (createQualitySelector && hls.levels.length > 1) {
+            videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
+              position: 'top-right',
+              showBitrate: true,
+              persistQuality: true
+            });
+          }
+        } catch (e) {
+          // Quality selector is optional, continue without it
+          console.log('Could not add quality selector:', e);
+        }
         
         // Autoplay the video (muted to ensure it works in all browsers)
         if (videoElement.autoplay !== false) { // Only autoplay if not explicitly disabled
