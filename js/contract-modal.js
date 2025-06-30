@@ -1,6 +1,7 @@
 import MCommon from '/js/methods-common.js'
 import MModals from '/js/methods-modals.js'
 import MSpk from '/js//methods-spk.js'
+import debugLogger from '/js/utils/debug-logger.js'
 
 export default {
   name: 'contract-modal',
@@ -233,15 +234,41 @@ export default {
       modalInstance.hide();
     },
     fetchProviderStats() {
+      // Known problematic nodes to skip
+      const skipNodes = new Set([
+        'nathansenn.spk.tv',
+        'blurtopian.com',
+        'actifit.io'
+      ]);
+      
       for (var i = 0; i < this.ipfsServices.length; i++) {
         for (var node in this.ipfsServices[i]) {
+          const providerUrl = this.ipfsServices[i][node].a;
+          
+          // Skip known problematic nodes
+          if (providerUrl) {
+            const shouldSkip = Array.from(skipNodes).some(badNode => 
+              providerUrl.includes(badNode)
+            );
+            
+            if (shouldSkip) {
+              debugLogger.debug(`Skipping known problematic provider: ${providerUrl}`);
+              continue;
+            }
+          }
+          
           const controller = new AbortController()
           const timeoutId = setTimeout(() => controller.abort(), 1000)
-          fetch(`${this.ipfsServices[i][node].a}/upload-stats`, { signal: controller.signal })
-            .then(response => response.json())
+          
+          fetch(`${providerUrl}/upload-stats`, { signal: controller.signal })
+            .then(response => {
+              clearTimeout(timeoutId);
+              return response.json();
+            })
             .then(data => {
               if (data?.node) {
                 this.providerStats[data.node] = data
+                debugLogger.debug(`Provider stats fetched for ${data.node}`, data);
               }
               this.filteredBrokerOptions = Object.entries(this.ipfsProviders)
                 .filter(([id]) => {
@@ -257,7 +284,14 @@ export default {
                 }, {});
               this.availableProvidersCount = Object.keys(this.filteredBrokerOptions).length;
             })
-            .catch(error => { })
+            .catch(error => {
+              clearTimeout(timeoutId);
+              // These errors are expected for unavailable providers
+              // Only log in debug mode to reduce console noise
+              if (window.localStorage.getItem('dlux_debug') === 'true') {
+                debugLogger.debug(`Provider stats fetch failed for ${providerUrl}:`, error.message || 'Network error');
+              }
+            })
         }
       }
     },

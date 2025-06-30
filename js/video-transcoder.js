@@ -2,6 +2,8 @@
 // Modular FFmpeg.wasm integration for video transcoding across DLUX IOV
 
 import { ffmpegManager } from './services/ffmpeg-manager.js';
+import { ProcessedFile, FileRoles } from './utils/processed-file.js';
+import debugLogger from './utils/debug-logger.js';
 
 export default {
     name: 'VideoTranscoder',
@@ -98,15 +100,8 @@ export default {
 
         <!-- Success State -->
         <div v-else-if="state === 'complete'" class="text-center">
-            <div class="position-relative d-inline-block mb-3" style="cursor: pointer;" @click="showVideoPreview">
-                <img v-if="outputFiles.thumbnail" 
-                     :src="thumbnailUrl" 
-                     class="img-thumbnail"
-                     style="max-width: 300px; max-height: 200px;"
-                     alt="Video thumbnail">
-                <div class="position-absolute top-50 start-50 translate-middle">
-                    <i class="fa-solid fa-play-circle fa-3x text-white" style="text-shadow: 0 0 10px rgba(0,0,0,0.8);"></i>
-                </div>
+            <div class="mb-3">
+                <i class="fa-solid fa-check-circle fa-3x text-success"></i>
             </div>
             <h5>Transcoding Complete!</h5>
             <p class="mb-3">{{ fileName }} is ready</p>
@@ -226,8 +221,7 @@ export default {
             errorMessage: '',
             outputFiles: {
                 m3u8: null,
-                segments: [],
-                thumbnail: null
+                segments: []
             },
             useProgressFallback: false,
             transcodeStartTime: null,
@@ -237,7 +231,6 @@ export default {
             currentQuality: '720p',
             blobUrls: {},
             hlsInstance: null,
-            thumbnailUrl: null,
             transcodedFiles: [],
             videoLoading: false,
             sessionId: null // Unique ID for this transcoding session
@@ -295,7 +288,7 @@ export default {
                 return true;
                 
             } catch (error) {
-                console.error('Failed to load FFmpeg:', error);
+                debugLogger.error('Failed to load FFmpeg:', error);
                 this.errorMessage = 'Failed to load video transcoder';
                 this.state = 'error';
                 // Set fallback flag on error
@@ -307,10 +300,16 @@ export default {
         
         async startProcess() {
             if (this.uploadChoice === 'original') {
-                // Skip transcoding, emit original file
+                // Skip transcoding, emit original file wrapped
+                const wrappedFile = new ProcessedFile(this.file, {
+                    isAuxiliary: false,
+                    role: FileRoles.VIDEO,
+                    processorId: 'video-transcoder'
+                });
+                
                 this.$emit('complete', {
                     choice: 'original',
-                    files: [this.file]
+                    files: [wrappedFile]
                 });
                 return;
             }
@@ -335,11 +334,6 @@ export default {
                 // Create blob URLs for preview
                 await this.createBlobUrls(result.files);
                 
-                // Create thumbnail URL
-                if (result.thumbnail) {
-                    this.thumbnailUrl = URL.createObjectURL(result.thumbnail);
-                }
-                
                 this.state = 'complete';
                 
                 // Auto-emit complete event in headless mode
@@ -353,7 +347,7 @@ export default {
                 }
                 
             } catch (error) {
-                console.error('Transcoding error:', error);
+                debugLogger.error('Transcoding error:', error);
                 
                 // Enhanced error handling for different error types
                 let errorMessage = 'Transcoding failed';
@@ -373,6 +367,7 @@ export default {
             }
         },
         
+        
         async transcodeVideo() {
             if (!window.FFmpegUtil) {
                 throw new Error('FFmpegUtil not loaded');
@@ -386,8 +381,9 @@ export default {
             // Write input file with session-specific name
             await ffmpegManager.writeFile(inputName, inputData);
             
-            // Determine output quality
-            const quality = await this.determineQuality(inputName);
+            // Determine video dimensions and available resolutions
+            const availableResolutions = await this.determineAvailableResolutions(inputName);
+            debugLogger.info(`🎬 Will transcode to ${availableResolutions.length} resolutions:`, availableResolutions);
             
             // Generate thumbnail with session-specific name
             const thumbnailName = `${this.sessionId}_thumbnail.jpg`;
@@ -400,14 +396,19 @@ export default {
             ]);
             
             const thumbnailData = await ffmpegManager.readFile(thumbnailName);
-            this.outputFiles.thumbnail = new File([thumbnailData], 'thumbnail.jpg', { type: 'image/jpeg' });
+            // Use proper naming convention for m3u8 thumbnail lookup
+            const baseName = this.fileName.replace(/\.[^/.]+$/, ''); // Remove extension
+            const now = Date.now();
+            this.outputFiles.thumbnail = new File([thumbnailData], `_${baseName}_poster.jpg`, { 
+                type: 'image/jpeg',
+                lastModified: now
+            });
             
-            // Transcode to HLS with session-specific names
-            const outputName = `${this.sessionId}_output.m3u8`;
-            const segmentPattern = `${this.sessionId}_segment_%03d.ts`;
+            debugLogger.info('📹 Starting multi-resolution transcoding...');
             
-            this.transcodeMessage = 'Transcoding to streaming format...';
-            const outputResolution = this.getResolutionSettings(quality);
+            // Store all generated files for processing
+            const extractedFiles = new Map(); // Map<filename, Uint8Array>
+            const successfulResolutions = [];
             
             // Start fallback progress tracking if needed
             let progressInterval = null;
@@ -427,21 +428,109 @@ export default {
                 }, 2000);
             }
             
+            // Get video info first to understand duration
+            debugLogger.debug('🎬 Getting video information...');
             try {
-                await ffmpegManager.exec([
-                    '-i', inputName,
-                    '-c:v', 'libx264',
-                    '-c:a', 'aac',
-                    '-b:a', '128k',
-                    '-vf', `scale=${outputResolution.width}:${outputResolution.height}`,
-                    '-b:v', outputResolution.bitrate,
-                    '-preset', 'fast',
-                    '-hls_time', '10',
-                    '-hls_list_size', '0',
-                    '-hls_segment_filename', segmentPattern,
-                    '-f', 'hls',
-                    outputName
-                ]);
+                await ffmpegManager.exec(['-i', inputName, '-f', 'null', '-']);
+            } catch (infoError) {
+                debugLogger.debug('📊 Video info (FFmpeg reports as error):', infoError.message);
+            }
+            
+            // Transcode each resolution separately (like old system)
+            try {
+                for (let i = 0; i < availableResolutions.length; i++) {
+                    const resolution = availableResolutions[i];
+                    const resHeight = resolution.height;
+                    const resWidth = resolution.width;
+                    const bitrate = resolution.bitrate;
+                    
+                    this.transcodeMessage = `Transcoding ${resHeight}p (${i + 1}/${availableResolutions.length})...`;
+                    debugLogger.debug(`🎬 Transcoding resolution ${resHeight}p (${resWidth}x${resHeight}) at ${bitrate}k bitrate`);
+                    
+                    // FFmpeg command for this specific resolution (based on old system)
+                    const commands = [
+                        '-i', inputName,
+                        '-c:v', 'libx264',
+                        '-b:v', `${Math.round(bitrate)}k`,
+                        '-maxrate', `${Math.round(bitrate * 1.5)}k`,
+                        '-bufsize', `${Math.round(bitrate * 2)}k`,
+                        '-vf', `scale=${resWidth}:${resHeight}`,
+                        '-c:a', 'aac',
+                        '-b:a', '128k',
+                        '-profile:v', 'main',
+                        '-max_muxing_queue_size', '1024',
+                        '-f', 'segment',
+                        '-segment_time', '5',
+                        '-segment_format', 'mpegts',
+                        '-segment_list_type', 'm3u8',
+                        '-segment_list', `${this.sessionId}_${resHeight}p_index.m3u8`,
+                        '-hls_time', '3',
+                        '-hls_list_size', '0',
+                        '-force_key_frames', 'expr:gte(t,n_forced*3)',
+                        `${this.sessionId}_${resHeight}p_%03d.ts`
+                    ];
+                    
+                    try {
+                        await ffmpegManager.exec(commands);
+                        
+                        // Wait for files to be written
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Check what files were created
+                        const fileList = await ffmpegManager.listDir('/');
+                        const segmentFiles = fileList.filter(f => 
+                            f.name.startsWith(`${this.sessionId}_${resHeight}p_`) && f.name.endsWith('.ts')
+                        );
+                        const playlistFile = fileList.find(f => 
+                            f.name === `${this.sessionId}_${resHeight}p_index.m3u8`
+                        );
+                        
+                        debugLogger.debug(`📋 ${resHeight}p files: ${segmentFiles.length} segments, playlist: ${playlistFile ? 'found' : 'missing'}`);
+                        
+                        if (playlistFile && segmentFiles.length > 0) {
+                            successfulResolutions.push(resHeight);
+                            
+                            // Extract segment files to memory
+                            for (const segFile of segmentFiles) {
+                                const segData = await ffmpegManager.readFile(segFile.name);
+                                const segDataCopy = segData.slice();
+                                // Remove session prefix for final name
+                                const finalSegmentName = segFile.name.replace(`${this.sessionId}_`, '');
+                                extractedFiles.set(finalSegmentName, segDataCopy);
+                                debugLogger.debug(`💾 Extracted segment: ${finalSegmentName} (${segDataCopy.length} bytes)`);
+                            }
+                            
+                            // Extract playlist file to memory
+                            const playlistData = await ffmpegManager.readFile(playlistFile.name);
+                            // Update playlist content to remove session prefixes from segment references
+                            const playlistText = new TextDecoder().decode(playlistData);
+                            const updatedPlaylistText = playlistText.replace(
+                                new RegExp(`${this.sessionId}_`, 'g'),
+                                ''
+                            );
+                            const updatedPlaylistData = new TextEncoder().encode(updatedPlaylistText);
+                            
+                            // Remove session prefix for final name
+                            const finalPlaylistName = playlistFile.name.replace(`${this.sessionId}_`, '');
+                            extractedFiles.set(finalPlaylistName, updatedPlaylistData);
+                            debugLogger.debug(`💾 Extracted playlist: ${finalPlaylistName} (${updatedPlaylistData.length} bytes)`);
+                            
+                            // Clean up FFmpeg filesystem for next resolution
+                            for (const segFile of segmentFiles) {
+                                await ffmpegManager.deleteFile(segFile.name);
+                            }
+                            await ffmpegManager.deleteFile(playlistFile.name);
+                            
+                        } else {
+                            debugLogger.error(`❌ ${resHeight}p files missing after transcoding`);
+                        }
+                        
+                    } catch (resolutionError) {
+                        debugLogger.error(`❌ ${resHeight}p transcoding failed:`, resolutionError);
+                        // Continue with other resolutions
+                    }
+                }
+                
             } finally {
                 if (progressInterval) {
                     clearInterval(progressInterval);
@@ -449,51 +538,202 @@ export default {
                 }
             }
             
-            // Read output files
-            this.transcodeMessage = 'Packaging files...';
-            const m3u8Data = await ffmpegManager.readFile(outputName);
+            if (successfulResolutions.length === 0) {
+                throw new Error('All resolution transcoding failed');
+            }
             
-            // Update m3u8 content to use original segment names (remove session prefix)
-            const m3u8Content = new TextDecoder().decode(m3u8Data);
-            const updatedM3u8Content = m3u8Content.replace(
-                new RegExp(`${this.sessionId}_segment_`, 'g'), 
-                'segment_'
-            );
+            debugLogger.info(`🎉 Successfully transcoded ${successfulResolutions.length} resolutions:`, successfulResolutions);
             
-            // Generate meaningful filename from original
-            const baseName = this.fileName.replace(/\.[^/.]+$/, ''); // Remove extension
-            const m3u8FileName = `${baseName}.m3u8`;
-            const m3u8File = new File(
-                [new TextEncoder().encode(updatedM3u8Content)], 
-                m3u8FileName, 
-                { type: 'application/x-mpegURL' }
-            );
+            // Process all extracted files from multiple resolutions
+            this.transcodeMessage = 'Creating files from transcoded data...';
+            const files = [];
             
-            // Store m3u8 file reference
-            this.outputFiles.m3u8 = m3u8File;
+            // Process all resolution playlists and segments
+            const extractedFilenames = Array.from(extractedFiles.keys());
+            const m3u8Files = extractedFilenames.filter(name => name.endsWith('.m3u8'));
+            const tsFiles = extractedFilenames.filter(name => name.endsWith('.ts'));
             
-            // Read segments with session prefix and rename them
-            const files = [m3u8File];
-            const fileList = await ffmpegManager.listDir('/');
+            debugLogger.debug(`📁 Processing ${m3u8Files.length} playlists and ${tsFiles.length} segments from extracted data`);
             
-            for (const file of fileList) {
-                if (file.name.startsWith(`${this.sessionId}_segment_`) && file.name.endsWith('.ts')) {
-                    const segmentData = await ffmpegManager.readFile(file.name);
-                    // Remove session prefix from segment name
-                    const originalSegmentName = file.name.replace(`${this.sessionId}_`, '');
-                    const segmentFile = new File([segmentData], originalSegmentName, { type: 'video/mp2t' });
-                    files.push(segmentFile);
-                    this.outputFiles.segments.push(segmentFile);
+            // Create segment mapping for URL replacement (like old system)
+            const segmentMapping = new Map();
+            
+            // Create File objects for all segments and hash them
+            for (const segmentName of tsFiles) {
+                const segmentData = extractedFiles.get(segmentName);
+                
+                // Hash the segment to get its CID (like old system)
+                try {
+                    const buf = buffer.Buffer(segmentData);
+                    const hashResult = await Hash.of(buf, { unixfs: 'UnixFS' });
+                    segmentMapping.set(segmentName, hashResult);
+                    debugLogger.debug(`🔑 Hashed segment ${segmentName}: ${hashResult}`);
+                } catch (error) {
+                    debugLogger.error(`Failed to hash segment ${segmentName}:`, error);
+                    throw new Error(`Failed to hash video segment: ${error.message}`);
                 }
+                
+                const segmentFile = new File([segmentData], segmentName, {
+                    type: 'video/mp2t',
+                    lastModified: now
+                });
+                
+                // Assign the CID to the file so upload system knows it's pre-hashed
+                segmentFile.cid = segmentMapping.get(segmentName);
+                
+                debugLogger.debug(`✅ Created segment file: ${segmentName} (${segmentData.length} bytes) with CID: ${segmentFile.cid}`);
+                files.push(segmentFile);
+                this.outputFiles.segments.push(segmentFile);
+            }
+            
+            // Create resolution playlists with updated segment URLs
+            const resolutionPlaylists = [];
+            const playlistMapping = new Map(); // Track playlist name -> CID
+            
+            for (const playlistName of m3u8Files) {
+                const playlistData = extractedFiles.get(playlistName);
+                let playlistContent = new TextDecoder().decode(playlistData);
+                
+                debugLogger.debug(`📋 Original playlist ${playlistName} content preview:`, playlistContent.substring(0, 200));
+                
+                // Replace segment references with IPFS URLs (like old system)
+                segmentMapping.forEach((segmentCID, segmentName) => {
+                    const segmentPattern = new RegExp(segmentName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                    const ipfsUrl = `https://ipfs.dlux.io/ipfs/${segmentCID}?filename=${segmentName}`;
+                    playlistContent = playlistContent.replace(segmentPattern, ipfsUrl);
+                    debugLogger.debug(`📝 Replaced ${segmentName} with ${ipfsUrl} in ${playlistName}`);
+                });
+                
+                debugLogger.debug(`📋 Updated playlist ${playlistName} content preview:`, playlistContent.substring(0, 200));
+                
+                // Create file with updated content
+                const updatedPlaylistData = new TextEncoder().encode(playlistContent);
+                
+                // Hash the updated playlist to get its CID
+                try {
+                    const buf = buffer.Buffer(updatedPlaylistData);
+                    const hashResult = await Hash.of(buf, { unixfs: 'UnixFS' });
+                    playlistMapping.set(playlistName, hashResult);
+                    debugLogger.debug(`🔑 Hashed playlist ${playlistName}: ${hashResult}`);
+                    
+                    const playlistFile = new File([updatedPlaylistData], playlistName, {
+                        type: 'application/x-mpegURL',
+                        lastModified: now
+                    });
+                    
+                    // Assign the CID to the file
+                    playlistFile.cid = hashResult;
+                    
+                    debugLogger.debug(`✅ Created playlist file: ${playlistName} (${updatedPlaylistData.length} bytes) with CID: ${playlistFile.cid}`);
+                    files.push(playlistFile);
+                    
+                    // Store for master playlist creation
+                    const resolution = playlistName.match(/(\d+)p_index\.m3u8/)?.[1];
+                    if (resolution) {
+                        resolutionPlaylists.push({
+                            resolution: resolution,
+                            fileName: playlistName,
+                            content: playlistContent,
+                            file: playlistFile,
+                            cid: hashResult // Store the CID for master playlist
+                        });
+                    }
+                } catch (error) {
+                    debugLogger.error(`Failed to hash playlist ${playlistName}:`, error);
+                    throw new Error(`Failed to hash playlist: ${error.message}`);
+                }
+            }
+            
+            // Create master playlist (like old system)
+            this.transcodeMessage = 'Creating master playlist...';
+            const masterPlaylistContent = this.createMasterPlaylist(resolutionPlaylists, baseName);
+            
+            // Hash the master playlist
+            try {
+                const masterData = new TextEncoder().encode(masterPlaylistContent);
+                const buf = buffer.Buffer(masterData);
+                const masterHash = await Hash.of(buf, { unixfs: 'UnixFS' });
+                
+                const masterPlaylistFile = new File(
+                    [masterData], 
+                    `${baseName}.m3u8`, 
+                    { 
+                        type: 'application/x-mpegURL',
+                        lastModified: now
+                    }
+                );
+                
+                // Assign the CID to the master playlist
+                masterPlaylistFile.cid = masterHash;
+                
+                debugLogger.debug(`✅ Created master playlist: ${baseName}.m3u8 with CID: ${masterHash}`);
+                files.push(masterPlaylistFile);
+                
+                // Store master playlist reference
+                this.outputFiles.masterM3u8 = masterPlaylistFile;
+                this.outputFiles.resolutionPlaylists = resolutionPlaylists;
+            } catch (error) {
+                debugLogger.error(`Failed to hash master playlist:`, error);
+                throw new Error(`Failed to hash master playlist: ${error.message}`);
+            }
+            
+            debugLogger.info(`🎬 Total files created: ${files.length} (1 master playlist + ${resolutionPlaylists.length} resolution playlists + ${this.outputFiles.segments.length} segments)`);
+            
+            // Add thumbnail to files array for upload
+            if (this.outputFiles.thumbnail) {
+                files.push(this.outputFiles.thumbnail);
             }
             
             // Clean up only session-specific files
             await this.cleanupSessionFiles();
             
+            // Wrap files with metadata
+            const wrappedFiles = [];
+            
+            // Master playlist file (main file)
+            wrappedFiles.push(new ProcessedFile(this.outputFiles.masterM3u8, {
+                isAuxiliary: false,
+                role: FileRoles.PLAYLIST,
+                processorId: 'video-transcoder'
+            }));
+            
+            // Resolution playlists (auxiliary)
+            this.outputFiles.resolutionPlaylists.forEach(playlist => {
+                wrappedFiles.push(new ProcessedFile(playlist.file, {
+                    isAuxiliary: true,
+                    role: FileRoles.PLAYLIST,
+                    parentFile: this.outputFiles.masterM3u8.name,
+                    processorId: 'video-transcoder'
+                }));
+            });
+            
+            // Poster/thumbnail file
+            if (this.outputFiles.thumbnail) {
+                wrappedFiles.push(new ProcessedFile(this.outputFiles.thumbnail, {
+                    isAuxiliary: true,
+                    role: FileRoles.POSTER,
+                    parentFile: this.outputFiles.masterM3u8.name,
+                    processorId: 'video-transcoder'
+                }));
+            }
+            
+            // Segment files (all auxiliary)
+            debugLogger.debug(`🎭 Wrapping ${this.outputFiles.segments.length} segment files for upload`);
+            this.outputFiles.segments.forEach((segmentFile, index) => {
+                debugLogger.debug(`🎭 Wrapping segment ${index + 1}: ${segmentFile.name} (${segmentFile.size} bytes)`);
+                wrappedFiles.push(new ProcessedFile(segmentFile, {
+                    isAuxiliary: true,
+                    role: FileRoles.SEGMENT,
+                    parentFile: this.outputFiles.masterM3u8.name,
+                    processorId: 'video-transcoder'
+                }));
+            });
+            
+            debugLogger.info(`📋 Final wrapped files count: ${wrappedFiles.length} (should include: 1 master playlist + ${this.outputFiles.resolutionPlaylists.length} resolution playlists + ${this.outputFiles.segments.length} segments + ${this.outputFiles.thumbnail ? '1 thumbnail' : '0 thumbnails'})`);
+            
             return {
-                files: files,
-                m3u8File: m3u8File,
-                thumbnail: this.outputFiles.thumbnail
+                files: wrappedFiles,
+                m3u8File: this.outputFiles.masterM3u8
             };
         },
         
@@ -528,9 +768,9 @@ export default {
         
         getResolutionSettings(quality) {
             const settings = {
-                '1080p': { width: 1920, height: 1080, bitrate: '5M' },
-                '720p': { width: 1280, height: 720, bitrate: '3M' },
-                '480p': { width: 854, height: 480, bitrate: '1.5M' }
+                '1080p': { width: 1920, height: 1080 },
+                '720p': { width: 1280, height: 720 },
+                '480p': { width: 854, height: 480 }
             };
             return settings[quality] || settings['720p'];
         },
@@ -567,41 +807,113 @@ export default {
             this.errorMessage = '';
         },
         
+        cleanup() {
+            // Clean up transcoded files and reset state
+            debugLogger.info('🧹 Cleaning up video transcoder state');
+            
+            // Clear transcoded files
+            this.transcodedFiles = [];
+            this.outputFiles = {
+                m3u8: null,
+                segments: [],
+                masterM3u8: null,
+                resolutionPlaylists: [],
+                thumbnail: null
+            };
+            
+            // Clear blob URLs
+            Object.values(this.blobUrls).forEach(url => {
+                URL.revokeObjectURL(url);
+            });
+            this.blobUrls = {};
+            
+            // Reset state
+            this.state = 'ready';
+            this.transcodeProgress = 0;
+            this.transcodeMessage = 'Preparing...';
+            this.errorMessage = '';
+            this.showPreview = false;
+            this.videoLoading = false;
+            this.sessionId = null;
+            
+            // Clean up HLS player if exists
+            this.cleanupPlayer();
+        },
+        
         async createBlobUrls(files) {
-            // First, create blob URLs for all segment files
-            const m3u8Files = [];
+            // IMPORTANT: This method creates blob URLs for preview only.
+            // It does NOT modify the original files - those remain with local references for upload.
             
-            for (const file of files) {
+            debugLogger.info('⚠️ IMPORTANT: Creating blob URLs for preview only - original files remain unchanged');
+            
+            // Sort files: segments first, then resolution playlists, then master playlist
+            const segments = [];
+            const resolutionPlaylists = [];
+            let masterPlaylist = null;
+            
+            for (const wrappedFile of files) {
+                // Extract the actual File object from ProcessedFile wrapper
+                const file = wrappedFile.getFile ? wrappedFile.getFile() : wrappedFile;
+                    
                 if (file.name.endsWith('.ts')) {
-                    // Create blob URL for segment
-                    const url = URL.createObjectURL(file);
-                    this.blobUrls[file.name] = url;
+                    segments.push(file);
+                } else if (file.name.match(/\d+p_index\.m3u8$/)) {
+                    resolutionPlaylists.push(file);
                 } else if (file.name.endsWith('.m3u8')) {
-                    // Store m3u8 files for processing later
-                    m3u8Files.push(file);
+                    masterPlaylist = file;
                 }
             }
             
-            // Now process m3u8 files with updated segment URLs
-            for (const m3u8File of m3u8Files) {
+            // Step 1: Create blob URLs for all segments
+            for (const segment of segments) {
+                const url = URL.createObjectURL(segment);
+                this.blobUrls[segment.name] = url;
+                debugLogger.debug(`Created blob URL for segment: ${segment.name}`);
+            }
+            
+            // Step 2: Process resolution playlists (they reference segments)
+            for (const playlist of resolutionPlaylists) {
                 try {
-                    // Update the m3u8 content with blob URLs
-                    const updatedBlob = await this.updateM3u8WithBlobUrls(m3u8File);
+                    // Create a modified version for preview ONLY - don't modify the original
+                    const updatedBlob = await this.updateM3u8WithBlobUrls(playlist);
                     const updatedUrl = URL.createObjectURL(updatedBlob);
-                    
-                    // Store the updated blob URL
-                    this.blobUrls[m3u8File.name] = updatedUrl;
-                    
-                    // Store quality mapping
-                    // For now, we're using single quality
-                    this.availableQualities = ['720p'];
-                    this.currentQuality = '720p';
-                    
-                    console.log(`Created updated m3u8 blob URL for ${m3u8File.name}`);
+                    this.blobUrls[playlist.name] = updatedUrl;
+                    debugLogger.debug(`Created preview blob URL for resolution playlist: ${playlist.name}`);
+                    debugLogger.debug(`✅ Original file ${playlist.name} remains unchanged with local references`);
                 } catch (error) {
-                    console.error(`Error processing m3u8 file ${m3u8File.name}:`, error);
+                    debugLogger.error(`Error processing resolution playlist ${playlist.name}:`, error);
                 }
             }
+            
+            // Step 3: Process master playlist (it references resolution playlists)
+            if (masterPlaylist) {
+                try {
+                    // Create a modified version for preview ONLY - don't modify the original
+                    const updatedBlob = await this.updateM3u8WithBlobUrls(masterPlaylist);
+                    const updatedUrl = URL.createObjectURL(updatedBlob);
+                    this.blobUrls[masterPlaylist.name] = updatedUrl;
+                    debugLogger.debug(`Created preview blob URL for master playlist: ${masterPlaylist.name}`);
+                    debugLogger.debug(`✅ Original file ${masterPlaylist.name} remains unchanged with local references`);
+                } catch (error) {
+                    debugLogger.error(`Error processing master playlist ${masterPlaylist.name}:`, error);
+                }
+            }
+            
+            // Build quality mapping from available resolution playlists
+            const qualityMapping = resolutionPlaylists.map(file => {
+                const resMatch = file.name.match(/(\d+)p_index\.m3u8/);
+                return resMatch ? resMatch[1] + 'p' : null;
+            }).filter(Boolean);
+            
+            // Set available qualities (sorted highest first)
+            this.availableQualities = qualityMapping.sort((a, b) => {
+                return parseInt(b.replace('p', '')) - parseInt(a.replace('p', ''));
+            });
+            
+            // Set current quality to highest available
+            this.currentQuality = this.availableQualities[0] || '720p';
+            
+            debugLogger.debug(`Available qualities: ${this.availableQualities.join(', ')}, current: ${this.currentQuality}`);
         },
         
         showVideoPreview() {
@@ -621,16 +933,25 @@ export default {
             
             // Emit results based on choice
             const files = [];
+            
+            // If 'both', include the original file wrapped
             if (this.uploadChoice === 'both') {
-                files.push(this.file); // Original
+                files.push(new ProcessedFile(this.file, {
+                    isAuxiliary: false,
+                    role: FileRoles.VIDEO,
+                    processorId: 'video-transcoder'
+                }));
             }
-            files.push(...this.transcodedFiles); // Transcoded files
+            
+            // Add all transcoded files (already wrapped)
+            files.push(...this.transcodedFiles);
             
             this.$emit('complete', {
                 choice: this.uploadChoice,
                 files: files,
-                m3u8File: this.outputFiles.m3u8,
-                thumbnail: this.outputFiles.thumbnail
+                m3u8File: this.outputFiles.masterM3u8 || this.outputFiles.m3u8,
+                thumbnail: this.outputFiles.thumbnail,
+                blobUrls: this.blobUrls  // Pass blob URLs for preview
             });
         },
         
@@ -641,15 +962,19 @@ export default {
             // Set loading state
             this.videoLoading = true;
             
-            // Find the m3u8 file
-            const m3u8File = this.transcodedFiles.find(f => f.name.endsWith('.m3u8'));
-            if (!m3u8File) {
-                console.error('No m3u8 file found');
+            // Find the m3u8 file (handle ProcessedFile wrapper)
+            const m3u8Wrapper = this.transcodedFiles.find(f => {
+                const fileName = f.name || (f.getFile && f.getFile().name);
+                return fileName && fileName.endsWith('.m3u8');
+            });
+            if (!m3u8Wrapper) {
+                debugLogger.error('No m3u8 file found');
                 this.videoLoading = false;
                 return;
             }
             
-            const m3u8Url = this.blobUrls[m3u8File.name];
+            const m3u8FileName = m3u8Wrapper.name || m3u8Wrapper.getFile().name;
+            const m3u8Url = this.blobUrls[m3u8FileName];
             
             // Check if HLS.js is supported
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
@@ -669,22 +994,22 @@ export default {
                 this.hlsInstance.attachMedia(video);
                 
                 this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    console.log('Video manifest loaded and parsed');
+                    debugLogger.debug('Video manifest loaded and parsed');
                     // Video is ready to play, hide loading spinner
                     this.videoLoading = false;
                     // Autoplay the video
                     video.play().catch(e => {
-                        console.log('Autoplay prevented:', e);
+                        debugLogger.debug('Autoplay prevented:', e);
                     });
                 });
                 
                 this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
                     if (data.fatal) {
-                        console.error('Fatal HLS error:', data);
+                        debugLogger.error('Fatal HLS error:', data);
                         this.errorMessage = 'Video playback error. Please try again.';
                     } else if (data.details !== 'bufferSeekOverHole' && data.details !== 'bufferNudgeOnHole') {
                         // Log other non-fatal errors except common buffer holes
-                        console.warn('HLS warning:', data.details);
+                        debugLogger.debug('HLS warning:', data.details);
                     }
                     // Silently ignore bufferSeekOverHole as it's harmless
                 });
@@ -695,11 +1020,11 @@ export default {
                 // Autoplay when ready
                 video.addEventListener('canplay', () => {
                     video.play().catch(e => {
-                        console.log('Autoplay prevented:', e);
+                        debugLogger.debug('Autoplay prevented:', e);
                     });
                 }, { once: true });
             } else {
-                console.error('HLS not supported in this browser');
+                debugLogger.error('HLS not supported in this browser');
                 this.errorMessage = 'Video preview not supported in this browser';
                 this.videoLoading = false;
             }
@@ -714,7 +1039,7 @@ export default {
                     if (context.url.startsWith('blob:')) {
                         super.load(context, config, callbacks);
                     } else {
-                        console.error('Unexpected non-blob URL in playlist:', context.url);
+                        debugLogger.error('Unexpected non-blob URL in playlist:', context.url);
                         callbacks.onError({ code: 404, text: 'Invalid URL in playlist' }, context);
                     }
                 }
@@ -725,7 +1050,7 @@ export default {
         
         switchQuality() {
             // For future implementation when we have multiple qualities
-            console.log('Switching to quality:', this.currentQuality);
+            debugLogger.debug('Switching to quality:', this.currentQuality);
             // Re-initialize player with new quality
             this.cleanupPlayer();
             this.$nextTick(() => {
@@ -734,7 +1059,7 @@ export default {
         },
         
         onVideoLoaded() {
-            console.log('Video metadata loaded');
+            debugLogger.debug('Video metadata loaded');
         },
         
         cleanupPlayer() {
@@ -764,23 +1089,39 @@ export default {
             // Read the m3u8 content
             const content = await this.readFileAsText(m3u8File);
             
-            // Replace segment references with blob URLs
+            // Determine if this is a master playlist or resolution playlist
+            const isMasterPlaylist = !m3u8File.name.match(/\d+p_index\.m3u8$/);
+            
+            // Replace references with blob URLs
             const lines = content.split('\n');
             const updatedLines = lines.map(line => {
                 if (!line.trim() || line.startsWith('#')) {
                     return line;
                 }
                 
-                // This is a segment reference
-                const segmentName = line.trim();
-                const blobUrl = this.blobUrls[segmentName];
+                // This is a reference to either a playlist or segment
+                const referenceName = line.trim();
                 
-                if (blobUrl) {
-                    console.log(`Replaced segment ${segmentName} with blob URL`);
-                    return blobUrl;
+                // Master playlists reference other playlists (.m3u8)
+                // Resolution playlists reference segments (.ts)
+                if (isMasterPlaylist && referenceName.endsWith('.m3u8')) {
+                    // For master playlist, keep playlist references as-is
+                    // They'll be loaded via blob URLs from the blobUrls map
+                    const blobUrl = this.blobUrls[referenceName];
+                    if (blobUrl) {
+                        return blobUrl;
+                    }
+                    return referenceName; // Keep original if no blob URL yet
+                } else if (!isMasterPlaylist && referenceName.endsWith('.ts')) {
+                    // For resolution playlists, replace segment references
+                    const blobUrl = this.blobUrls[referenceName];
+                    if (blobUrl) {
+                        return blobUrl;
+                    }
+                    debugLogger.debug('No blob URL found for segment:', referenceName);
+                    return referenceName;
                 }
                 
-                console.warn('No blob URL found for segment:', segmentName);
                 return line;
             });
             
@@ -801,13 +1142,117 @@ export default {
                         try {
                             await ffmpegManager.deleteFile(file.name);
                         } catch (e) {
-                            console.warn(`Could not delete session file ${file.name}:`, e);
+                            debugLogger.debug(`Could not delete session file ${file.name}:`, e);
                         }
                     }
                 }
             } catch (error) {
-                console.warn('Error during session cleanup:', error);
+                debugLogger.debug('Error during session cleanup:', error);
             }
+        },
+
+        // Determine available resolutions based on input video dimensions
+        async determineAvailableResolutions(inputFileName) {
+            // Predefined resolution settings (matching old system)
+            const allResolutions = [
+                { height: 480, width: 854, bitrate: 800 },   // 480p
+                { height: 720, width: 1280, bitrate: 2500 },  // 720p 
+                { height: 1080, width: 1920, bitrate: 5000 }  // 1080p
+            ];
+            
+            // Get video dimensions from FFmpeg probe
+            let sourceHeight = 1080; // Default assumption
+            let sourceWidth = 1920;
+            
+            try {
+                await ffmpegManager.exec(['-i', inputFileName, '-f', 'null', '-']);
+            } catch (probeError) {
+                // FFmpeg reports video info as "error" - parse from message
+                const output = probeError.message || '';
+                
+                // Look for resolution pattern like "1920x1080" or "Video: ... 1280x720"
+                const resolutionMatch = output.match(/(\d{3,4})x(\d{3,4})/);
+                if (resolutionMatch) {
+                    sourceWidth = parseInt(resolutionMatch[1]);
+                    sourceHeight = parseInt(resolutionMatch[2]);
+                    debugLogger.debug(`📐 Detected source resolution: ${sourceWidth}x${sourceHeight}`);
+                } else {
+                    debugLogger.debug('📐 Could not detect source resolution, using defaults');
+                }
+            }
+            
+            // Filter resolutions to only include those smaller than or equal to source
+            const availableResolutions = allResolutions.filter(res => {
+                // Only include if target resolution is smaller than or equal to source
+                return res.height <= sourceHeight;
+            });
+            
+            // Always include at least 480p as minimum
+            if (availableResolutions.length === 0) {
+                availableResolutions.push(allResolutions[0]); // 480p
+            }
+            
+            debugLogger.debug(`🎬 Selected ${availableResolutions.length} resolution(s) for transcoding:`, 
+                availableResolutions.map(r => `${r.height}p`).join(', '));
+            
+            return availableResolutions;
+        },
+
+        // Create master playlist that references all resolution playlists
+        createMasterPlaylist(resolutionPlaylists, baseName) {
+            // Sort playlists by resolution (highest first)
+            const sortedPlaylists = resolutionPlaylists.sort((a, b) => {
+                return parseInt(b.resolution) - parseInt(a.resolution);
+            });
+            
+            // Build master playlist content (HLS format)
+            let masterContent = '#EXTM3U\n#EXT-X-VERSION:3\n\n';
+            
+            // Add each resolution variant
+            sortedPlaylists.forEach(playlist => {
+                const resolution = parseInt(playlist.resolution);
+                let bandwidth;
+                
+                // Match bitrates to old system
+                switch (resolution) {
+                    case 480:
+                        bandwidth = 800000;  // 800k
+                        break;
+                    case 720:
+                        bandwidth = 2500000; // 2.5M
+                        break;
+                    case 1080:
+                        bandwidth = 5000000; // 5M
+                        break;
+                    default:
+                        bandwidth = 1500000; // Default 1.5M
+                }
+                
+                // Add stream info line
+                masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${this.getResolutionDimensions(resolution)}\n`;
+                // Add IPFS URL for playlist (using CID if available, otherwise filename)
+                if (playlist.cid) {
+                    masterContent += `https://ipfs.dlux.io/ipfs/${playlist.cid}?filename=${playlist.fileName}\n`;
+                } else {
+                    // Fallback to filename if no CID (shouldn't happen)
+                    masterContent += `${playlist.fileName}\n`;
+                }
+            });
+            
+            debugLogger.debug(`📋 Generated master playlist with ${sortedPlaylists.length} resolution variants`);
+            debugLogger.debug('Master playlist content:\n', masterContent);
+            
+            return masterContent;
+        },
+
+        // Get resolution dimensions string for master playlist
+        getResolutionDimensions(height) {
+            const dimensions = {
+                480: '854x480',
+                720: '1280x720', 
+                1080: '1920x1080'
+            };
+            return dimensions[height] || '1280x720';
         }
     },
     
@@ -836,9 +1281,5 @@ export default {
         Object.values(this.blobUrls).forEach(url => {
             URL.revokeObjectURL(url);
         });
-        
-        if (this.thumbnailUrl) {
-            URL.revokeObjectURL(this.thumbnailUrl);
-        }
     }
 };

@@ -1,3 +1,7 @@
+import debugLogger from '/js/utils/debug-logger.js';
+import hlsDebug from '/js/utils/hls-debug.js';
+import IPFSHLSPlayer from '/js/services/ipfs-hls-player.js';
+
 export default {
   accountCheck(a) {
     return new Promise((resolve, e) => {
@@ -60,7 +64,7 @@ export default {
         })
         .catch(e => {
           clearTimeout(timeoutId)
-          console.warn(`Node ${nodes[t]} failed:`, e.message)
+          debugLogger.debug(`Node ${nodes[t]} failed:`, e.message)
           this.apiSelector(a, t + 1)
         })
     }
@@ -182,7 +186,6 @@ export default {
   banishPrompt() {
     localStorage.setItem(`hhp:${this.account}`, new Date().getTime());
     this.hasHiddenPrompt = true
-    console.log('BANISH')
   },
   voteProposal(num) {
     this.toSign = {
@@ -480,7 +483,7 @@ export default {
     this.toSign = op
   },
   simpleCJ(id, params, options) {
-    console.log('SCJ', id)
+    debugLogger.debug('simpleCJ:', id)
     var op = {
       id
     }
@@ -494,12 +497,12 @@ export default {
     op.ops = options.ops || [];
     op.api = options.api || "";
     op.txid = id + '_' + Date.now();
-    console.log(op)
+    debugLogger.debug('simpleCJ operation:', op)
     this.$emit(options.broadcast ? options.broadcast : 'tosign', op)
     this.toSign = op
   },
   sendIt(event) {
-    console.log('CV', event)
+    debugLogger.debug('sendIt event:', event)
     this.toSign = event
     this.$emit('tosign', event)
   },
@@ -573,7 +576,7 @@ export default {
     return result;
   },
   run(op) {
-    console.log('Refreshing:', op)
+    debugLogger.debug('Refreshing:', op)
     if (typeof this[op] == "function" && this.account != "GUEST") {
       this[op](this.account);
     } else if (typeof op == "object") {
@@ -659,6 +662,8 @@ export default {
 
         console.log('IPFS Loader fetching:', ipfsUrl);
 
+        // Fetching URL
+
         this.requestController = new AbortController();
         const headers = {};
         if (context.type === 'manifest' || context.type === 'level') {
@@ -678,11 +683,11 @@ export default {
               if (!contentType.includes('application/x-mpegURL') && 
                   !contentType.includes('audio/x-mpegurl') && 
                   !contentType.includes('text/')) {
-                console.warn('Unexpected content type for playlist:', contentType);
+                // Unexpected content type for playlist
               }
             } else if (context.type === 'segment') {
               if (!contentType.includes('video/MP2T') && !contentType.includes('application/octet-stream')) {
-                console.warn('Unexpected content type for segment:', contentType);
+                // Unexpected content type for segment
               }
             }
 
@@ -697,7 +702,7 @@ export default {
             this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
             this.stats.parsing.end = this.stats.loading.end;
 
-            console.log('IPFS Loader data received:', typeof data, 'Context:', context.type);
+            // Data received
             
             // HLS.js expects the response to match the original URL format
             const response = { 
@@ -707,22 +712,23 @@ export default {
             
             if (callbacks) {
               if (typeof callbacks.onSuccess === 'function') {
-                console.log('✅ Calling HLS.js onSuccess callback');
+                // Calling onSuccess callback
                 callbacks.onSuccess(response, this.stats, context);
               } else if (typeof callbacks === 'function') {
                 // Some HLS.js versions might pass callback directly
-                console.log('✅ Calling HLS.js callback directly');
+                // Calling callback directly
                 callbacks(null, response, this.stats, context);
               } else {
-                console.warn('❌ No valid onSuccess callback found. Callbacks:', Object.keys(callbacks || {}));
+                // No valid onSuccess callback found
               }
             } else {
-              console.warn('❌ No callbacks object provided at all');
+              // No callbacks object provided
             }
           })
           .catch(err => {
             if (err.name === 'AbortError') return;
-            console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
+            // Commented out to reduce log spam - HLS retries cause thousands of these
+            // hlsDebug.log('ERROR', `IPFS Loader error: ${err.message}`, { url: ipfsUrl, error: err });
             if (callbacks) {
               const error = { code: err.code || 'NETWORK_ERROR', text: err.message || 'Failed to load IPFS content' };
               if (typeof callbacks.onError === 'function') {
@@ -731,7 +737,7 @@ export default {
                 // Some HLS.js versions might pass callback directly - error as first param
                 callbacks(error, null, this.stats, context);
               } else {
-                console.warn('❌ No valid onError callback found');
+                // No valid onError callback found
               }
             }
           });
@@ -760,42 +766,74 @@ export default {
 
     const videoSrc = videoElement.src;
     const videoType = videoElement.type;
-    console.log('Setting up player for video:', videoSrc, 'Type:', videoType);
+    // Video setup logging removed to reduce noise
 
     // Handle blob URLs for preview (they contain M3U8 playlists)
     if (videoSrc.startsWith('blob:')) {
-      console.log('Processing blob URL for HLS preview:', videoSrc);
+      // Processing blob URL for HLS preview
       // Allow blob URLs to be processed by HLS if they're M3U8 playlists
       // Don't skip them - they might be transcoded preview playlists
     }
 
     // Skip if HLS instance already exists for this element
     if (videoElement.hlsInstance) {
-      console.log('HLS instance already exists for this video element');
+      // HLS instance already exists
       return;
     }
 
     // Skip if already processed (mark with a flag)
     if (videoElement.dataset.hlsProcessed) {
-      console.log('Video element already processed for HLS');
+      // Already processed
       return;
     }
 
-    // Check if this is an M3U8 playlist by URL extension or explicit type
-    const isM3U8 = videoType === 'application/x-mpegURL' || 
-                   videoType === 'audio/x-mpegurl' ||
-                   videoSrc.endsWith('.m3u8') ||
-                   videoSrc.includes('.m3u8?') ||
-                   videoSrc.includes('filename=') && videoSrc.includes('.m3u8');
+    // Enhanced HLS detection with multiple fallback methods
+    const srcLower = videoSrc.toLowerCase();
+    const isM3U8 = 
+      // Explicit type checks
+      videoType === 'application/x-mpegURL' || 
+      videoType === 'audio/x-mpegurl' ||
+      videoType === 'application/vnd.apple.mpegurl' ||
+      // URL extension checks
+      srcLower.endsWith('.m3u8') ||
+      srcLower.includes('.m3u8?') ||
+      srcLower.includes('.m3u8#') ||
+      // Filename parameter checks (including partial matches)
+      (srcLower.includes('filename=') && srcLower.includes('m3u')) ||
+      // Common HLS URL patterns
+      srcLower.includes('/manifest.m3u8') ||
+      srcLower.includes('/playlist.m3u8') ||
+      srcLower.includes('/master.m3u8') ||
+      srcLower.includes('/index.m3u8') ||
+      // Check for HLS-related strings in the URL
+      (srcLower.includes('hls') && srcLower.includes('playlist'));
 
     if (isM3U8) {
+      // Log if we're using fallback detection (no explicit .m3u8 extension)
+      if (!srcLower.endsWith('.m3u8') && !srcLower.includes('.m3u8?') && !srcLower.includes('.m3u8#')) {
+        // HLS detected via fallback pattern
+      }
+      
       if (typeof Hls === 'undefined') {
         console.warn('HLS.js library not loaded');
         return;
       }
   
       if (!Hls.isSupported()) {
-        console.log('HLS.js not supported, using native playback');
+        // HLS.js not supported, using native playback (Safari)
+        if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+          // Native HLS support - add autoplay
+          videoElement.addEventListener('loadedmetadata', () => {
+            if (videoElement.autoplay !== false) {
+              videoElement.muted = true; // Ensure muted for autoplay policy
+              videoElement.autoplay = true; // Set autoplay attribute
+              videoElement.play().catch(e => {
+                console.log('Native HLS autoplay prevented:', e);
+                videoElement.muted = false;
+              });
+            }
+          }, { once: true });
+        }
         return;
       }
   
@@ -816,26 +854,38 @@ export default {
 
             videoElement.hlsInstance = hls;
       
-      console.log('HLS.js: Loading source:', videoSrc);
+      // Loading HLS source
       hls.loadSource(videoSrc);
       
-      console.log('HLS.js: Attaching media to video element');
+      // Attaching media to video element
       hls.attachMedia(videoElement);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('✅ HLS manifest parsed successfully');
+        // HLS initialized successfully
+        console.log('✅ HLS playback ready for:', videoSrc);
+        
+        // Autoplay the video (muted to ensure it works in all browsers)
+        if (videoElement.autoplay !== false) { // Only autoplay if not explicitly disabled
+          videoElement.muted = true; // Ensure muted for autoplay policy
+          videoElement.autoplay = true; // Set autoplay attribute
+          videoElement.play().catch(e => {
+            console.log('Autoplay prevented:', e);
+            // Remove muted if autoplay fails
+            videoElement.muted = false;
+          });
+        }
       });
 
       hls.on(Hls.Events.MANIFEST_LOADING, () => {
-        console.log('📡 HLS manifest loading started');
+        // Manifest loading started
       });
 
       hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
-        console.log('📥 HLS manifest loaded:', data);
+        // Manifest loaded
       });
 
       hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-        console.log('📦 HLS level loaded:', data.level);
+        // Level loaded
       });
 
       hls.on(Hls.Events.ERROR, (event, data) => {
@@ -860,7 +910,7 @@ export default {
         }
       });
     } else {
-      console.log('Not an M3U8 playlist, using native video playback');
+      // Not M3U8 - using native video playback
       // Mark as processed to prevent repeated checks
       videoElement.dataset.hlsProcessed = 'true';
     }
@@ -876,14 +926,38 @@ export default {
       }
       processedVideos.add(video);
       
-      // Set proper type attribute for M3U8 videos before processing
+      // Enhanced HLS detection with multiple fallbacks
       if (video.src && !video.type) {
-        const isM3U8 = video.src.endsWith('.m3u8') || 
-                       video.src.includes('.m3u8?') ||
-                       (video.src.includes('filename=') && video.src.includes('.m3u8')) ||
-                       video.src.startsWith('blob:'); // Assume blob URLs are M3U8 for preview
+        // Check multiple indicators for HLS content
+        const srcLower = video.src.toLowerCase();
+        const isM3U8 = 
+          // Standard extension checks
+          srcLower.endsWith('.m3u8') || 
+          srcLower.includes('.m3u8?') ||
+          srcLower.includes('.m3u8#') ||
+          // Filename parameter checks (with or without extension)
+          (srcLower.includes('filename=') && (srcLower.includes('.m3u8') || srcLower.includes('m3u'))) ||
+          // Common HLS patterns
+          srcLower.includes('/manifest.m3u8') ||
+          srcLower.includes('/playlist.m3u8') ||
+          srcLower.includes('/master.m3u8') ||
+          // Blob URLs for preview
+          video.src.startsWith('blob:');
+          
         if (isM3U8) {
           video.type = 'application/x-mpegURL';
+          debugLogger.debug('Set video type to application/x-mpegURL based on URL pattern');
+        }
+      }
+      
+      // Also check data attributes that might contain type info
+      if (!video.type && video.dataset) {
+        // Check for type hints in data attributes
+        if (video.dataset.type === 'm3u8' || 
+            video.dataset.fileType === 'm3u8' ||
+            video.dataset.mimeType === 'application/x-mpegURL') {
+          video.type = 'application/x-mpegURL';
+          debugLogger.debug('Set video type to application/x-mpegURL based on data attributes');
         }
       }
       
@@ -932,7 +1006,7 @@ export default {
 
     // Prevent multiple observers on the same page
     if (window._dluxVideoObserver) {
-      console.log('Video observer already exists, skipping initialization');
+      debugLogger.debug('Video observer already exists, skipping initialization');
       return window._dluxVideoObserver;
     }
 

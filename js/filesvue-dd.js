@@ -6,6 +6,8 @@ import VideoTranscoder from '/js/video-transcoder.js';
 import common from './methods-common.js';
 import spk from './methods-spk.js';
 import watchers from './watchers-common.js';
+import debugLogger from './utils/debug-logger.js';
+import hlsDebug from './utils/hls-debug.js';
 
 export default {
     components: {
@@ -277,7 +279,7 @@ export default {
                 Processing Files
             </h5>
             <div class="row g-2">
-                <div v-for="pFile in processingFiles" :key="pFile.id" class="col-12 col-md-6 col-lg-4">
+                <div v-for="pFile in processingFiles" :key="pFile.id" class="">
                     <div class="card bg-dark border-secondary">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-start mb-2">
@@ -1023,7 +1025,7 @@ export default {
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
                          class="text-center p-3">
                         <video :src="getFileUrlWithType(previewModal.file)" 
-                               :type="previewModal.file?.type?.includes('m3u8') || previewModal.file?.name?.endsWith('.m3u8') ? 'application/x-mpegURL' : undefined"
+                               :type="getVideoMimeType(previewModal.file)"
                                controls 
                                class="w-100 rounded"
                                style="max-height: 70vh;">
@@ -1307,6 +1309,7 @@ export default {
                 show: false,
                 file: null
             },
+            videoObserver: null, // MutationObserver for HLS video setup
             // Video transcoding
             showVideoTranscoder: false,
             showVideoChoiceModal: false,
@@ -1316,7 +1319,7 @@ export default {
             processedVideoFiles: [], // Completed video files ready for upload
         };
     },
-    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
+    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped', 'refresh-drive'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
     methods: {
         ...common,
         ...spk,
@@ -1408,12 +1411,12 @@ export default {
                 // Clear from localStorage
                 if (this.localStorageKey) {
                     localStorage.removeItem(this.localStorageKey);
-                    console.log("Cleared pending changes from localStorage");
+                    debugLogger.debug("Cleared pending changes from localStorage");
                 }
 
                 // Rebuild from original contract data
                 this.init();
-                console.log("Reverted all pending changes");
+                debugLogger.debug("Reverted all pending changes");
             }
         },
         addAsset(id, contract) {
@@ -1488,7 +1491,7 @@ export default {
                 // Add to virtual folders if not already there
                 if (!this.pendingChanges['__virtualFolders__'][this.selectedUser].includes(newPath)) {
                     this.pendingChanges['__virtualFolders__'][this.selectedUser].push(newPath);
-                    console.log("Added virtual folder:", newPath);
+                    debugLogger.debug("Added virtual folder:", newPath);
 
                     // --- Trigger UI update by rebuilding tree ---
                     this.buildFolderTrees();
@@ -1500,7 +1503,7 @@ export default {
             }
         },
         refreshDrive() {
-            console.log('🔄 Refreshing drive data...');
+            debugLogger.debug('🔄 Refreshing drive data...');
             this.$emit('refresh-drive');
             // Also call init to reload local data
             this.init();
@@ -1626,7 +1629,7 @@ export default {
                 });
         },
         handleLabel(m) {
-            console.log('handleLabel:', m); // Debug log
+            debugLogger.debug('handleLabel:', m); // Debug log
             let currentLabels = this.filterLabels ? this.filterLabels.split('') : [];
             if (m.action == 'added') {
                 if (!currentLabels.includes(m.item)) {
@@ -1636,11 +1639,11 @@ export default {
                 currentLabels = currentLabels.filter(label => label !== m.item);
             }
             this.filterLabels = currentLabels.sort().join('');
-            console.log('Updated filterLabels:', this.filterLabels); // Debug log
+            debugLogger.debug('Updated filterLabels:', this.filterLabels); // Debug log
             this.render();
         },
         handleTag(m) {
-            console.log('handleTag:', m); // Debug log
+            debugLogger.debug('handleTag:', m); // Debug log
             // Flags seem to be a bitmask, passed directly as prop_selections?
             // Let's assume the @data event for tags/flags gives us the *new complete bitmask*
             // If it gives individual add/remove like labels, we need to adjust
@@ -1662,7 +1665,7 @@ export default {
                 this.filterFlags = num;
             }
 
-            console.log('Updated filterFlags:', this.filterFlags); // Debug log
+            debugLogger.debug('Updated filterFlags:', this.filterFlags); // Debug log
             this.render();
         },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
@@ -1812,13 +1815,13 @@ export default {
             
             // Debug logging for file slots
             if (type === 'file' && item) {
-                console.log('Context menu for file:', item);
-                console.log('File slots available:', Object.keys(this.fileSlots));
-                console.log('File metadata:', this.newMeta[item.i] && this.newMeta[item.i][item.f]);
+                debugLogger.debug('Context menu for file:', item);
+                debugLogger.debug('File slots available:', Object.keys(this.fileSlots));
+                debugLogger.debug('File metadata:', this.newMeta[item.i] && this.newMeta[item.i][item.f]);
                 const fileType = (this.newMeta[item.i] && this.newMeta[item.i][item.f] && this.newMeta[item.i][item.f].type) || '';
-                console.log('File type:', fileType);
-                console.log('Is image (by type):', this.isImageFile(fileType));
-                console.log('Is image (by filename):', this.isImageFile(item.f));
+                debugLogger.debug('File type:', fileType);
+                debugLogger.debug('Is image (by type):', this.isImageFile(fileType));
+                debugLogger.debug('Is image (by filename):', this.isImageFile(item.f));
             }
             
             const hide = () => {
@@ -1882,13 +1885,13 @@ export default {
             }
         },
         dragStartFile(event, file) {
-            console.log('Drag start file:', file);
+            debugLogger.debug('Drag start file:', file);
 
             // If dragging a selected file and there are multiple files selected
             if (this.isFileSelected(file) && this.selectedFiles.length > 1) {
                 // Include all selected files in the drag data
                 event.dataTransfer.setData("fileids", JSON.stringify(this.selectedFiles));
-                console.log('Dragging multiple files:', this.selectedFiles);
+                debugLogger.debug('Dragging multiple files:', this.selectedFiles);
             } else {
                 // Single file drag (traditional behavior)
                 this.selectedFiles = [file.f]; // Select only this file
@@ -1960,14 +1963,14 @@ export default {
                             return { file: item.file, fullAppPath: fullAppPath };
                         });
 
-                        console.log(`External items processed (dropped on folder "${targetPath}"):`, filesWithFullPath);
+                        debugLogger.debug(`External items processed (dropped on folder "${targetPath}"):`, filesWithFullPath);
                         // Check for video files and show transcoding options
                         this.processFilesWithVideoCheck(filesWithFullPath);
                         // Prevent internal D&D logic from running for external files
                         return;
                     }
                 }).catch(error => {
-                    console.error("Error processing dropped items:", error);
+                    debugLogger.error("Error processing dropped items:", error);
                     alert("Error processing dropped folder/files.");
                 });
                 return; // Prevent internal D&D logic
@@ -1997,14 +2000,14 @@ export default {
 
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
-                        console.warn("Cannot move preset folders");
+                        debugLogger.warn("Cannot move preset folders");
                         return;
                     }
 
                     // Check if we're dropping into a subfolder of the folder being moved
                     // This would create a recursive loop and is not allowed
                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                        console.warn('Cannot move a folder into its own subfolder');
+                        debugLogger.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
 
@@ -2107,7 +2110,7 @@ export default {
                                         // Add to contract's newFolders if not already there
                                         if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
                                             this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
-                                            console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
+                                            debugLogger.debug(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
                                         }
 
                                         // Remove from virtual folders since it's now a real folder
@@ -2206,13 +2209,13 @@ export default {
 
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
-                        console.warn("Cannot move preset folders");
+                        debugLogger.warn("Cannot move preset folders");
                         return;
                     }
 
                     // Check if we're dropping into a subfolder of the folder being moved
                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                        console.warn('Cannot move a folder into its own subfolder');
+                        debugLogger.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
 
@@ -2499,7 +2502,7 @@ export default {
                     }
                 });
                 const newFolderListStr = folderListEntries.join("|");
-                console.log({ newFolderListStr })
+                debugLogger.debug({ newFolderListStr })
                 const newFilesMetadata = [];
                 const sortedFileCIDs = Object.keys(originalContract.df || {}).sort();
                 sortedFileCIDs.forEach(cid => {
@@ -2600,7 +2603,7 @@ export default {
                 key: 'Posting' // Specify Posting key
             };
 
-            console.log("Emitting tosign for batch update:", opData);
+            debugLogger.debug("Emitting tosign for batch update:", opData);
             this.$emit('tosign', opData);
 
             // **DO NOT** clear pending changes or re-init here.
@@ -2610,7 +2613,7 @@ export default {
             // build arrays to validate each portion of the metadata
             let metaData = metadataString.split(',')
 
-            console.log(`Validating metadata with ${metaData.length} parts`);
+            debugLogger.debug(`Validating metadata with ${metaData.length} parts`);
 
             // Isolate the first portion of the metadata, this is the contract data
             const contractData = metaData[0]
@@ -2618,7 +2621,7 @@ export default {
             const metadata = metaData.splice(1)
 
             if (metadata.length % 4 !== 0) {
-                console.log(`Metadata validation failed: File metadata length (${metadata.length}) is not a multiple of 4`);
+                debugLogger.debug(`Metadata validation failed: File metadata length (${metadata.length}) is not a multiple of 4`);
                 return false;
             }
 
@@ -2635,7 +2638,7 @@ export default {
             // test to see it's a valid character
             let simpleTest = this.Base64toNumber(firstChar) + 1
             if (typeof simpleTest !== 'number') {
-                console.log(`Metadata validation failed: First character '${firstChar}' is not a valid Base64 character`);
+                debugLogger.debug(`Metadata validation failed: First character '${firstChar}' is not a valid Base64 character`);
                 return false
             }
 
@@ -2650,17 +2653,17 @@ export default {
                 }
                 let atIndex = key.indexOf('@');
                 if (atIndex === -1) {
-                    console.log(`Metadata validation failed: Missing @ in encryption key ${key}`);
+                    debugLogger.debug(`Metadata validation failed: Missing @ in encryption key ${key}`);
                     return false;
                 }
                 let cipher = key.substring(0, atIndex);
                 if (!/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(cipher)) {
-                    console.log(`Metadata validation failed: Invalid cipher format in encryption key: '${cipher}'`);
+                    debugLogger.debug(`Metadata validation failed: Invalid cipher format in encryption key: '${cipher}'`);
                     return false;
                 }
                 let account = key.substring(atIndex + 1);
                 if (!/^[a-z0-9-.]{1,16}$/.test(account)) {
-                    console.log(`Metadata validation failed: Invalid account format in encryption key: '${account}'`);
+                    debugLogger.debug(`Metadata validation failed: Invalid account format in encryption key: '${account}'`);
                     return false;
                 }
             }
@@ -2669,7 +2672,7 @@ export default {
             let folderData = contractData.split('|')
             folderData = folderData.splice(1)
             if (folderData.length > 48) {
-                console.log(`Metadata validation failed: Too many folders (${folderData.length}), maximum is 48`);
+                debugLogger.debug(`Metadata validation failed: Too many folders (${folderData.length}), maximum is 48`);
                 return false;
             }
 
@@ -2684,18 +2687,18 @@ export default {
                     if (j < pathParts.length - 1) {
                         // Parent indices
                         if (!part.match(/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/)) {
-                            console.log(`Metadata validation failed: Invalid parent folder index format: '${part}'`);
+                            debugLogger.debug(`Metadata validation failed: Invalid parent folder index format: '${part}'`);
                             return false;
                         }
                         let parentIndex = this.base58ToNumber(part);
                         if (!folderIndexMap.has(parentIndex)) {
-                            console.log(`Metadata validation failed: Parent folder index not found: ${parentIndex}`);
+                            debugLogger.debug(`Metadata validation failed: Parent folder index not found: ${parentIndex}`);
                             return false;
                         }
                     } else {
                         // Folder name
                         if (!part.match(/^[0-9a-zA-Z+_.\- ]{2,16}$/)) {
-                            console.log(`Metadata validation failed: Invalid folder name format: '${part}'`);
+                            debugLogger.debug(`Metadata validation failed: Invalid folder name format: '${part}'`);
                             return false;
                         }
                         folderIndexMap.set(k + 1, folderPath); // Assign index to path
@@ -2720,7 +2723,7 @@ export default {
                 return false;
             }
 
-            console.log('Metadata validation passed');
+            debugLogger.debug('Metadata validation passed');
             return true;
 
             function validateFileMetadata(metadataStr, folderIndexMap) {
@@ -2730,7 +2733,7 @@ export default {
                     if (i + 4 <= metadataStr.length) {
                         fileEntries.push(metadataStr.slice(i, i + 4));
                     } else {
-                        console.log(`Metadata validation failed: Incomplete file entry at position ${i}`);
+                        debugLogger.debug(`Metadata validation failed: Incomplete file entry at position ${i}`);
                         return false;
                     }
                 }
@@ -2746,7 +2749,7 @@ export default {
                 for (let i = 0; i < fileEntries.length; i++) {
                     const entry = fileEntries[i];
                     if (entry.length !== 4) {
-                        console.log(`Metadata validation failed: File entry ${i} has ${entry.length} fields, expected 4`);
+                        debugLogger.debug(`Metadata validation failed: File entry ${i} has ${entry.length} fields, expected 4`);
                         return false;
                     }
 
@@ -2754,30 +2757,30 @@ export default {
 
                     // Validate name
                     if (!namePattern.test(name)) {
-                        console.log(`Metadata validation failed: Invalid file name format: '${name}'`);
+                        debugLogger.debug(`Metadata validation failed: Invalid file name format: '${name}'`);
                         return false;
                     }
 
                     // Validate type
                     if (!typePattern.test(type)) {
-                        console.log(`Metadata validation failed: Invalid file type format: '${type}'`);
+                        debugLogger.debug(`Metadata validation failed: Invalid file type format: '${type}'`);
                         return false;
                     }
                     const typeParts = type.split('.');
                     if (typeParts.length > 1 && !folderIndexMap.has(typeParts[1])) {
-                        console.log(`Metadata validation failed: Invalid folder index in type: '${type}', folder index '${typeParts[1]}' not found`);
+                        debugLogger.debug(`Metadata validation failed: Invalid folder index in type: '${type}', folder index '${typeParts[1]}' not found`);
                         return false;
                     }
 
                     // Validate thumb (IPFS CID or URL)
                     if (thumb && !ipfsPattern.test(thumb) && !urlPattern.test(thumb)) {
-                        console.log(`Metadata validation failed: Invalid thumbnail format: '${thumb}'`);
+                        debugLogger.debug(`Metadata validation failed: Invalid thumbnail format: '${thumb}'`);
                         return false;
                     }
 
                     // Validate flagsCombined
                     if (flagsCombined && !flagsPattern.test(flagsCombined)) {
-                        console.log(`Metadata validation failed: Invalid flags format: '${flagsCombined}'`);
+                        debugLogger.debug(`Metadata validation failed: Invalid flags format: '${flagsCombined}'`);
                         return false;
                     }
                 }
@@ -2786,7 +2789,7 @@ export default {
             }
         },
         handleChangesConfirmed(contractId) {
-            console.log(`Handling confirmed changes for contract: ${contractId}`);
+            debugLogger.debug(`Handling confirmed changes for contract: ${contractId}`);
             if (this.pendingChanges[contractId]) {
                 // Remove the specific contract's changes from pendingChanges
                 delete this.pendingChanges[contractId];
@@ -2805,7 +2808,7 @@ export default {
                         } else {
                             localStorage.removeItem(this.localStorageKey);
                         }
-                        // console.log(`Updated localStorage after confirming changes for ${contractId}`);
+                        // debugLogger.debug(`Updated localStorage after confirming changes for ${contractId}`);
                     } catch (e) {
                         console.error("Error saving updated pending changes to localStorage:", e);
                     }
@@ -2813,7 +2816,7 @@ export default {
 
                 // Re-initialize data to reflect the saved state from the blockchain
                 this.init();
-                // console.log(`Re-initialized data after confirming changes for ${contractId}`);
+                // debugLogger.debug(`Re-initialized data after confirming changes for ${contractId}`);
 
             } else {
                 console.warn(`Received confirmation for ${contractId}, but no pending changes found.`);
@@ -2936,7 +2939,7 @@ export default {
             })
         },
         render() {
-            console.log('Rendering with filters:',
+            debugLogger.debug('Rendering with filters:',
                 {
                     search: this.filesSelect.search,
                     flags: this.filterFlags,
@@ -3072,7 +3075,7 @@ export default {
 
             // Update the reactive array used by the template
             this.filesArray = filteredFiles;
-            console.log('Render complete. Files matching filters:', this.filesArray.length, 'Total matching anywhere:', allMatchingFiles.length); // Debug log
+            debugLogger.debug('Render complete. Files matching filters:', this.filesArray.length, 'Total matching anywhere:', allMatchingFiles.length); // Debug log
         },
 
         // Helper method to compute the number of matching files at each breadcrumb level
@@ -3226,7 +3229,7 @@ export default {
         },
 
         buildFolderTrees() {
-            console.log("Building folder trees...");
+            debugLogger.debug("Building folder trees...");
             const filesByUser = {};
             for (const fileId in this.files) {
                 const file = this.files[fileId];
@@ -3401,7 +3404,7 @@ export default {
                     for (var j = 0; j < filesNames.length; j++) {
                         const typeIndex = slots[j * 4 + 2] || "";
                         const [type, folderIndex] = typeIndex.split(".");
-                        console.log({ typeIndex, type, folderIndex })
+                        debugLogger.debug({ typeIndex, type, folderIndex })
                         const folderPath = folderIndex ? indexToPath[folderIndex] : indexToPath["1"];
                         this.newMeta[id][filesNames[j]] = {
                             name: filesNames[j],
@@ -3536,10 +3539,10 @@ export default {
             // Check for external files first
             if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
                 if (targetPath == 'Trash') {
-                    console.log('Dropped on trash')
+                    debugLogger.debug('Dropped on trash')
                     return
                 }
-                console.log('Dropped on background - event.dataTransfer.items:', event.dataTransfer.items);
+                debugLogger.debug('Dropped on background - event.dataTransfer.items:', event.dataTransfer.items);
                 this.processDroppedItems(event.dataTransfer.items).then(processedFiles => {
                     if (processedFiles.length > 0) {
                         // Combine targetPath with relativePath here
@@ -3559,12 +3562,12 @@ export default {
                             return { file: item.file, fullAppPath: fullAppPath };
                         });
 
-                        console.log(`External items processed (dropped on background, target: "${targetPath}"):`, filesWithFullPath);
+                        debugLogger.debug(`External items processed (dropped on background, target: "${targetPath}"):`, filesWithFullPath);
                         // Check for video files and show transcoding options
                         this.processFilesWithVideoCheck(filesWithFullPath);
                     }
                 }).catch(error => {
-                    console.error("Error processing dropped items:", error);
+                    debugLogger.error("Error processing dropped items:", error);
                     alert("Error processing dropped folder/files.");
                 });
                 return; // Prevent internal D&D logic
@@ -3572,11 +3575,11 @@ export default {
 
             // --- Existing internal D&D logic ---
             const fileId = event.dataTransfer.getData("fileid");
-            console.log('Background drop - fileId:', fileId);
+            debugLogger.debug('Background drop - fileId:', fileId);
 
             // Find the file by ID
             const file = this.files[fileId];
-            console.log('Background drop - Found file:', file);
+            debugLogger.debug('Background drop - Found file:', file);
 
             if (!file) {
                 console.error('Background drop - File not found with ID:', fileId);
@@ -3590,13 +3593,13 @@ export default {
 
             // Skip if folder path is the same
             if (file.folderPath === this.currentFolderPath) {
-                console.log('Background drop - File already in this folder');
+                debugLogger.debug('Background drop - File already in this folder');
                 return;
             }
 
             // Store original path for debugging
             const originalPath = file.folderPath;
-            console.log('Background drop - Original path:', originalPath, 'New path:', this.currentFolderPath);
+            debugLogger.debug('Background drop - Original path:', originalPath, 'New path:', this.currentFolderPath);
 
             // Update file folder path
             this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
@@ -3607,7 +3610,7 @@ export default {
 
             // Important: Actually update the file object's folderPath
             file.folderPath = this.currentFolderPath;
-            console.log('Background drop - Updated file:', file);
+            debugLogger.debug('Background drop - Updated file:', file);
 
             // Force folder path into metadata if needed
             if (this.newMeta[file.i] && this.newMeta[file.i][file.f]) {
@@ -3627,10 +3630,10 @@ export default {
             // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = folder.path;
-            console.log('Entering folder:', folder.path);
+            debugLogger.debug('Entering folder:', folder.path);
             this.dragHoverTimeout = setTimeout(() => {
                 if (this.dragHoverTargetPath === folder.path) {
-                    console.log('Navigating due to hover on folder:', folder.path);
+                    debugLogger.debug('Navigating due to hover on folder:', folder.path);
                     this.navigateTo(folder.path);
                     this.dragHoverTargetPath = null; // Reset after navigation
                 }
@@ -3644,10 +3647,10 @@ export default {
             // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = path;
-            console.log('Entering breadcrumb:', path);
+            debugLogger.debug('Entering breadcrumb:', path);
             this.dragHoverTimeout = setTimeout(() => {
                 if (this.dragHoverTargetPath === path) {
-                    console.log('Navigating due to hover on breadcrumb:', path);
+                    debugLogger.debug('Navigating due to hover on breadcrumb:', path);
                     this.navigateTo(path);
                     this.dragHoverTargetPath = null; // Reset after navigation
                 }
@@ -3682,7 +3685,7 @@ export default {
             // If we are truly leaving the bounds of the element that had the hover timeout
             if (isLeavingHoverTarget && (!relatedTarget || !currentTarget.contains(relatedTarget))) {
                 clearTimeout(this.dragHoverTimeout);
-                console.log('Cleared nav timeout for:', this.dragHoverTargetPath);
+                debugLogger.debug('Cleared nav timeout for:', this.dragHoverTargetPath);
                 this.dragHoverTargetPath = null;
             }
 
@@ -3934,7 +3937,7 @@ export default {
             this.$forceUpdate();
         },
         dragStartItem(event, item, type) {
-            console.log(`Drag start ${type}:`, item);
+            debugLogger.debug(`Drag start ${type}:`, item);
 
             let dragDataIds = [];
             let isDraggingSelected = false;
@@ -3957,7 +3960,7 @@ export default {
             if (isDraggingSelected && this.selectedFiles.length > 1) {
                 // Include all selected file and folder IDs in the drag data
                 dragDataIds = this.selectedFiles.filter(id => !id.startsWith('folder-') || !this.isPresetFolder(id.substring('folder-'.length)));
-                console.log('Dragging multiple items:', dragDataIds);
+                debugLogger.debug('Dragging multiple items:', dragDataIds);
                 event.dataTransfer.setData("itemids", JSON.stringify(dragDataIds)); // Use a generic name
             } else {
                 // Single item drag (traditional behavior)
@@ -3970,7 +3973,7 @@ export default {
                 }
                 this.selectedFiles = [singleId];
                 dragDataIds = [singleId];
-                console.log(`Dragging single ${type}:`, singleId);
+                debugLogger.debug(`Dragging single ${type}:`, singleId);
                 event.dataTransfer.setData("itemids", JSON.stringify(dragDataIds)); // Still use generic name
             }
 
@@ -3984,7 +3987,7 @@ export default {
             if (firstFileId && this.files[firstFileId]) {
                 representativeContractId = this.files[firstFileId].i;
                 event.dataTransfer.setData("contractid", representativeContractId);
-                console.log("Using contractId:", representativeContractId);
+                debugLogger.debug("Using contractId:", representativeContractId);
             } else {
                 console.warn("No file found in selection to determine contractId.");
                 // Optionally set a placeholder or handle folder-only drags differently later
@@ -4082,14 +4085,14 @@ export default {
 
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
-                        console.warn("Cannot move preset folders");
+                        debugLogger.warn("Cannot move preset folders");
                         return;
                     }
 
                     // Check if we're dropping into a subfolder of the folder being moved
                     // This would create a recursive loop and is not allowed
                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                        console.warn('Cannot move a folder into its own subfolder');
+                        debugLogger.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
 
@@ -4192,7 +4195,7 @@ export default {
                                         // Add to contract's newFolders if not already there
                                         if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
                                             this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
-                                            console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
+                                            debugLogger.debug(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
                                         }
 
                                         // Remove from virtual folders since it's now a real folder
@@ -4297,13 +4300,13 @@ export default {
 
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
-                        console.warn("Cannot move preset folders");
+                        debugLogger.warn("Cannot move preset folders");
                         return;
                     }
 
                     // Check if we're dropping into a subfolder of the folder being moved
                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                        console.warn('Cannot move a folder into its own subfolder');
+                        debugLogger.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
 
@@ -4443,7 +4446,7 @@ export default {
                     const savedChanges = localStorage.getItem(this.localStorageKey);
                     if (savedChanges) {
                         this.pendingChanges = JSON.parse(savedChanges);
-                        console.log("Loaded pending changes from localStorage");
+                        debugLogger.debug("Loaded pending changes from localStorage");
 
                         // Update newMeta based on pendingChanges
                         for (const contractId in this.pendingChanges) {
@@ -4531,7 +4534,7 @@ export default {
         saveMetadataChanges() {
             if (!this.fileToEditMetadata) return;
 
-            console.log('Saving metadata, current tempMetadata:', JSON.parse(JSON.stringify(this.tempMetadata)));
+            debugLogger.debug('Saving metadata, current tempMetadata:', JSON.parse(JSON.stringify(this.tempMetadata)));
 
             const file = this.fileToEditMetadata;
             const contractId = file.i;
@@ -4551,7 +4554,7 @@ export default {
                 finalFlagsNum |= flagVal; // Add selected flags using bitwise OR
             });
 
-            console.log('Calculated final values:', { finalLabels, finalLicense, finalFlagsNum });
+            debugLogger.debug('Calculated final values:', { finalLabels, finalLicense, finalFlagsNum });
 
             // --- Update newMeta --- 
             this.newMeta[contractId][fileId].labels = finalLabels;
@@ -4577,7 +4580,7 @@ export default {
                 folderPath: this.newMeta[contractId][fileId].folderPath || '',
             };
 
-            console.log('Updated pendingChanges for', contractId, fileId, ':', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+            debugLogger.debug('Updated pendingChanges for', contractId, fileId, ':', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
 
             // --- Close editor --- 
             this.closeMetadataEditor();
@@ -4594,7 +4597,7 @@ export default {
 
         // Handlers for the choices-vue components in the editor
         handleTempLabel(data) {
-            console.log('handleTempLabel received data:', data);
+            debugLogger.debug('handleTempLabel received data:', data);
             const currentLabels = [...this.tempMetadata.labels]; // Clone for modification
             if (data.action === 'added') {
                 if (!currentLabels.includes(data.item)) {
@@ -4611,10 +4614,10 @@ export default {
                 ...this.tempMetadata,
                 labels: currentLabels.sort() // Keep it sorted
             };
-            console.log('tempMetadata after label update:', JSON.parse(JSON.stringify(this.tempMetadata)));
+            debugLogger.debug('tempMetadata after label update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
         handleTempLic(data) {
-            console.log('handleTempLic received data:', data);
+            debugLogger.debug('handleTempLic received data:', data);
             let newLicense = [];
             if (data.action === 'added') {
                 newLicense = [data.item]; // License allows only one selection
@@ -4626,10 +4629,10 @@ export default {
                 ...this.tempMetadata, // Spread existing values
                 license: newLicense
             };
-            console.log('tempMetadata after license update:', JSON.parse(JSON.stringify(this.tempMetadata)));
+            debugLogger.debug('tempMetadata after license update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
         handleTempFlag(data) {
-            console.log('handleTempFlag received data:', data);
+            debugLogger.debug('handleTempFlag received data:', data);
 
             // Initialize current flags as a bitwise number
             let currentFlagsNum = this.tempMetadata.flags.reduce((acc, flag) => acc | flag, 0);
@@ -4652,7 +4655,7 @@ export default {
                 flags: newFlagsArray.sort((a, b) => a - b) // Sort numerically
             };
 
-            console.log('tempMetadata after flag update:', JSON.parse(JSON.stringify(this.tempMetadata)));
+            debugLogger.debug('tempMetadata after flag update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
         // Added: Method to open the details viewer
         openDetailsViewer(file) {
@@ -4679,7 +4682,7 @@ export default {
             const fileId = file.f;
             const newPath = "Trash"; // The target folder is always "Trash"
 
-            console.log(`Moving file ${fileId} (contract ${contractId}) to Trash.`);
+            debugLogger.debug(`Moving file ${fileId} (contract ${contractId}) to Trash.`);
 
             // Update the canonical file object in this.files
             if (this.files[fileId]) {
@@ -4699,7 +4702,7 @@ export default {
                 name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
             };
 
-            console.log('Updated pendingChanges for move to trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+            debugLogger.debug('Updated pendingChanges for move to trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
 
             // Rebuild folder trees and re-render the view
             this.buildFolderTrees();
@@ -4748,7 +4751,7 @@ export default {
                     if (virtualIndex !== -1) {
                         // Remove from virtual folders
                         virtualFolders.splice(virtualIndex, 1);
-                        console.log(`Deleted virtual folder: ${folderPath}`);
+                        debugLogger.debug(`Deleted virtual folder: ${folderPath}`);
                         this.buildFolderTrees();
                         return;
                     }
@@ -4762,7 +4765,7 @@ export default {
                         const folderIndex = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
                         if (folderIndex !== -1) {
                             this.pendingChanges[contractId].__newFolders__.splice(folderIndex, 1);
-                            console.log(`Removed pending new folder "${folderPath}" as it was deleted.`);
+                            debugLogger.debug(`Removed pending new folder "${folderPath}" as it was deleted.`);
                         }
                     }
                 }
@@ -4789,7 +4792,7 @@ export default {
             const fileId = file.f;
             const restorePath = ""; // Restore to root directory
 
-            console.log(`Restoring file ${fileId} (contract ${contractId}) from Trash to root.`);
+            debugLogger.debug(`Restoring file ${fileId} (contract ${contractId}) from Trash to root.`);
 
             // Update the canonical file object in this.files
             if (this.files[fileId]) {
@@ -4809,7 +4812,7 @@ export default {
                 name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
             };
 
-            console.log('Updated pendingChanges for restore from trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+            debugLogger.debug('Updated pendingChanges for restore from trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
 
             // Rebuild folder trees and re-render the view
             this.buildFolderTrees();
@@ -4850,7 +4853,7 @@ export default {
             return { valid: true, message: "" };
         },
         handleUploadDone(payload) {
-            console.log('📤 Upload completed, updating contract data...', payload);
+            debugLogger.debug('📤 Upload completed, updating contract data...', payload);
             
             // Emit update-contract with the payload containing the new files
             this.$emit('update-contract', payload);
@@ -5059,6 +5062,8 @@ export default {
         },
 
         closeFilePreview() {
+            // HLS cleanup is handled by the MutationObserver pattern
+            // Each video element manages its own HLS instance
             this.previewModal.show = false;
             this.previewModal.file = null;
         },
@@ -5069,13 +5074,55 @@ export default {
             let url = file.url;
 
             // For IPFS URLs, add filename parameter for proper MIME type detection
-            if (url.includes('ipfs.dlux.io/ipfs/') && file.name && file.type) {
+            // This matches the original working implementation
+            if (url.includes('ipfs.dlux.io/ipfs/')) {
                 const cid = url.split('/ipfs/')[1].split('?')[0];
-                const filename = `${file.name}.${file.type}`;
-                url = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+                
+                // Reconstruct full filename with extension for VFS files
+                let filename = file.name;
+                if (file.meta?.type) {
+                    filename = `${file.name}.${file.meta.type}`;
+                }
+                
+                // Add filename parameter to help IPFS gateway resolve file type and references
+                url = `https://ipfs.dlux.io/ipfs/${cid}?filename=${encodeURIComponent(filename)}`;
             }
 
             return url;
+        },
+
+        getVideoMimeType(file) {
+            if (!file) return undefined;
+            
+            // Log file for debugging
+            hlsDebug.fileDetection(file);
+            
+            // Check explicit MIME type in file.type
+            if (file.type === 'application/x-mpegURL' || 
+                file.type === 'audio/x-mpegurl' ||
+                file.type === 'application/vnd.apple.mpegurl') {
+                return 'application/x-mpegURL';
+            }
+            
+            // Check metadata type field (VFS stores extension here)
+            if (file.meta?.type === 'm3u8' || file.type === 'm3u8') {
+                hlsDebug.log('DETECTION', 'HLS detected from VFS metadata type field', file);
+                return 'application/x-mpegURL';
+            }
+            
+            // Check file name with extension
+            if (file.name?.endsWith('.m3u8')) {
+                return 'application/x-mpegURL';
+            }
+            
+            // For VFS files, reconstruct full name with extension
+            const fullName = file.meta ? `${file.name}.${file.meta.type}` : file.name;
+            if (fullName?.endsWith('.m3u8')) {
+                hlsDebug.log('DETECTION', `HLS detected from reconstructed VFS name: ${fullName}`, file);
+                return 'application/x-mpegURL';
+            }
+            
+            return undefined;
         },
 
         isImageFile(type) {
@@ -5147,7 +5194,7 @@ export default {
         handleGlobalDragEnd() {
             const activeElements = this.$refs.container?.querySelectorAll('.drag-over-active');
             activeElements?.forEach(el => el.classList.remove('drag-over-active'));
-            console.log('Cleaned up all drag-over-active on global dragend');
+            debugLogger.debug('Cleaned up all drag-over-active on global dragend');
         },
         clearAllDragHighlights() {
             this.$refs.container?.querySelectorAll('.drag-over-active').forEach(el => el.classList.remove('drag-over-active'));
@@ -5160,7 +5207,7 @@ export default {
             // If relatedTarget is null, it means we left the window or a non-browser area
             if (!event.relatedTarget || event.relatedTarget.nodeName === 'HTML') {
                 this.clearAllDragHighlights();
-                console.log('Drag left component/window, cleared all highlights');
+                debugLogger.debug('Drag left component/window, cleared all highlights');
             }
         },
         addToPost(file) {
@@ -5298,18 +5345,18 @@ export default {
             
             // If we have video files, add them to the queue and show choice modal
             if (videoFiles.length > 0) {
-                console.log('Found video files:', videoFiles);
+                debugLogger.debug('Found video files:', videoFiles);
                 this.pendingVideoFiles = videoFiles;
                 // Show choice modal for first video instead of old transcoder modal
                 const firstVideo = this.pendingVideoFiles[0];
-                console.log('First video:', firstVideo);
+                debugLogger.debug('First video:', firstVideo);
                 this.videoToTranscode = {
                     file: firstVideo.file,
                     fileName: firstVideo.file.name,
                     fileSize: firstVideo.file.size,
                     fullAppPath: firstVideo.fullAppPath
                 };
-                console.log('Setting showVideoChoiceModal to true');
+                debugLogger.debug('Setting showVideoChoiceModal to true');
                 this.showVideoChoiceModal = true;
             }
             
@@ -5347,7 +5394,8 @@ export default {
             // Add to upload queue
             const currentFiles = this.droppedExternalFiles?.files || [];
             this.droppedExternalFiles = { 
-                files: [...currentFiles, ...filesToAdd] 
+                files: [...currentFiles, ...filesToAdd],
+                blobUrls: result.blobUrls || {} // Pass blob URLs from transcoder
             };
             
             // Close transcoder and process next video using choice modal
@@ -5402,7 +5450,7 @@ export default {
         cancelVideoChoice() {
             // Skip current video without processing
             const skippedVideo = this.pendingVideoFiles.shift();
-            console.log('User cancelled video choice for:', skippedVideo?.file?.name);
+            debugLogger.debug('User cancelled video choice for:', skippedVideo?.file?.name);
             
             // Close the modal
             this.closeVideoChoiceModal();
@@ -5507,11 +5555,12 @@ export default {
             if (processingFile) {
                 processingFile.status = 'complete';
                 processingFile.transcodedFiles = result.files;
+                processingFile.blobUrls = result.blobUrls || {}; // Store blob URLs from transcoder
                 processingFile.thumbnailUrl = result.thumbnail ? URL.createObjectURL(result.thumbnail) : null;
                 // Emit progress 100 to ensure UI updates
                 processingFile.progress = 100;
                 
-                console.log('Processing complete for:', processingId, 'Auto-moving to ready section');
+                debugLogger.debug('Processing complete for:', processingId, 'Auto-moving to ready section');
                 
                 // Auto-move to ready section after a brief moment to show completion
                 setTimeout(() => {
@@ -5547,6 +5596,15 @@ export default {
             
             const processingFile = this.processingFiles[index];
             
+            // Get the transcoder component ref and clean it up
+            const transcoderRef = `transcoder_${processingId}`;
+            if (this.$refs[transcoderRef] && this.$refs[transcoderRef][0]) {
+                const transcoder = this.$refs[transcoderRef][0];
+                if (transcoder.cleanup) {
+                    transcoder.cleanup();
+                }
+            }
+            
             // Clean up transcoder instance if it exists
             if (processingFile.transcoderInstance) {
                 processingFile.transcoderInstance.$destroy();
@@ -5577,19 +5635,55 @@ export default {
             
             // You would need to add a video preview modal to the template
             // For now, we'll just log
-            console.log('Preview video:', processingFile);
+            debugLogger.debug('Preview video:', processingFile);
             alert('Video preview functionality will be integrated with the existing video player modal.');
         },
         
         moveToReady(processingFile) {
-            // Add transcoded files to upload queue - just raw files
-            const filesToAdd = processingFile.transcodedFiles;
+            // Extract all raw files for upload
+            const allFiles = processingFile.transcodedFiles.map(pf => {
+                // Handle ProcessedFile objects properly
+                return pf.getFile ? pf.getFile() : pf.file || pf;
+            });
             
-            // Add to upload queue with raw File objects
+            // Create metadata map for upload component
+            const fileMetadata = {};
+            processingFile.transcodedFiles.forEach(pf => {
+                // Get metadata from ProcessedFile object
+                const metadata = pf.getMetadata ? pf.getMetadata() : {
+                    isAuxiliary: pf.isAuxiliary,
+                    role: pf.role,
+                    parentFile: pf.parentFile
+                };
+                
+                const fileName = pf.getFile ? pf.getFile().name : (pf.file?.name || pf.name);
+                
+                fileMetadata[fileName] = {
+                    isAuxiliary: metadata.isAuxiliary,
+                    role: metadata.role,
+                    parentFile: metadata.parentFile
+                };
+                
+                debugLogger.debug(`filesvue-dd: Metadata for ${fileName}:`, {
+                    ...fileMetadata[fileName]
+                });
+            });
+            
+            // Add all files to upload queue
             const currentFiles = this.droppedExternalFiles?.files || [];
+            const currentMetadata = this.droppedExternalFiles?.metadata || {};
+            const currentBlobUrls = this.droppedExternalFiles?.blobUrls || {};
+            
             this.droppedExternalFiles = { 
-                files: [...currentFiles, ...filesToAdd] 
+                files: [...currentFiles, ...allFiles],
+                metadata: { ...currentMetadata, ...fileMetadata },
+                blobUrls: { ...currentBlobUrls, ...(processingFile.blobUrls || {}) }
             };
+            
+            debugLogger.debug('moveToReady: Setting droppedExternalFiles with metadata:', {
+                fileCount: allFiles.length,
+                metadata: fileMetadata
+            });
             
             // Remove from processing queue
             this.cancelProcessing(processingFile.id);
@@ -5746,7 +5840,7 @@ export default {
                     try {
                         if (Object.keys(newValue).length > 0) {
                             localStorage.setItem(this.localStorageKey, JSON.stringify(newValue));
-                            // console.log("Saved pendingChanges to localStorage"); // Optional debug log
+                            // debugLogger.debug("Saved pendingChanges to localStorage"); // Optional debug log
                         } else {
                             // If pendingChanges becomes empty, remove it from localStorage
                             localStorage.removeItem(this.localStorageKey);
@@ -5799,7 +5893,7 @@ export default {
         // Add window mouseup handler for selection box (emergency escape)
         window.addEventListener('mouseup', (e) => {
             if (this.selectionBox.active) {
-                console.log('Emergency ending selection box (window mouseup)');
+                debugLogger.debug('Emergency ending selection box (window mouseup)');
                 this.endSelectionBox();
             }
         });

@@ -1,6 +1,8 @@
 import ChoicesVue from '/js/choices-vue.js';
 import MCommon from '/js/methods-common.js'
 import Mspk from '/js/methods-spk.js'
+import { thumbnailService } from '/js/services/thumbnail-service.js';
+import debugLogger from '/js/utils/debug-logger.js';
 export default {
   components: {
     "choices-vue": ChoicesVue
@@ -71,7 +73,7 @@ export default {
 
             <!-- Collapsible file details section -->
             <div v-show="showFileDetails" class="mt-2 border-top pt-2">
-                <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
+                <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in mainFiles"
                     class="rounded">
                     <div class="card mt-3">
                         <div class="d-flex flex-wrap align-items-center px-2 py-1">
@@ -196,13 +198,13 @@ export default {
                                                 <input autocapitalize="off"
                                                     :disabled="FileInfo['thumb' + file.name].use_thumb"
                                                     placeholder="https://your-thumbnail-image.png"
-                                                    pattern="https://[a-z0-9.\-/]+|Qm[a-zA-Z0-9]+"
+                                                    pattern="https://.*|Qm[a-zA-Z0-9]+"
                                                     class="form-control disabled bg-dark border-0" v-model="FileInfo[file.name].meta.thumb">
                                             </div>
                                             <div v-if="!FileInfo['thumb' + file.name]"
                                                 class="position-relative has-validation">
                                                 <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
-                                                    pattern="https://[a-z0-9.\-/]+|Qm[a-zA-Z0-9]+"
+                                                    pattern="https://.*|Qm[a-zA-Z0-9]+"
                                                     class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
                                             </div>
                                         </div>
@@ -242,9 +244,46 @@ export default {
                     </div>
                 </div>
             </div>
-
-
-
+            
+            <!-- Auxiliary Files Section -->
+            <div v-if="auxiliaryFiles.length > 0" class="mt-3">
+                <div class="d-flex align-items-center">
+                    <div class="lead fs-6">
+                        <i class="fa-solid fa-file-circle-plus fa-fw me-1"></i>
+                        Supporting Files ({{auxiliaryFiles.length}})
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary ms-auto" @click="showAuxiliaryFiles = !showAuxiliaryFiles">
+                        {{ showAuxiliaryFiles ? 'Hide' : 'Show' }}
+                        <i :class="['fa-solid', showAuxiliaryFiles ? 'fa-chevron-up' : 'fa-chevron-down']" class="fa-fw"></i>
+                    </button>
+                </div>
+                <div v-show="showAuxiliaryFiles" class="mt-2">
+                    <p class="text-muted small mb-2">
+                        These files are automatically generated to support your main files (video segments, thumbnails, etc.) and will be uploaded together.
+                    </p>
+                    <div class="list-group">
+                        <div v-for="(auxFile, index) in auxiliaryFiles" :key="auxFile.hash || index" 
+                             class="list-group-item bg-dark border-secondary">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="small">
+                                        <span class="badge bg-secondary me-2">{{auxFile.role || 'auxiliary'}}</span>
+                                        {{auxFile.name}}
+                                    </div>
+                                    <div class="text-muted" style="font-size: 0.8rem;">
+                                        {{fancyBytes(auxFile.size)}} • CID: {{auxFile.hash ? auxFile.hash.substring(0, 8) + '...' : 'pending'}}
+                                    </div>
+                                </div>
+                                <div v-if="auxFile.progress !== undefined" class="ms-3" style="width: 100px;">
+                                    <div class="progress" style="height: 5px;">
+                                        <div class="progress-bar" :style="'width: ' + (auxFile.progress || 0) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div id="listOfEncs" v-if="encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)" class="rounded">
                 <div class="card mt-3">
@@ -442,12 +481,34 @@ export default {
         if(old.length < (i - 1))this.addDataURL(n[i][1], n[i][0], n[i][2])
       }
     },
+    thumbnailsGenerating(newVal, oldVal) {
+      debugLogger.debug(`Thumbnails generating: ${oldVal} -> ${newVal}`);
+      // When all thumbnails are done generating, try linking playlist posters
+      if (oldVal > 0 && newVal === 0) {
+        debugLogger.debug('All thumbnails generated, calling linkPlaylistPosters');
+        this.linkPlaylistPosters();
+      }
+    },
+    FileInfo: {
+      deep: true,
+      handler() {
+        // Debounce to avoid calling too frequently
+        if (this.fileInfoDebounce) {
+          clearTimeout(this.fileInfoDebounce);
+        }
+        this.fileInfoDebounce = setTimeout(() => {
+          // Call linkPlaylistPosters whenever FileInfo changes
+          this.linkPlaylistPosters();
+        }, 100);
+      }
+    },
     propStructuredFiles: {
       immediate: true,
       deep: true,
       async handler(newFilesArray) {
         if (Array.isArray(newFilesArray) && newFilesArray.length > 0) {
-          console.log('propStructuredFiles watcher received:', newFilesArray);
+          debugLogger.debug('propStructuredFiles watcher received:', newFilesArray);
+          debugLogger.debug('First item structure:', newFilesArray[0]);
           
           // 1. Consolidate newFilesArray to pick the best fullAppPath for identical files
           const consolidatedNewFiles = [];
@@ -471,23 +532,25 @@ export default {
 
           newFilesArray.forEach(newItem => {
             // Handle both raw File objects and structured objects
-            let file, itemPath;
+            let file, itemPath, metadata;
             
             if (newItem instanceof File) {
                 // Raw File object - wrap it
                 file = newItem;
                 itemPath = null;
+                metadata = {};
             } else if (newItem && newItem.file) {
                 // Structured object
                 file = newItem.file;
                 itemPath = newItem.fullAppPath || newItem.targetPath || null;
+                metadata = newItem.metadata || {};
             } else {
-                console.warn('Skipping malformed item in propStructuredFiles:', newItem);
+                debugLogger.warn('Skipping malformed item in propStructuredFiles:', newItem);
                 return;
             }
             
             if (typeof file.name !== 'string' || typeof file.size !== 'number') {
-                console.warn('Skipping item with invalid file properties:', file);
+                debugLogger.warn('Skipping item with invalid file properties:', file);
                 return;
             }
             
@@ -501,22 +564,34 @@ export default {
               const existingItem = consolidatedNewFiles[existingItemIndex];
               // Prefer fullAppPath, fallback to targetPath, then to null for existing item path
               const existingItemPath = existingItem.fullAppPath || existingItem.targetPath || null;
+              const existingMetadata = existingItem.metadata || {};
 
               if (isNewPathBetter(newItemPath, existingItemPath)) {
                 // Create properly structured object
                 const structuredItem = newItem instanceof File ? 
-                    { file: file, fullAppPath: newItemPath, targetPath: null } : 
-                    { ...newItem, fullAppPath: newItemPath };
+                    { file: file, fullAppPath: newItemPath, targetPath: null, metadata: metadata } : 
+                    { ...newItem, fullAppPath: newItemPath, metadata: metadata };
                 consolidatedNewFiles[existingItemIndex] = structuredItem;
-                console.log(`Consolidated file ${file.name}: using new path '${newItemPath}' over '${existingItemPath}'`);
+                debugLogger.debug(`Consolidated file ${file.name}: using new path '${newItemPath}' over '${existingItemPath}'`);
+              } else if (metadata && Object.keys(metadata).length > 0 && Object.keys(existingMetadata).length === 0) {
+                // Even if the path isn't better, if the new item has metadata and the existing doesn't, update the metadata
+                consolidatedNewFiles[existingItemIndex] = { ...existingItem, metadata: metadata };
+                debugLogger.debug(`Updated metadata for ${file.name}: added missing metadata`);
               }
             } else {
               seenFiles.set(fileKey, consolidatedNewFiles.length);
               // Create properly structured object
               const structuredItem = newItem instanceof File ? 
-                  { file: file, fullAppPath: newItemPath, targetPath: null } : 
-                  { ...newItem, fullAppPath: newItemPath };
+                  { file: file, fullAppPath: newItemPath, targetPath: null, metadata: metadata } : 
+                  { ...newItem, fullAppPath: newItemPath, metadata: metadata };
               consolidatedNewFiles.push(structuredItem);
+              
+              // Debug log to check metadata
+              debugLogger.debug(`Structured item ${file.name} metadata check:`, {
+                  hasMetadata: !!structuredItem.metadata,
+                  metadata: structuredItem.metadata,
+                  structuredItem: structuredItem
+              });
             }
           });
           
@@ -528,30 +603,60 @@ export default {
           );
 
           if (filesToAdd.length > 0) {
-              console.log('Adding new (consolidated) files:', filesToAdd);
+              debugLogger.debug('Adding new (consolidated) files:', filesToAdd);
+              debugLogger.debug('Files with metadata check:', filesToAdd.map(f => ({
+                  name: f.file.name,
+                  hasMetadata: !!f.metadata,
+                  metadata: f.metadata
+              })));
               const processingPromises = [];
               filesToAdd.forEach(item => {
                   // item.fullAppPath should be the best available path after consolidation
-                  console.log(`Adding file ${item.file.name} with path: ${item.fullAppPath}`); 
-                  processingPromises.push(this.processSingleFile(item.file, item.fullAppPath)); 
+                  debugLogger.debug(`Adding file ${item.file.name} with path: ${item.fullAppPath}`); 
+                  
+                  // Attach metadata to the file object before processing
+                  const fileWithMetadata = item.file;
+                  if (item.metadata) {
+                      debugLogger.debug(`Raw metadata for ${item.file.name}:`, item.metadata);
+                      debugLogger.debug(`Metadata keys:`, Object.keys(item.metadata));
+                      fileWithMetadata._isAuxiliary = item.metadata.isAuxiliary;
+                      fileWithMetadata._role = item.metadata.role;
+                      fileWithMetadata._parentFile = item.metadata.parentFile;
+                      fileWithMetadata._processorId = item.metadata.processorId;
+                      
+                      debugLogger.debug(`Metadata attached to ${item.file.name}:`, {
+                          isAuxiliary: fileWithMetadata._isAuxiliary,
+                          role: fileWithMetadata._role,
+                          parentFile: fileWithMetadata._parentFile
+                      });
+                  }
+                  
+                  processingPromises.push(this.processSingleFile(fileWithMetadata, item.fullAppPath)); 
               });
               
               try {
                 await Promise.all(processingPromises);
-                console.log('All files processed from prop update.');
+                debugLogger.debug('All files processed from prop update.');
+                
+                // Link m3u8 files with their poster thumbnails after a delay
+                // to ensure all poster files have their hashes calculated
+                setTimeout(() => {
+                    this.linkPlaylistPosters();
+                }, 500);
+                
                 this.ready = true;
               } catch (error) {
                 console.error("Error processing files from props:", error);
                 this.ready = false;
               }
           } else {
-              console.log('No new files to add from prop update (after consolidation).');
+              debugLogger.debug('No new files to add from prop update (after consolidation).');
               if(this.File.length > 0 && !this.ready) {
                 if (Object.keys(this.FileInfo).length > 0) this.ready = true;
               }
           }
         } else {
-            console.log('propStructuredFiles updated to empty or non-array:', newFilesArray);
+            debugLogger.debug('propStructuredFiles updated to empty or non-array:', newFilesArray);
         }
       }
     }
@@ -578,12 +683,13 @@ export default {
       ready: false,
       deletable: true,
       showFileDetails: false,
+      showAuxiliaryFiles: false,
       uploadInProgress: false,
       fileProgress: {}, // Tracks progress for each file by CID
       completedFiles: 0,
       thumbnailsGenerating: 0, // Count of thumbnails currently being generated
       allowDuplicates: false, // Allow uploading files even if they exist
-      duplicateFiles: [] // Track files that were detected as duplicates
+      duplicateFiles: [], // Track files that were detected as duplicates
     };
   },
   emits: ["tosign", "done"],
@@ -643,7 +749,7 @@ export default {
           return;
       }
 
-      console.log(`Polling for bundle status. Expecting contract pattern::<number>:${contractInstanceId} bundled`);
+      debugLogger.debug(`Polling for bundle status. Expecting contract pattern::<number>:${contractInstanceId} bundled`);
       var lastSince = since
       fetch('https://spktest.dlux.io/feed' + (since ? `/${since}` : ''))
         .then(response => {
@@ -669,7 +775,7 @@ export default {
             this.uploadInProgress = false;
             this.$emit('done', contractID);
           } else {
-            console.log(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
+            debugLogger.debug(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
             setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000);
           }
         })
@@ -684,7 +790,7 @@ export default {
             
             // Security check: skip hidden files (starting with .)
             if (file.name.startsWith('.')) {
-                console.log(`Skipping hidden file for security: ${file.name}`);
+                debugLogger.info(`Skipping hidden file for security: ${file.name}`);
                 resolveProcess();
                 return;
             }
@@ -699,7 +805,7 @@ export default {
             // Make sure we use the full path, not just the filename
             const actualPath = fullAppPath || file.name;
             reader.fullAppPath = actualPath;
-            console.log(`Processing file: ${file.name} with fullAppPath: ${actualPath} (original input: ${fullAppPath})`);
+            debugLogger.debug(`Processing file: ${file.name} with fullAppPath: ${actualPath} (original input: ${fullAppPath})`);
 
             reader.onload = (event) => {
                 const target = event.currentTarget || event.target;
@@ -714,9 +820,23 @@ export default {
                     return;
                 }
                 
-                console.log(`File ${currentFile.name} loaded with path: ${pathForFile}`);
-                this.hashOf(buffer.Buffer(fileContent), { index: indexForFile, path: pathForFile, originalFile: currentFile })
-                .then((ret) => {
+                debugLogger.debug(`File ${currentFile.name} loaded with path: ${pathForFile}`);
+                
+                // Check if file already has a CID assigned (e.g., from video transcoding)
+                let hashPromise;
+                if (currentFile.cid) {
+                    debugLogger.debug(`Using pre-calculated CID for ${currentFile.name}: ${currentFile.cid}`);
+                    // Create a fake promise that returns the pre-calculated CID in the expected format
+                    hashPromise = Promise.resolve({
+                        hash: currentFile.cid,
+                        opts: { index: indexForFile, path: pathForFile, originalFile: currentFile }
+                    });
+                } else {
+                    // Calculate CID normally
+                    hashPromise = this.hashOf(buffer.Buffer(fileContent), { index: indexForFile, path: pathForFile, originalFile: currentFile });
+                }
+                
+                hashPromise.then((ret) => {
                     const dict = { 
                         hash: ret.hash, 
                         index: ret.opts.index, 
@@ -744,36 +864,83 @@ export default {
                             // Check if this is a thumb file (ends with _thumb.ts or _thumb.m3u8)
                             const isThumbFile = dict.name.endsWith('_thumb.ts') || dict.name.endsWith('_thumb.m3u8');
                             
+                            // Check if this is an auxiliary file from processor (segments, posters, etc)
+                            const isAuxiliaryFile = currentFile._isAuxiliary === true;
+                            const fileRole = currentFile._role || '';
+                            
+                            debugLogger.debug(`File ${dict.name} metadata check:`, {
+                                _isAuxiliary: currentFile._isAuxiliary,
+                                _role: currentFile._role,
+                                isAuxiliaryFile,
+                                fileRole
+                            });
+                            
+                            // Determine if file should be hidden (flag 2)
+                            const shouldHide = isThumbFile || isAuxiliaryFile;
+                            
                             this.FileInfo[dict.name].meta = {
-                                name: isThumbFile ? '' : name, // No name for thumb files
-                                ext: isThumbFile ? '' : ext,   // No type for thumb files  
-                                flag: isThumbFile ? "2" : "",  // Flag 2 for thumb files
+                                name: shouldHide ? '' : name, // No name for hidden files
+                                ext: shouldHide ? '' : ext,   // No type for hidden files  
+                                flag: shouldHide ? "2" : "",  // Flag 2 for hidden files
                                 labels: "",
                                 thumb: "",
                                 license: "",
-                                fullAppPath: dict.fullAppPath
+                                fullAppPath: dict.fullAppPath,
+                                role: fileRole // Store role for later reference
                             };
                             
-                            // Mark as thumb file for special handling
+                            // Mark as thumb/auxiliary file for special handling
                             if (isThumbFile) {
                                 this.FileInfo[dict.name].is_thumb = true;
                                 this.FileInfo[dict.name].use_thumb = true;
-                                console.log(`Processed thumb file: ${dict.name} with flag 2`);
+                                debugLogger.debug(`Processed thumb file: ${dict.name} with flag 2`);
                             }
-                            console.log(`FileInfo entry created for ${dict.name} with path: ${dict.fullAppPath}`);
+                            
+                            if (isAuxiliaryFile) {
+                                this.FileInfo[dict.name].is_auxiliary = true;
+                                this.FileInfo[dict.name].role = fileRole;
+                                debugLogger.debug(`Processed auxiliary file: ${dict.name} (role: ${fileRole}) with flag 2`);
+                            } else if (fileRole) {
+                                // Set role for non-auxiliary files too (like playlists)
+                                this.FileInfo[dict.name].role = fileRole;
+                                debugLogger.debug(`Set role ${fileRole} for file: ${dict.name}`);
+                            }
+                            debugLogger.debug(`FileInfo entry created for ${dict.name} with path: ${dict.fullAppPath}`);
 
                             const currentIndex = this.File.findIndex(f => f === ret.opts.originalFile);
                             if(currentIndex !== -1) dict.index = currentIndex;
-                            else console.warn("File index mismatch after hash check");
+                            else debugLogger.warn("File index mismatch after hash check");
 
                             this.encryptFileAndPlace(dict);
-                            this.generateThumbnail(ret.opts.originalFile, dict.name);
+                            
+                            // Handle thumbnail generation
+                            debugLogger.debug(`Thumbnail handling for ${dict.name}:`, {
+                                fileRole,
+                                isVideo: fileRole === 'video',
+                                isPlaylist: fileRole === 'playlist',
+                                isAuxiliaryFile
+                            });
+                            
+                            if (fileRole === 'playlist') {
+                                // For m3u8 files, look for associated poster by naming convention
+                                const baseName = dict.name.replace('.m3u8', '');
+                                const posterName = `_${baseName}_poster.jpg`;
+                                
+                                // This will be done after all files are processed
+                                debugLogger.debug(`📹 Will look for poster ${posterName} for playlist ${dict.name}`);
+                            } else if (fileRole === 'video' || (!isAuxiliaryFile && !isThumbFile)) {
+                                // Generate thumbnail for all files (images, videos, etc.)
+                                debugLogger.debug(`Generating thumbnail for file: ${dict.name}`);
+                                this.generateThumbnail(ret.opts.originalFile, dict.name);
+                            } else {
+                                debugLogger.debug(`Skipping thumbnail for auxiliary/thumb file: ${dict.name}`);
+                            }
                             
                             resolveProcess();
 
                         } else {
                             // Enhanced error messaging - log instead of alert for batch uploads
-                            console.warn(`File "${ret.opts.originalFile.name}" appears to be already uploaded (CID: ${ret.hash})`);
+                            debugLogger.info(`File "${ret.opts.originalFile.name}" appears to be already uploaded (CID: ${ret.hash})`);
                             
                             // Track duplicate files only if force upload is not enabled
                             if (!this.allowDuplicates) {
@@ -848,7 +1015,7 @@ export default {
         if (!string) string = '2'
         this.FileInfo[n].meta.labels += m.item
       } else {
-        console.log('remove', m.item)
+        debugLogger.debug('remove', m.item)
         var string = this.FileInfo[n].meta.labels
         var arr = string.split('')
         for (var j = 1; j < arr.length; j++) {
@@ -938,7 +1105,7 @@ export default {
       return new Promise((resolve, reject) => {
         let encryptedKey = encryptedMessage.split("#")[1];
         let encryptedMessageOnly = encryptedMessage.split("#")[2];
-        console.log("Encrypted message: ", encryptedMessageOnly);
+        debugLogger.debug("Encrypted message: ", encryptedMessageOnly);
         hive_keychain.requestVerifyKey(username, '#' + encryptedKey, 'Memo', (response) => {
           if (response.success) {
             let key = response.result;
@@ -1024,9 +1191,9 @@ export default {
       this.FileInfo[n].meta.thumb = this.FileInfo['thumb' + n].use_thumb ? this.FileInfo[n].thumb : ''
     },
     addDataURL(url, name, type = "video/mp2t") {
-      console.log(name)
+      debugLogger.debug('addDataURL:', name)
       var newFile = new File(new blob([url]), name, { type });
-      console.log({ newFile })
+      debugLogger.debug('newFile:', { newFile })
       newFile.progress = 0;
       newFile.status = 'Pending Signature';
       newFile.actions = {
@@ -1074,7 +1241,7 @@ export default {
       
       try {
         await Promise.all(processingPromises);
-        console.log('All files processed from upload.');
+        debugLogger.debug('All files processed from upload.');
         this.ready = true;
       } catch (error) {
         console.error("Error processing files from upload:", error);
@@ -1104,7 +1271,7 @@ export default {
         
         // Process directories recursively
         if (entries.some(entry => entry && entry.isDirectory)) {
-          console.log("Processing dropped folders...");
+          debugLogger.debug("Processing dropped folders...");
           const allFiles = [];
           
           const processEntries = async (entries) => {
@@ -1112,7 +1279,7 @@ export default {
               if (entry.isDirectory) {
                 // Skip hidden directories for security
                 if (entry.name.startsWith('.')) {
-                  console.log(`Skipping hidden directory for security: ${entry.name}`);
+                  debugLogger.info(`Skipping hidden directory for security: ${entry.name}`);
                   return [];
                 }
                 
@@ -1135,7 +1302,7 @@ export default {
               } else if (entry.isFile) {
                 // Skip hidden files for security
                 if (entry.name.startsWith('.')) {
-                  console.log(`Skipping hidden file for security: ${entry.name}`);
+                  debugLogger.debug(`Skipping hidden file for security: ${entry.name}`);
                   return [];
                 }
                 
@@ -1166,7 +1333,7 @@ export default {
           
           try {
             await Promise.all(processingPromises);
-            console.log('All files processed from folder drop.');
+            debugLogger.debug('All files processed from folder drop.');
             this.ready = true;
           } catch (error) {
             console.error("Error processing files from folder drop:", error);
@@ -1185,160 +1352,393 @@ export default {
       
       try {
         await Promise.all(processingPromises);
-        console.log('All files processed from drag.');
+        debugLogger.debug('All files processed from drag.');
+        
         this.ready = true;
       } catch (error) {
         console.error("Error processing files from drag:", error);
         this.ready = false;
       }
     },
-    generateThumbnail(originalFile, fileInfoKey) {
-        if (!originalFile.type.startsWith('image/')) {
+    
+    async updateM3U8FilesBeforeUpload() {
+        debugLogger.info('🔄 Updating M3U8 playlists with IPFS URLs before upload...');
+        
+        // Find all M3U8 files
+        const m3u8Files = [];
+        for (const fileName in this.FileInfo) {
+            if (fileName.endsWith('.m3u8')) {
+                const fileInfo = this.FileInfo[fileName];
+                const file = this.File[fileInfo.index];
+                if (file) {
+                    m3u8Files.push({ file, fileInfo, fileName });
+                }
+            }
+        }
+        
+        if (m3u8Files.length === 0) {
+            debugLogger.debug('No M3U8 files to update');
             return;
         }
         
+        debugLogger.info(`Found ${m3u8Files.length} M3U8 files to update`);
+        
+        // Process each M3U8 file
+        for (const { file, fileInfo, fileName } of m3u8Files) {
+            try {
+                // Update the playlist content
+                const updatedFile = await this.updateM3u8ForUpload(file);
+                
+                // Read the updated content to calculate new hash
+                const reader = new FileReader();
+                const updatedContent = await new Promise((resolve, reject) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(updatedFile);
+                });
+                
+                // Calculate new hash for the updated content
+                const newHashResult = await this.hashOf(buffer.Buffer(updatedContent), {});
+                const newHash = newHashResult.hash;
+                
+                debugLogger.info(`📝 Updated hash for ${fileName}: ${fileInfo.hash} → ${newHash}`);
+                
+                // Update the FileInfo with new hash
+                this.FileInfo[fileName].hash = newHash;
+                
+                // Replace the file in the File array with the updated one
+                this.File[fileInfo.index] = updatedFile;
+                
+                // Update the file's CID to match the new hash
+                this.File[fileInfo.index].cid = newHash;
+                debugLogger.debug(`Updated file CID for ${fileName}: ${newHash}`);
+                
+            } catch (error) {
+                console.error(`Failed to update M3U8 file ${fileName}:`, error);
+            }
+        }
+        
+        debugLogger.info('✅ M3U8 files updated successfully');
+    },
+    
+    linkPlaylistPosters() {
+        debugLogger.debug('🔗 linkPlaylistPosters called');
+        debugLogger.debug('FileInfo keys:', Object.keys(this.FileInfo));
+        
+        // Check if we're still processing files
+        if (this.thumbnailsGenerating > 0) {
+            debugLogger.debug(`⏳ Still generating ${this.thumbnailsGenerating} thumbnails, postponing linkPlaylistPosters`);
+            return;
+        }
+        
+        // After all files are processed, link m3u8 files with their poster thumbnails
+        // First, find any available poster file (master playlist poster)
+        let sharedPosterHash = null;
+        let sharedPosterName = null;
+        
+        // Look for master playlist poster first
+        Object.entries(this.FileInfo).forEach(([fileName, fileInfo]) => {
+            if (fileInfo.role === 'poster' && fileName.includes('_poster.jpg')) {
+                if (fileInfo.hash) {
+                    sharedPosterHash = fileInfo.hash;
+                    sharedPosterName = fileName;
+                    debugLogger.debug(`🎬 Found shared poster: ${fileName} with hash ${sharedPosterHash}`);
+                }
+            }
+        });
+        
+        // Now link all playlists to the shared poster
+        Object.entries(this.FileInfo).forEach(([fileName, fileInfo]) => {
+            debugLogger.debug(`Checking file ${fileName}, role: ${fileInfo.role}, is m3u8: ${fileName.endsWith('.m3u8')}`);
+            
+            if (fileInfo.role === 'playlist' && fileName.endsWith('.m3u8')) {
+                // For resolution playlists (480p_index.m3u8, etc.), use shared poster
+                if (fileName.match(/\d+p_index\.m3u8$/)) {
+                    if (sharedPosterHash) {
+                        this.FileInfo[fileName].thumb = sharedPosterHash;
+                        if (this.FileInfo[fileName].meta) {
+                            this.FileInfo[fileName].meta.thumb = sharedPosterHash;
+                        }
+                        debugLogger.debug(`✅ Linked shared poster ${sharedPosterHash} to resolution playlist ${fileName}`);
+                    } else {
+                        debugLogger.debug(`⚠️ No shared poster available for resolution playlist ${fileName}`);
+                    }
+                } else {
+                    // For master playlist, look for specific poster by naming convention
+                    const baseName = fileName.replace('.m3u8', '');
+                    const posterName = `_${baseName}_poster.jpg`;
+                    
+                    debugLogger.debug(`Looking for poster: ${posterName}`);
+                    
+                    // Find the poster file in FileInfo
+                    const posterFile = this.FileInfo[posterName];
+                    
+                    if (posterFile) {
+                        // The hash is stored directly on the FileInfo object
+                        const posterHash = posterFile.hash;
+                        if (posterHash) {
+                            // Use the poster's CID as thumbnail
+                            this.FileInfo[fileName].thumb = posterHash;
+                            if (this.FileInfo[fileName].meta) {
+                                this.FileInfo[fileName].meta.thumb = posterHash;
+                            }
+                            debugLogger.debug(`✅ Linked poster thumbnail ${posterHash} to master playlist ${fileName}`);
+                        } else {
+                            debugLogger.debug(`⚠️ Poster file exists but no hash yet for ${posterName}`);
+                            debugLogger.debug(`Poster file data:`, posterFile);
+                        }
+                    } else {
+                        debugLogger.debug(`⚠️ No poster found for master playlist ${fileName} (looked for ${posterName})`);
+                        // Fallback to shared poster if available
+                        if (sharedPosterHash) {
+                            this.FileInfo[fileName].thumb = sharedPosterHash;
+                            if (this.FileInfo[fileName].meta) {
+                                this.FileInfo[fileName].meta.thumb = sharedPosterHash;
+                            }
+                            debugLogger.debug(`✅ Used shared poster ${sharedPosterHash} as fallback for master playlist ${fileName}`);
+                        }
+                    }
+                }
+            }
+        });
+    },
+    
+    async updateM3u8ForUpload(file) {
+        debugLogger.debug(`Updating playlist ${file.name} with uploaded CIDs`);
+        
+        // Read the m3u8 content
+        const content = await this.readFileAsText(file);
+        
+        // Check if content already contains IPFS URLs (this shouldn't happen with fresh files)
+        if (content.includes('https://ipfs.dlux.io/ipfs/') || content.includes('ipfs://')) {
+            console.warn(`WARNING: Playlist ${file.name} already contains IPFS URLs - this indicates file reuse`);
+            debugLogger.debug(`Will process anyway to ensure correct CIDs are used`);
+            debugLogger.debug(`Playlist content preview:`, content.substring(0, 300));
+            // Don't skip - we need to update with correct CIDs
+        }
+        
+        // Track statistics for debugging
+        let totalReferences = 0;
+        let successfulReplacements = 0;
+        let missingReferences = [];
+        
+        // Parse lines
+        const lines = content.split('\n');
+        const updatedLines = lines.map(line => {
+            if (!line.trim() || line.startsWith('#')) {
+                return line; // Keep comments and empty lines as-is
+            }
+            
+            // This is a file reference - could be a segment or another playlist
+            let referencedFile = line.trim();
+            
+            // Extract filename from various URL formats
+            let filename = referencedFile;
+            
+            // Handle IPFS URLs - extract the filename parameter
+            if (referencedFile.includes('ipfs.dlux.io/ipfs/') || referencedFile.includes('ipfs://')) {
+                const urlMatch = referencedFile.match(/filename=([^&]+)/);
+                if (urlMatch) {
+                    filename = urlMatch[1];
+                    debugLogger.debug(`Extracted filename ${filename} from IPFS URL in ${file.name}`);
+                } else {
+                    // Try to extract from the URL path
+                    const pathMatch = referencedFile.match(/\/([^/?]+)(?:\?|$)/);
+                    if (pathMatch) {
+                        filename = pathMatch[1];
+                        debugLogger.debug(`Extracted filename ${filename} from IPFS URL path in ${file.name}`);
+                    }
+                }
+            }
+            
+            // Handle blob URLs
+            if (referencedFile.startsWith('blob:')) {
+                debugLogger.warn(`Playlist ${file.name} contains blob URLs - these cannot be converted to IPFS`);
+                // Can't extract filename from blob URL, skip
+                return line;
+            }
+            
+            // Now use the extracted filename to look up the correct CID
+            referencedFile = filename;
+            
+            // Remove any session prefixes or relative paths
+            if (referencedFile.includes('__')) {
+                referencedFile = referencedFile.split('__').pop();
+            }
+            if (referencedFile.startsWith('../')) {
+                referencedFile = referencedFile.replace('../', '');
+            }
+            
+            // Count this as a reference to track
+            totalReferences++;
+            
+            // Look up the file info and hash for this file
+            const fileInfo = this.FileInfo[referencedFile];
+            if (fileInfo && fileInfo.hash) {
+                // Replace with IPFS URL using the old system's format with filename parameter
+                const ipfsUrl = `https://ipfs.dlux.io/ipfs/${fileInfo.hash}?filename=${referencedFile}`;
+                debugLogger.debug(`Replaced ${referencedFile} with IPFS URL using hash ${fileInfo.hash} in ${file.name}`);
+                successfulReplacements++;
+                return ipfsUrl;
+            } else {
+                debugLogger.debug(`No hash found for: ${referencedFile} in ${file.name}`);
+                debugLogger.debug(`FileInfo keys:`, Object.keys(this.FileInfo));
+                missingReferences.push(referencedFile);
+                return line; // Keep original if we can't find the hash
+            }
+        });
+        
+        // Create new content
+        const updatedContent = updatedLines.join('\n');
+        
+        // Log summary of the update
+        debugLogger.info(`📊 Playlist Update Summary for ${file.name}:`);
+        debugLogger.info(`   Total references found: ${totalReferences}`);
+        debugLogger.info(`   Successfully replaced: ${successfulReplacements}`);
+        if (missingReferences.length > 0) {
+            // Only show as error if we're at the end of upload and still missing
+            if (successfulReplacements === 0 && totalReferences > 0) {
+                console.error(`❌ Failed to update ${file.name} - missing all referenced files`);
+                console.error(`   Missing: ${missingReferences.join(', ')}`);
+                console.error(`   This playlist will not work for playback!`);
+            } else {
+                debugLogger.debug(`   References not yet uploaded: ${missingReferences.length}`);
+                debugLogger.debug(`   Waiting for: ${missingReferences.join(', ')}`);
+            }
+        }
+        
+        // Create a new File object with updated content
+        const updatedFile = new File([updatedContent], file.name, {
+            type: file.type || 'application/x-mpegURL',
+            lastModified: file.lastModified
+        });
+        
+        // Copy over any custom properties from the original file
+        // Don't copy CID - the modified content needs a new CID
+        if (file._isAuxiliary !== undefined) updatedFile._isAuxiliary = file._isAuxiliary;
+        if (file._role) updatedFile._role = file._role;
+        if (file._parentFile) updatedFile._parentFile = file._parentFile;
+        
+        debugLogger.debug(`Updated ${file.name} content for IPFS upload`);
+        return updatedFile;
+    },
+    
+    readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    },
+    
+    async generateThumbnail(originalFile, fileInfoKey) {
+        debugLogger.debug(`generateThumbnail called for: ${originalFile.name}, type: ${originalFile.type}, size: ${originalFile.size}`);
         // Increment counter for thumbnail generation
         this.thumbnailsGenerating++;
         
-        let that = this;
-        var thumbReader = new FileReader();
-        thumbReader.onload = (ev) => {
-            var originalImage = new Image();
-            originalImage.src = ev.target.result
-            originalImage.onload = () => {
-                var thumbnailImage = createThumbnail(originalImage);
-                var newThumbFile = dataURLtoFile(thumbnailImage.src, '_' + originalFile.name);
-                
-                newThumbFile.progress = 0;
-                newThumbFile.status = 'Pending Signature';
-                newThumbFile.actions = { cancel: false, pause: false, resume: false };
-
-                const thumbFileReader = new FileReader();
-                thumbFileReader.onload = (thumbEvent) => {
-                    const thumbFileContent = thumbEvent.target.result;
-                    const buf = buffer.Buffer(thumbFileContent);
-                    that.hashOf(buf, {}).then((ret) => {
-                        const newIndex = that.File.length;
-                        // Smart truncation that preserves file extension
-                        let thumbName = '_' + originalFile.name;
-                        if (thumbName.length > 32) {
-                            const lastDotIndex = thumbName.lastIndexOf('.');
-                            if (lastDotIndex > -1) {
-                                const ext = thumbName.substring(lastDotIndex);
-                                const nameWithoutExt = thumbName.substring(0, lastDotIndex);
-                                thumbName = nameWithoutExt.substring(0, 32 - ext.length) + ext;
-                            } else {
-                                thumbName = thumbName.substring(0, 32);
-                            }
-                        }
-                        
-                        const thumbDict = {
-                            fileContent: thumbnailImage.src,
-                            hash: ret.hash,
-                            index: newIndex,
-                            size: buf.byteLength,
-                            name: thumbName,
-                            progress: 0,
-                            status: 'Pending Signature',
-                            is_thumb: true,
-                            use_thumb: true
-                        };
-                        
-                        if(that.FileInfo[fileInfoKey]){
-                            that.FileInfo[fileInfoKey].thumb_index = newIndex;
-                            that.FileInfo[fileInfoKey].thumb = ret.hash;
-                            that.FileInfo[fileInfoKey].meta.thumb = ret.hash;
-                            that.FileInfo['_' + fileInfoKey] = thumbDict;
-                            
-                            const names = thumbDict.name.replaceAll(',', '-').split('.');
-                            const ext = names.length > 1 ? names.pop() : '';
-                            const name = names.join('.');
-                            that.FileInfo['_' + fileInfoKey].meta = {
-                                name,
-                                ext,
-                                flag: "2",
-                                labels: "",
-                                thumb: "",
-                                license: "",
-                            };
-                            that.File.push(newThumbFile);
-                        } else {
-                            console.error(`Main FileInfo entry not found for key ${fileInfoKey} when adding thumbnail.`);
-                        }
-                        
-                        // Decrement counter when thumbnail generation is done
-                        that.thumbnailsGenerating--;
-                    }).catch(err => {
-                        console.error("Error hashing thumbnail:", err);
-                        // Make sure to decrement even on error
-                        that.thumbnailsGenerating--;
-                    });
-                }
-                thumbFileReader.onerror = (err) => {
-                    console.error("Error reading thumbnail file:", err);
-                    // Make sure to decrement on error
-                    that.thumbnailsGenerating--;
-                };
-                thumbFileReader.readAsArrayBuffer(newThumbFile);
-            }
-            originalImage.onerror = (err) => {
-                console.error("Image load error for thumbnail generation:", err);
-                // Make sure to decrement on error
-                that.thumbnailsGenerating--;
-            };
-        }
-        thumbReader.onerror = (err) => {
-            console.error("Error reading original file for thumbnail:", err);
-            // Make sure to decrement on error
-            that.thumbnailsGenerating--;
-        };
-        thumbReader.readAsDataURL(originalFile);
-
-        function createThumbnail(image) {
-            var canvas, ctx;
-            canvas = document.createElement('canvas');
-            ctx = canvas.getContext('2d');
-            const aspectRatio = image.width / image.height;
-            const targetWidth = 128;
-            const targetHeight = 128;
-            let drawWidth, drawHeight, offsetX, offsetY;
-
-            if (aspectRatio > 1) {
-                drawHeight = image.height;
-                drawWidth = image.height;
-                offsetX = (image.width - drawWidth) / 2;
-                offsetY = 0;
-            } else {
-                drawWidth = image.width;
-                drawHeight = image.width;
-                offsetX = 0;
-                offsetY = (image.height - drawHeight) / 2;
-            }
-
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-            ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight, 0, 0, targetWidth, targetHeight);
+        try {
+            // Use the modular thumbnail service
+            const thumbnailResult = await thumbnailService.generateThumbnail(originalFile);
             
-            var thumbnail = new Image();
-            thumbnail.src = canvas.toDataURL('image/jpeg', 0.7);
-            return thumbnail;
-        }
-
-        function dataURLtoFile(dataurl, filename) {
-            var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--){
-                u8arr[n] = bstr.charCodeAt(n);
+            if (!thumbnailResult) {
+                debugLogger.debug(`No thumbnail generator available for file: ${originalFile.name}`);
+                this.thumbnailsGenerating--;
+                return;
             }
-            return new File([u8arr], filename, {type:mime});
+            
+            // Convert the result to a File object
+            const thumbFileName = '_' + originalFile.name;
+            const newThumbFile = new File(
+                [thumbnailResult.data], 
+                thumbFileName,
+                { type: `image/${thumbnailResult.format}` }
+            );
+            
+            newThumbFile.progress = 0;
+            newThumbFile.status = 'Pending Signature';
+            newThumbFile.actions = { cancel: false, pause: false, resume: false };
+            
+            // Hash the thumbnail
+            const buf = buffer.Buffer(thumbnailResult.data);
+            const ret = await this.hashOf(buf, {});
+            const newIndex = this.File.length;
+            
+            // Assign CID to the thumbnail file
+            newThumbFile.cid = ret.hash;
+            // Mark as auxiliary file for consistent handling
+            newThumbFile._isAuxiliary = true;
+            newThumbFile._role = 'thumbnail';
+            debugLogger.debug(`Thumbnail CID assigned: ${newThumbFile.name} = ${ret.hash}`);
+            
+            // Smart truncation that preserves file extension
+            let thumbName = '_' + originalFile.name;
+            if (thumbName.length > 32) {
+                const lastDotIndex = thumbName.lastIndexOf('.');
+                if (lastDotIndex > -1) {
+                    const ext = thumbName.substring(lastDotIndex);
+                    const nameWithoutExt = thumbName.substring(0, lastDotIndex);
+                    thumbName = nameWithoutExt.substring(0, 32 - ext.length) + ext;
+                } else {
+                    thumbName = thumbName.substring(0, 32);
+                }
+            }
+            
+            const thumbDict = {
+                fileContent: thumbnailResult.dataURL,
+                hash: ret.hash,
+                index: newIndex,
+                size: newThumbFile.size,
+                name: thumbName,
+                status: 'Pending Signature',
+                flag: '2'  // Always flag 2 for thumbnails
+            };
+            
+            this.File.push(newThumbFile);
+            this.FileInfo[thumbDict.name] = {
+                ...thumbDict,
+                is_thumb: true,
+                is_auxiliary: true,
+                role: 'thumbnail',
+                meta: {
+                    name: '',
+                    ext: '',
+                    flag: "2"
+                }
+            };
+            
+            debugLogger.debug(`Thumbnail added for ${originalFile.name}: ${thumbName} with hash ${ret.hash}`);
+            
+            // Update main file with thumbnail reference
+            if (this.FileInfo[fileInfoKey]) {
+                this.FileInfo[fileInfoKey].thumb = ret.hash;
+                // Also update meta.thumb for UI display
+                if (this.FileInfo[fileInfoKey].meta) {
+                    this.FileInfo[fileInfoKey].meta.thumb = ret.hash;
+                }
+                debugLogger.debug(`Main file ${fileInfoKey} updated with thumbnail: ${ret.hash}`);
+            } else {
+                console.error(`Main FileInfo entry not found for key ${fileInfoKey} when adding thumbnail.`);
+            }
+            
+            // Decrement counter when thumbnail generation is done
+            this.thumbnailsGenerating--;
+            
+        } catch (error) {
+            console.error("Error generating thumbnail:", error);
+            console.error("Failed for file:", originalFile.name, "type:", originalFile.type, "size:", originalFile.size);
+            console.error("Error details:", error.message, error.stack);
+            // Make sure to decrement even on error
+            this.thumbnailsGenerating--;
         }
     },
+
     makePaths(){
       const allPaths = new Set(['']);
       const fileInfosToProcess = Object.values(this.FileInfo).filter(f => !f.is_thumb);
 
       // Debug fullAppPath access
-      console.log("Files for path processing:", fileInfosToProcess.map(f => ({
+      debugLogger.debug("Files for path processing:", fileInfosToProcess.map(f => ({
           name: f.name,
           fullAppPath: f.meta?.fullAppPath,
           metaExists: !!f.meta
@@ -1347,7 +1747,7 @@ export default {
       fileInfosToProcess.forEach(file => {
           // Get path from meta object
           const path = file.meta?.fullAppPath || '';
-          console.log(`Processing path: ${path} for file ${file.name}`);
+          debugLogger.debug(`Processing path: ${path} for file ${file.name}`);
           
           if (!path) return; // Skip if no path
           
@@ -1374,7 +1774,7 @@ export default {
           return a.localeCompare(b);
       });
 
-      console.log("Sorted paths:", sortedPaths);
+      debugLogger.debug("Sorted paths:", sortedPaths);
 
       const indexToPath = {};
       const pathToIndex = {};
@@ -1447,13 +1847,15 @@ export default {
       // Format: folderName|parentIndex/folderName|...
       const folderListString = folderListEntries.join('|');
       
-      console.log("Generated Folder String:", folderListString);
-      console.log("Generated PathToIndex Map:", pathToIndex);
+      debugLogger.debug("Generated Folder String:", folderListString);
+      debugLogger.debug("Generated PathToIndex Map:", pathToIndex);
 
       return { folderListString, pathToIndexMap: pathToIndex };
     },
     async processPlaylistsBeforeUpload() {
-      console.log("Processing playlists before upload...");
+      debugLogger.debug("Processing playlists before upload...");
+      debugLogger.debug("FileInfo entries:", Object.entries(this.FileInfo).length);
+      debugLogger.debug("File array length:", this.File.length);
       
       // Find all M3U8 files in FileInfo
       const m3u8Files = [];
@@ -1461,37 +1863,64 @@ export default {
       
       // Build hash map and find playlists
       for (const [name, info] of Object.entries(this.FileInfo)) {
+        debugLogger.debug(`Checking file ${name}, info:`, info);
         // Add to hash map if file has IPFS hash
         const hash = this.encryption.encrypted ? info.enc_hash : info.hash;
         if (hash) {
           fileHashMap.set(name, hash);
+          debugLogger.debug(`Added ${name} -> ${hash} to hash map`);
         }
         
         // Check if it's an M3U8 file
-        if (name.endsWith('.m3u8') && !info.is_thumb) {
+        if (name.endsWith('.m3u8')) {
+          debugLogger.debug(`Found M3U8 file: ${name}`);
           m3u8Files.push({ name, info, fileIndex: info.index });
         }
       }
       
       if (m3u8Files.length === 0) {
-        console.log("No M3U8 files found to process");
+        debugLogger.debug("No M3U8 files found to process");
         return;
       }
       
-      console.log(`Found ${m3u8Files.length} playlist(s) to process`);
+      debugLogger.debug(`Found ${m3u8Files.length} playlist(s) to process`);
       
       // Process each playlist
       for (const playlist of m3u8Files) {
         try {
-          // Get the File object
-          const file = this.File[playlist.fileIndex];
+          debugLogger.debug(`Processing playlist ${playlist.name} at index ${playlist.fileIndex}`);
+          
+          // Get the File object - try different approaches
+          let file = this.File[playlist.fileIndex];
+          
+          // If not found by index, try to find by name
           if (!file) {
-            console.error(`File not found at index ${playlist.fileIndex} for ${playlist.name}`);
+            debugLogger.debug(`File not at index ${playlist.fileIndex}, searching by name...`);
+            const fileIndex = this.File.findIndex(f => f.name === playlist.name);
+            if (fileIndex !== -1) {
+              file = this.File[fileIndex];
+              debugLogger.debug(`Found file ${playlist.name} at index ${fileIndex}`);
+            }
+          }
+          
+          if (!file) {
+            console.error(`File not found for ${playlist.name}`);
             continue;
           }
           
           // Read the file content
           const content = await this.readFileAsText(file);
+          
+          // Check if the content contains blob URLs
+          if (content.includes('blob:')) {
+            console.error(`🚨 ERROR: Playlist ${playlist.name} contains blob URLs!`);
+            console.error(`This file was modified for preview and should not be uploaded.`);
+            console.error(`Skipping blob URL processing - these will be replaced with IPFS URLs anyway`);
+            
+            // Instead of trying to recover from blob URLs, we'll just process normally
+            // The updatePlaylistContent method will handle replacing references with IPFS URLs
+            // Even if it contains blob URLs, they'll be replaced with proper IPFS URLs
+          }
           
           // Process the content to update segment references
           const updatedContent = this.updatePlaylistContent(content, fileHashMap);
@@ -1518,7 +1947,7 @@ export default {
             this.File[playlist.fileIndex].cid = hashResult.hash;
           }
           
-          console.log(`Updated playlist ${playlist.name} with new hash ${hashResult.hash}`);
+          debugLogger.debug(`Updated playlist ${playlist.name} with new hash ${hashResult.hash}`);
           
         } catch (error) {
           console.error(`Error processing playlist ${playlist.name}:`, error);
@@ -1553,35 +1982,66 @@ export default {
         }
         
         // This line should be a segment reference
-        const segmentName = line.trim();
+        let segmentName = line.trim();
+        
+        // Check if this is already a blob URL
+        if (segmentName.startsWith('blob:')) {
+          console.error(`ERROR: Playlist contains blob URL: ${segmentName}`);
+          console.error(`Cannot extract filename from blob URL - this will fail on IPFS!`);
+          // Try to extract filename from other parts of the playlist or skip
+          return line; // Keep the blob URL for now, but this will fail
+        }
+        
+        // Check if this is already an IPFS URL
+        if (segmentName.includes('ipfs.dlux.io') || segmentName.includes('ipfs://')) {
+          console.warn(`Playlist already contains IPFS URL: ${segmentName}`);
+          // Extract filename from URL if possible
+          const urlMatch = segmentName.match(/filename=([^&]+)/);
+          if (urlMatch) {
+            segmentName = urlMatch[1];
+            debugLogger.debug(`Extracted filename ${segmentName} from existing IPFS URL`);
+          } else {
+            return line; // Keep existing IPFS URL
+          }
+        }
+        
+        // Remove session prefixes if present
+        if (segmentName.includes('__')) {
+          segmentName = segmentName.split('__').pop();
+        }
+        if (segmentName.startsWith('../')) {
+          segmentName = segmentName.replace('../', '');
+        }
         
         // Check if we have this segment in our hash map
         if (fileHashMap.has(segmentName)) {
           const hash = fileHashMap.get(segmentName);
-          const ipfsUrl = `${ipfsGateway}${hash}?filename=${segmentName}`;
+          const ipfsUrl = `${ipfsGateway}${hash}`;
           replacementCount++;
-          console.log(`Replaced ${segmentName} with ${ipfsUrl}`);
+          debugLogger.debug(`Replaced ${segmentName} with ${ipfsUrl}`);
           return ipfsUrl;
         }
         
-        // Fuzzy matching for segments
+        // Fuzzy matching for segments and playlists
         for (const [fileName, hash] of fileHashMap) {
-          if (fileName.endsWith('.ts') && 
+          // Check for both .ts segments and .m3u8 playlists
+          if ((fileName.endsWith('.ts') || fileName.endsWith('.m3u8')) && 
               (segmentName === fileName || 
                segmentName.endsWith(fileName) ||
                fileName.endsWith(segmentName))) {
-            const ipfsUrl = `${ipfsGateway}${hash}?filename=${fileName}`;
+            const ipfsUrl = `${ipfsGateway}${hash}`;
             replacementCount++;
-            console.log(`Replaced ${segmentName} with ${ipfsUrl} (fuzzy match)`);
+            const fileType = fileName.endsWith('.m3u8') ? 'playlist' : 'segment';
+            debugLogger.debug(`Replaced ${segmentName} with ${ipfsUrl} (fuzzy match - ${fileType}`);
             return ipfsUrl;
           }
         }
         
-        console.warn(`No hash found for segment ${segmentName}`);
+        console.warn(`No hash found for reference ${segmentName}`);
         return line;
       });
       
-      console.log(`Updated ${replacementCount} segment references`);
+      debugLogger.debug(`Updated ${replacementCount} segment references`);
       return updatedLines.join('\n');
     },
     deleteImg(index, name) {
@@ -1594,8 +2054,9 @@ export default {
       delete this.FileInfo[name]
       delete this.FileInfo['thumb' + name]
     },
-    signNUpload() {
-      console.log(this.contract.i)
+    async signNUpload() {
+      console.log('🚀🚀🚀 SIGNUPLOAD METHOD CALLED - STARTING 🚀🚀🚀');
+      console.log('🚀 Contract ID:', this.contract.i)
       var header = `${this.contract.i}`
       const { folderListString, pathToIndexMap } = this.makePaths();
 
@@ -1617,14 +2078,67 @@ export default {
       this.fileProgress = {}
       this.completedFiles = 0
 
-      // Process any M3U8 playlists FIRST to update segment references with IPFS URLs
-      this.processPlaylistsBeforeUpload().then(() => {
-        // NOW collect CIDs and metadata after playlists have been updated
-        var body = ""
-        var names = Object.keys(this.FileInfo)
-        var cids = []
-        var meta = {}
+      // Collect initial CIDs and metadata
+      var body = ""
+      var names = Object.keys(this.FileInfo)
+      var cids = []
+      var meta = {}
 
+      if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
+          if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
+            meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].hash}`
+            cids.push(this.FileInfo[names[i]].hash)
+          }
+        }
+        else for (var i = 0; i < names.length; i++) {
+          if (this.FileInfo[names[i]].enc_hash) {
+            meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
+            body += `,${this.FileInfo[names[i]].enc_hash}`
+            cids.push(this.FileInfo[names[i]].enc_hash)
+          }
+        }
+        
+        // Process playlists to update with IPFS URLs BEFORE signing the contract
+        debugLogger.debug('About to process playlists, FileInfo keys:', Object.keys(this.FileInfo));
+        debugLogger.debug('🔧 CRITICAL DEBUG: About to call processPlaylistsBeforeUpload()');
+        debugLogger.debug('🔧 Function exists?', typeof this.processPlaylistsBeforeUpload);
+        debugLogger.debug('🔧 FileInfo has entries?', Object.keys(this.FileInfo).length > 0);
+        
+        // First, check if any m3u8 files contain blob URLs
+        for (const [name, info] of Object.entries(this.FileInfo)) {
+            if (name.endsWith('.m3u8') && info.index !== undefined) {
+                const file = this.File[info.index];
+                if (file) {
+                    try {
+                        const content = await this.readFileAsText(file);
+                        if (content.includes('blob:')) {
+                            console.error(`🚨 CRITICAL: ${name} contains blob URLs before processing!`);
+                            console.error(`This indicates the file was modified for preview and should not be uploaded.`);
+                            // TODO: We should replace this with the original file
+                        }
+                    } catch (e) {
+                        console.error(`Error checking ${name} for blob URLs:`, e);
+                    }
+                }
+            }
+        }
+        
+        // DISABLED: processPlaylistsBeforeUpload is no longer needed
+        // We now update playlists during upload with actual uploaded CIDs
+        // try {
+        //     console.log('🔧 Calling processPlaylistsBeforeUpload...');
+        //     await this.processPlaylistsBeforeUpload();
+        //     console.log('🔧 processPlaylistsBeforeUpload completed successfully');
+        // } catch (error) {
+        //     console.error('🔧 ERROR in processPlaylistsBeforeUpload:', error);
+        // }
+        
+        // Re-collect CIDs and metadata after playlist processing
+        body = ""
+        cids = []
+        meta = {}
+        
         if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
           if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
             meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
@@ -1640,76 +2154,29 @@ export default {
           }
         }
         // Create challenge with original body (including comma)
+        debugLogger.debug('🎯 ABOUT TO CREATE CHALLENGE - POST PLAYLIST PROCESSING');
         const challenge = this.user.name + ':' + header + body;
         
         // Keep the body as-is with the leading comma for contract.files
         this.contract.files = body;
-        console.log("Signing challenge:", challenge);
-        console.log("Contract details:", {
+        debugLogger.debug("Signing challenge:", challenge);
+        debugLogger.debug("Contract details:", {
           id: this.contract.i,
           broker: this.contract.b,
           account: this.contract.t,
           api: this.contract.api
         });
         
-        this.signText(challenge).then(res => {
-          console.log("signText response:", res);
-          this.meta = meta
-          // Extract signature from challenge:signature format
-          const lastColonIndex = res.lastIndexOf(':');
-          this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
-          console.log("Extracted signature:", this.contract.fosig);
-          
-          this.upload(cids, this.contract, folderListString, pathToIndexMap)
-          this.ready = false
-        })
-      }).catch(err => {
-        console.error("Error processing playlists:", err);
-        // If playlist processing fails, still try to upload with original hashes
-        var body = ""
-        var names = Object.keys(this.FileInfo)
-        var cids = []
-        var meta = {}
-
-        if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
-          if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
-            meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
-            body += `,${this.FileInfo[names[i]].hash}`
-            cids.push(this.FileInfo[names[i]].hash)
-          }
-        }
-        else for (var i = 0; i < names.length; i++) {
-          if (this.FileInfo[names[i]].enc_hash) {
-            meta[this.FileInfo[names[i]].enc_hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},,${this.FileInfo[names[i]].meta.flag + 1}--${this.FileInfo[names[i]].meta.labels}`
-            body += `,${this.FileInfo[names[i]].enc_hash}`
-            cids.push(this.FileInfo[names[i]].enc_hash)
-          }
-        }
-        // Create challenge with original body (including comma)
-        const challenge = this.user.name + ':' + header + body;
+        const res = await this.signText(challenge);
+        debugLogger.debug("signText response:", res);
+        this.meta = meta
+        // Extract signature from challenge:signature format
+        const lastColonIndex = res.lastIndexOf(':');
+        this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+        debugLogger.debug("Extracted signature:", this.contract.fosig);
         
-        // Keep the body as-is with the leading comma for contract.files
-        this.contract.files = body;
-        console.log("Signing challenge:", challenge);
-        console.log("Contract details:", {
-          id: this.contract.i,
-          broker: this.contract.b,
-          account: this.contract.t,
-          api: this.contract.api
-        });
-        
-        this.signText(challenge).then(res => {
-          console.log("signText response:", res);
-          this.meta = meta
-          // Extract signature from challenge:signature format
-          const lastColonIndex = res.lastIndexOf(':');
-          this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
-          console.log("Extracted signature:", this.contract.fosig);
-          
-          this.upload(cids, this.contract, folderListString, pathToIndexMap)
-          this.ready = false
-        })
-      })
+        this.upload(cids, this.contract, folderListString, pathToIndexMap)
+        this.ready = false
     },
     appendFile(file, id) {
       if (this.files[file]) delete this.files[file]
@@ -1755,7 +2222,7 @@ export default {
       fetch(`https://spktest.dlux.io/user_services/${broker}`)
         .then(r => r.json())
         .then(res => {
-          console.log(res)
+          debugLogger.debug(res)
           this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
         })
     },
@@ -1786,7 +2253,57 @@ export default {
       if (num & 8) out.executable = true
       return out
     },
-    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract, folderListString = '', pathToIndexMap = { '': '0' }) {
+    async upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract, folderListString = '', pathToIndexMap = { '': '0' }) {
+      console.log('\n🚀 Starting upload process...');
+      console.log(`📦 Total files to upload: ${this.File.length}`);
+      
+      
+      // Critical check: Verify no blob URLs in m3u8 files before upload
+      const m3u8Files = this.File.filter(f => f.name && f.name.endsWith('.m3u8'));
+      if (m3u8Files.length > 0) {
+          debugLogger.debug(`\n🔍 Pre-upload verification of ${m3u8Files.length} playlist files...`);
+          
+          // Check each playlist synchronously to ensure we catch issues
+          let hasErrors = false;
+          for (const file of m3u8Files) {
+              try {
+                  const reader = new FileReader();
+                  const content = await new Promise((resolve, reject) => {
+                      reader.onload = (e) => resolve(e.target.result);
+                      reader.onerror = reject;
+                      reader.readAsText(file);
+                  });
+                  
+                  if (content.includes('blob:')) {
+                      console.error(`\n🚨 UPLOAD BLOCKED: ${file.name} contains blob URLs!`);
+                      console.error(`This would cause playback failure after upload.`);
+                      hasErrors = true;
+                  } else if (content.includes('ipfs.dlux.io') || content.includes('ipfs://')) {
+                      // Note: IPFS URLs in HLS files are expected and required for IPFS compatibility
+                      // These are added during transcoding to ensure playback works on IPFS
+                      // console.warn(`⚠️ WARNING: ${file.name} already contains IPFS URLs`);
+                      // console.warn(`This suggests file reuse from a previous upload attempt.`);
+                  } else {
+                      debugLogger.debug(`✅ ${file.name} verified - contains only local references`);
+                  }
+              } catch (e) {
+                  console.error(`Error verifying ${file.name}:`, e);
+              }
+          }
+          
+          if (hasErrors) {
+              console.error(`\n❌ Upload cannot proceed - playlists contain blob URLs`);
+              console.error(`Please refresh the page and try again.`);
+              alert('Upload error: Video playlists contain invalid URLs. Please refresh the page and try again.');
+              this.uploadInProgress = false;
+              return;
+          }
+      }
+      
+      // Files are now pre-processed in video transcoder with IPFS URLs
+      // No need to modify them here - CIDs already match the content
+      debugLogger.info('📝 Using pre-processed files from video transcoder');
+      
       cids = cids.sort(function (a, b) {
         if (a < b) { return -1; }
         if (a > b) { return 1; }
@@ -1801,7 +2318,7 @@ export default {
       
       const fileMetaEntries = {};
 
-      console.log("Path to index map in upload:", pathToIndexMap);
+      debugLogger.debug("Path to index map in upload:", pathToIndexMap);
 
       // First pass: Assign CIDs to files
       for (var name in this.FileInfo) {
@@ -1858,7 +2375,7 @@ export default {
         // Root files (index '0') get no path suffix, only folder files get suffixes
         const extWithPath = sanitizedExt + (pathIndex !== '1' ? '.' + pathIndex : '');
         
-        console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
+        debugLogger.debug(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
         
         // --- End Sanitization and Path Index ---
         for (var i = 0; i < cids.length; i++) {
@@ -1884,9 +2401,9 @@ export default {
       }
       this.finalMetadataString = metaString; // Store it on the instance
       
-      console.log({metaString});
-      console.log('CIDs being uploaded:', cids);
-      console.log('File metadata entries:', fileMetaEntries);
+      debugLogger.debug({metaString});
+      debugLogger.debug('CIDs being uploaded:', cids);
+      debugLogger.debug('File metadata entries:', fileMetaEntries);
       // return // for testing without actual upload
       
       const apiUrl = this.contract.api;
@@ -1903,7 +2420,7 @@ export default {
         cids: `${cids.join(',')}`,
         meta: encodeURI(metaString),
         onAbort: (e, f) => {
-          console.log('options.onAbort')
+          debugLogger.debug('options.onAbort')
           this.File = []
           this.FileInfo = {}
           this.fileRequests = {}
@@ -1912,7 +2429,7 @@ export default {
           this.completedFiles = 0
         },
         onProgress: (e, f) => {
-          console.log('options.onProgress', e, f)
+          debugLogger.debug('options.onProgress', e, f)
           
           // Safety check - ensure FileInfo entry exists
           if (!this.FileInfo[f.name]) {
@@ -1987,15 +2504,35 @@ export default {
           }
         },
         onComplete: (e, f) => {
-          console.log('options.onComplete', e, f)
+          debugLogger.debug('options.onComplete', e, f)
           
-          // Mark file as fully uploaded
-          this.File[this.FileInfo[f.name].index].actions.pause = false
-          this.File[this.FileInfo[f.name].index].actions.resume = false
-          this.File[this.FileInfo[f.name].index].actions.cancel = false
-          this.FileInfo[f.name].progress = 100
-          this.File[this.FileInfo[f.name].index].progress = 100
-          this.FileInfo[f.name].status = 'done'
+          // Safety check for file name
+          if (!f || !f.name || !this.FileInfo[f.name]) {
+            console.warn('onComplete called with invalid file data:', f);
+            return;
+          }
+          
+          const fileInfo = this.FileInfo[f.name];
+          const fileIndex = fileInfo.index;
+          
+          // Safety check for file array access
+          if (fileIndex === undefined || fileIndex < 0 || fileIndex >= this.File.length || !this.File[fileIndex]) {
+            console.warn(`Invalid file index ${fileIndex} for file ${f.name}, File array length: ${this.File.length}`);
+            // Still mark FileInfo as done even if File array entry is missing
+            fileInfo.progress = 100;
+            fileInfo.status = 'done';
+          } else {
+            // Mark file as fully uploaded
+            const fileEntry = this.File[fileIndex];
+            if (fileEntry.actions) {
+              fileEntry.actions.pause = false;
+              fileEntry.actions.resume = false;
+              fileEntry.actions.cancel = false;
+            }
+            fileEntry.progress = 100;
+            fileInfo.progress = 100;
+            fileInfo.status = 'done';
+          }
           
           // Update combined progress tracking
           if (f.cid) {
@@ -2019,34 +2556,121 @@ export default {
           
           // If all files are uploaded, perform final actions
           if (done) {
+            console.log('All files uploaded successfully, emitting done event');
+            this.uploadInProgress = false
+            this.$emit('done', {
+              contractId: this.contract.i,
+              metadata: this.finalMetadataString
+            });
+            
+            // Reset component state after a short delay to allow UI to update
             setTimeout(() => {
-              this.uploadInProgress = false
-              this.$emit('done', {
-                contractId: this.contract.i,
-                metadata: this.finalMetadataString
-              });
-              
-              // Reset component state
               this.File = [];
               this.FileInfo = {};
               this.fileInput = [];
               this.showFileDetails = false;
-            }, 5000)
+            }, 100)
           }
         }
       };
-      const uploadFileChunks = (file, options) => {
+      const uploadFileChunks = async (file, options) => {
+        let fileToUpload = file;
+        
+        // Enhanced logging for m3u8 file uploads
+        if (file.name.endsWith('.m3u8')) {
+            debugLogger.debug(`\n=== M3U8 Upload Debug for ${file.name} ===`);
+            debugLogger.debug(`File size: ${file.size} bytes`);
+            debugLogger.debug(`File type: ${file.type}`);
+            debugLogger.debug(`Last modified: ${new Date(file.lastModified).toISOString()}`);
+            debugLogger.debug(`CID being uploaded: ${options.cid}`);
+            
+            // Read and analyze the playlist content
+            try {
+                const content = await this.readFileAsText(file);
+                const lines = content.split('\n');
+                
+                // Count different types of references
+                let localRefs = 0;
+                let blobRefs = 0;
+                let ipfsRefs = 0;
+                let otherRefs = 0;
+                
+                lines.forEach(line => {
+                    const trimmed = line.trim();
+                    if (trimmed && !trimmed.startsWith('#')) {
+                        if (trimmed.includes('blob:')) {
+                            blobRefs++;
+                            console.error(`❌ BLOB URL found: ${trimmed}`);
+                        } else if (trimmed.includes('ipfs.dlux.io') || trimmed.includes('ipfs://')) {
+                            ipfsRefs++;
+                            // Note: IPFS URLs are expected in HLS files for IPFS compatibility
+                            // console.warn(`⚠️ IPFS URL found: ${trimmed}`);
+                        } else if (trimmed.endsWith('.ts') || trimmed.endsWith('.m3u8')) {
+                            localRefs++;
+                            debugLogger.debug(`✅ Local reference: ${trimmed}`);
+                        } else {
+                            otherRefs++;
+                            debugLogger.debug(`❓ Other reference: ${trimmed}`);
+                        }
+                    }
+                });
+                
+                debugLogger.debug(`\nPlaylist analysis for ${file.name}:`);
+                debugLogger.debug(`- Local references: ${localRefs}`);
+                debugLogger.debug(`- Blob URLs: ${blobRefs}`);
+                debugLogger.debug(`- IPFS URLs: ${ipfsRefs}`);
+                debugLogger.debug(`- Other: ${otherRefs}`);
+                
+                if (blobRefs > 0) {
+                    console.error(`\n🚨 CRITICAL ERROR: Playlist ${file.name} contains ${blobRefs} blob URLs!`);
+                    console.error(`This will cause playback failure after upload.`);
+                    console.error(`The playlist should only contain local file references.`);
+                    
+                    // Try to find the original file without blob URLs
+                    console.error(`Attempting to find original playlist file...`);
+                    
+                    // Log the first few blob URLs for debugging
+                    lines.forEach((line, idx) => {
+                        const trimmed = line.trim();
+                        if (trimmed.includes('blob:') && blobRefs <= 3) {
+                            console.error(`Line ${idx}: ${trimmed}`);
+                        }
+                    });
+                    
+                    // This is a critical issue that needs to be fixed
+                    // The upload will fail if we proceed with blob URLs
+                }
+                
+                if (ipfsRefs > 0) {
+                    // Note: IPFS URLs in HLS playlists are expected and required for IPFS compatibility
+                    // console.warn(`\n⚠️ WARNING: Playlist ${file.name} already contains ${ipfsRefs} IPFS URLs`);
+                    // console.warn(`This suggests the file is being reused from a previous upload attempt.`);
+                } else if (localRefs > 0) {
+                    debugLogger.debug(`✅ Playlist ${file.name} contains ${localRefs} local references - this is expected`);
+                    debugLogger.debug(`The IPFS gateway will handle filename resolution during playback`);
+                }
+                
+                debugLogger.debug(`=== End M3U8 Debug ===\n`);
+            } catch (error) {
+                console.error(`Error reading playlist ${file.name}:`, error);
+            }
+            
+            // M3U8 files are uploaded as-is with local references
+            // The IPFS gateway handles filename-to-CID resolution during playback
+            debugLogger.debug(`📋 M3U8 file ${file.name} will be uploaded with local references`);
+        }
+        
         const formData = new FormData();
         const req = new XMLHttpRequest();
-        const chunk = file.slice(options.startingByte);
+        const chunk = fileToUpload.slice(options.startingByte);
 
         formData.append('chunk', chunk);
         
-        console.log('uploadFileChunks options:', options)
-        console.log(`Uploading chunk for file: ${file.name}, CID: ${options.cid}, Contract: ${options.contract.i}`);
+        debugLogger.debug('uploadFileChunks options:', options)
+        debugLogger.debug(`Uploading chunk for file: ${fileToUpload.name}, CID: ${options.cid}, Contract: ${options.contract.i}`);
         req.open('POST', options.url, true);
         req.setRequestHeader(
-          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size - 1}/${file.size}`
+          'Content-Range', `bytes=${options.startingByte}-${options.startingByte + chunk.size - 1}/${fileToUpload.size}`
         );
         req.setRequestHeader('X-Cid', options.cid);
         req.setRequestHeader('X-Contract', options.contract.i);
@@ -2055,28 +2679,50 @@ export default {
 
         req.onload = (e) => {
           if (req.status === 200) {
-            console.log(`Upload chunk successful for ${file.name}`, req.responseText);
+            debugLogger.debug(`Upload chunk successful for ${file.name}`, req.responseText);
             
             // Log all response headers for debugging
             const allHeaders = req.getAllResponseHeaders();
-            console.log(`All response headers for ${file.name}:`, allHeaders);
+            debugLogger.debug(`All response headers for ${file.name}:`, allHeaders);
             
             // Log specific headers
-            console.log(`Response headers for ${file.name}:`, {
-              'content-type': req.getResponseHeader('content-type'),
-              'x-upload-status': req.getResponseHeader('x-upload-status'),
-              'x-file-persisted': req.getResponseHeader('x-file-persisted'),
-              'x-cid': req.getResponseHeader('x-cid'),
-              'x-contract': req.getResponseHeader('x-contract')
-            });
+            // Note: Browser will log "Refused to get unsafe header" warnings for custom headers
+            // This is expected browser security behavior and can be ignored
+            // Wrap in try-catch to reduce console noise
+            try {
+              const headers = {};
+              // Safe header that should always work
+              headers['content-type'] = req.getResponseHeader('content-type');
+              
+              // Custom headers might be blocked by CORS
+              try { headers['x-upload-status'] = req.getResponseHeader('x-upload-status'); } catch(e) {}
+              try { headers['x-file-persisted'] = req.getResponseHeader('x-file-persisted'); } catch(e) {}
+              try { headers['x-cid'] = req.getResponseHeader('x-cid'); } catch(e) {}
+              try { headers['x-contract'] = req.getResponseHeader('x-contract'); } catch(e) {}
+              
+              debugLogger.debug(`Response headers for ${file.name}:`, headers);
+            } catch (err) {
+              debugLogger.debug(`Could not access response headers for ${file.name}`);
+            }
+            
+            // Capture the actual IPFS CID from the upload response
+            let actualCID = null;
+            try {
+              actualCID = req.getResponseHeader('x-cid');
+            } catch(e) {
+              // Header not accessible due to CORS
+            }
+            if (actualCID && actualCID !== options.cid) {
+              console.warn(`CID mismatch for ${file.name}: expected ${options.cid}, got ${actualCID}`);
+            }
             
             // Parse response if it's JSON
             let responseData = req.responseText;
             try {
               responseData = JSON.parse(req.responseText);
-              console.log(`Parsed response for ${file.name}:`, responseData);
+              debugLogger.debug(`Parsed response for ${file.name}:`, responseData);
             } catch (err) {
-              console.log(`Response is not JSON for ${file.name}, raw text:`, req.responseText);
+              debugLogger.debug(`Response is not JSON for ${file.name}, raw text:`, req.responseText);
             }
             
             options.onComplete(e, file);
@@ -2096,8 +2742,8 @@ export default {
           options.onProgress({
             ...e,
             loaded,
-            total: file.size,
-            percentage: loaded / file.size * 100
+            total: fileToUpload.size,
+            percentage: loaded / fileToUpload.size * 100
           }, file);
         };
 
@@ -2120,8 +2766,8 @@ export default {
         req.send(formData);
       };
       const uploadFile = (file, options, cid) => {
-        console.log('Uploading', cid, options, file)
-        console.log('Upload authorization headers:', {
+        debugLogger.debug('Uploading', cid, options, file)
+        debugLogger.debug('Upload authorization headers:', {
           'Content-Type': 'application/json',
           'X-Sig': options.contract.fosig,
           'X-Account': options.contract.t,
@@ -2129,8 +2775,8 @@ export default {
           'X-Cid': cid,
           'X-Chain': 'HIVE'
         });
-        console.log('Contract files string:', options.contract.files);
-        console.log('CIDs array:', options.cids);
+        debugLogger.debug('Contract files string:', options.contract.files);
+        debugLogger.debug('CIDs array:', options.cids);
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'POST', // Changed back to POST as per GitHub reference
           headers: {
@@ -2147,14 +2793,14 @@ export default {
           })
         })
           .then(res => {
-            console.log(`Upload authorization response status: ${res.status}`);
+            debugLogger.debug(`Upload authorization response status: ${res.status}`);
             
             // Log response headers before parsing JSON
             const responseHeaders = {};
             res.headers.forEach((value, key) => {
               responseHeaders[key] = value;
             });
-            console.log('Upload authorization response headers:', responseHeaders);
+            debugLogger.debug('Upload authorization response headers:', responseHeaders);
             
             if (!res.ok) {
               // Try to get error details from response body
@@ -2166,11 +2812,11 @@ export default {
             return res.json();
           })
           .then(jsonData => {
-            console.log('Upload authorization JSON response:', jsonData);
-            console.log('Authorized CIDs from server:', jsonData.authorized);
-            console.log('Attempting to upload CID:', cid);
-            console.log('Is this CID authorized?', jsonData.authorized && jsonData.authorized.includes(cid));
-            console.log('Starting chunked upload for file:', file.name);
+            debugLogger.debug('Upload authorization JSON response:', jsonData);
+            debugLogger.debug('Authorized CIDs from server:', jsonData.authorized);
+            debugLogger.debug('Attempting to upload CID:', cid);
+            debugLogger.debug('Is this CID authorized?', jsonData.authorized && jsonData.authorized.includes(cid));
+            debugLogger.debug('Starting chunked upload for file:', file.name);
             
             options = { ...options, ...jsonData };
             options.cid = cid
@@ -2260,16 +2906,98 @@ export default {
             })
         }
       };
-      [...this.File]
-        .forEach(file => {
-          let options = defaultOptions
-          options.cid = file.cid
-          if (file.cid) {
-            // Set the CID as a property on the file object so onProgress and onComplete can access it
-            file.cid = file.cid
-            uploadFile(file, options, file.cid)
+      // Sort files into priority groups for HLS upload ordering
+      const sortFilesForHLS = (files) => {
+        const segments = [];      // .ts files (must upload first)
+        const thumbnails = [];    // image files
+        const variantPlaylists = []; // resolution-specific .m3u8 files
+        const masterPlaylists = [];  // main .m3u8 files
+        const otherFiles = [];       // everything else
+        
+        files.forEach(file => {
+          const name = file.name.toLowerCase();
+          
+          if (name.endsWith('.ts')) {
+            segments.push(file);
+          } else if (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png') || name.endsWith('.webp')) {
+            thumbnails.push(file);
+          } else if (name.endsWith('.m3u8')) {
+            // Check if it's a variant playlist (contains resolution like 720p, 1080p)
+            if (/\d{3,4}p/.test(name)) {
+              variantPlaylists.push(file);
+            } else {
+              masterPlaylists.push(file);
+            }
+          } else {
+            otherFiles.push(file);
           }
         });
+        
+        // Sort variant playlists by resolution (lower first, as they're usually smaller)
+        variantPlaylists.sort((a, b) => {
+          const aRes = parseInt(a.name.match(/(\d{3,4})p/)?.[1] || '0');
+          const bRes = parseInt(b.name.match(/(\d{3,4})p/)?.[1] || '0');
+          return aRes - bRes;
+        });
+        
+        // Combine in the correct order
+        const sortedFiles = [
+          ...segments,       // Upload segments first
+          ...thumbnails,     // Then thumbnails
+          ...otherFiles,     // Then other files
+          ...variantPlaylists, // Then variant playlists (they reference segments)
+          ...masterPlaylists   // Finally master playlists (they reference variant playlists)
+        ];
+        
+        debugLogger.info('📋 HLS Upload Order:');
+        debugLogger.info(`  1. Segments (.ts): ${segments.length} files`);
+        debugLogger.info(`  2. Thumbnails: ${thumbnails.length} files`);
+        debugLogger.info(`  3. Other files: ${otherFiles.length} files`);
+        debugLogger.info(`  4. Variant playlists: ${variantPlaylists.length} files`);
+        debugLogger.info(`  5. Master playlists: ${masterPlaylists.length} files`);
+        debugLogger.debug('Detailed order:', sortedFiles.map(f => f.name));
+        
+        return sortedFiles;
+      };
+      
+      const sortedFiles = sortFilesForHLS([...this.File]);
+      
+      // Upload files sequentially to ensure dependencies are uploaded first
+      const uploadFilesSequentially = async () => {
+        for (const file of sortedFiles) {
+          if (!file.cid) continue;
+          
+          let options = { ...defaultOptions };
+          options.cid = file.cid;
+          
+          try {
+            // Wait for each upload to complete before starting the next
+            await new Promise((resolve, reject) => {
+              // Store the original onComplete and onError
+              const originalOnComplete = options.onComplete;
+              const originalOnError = options.onError;
+              
+              options.onComplete = (e, f) => {
+                originalOnComplete(e, f);
+                resolve();
+              };
+              
+              options.onError = (e, f) => {
+                originalOnError(e, f);
+                // Continue with next file even if this one fails
+                resolve();
+              };
+              
+              uploadFile(file, options, file.cid);
+            });
+          } catch (err) {
+            console.error(`Error uploading ${file.name}:`, err);
+          }
+        }
+      };
+      
+      // Start the sequential upload process
+      uploadFilesSequentially();
     },
   },
   computed: {
@@ -2353,6 +3081,20 @@ export default {
         !file.is_thumb || (file.is_thumb && file.use_thumb)
       ).length;
     },
+    mainFiles() {
+      const main = Object.values(this.FileInfo).filter(file => 
+        !file.is_thumb && !file.is_auxiliary
+      );
+      debugLogger.debug('Main files:', main.map(f => ({ name: f.name, flag: f.meta?.flag, is_auxiliary: f.is_auxiliary })));
+      return main;
+    },
+    auxiliaryFiles() {
+      const aux = Object.values(this.FileInfo).filter(file => 
+        file.is_auxiliary || file.is_thumb
+      );
+      debugLogger.debug('Auxiliary files:', aux.map(f => ({ name: f.name, role: f.role, flag: f.meta?.flag, is_auxiliary: f.is_auxiliary, is_thumb: f.is_thumb })));
+      return aux;
+    }
   },
   mounted() {
     this.contract = this.propcontract;

@@ -1,6 +1,8 @@
 // Playlist Processor Service
 // Updates M3U8 playlists with IPFS URLs after segments are uploaded
 
+import debugLogger from '../utils/debug-logger.js';
+
 class PlaylistProcessor {
     constructor() {
         this.ipfsGateway = 'https://ipfs.dlux.io/ipfs/';
@@ -29,18 +31,18 @@ class PlaylistProcessor {
         
         // If no playlists found, return original files
         if (m3u8Files.length === 0) {
-            console.log('PlaylistProcessor: No M3U8 files found to process');
+            debugLogger.debug('PlaylistProcessor: No M3U8 files found to process');
             return files;
         }
         
-        console.log(`PlaylistProcessor: Found ${m3u8Files.length} playlist(s) to process`);
+        debugLogger.info(`PlaylistProcessor: Found ${m3u8Files.length} playlist(s) to process`);
         
         // Process each playlist
         for (const playlistFile of m3u8Files) {
             try {
                 await this.updatePlaylist(playlistFile, fileHashMap);
             } catch (error) {
-                console.error(`PlaylistProcessor: Error processing ${playlistFile.name}:`, error);
+                debugLogger.error(`PlaylistProcessor: Error processing ${playlistFile.name}:`, error);
             }
         }
         
@@ -53,11 +55,11 @@ class PlaylistProcessor {
      * @param {Map} fileHashMap - Map of filenames to IPFS hashes
      */
     async updatePlaylist(playlistFile, fileHashMap) {
-        console.log(`PlaylistProcessor: Processing playlist ${playlistFile.name}`);
+        debugLogger.debug(`PlaylistProcessor: Processing playlist ${playlistFile.name}`);
         
         // Check if we have the playlist content
         if (!playlistFile.content && !playlistFile.buffer && !playlistFile.data) {
-            console.error(`PlaylistProcessor: No content found for ${playlistFile.name}`);
+            debugLogger.error(`PlaylistProcessor: No content found for ${playlistFile.name}`);
             return;
         }
         
@@ -77,7 +79,7 @@ class PlaylistProcessor {
         }
         
         if (!playlistContent) {
-            console.error(`PlaylistProcessor: Could not extract content from ${playlistFile.name}`);
+            debugLogger.error(`PlaylistProcessor: Could not extract content from ${playlistFile.name}`);
             return;
         }
         
@@ -98,27 +100,28 @@ class PlaylistProcessor {
             // Check if we have this segment in our hash map
             if (fileHashMap.has(segmentName)) {
                 const hash = fileHashMap.get(segmentName);
-                const ipfsUrl = `${this.ipfsGateway}${hash}?filename=${segmentName}`;
+                const ipfsUrl = `${this.ipfsGateway}${hash}`;
                 replacementCount++;
-                console.log(`PlaylistProcessor: Replaced ${segmentName} with ${ipfsUrl}`);
+                debugLogger.debug(`PlaylistProcessor: Replaced ${segmentName} with ${ipfsUrl}`);
                 return ipfsUrl;
             }
             
             // If not found, check for common variations
-            // Sometimes segments might have prefixes or different extensions
+            // Handle both segments (.ts) and variant playlists (.m3u8)
             for (const [fileName, hash] of fileHashMap) {
-                if (fileName.endsWith('.ts') && 
+                if ((fileName.endsWith('.ts') || fileName.endsWith('.m3u8')) && 
                     (segmentName === fileName || 
                      segmentName.endsWith(fileName) ||
                      fileName.endsWith(segmentName))) {
-                    const ipfsUrl = `${this.ipfsGateway}${hash}?filename=${fileName}`;
+                    const ipfsUrl = `${this.ipfsGateway}${hash}`;
                     replacementCount++;
-                    console.log(`PlaylistProcessor: Replaced ${segmentName} with ${ipfsUrl} (fuzzy match)`);
+                    const fileType = fileName.endsWith('.m3u8') ? 'playlist' : 'segment';
+                    debugLogger.debug(`PlaylistProcessor: Replaced ${segmentName} with ${ipfsUrl} (fuzzy match - ${fileType}`);
                     return ipfsUrl;
                 }
             }
             
-            console.warn(`PlaylistProcessor: No hash found for segment ${segmentName}`);
+            debugLogger.debug(`PlaylistProcessor: No hash found for reference ${segmentName}`);
             return line;
         });
         
@@ -145,7 +148,7 @@ class PlaylistProcessor {
             playlistFile.size = updatedData.length;
         }
         
-        console.log(`PlaylistProcessor: Updated ${replacementCount} segment references in ${playlistFile.name}`);
+        debugLogger.info(`PlaylistProcessor: Updated ${replacementCount} segment references in ${playlistFile.name}`);
     }
     
     /**
@@ -177,7 +180,7 @@ class PlaylistProcessor {
             return files;
         }
         
-        console.log(`PlaylistProcessor: Processing ${m3u8Files.length} transcoded playlist(s)`);
+        debugLogger.info(`PlaylistProcessor: Processing ${m3u8Files.length} transcoded playlist(s)`);
         
         // Process each playlist File object
         for (const playlistFile of m3u8Files) {
@@ -200,7 +203,7 @@ class PlaylistProcessor {
                 }
                 
             } catch (error) {
-                console.error(`PlaylistProcessor: Error processing transcoded ${playlistFile.name}:`, error);
+                debugLogger.error(`PlaylistProcessor: Error processing transcoded ${playlistFile.name}:`, error);
             }
         }
         
@@ -243,18 +246,18 @@ class PlaylistProcessor {
             // Check if we have this segment in our hash map
             if (fileHashMap.has(segmentName)) {
                 const hash = fileHashMap.get(segmentName);
-                const ipfsUrl = `${this.ipfsGateway}${hash}?filename=${segmentName}`;
+                const ipfsUrl = `${this.ipfsGateway}${hash}`;
                 replacementCount++;
                 return ipfsUrl;
             }
             
-            // Fuzzy matching for segments
+            // Fuzzy matching for segments and playlists
             for (const [fileName, hash] of fileHashMap) {
-                if (fileName.endsWith('.ts') && 
+                if ((fileName.endsWith('.ts') || fileName.endsWith('.m3u8')) && 
                     (segmentName === fileName || 
                      segmentName.endsWith(fileName) ||
                      fileName.endsWith(segmentName))) {
-                    const ipfsUrl = `${this.ipfsGateway}${hash}?filename=${fileName}`;
+                    const ipfsUrl = `${this.ipfsGateway}${hash}`;
                     replacementCount++;
                     return ipfsUrl;
                 }
@@ -263,7 +266,7 @@ class PlaylistProcessor {
             return line;
         });
         
-        console.log(`PlaylistProcessor: Replaced ${replacementCount} segment references`);
+        debugLogger.info(`PlaylistProcessor: Replaced ${replacementCount} segment references`);
         return updatedLines.join('\n');
     }
 }

@@ -3,6 +3,7 @@ import UploadVue from '/js/uploadvue-dd.js';
 import VideoTranscoder from '/js/video-transcoder.js';
 import MCommon from '/js/methods-common.js';
 import Watchers from '/js/watchers-common.js';
+import debugLogger from '/js/utils/debug-logger.js';
 
 export default {
     name: 'UploadEverywhere',
@@ -30,8 +31,8 @@ export default {
         <div class="d-flex flex-column rounded p-2 border border-primary bg-blur-darkg mb-3">
             <!-- File List -->
             <div v-if="droppedFiles.length > 0" class="mb-3">
-                <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
-                <ul class="m-0">
+                <h5>Ready to Upload: {{ totalFileCount }} files (Total Size: {{ fancyBytes(totalSize) }})</h5>
+                <ul class="m-0 p-0">
                     <li v-for="(file, index) in droppedFiles" :key="index" class="my-1 p-2 bg-card rounded d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center">
                             <!-- File type icon -->
@@ -296,12 +297,21 @@ export default {
             videoLoading: false,
             hlsInstance: null,
             blobUrls: {}, // Store blob URLs for transcoded files
+            fileMetadata: {}, // Store metadata for auxiliary file filtering
         };
     },
     computed: {
         displayRequiredBroca() {
             // Calculate the BROCA needed, with a minimum of 100 for the button display/contract build amount
             return Math.max(100, this.requiredBroca);
+        },
+        totalFileCount() {
+            // Count main files + auxiliary files
+            const mainFileCount = this.droppedFiles.length;
+            const auxiliaryFileCount = this.structuredFilesForUpload.filter(item => 
+                item.metadata?.isAuxiliary
+            ).length;
+            return mainFileCount + auxiliaryFileCount;
         }
     },
     watch: {
@@ -318,31 +328,147 @@ export default {
         externalDrop: { // Added: Watcher for the new externalDrop prop
             handler(newDrop) {
                 if (newDrop && newDrop.files && newDrop.files.length > 0) {
-                    console.log('externalDrop watcher triggered, accumulating files:', newDrop);
-                     // Extract just the File objects for addFiles UI update
-                    // Handle both raw File objects and wrapper objects with .file property
-                    const fileObjects = newDrop.files.map(item => {
-                        return item instanceof File ? item : (item.file || item);
-                    }); 
-                    this.addFiles(fileObjects); // Add the plain File objects to the UI list
-
-                    // Ensure all files are properly structured before adding
-                    const structuredDropFiles = newDrop.files.map(item => {
-                        // If it's already a structured object, use it as-is
-                        if (item && typeof item === 'object' && item.file) {
-                            return item;
+                    debugLogger.debug('externalDrop watcher triggered, accumulating files:', newDrop);
+                    
+                    // Store metadata if provided
+                    if (newDrop.metadata) {
+                        if (!this.fileMetadata) {
+                            this.fileMetadata = {};
                         }
-                        // If it's a raw File, wrap it
-                        return {
-                            file: item,
-                            targetPath: item.targetPath || null,
-                            fullAppPath: item.fullAppPath || null
-                        };
+                        Object.assign(this.fileMetadata, newDrop.metadata);
+                        debugLogger.debug('upload-everywhere: Received metadata from external drop:', newDrop.metadata);
+                        debugLogger.debug('upload-everywhere: File names in drop:', newDrop.files.map(f => f.name || 'unknown'));
+                        debugLogger.debug('upload-everywhere: Metadata keys:', Object.keys(newDrop.metadata));
+                    } else {
+                        debugLogger.debug('upload-everywhere: No metadata in external drop');
+                    }
+                    
+                    // Process HLS files to recreate blob URLs
+                    const allFiles = newDrop.files.map(item => {
+                        if (item instanceof File) {
+                            return item;
+                        } else if (item && typeof item === 'object' && item.file) {
+                            return item.file;
+                        }
+                        return null;
+                    }).filter(Boolean);
+                    
+                    // Debug: Check if any m3u8 files already contain IPFS URLs
+                    for (const file of allFiles) {
+                        if (file.name.endsWith('.m3u8')) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                const content = e.target.result;
+                                // Note: IPFS URLs in HLS files are expected and required for IPFS compatibility
+                                // These are added during transcoding to ensure playback works on IPFS
+                                // if (content.includes('ipfs.dlux.io') || content.includes('ipfs://')) {
+                                //     debugLogger.error(`ERROR: ${file.name} contains IPFS URLs in externalDrop!`);
+                                //     debugLogger.error(`File content preview:`, content.substring(0, 200));
+                                // }
+                            };
+                            reader.readAsText(file);
+                        }
+                    }
+                    
+                    // Check if this is an HLS file set
+                    const hasM3u8 = allFiles.some(f => f.name.endsWith('.m3u8'));
+                    const hasSegments = allFiles.some(f => f.name.endsWith('.ts'));
+                    
+                    if (hasM3u8 && hasSegments) {
+                        debugLogger.debug('Detected HLS file set in external drop');
+                        
+                        // Check if blob URLs already exist (from video-transcoder)
+                        const hasBlobUrls = newDrop.blobUrls && Object.keys(newDrop.blobUrls).length > 0;
+                        
+                        if (hasBlobUrls) {
+                            debugLogger.debug('Using existing blob URLs from transcoder');
+                            // Store the blob URLs from transcoder
+                            this.blobUrls = { ...this.blobUrls, ...newDrop.blobUrls };
+                            
+                            // Attach blob URLs to files for preview
+                            allFiles.forEach(file => {
+                                if (this.blobUrls[file.name]) {
+                                    file._blobUrl = this.blobUrls[file.name];
+                                }
+                            });
+                        } else {
+                            debugLogger.debug('No blob URLs found, creating them');
+                            // Process in next tick to ensure proper file handling
+                            this.$nextTick(async () => {
+                                await this.createBlobUrls(allFiles);
+                                
+                                // Attach blob URLs and related URLs to files
+                                allFiles.forEach(file => {
+                                    if (this.blobUrls[file.name]) {
+                                        file._blobUrl = this.blobUrls[file.name];
+                                        
+                                        // For master playlists, attach all related blob URLs
+                                        if (file.name.endsWith('_master.m3u8') || file.name.endsWith('.m3u8')) {
+                                            file._relatedBlobUrls = { ...this.blobUrls };
+                                            debugLogger.debug(`Attached ${Object.keys(this.blobUrls).length} blob URLs to master playlist`);
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+                    
+                    // Filter files based on metadata
+                    const filesToShow = newDrop.files.filter(file => {
+                        const metadata = newDrop.metadata?.[file.name];
+                        return !metadata?.isAuxiliary; // Show only non-auxiliary files
                     });
                     
-                    // Append the new structured files to the existing list for upload
+                    // Extract just the File objects for addFiles UI update
+                    // Handle both raw File objects and wrapper objects with .file property
+                    const fileObjects = filesToShow.map(item => {
+                        return item instanceof File ? item : (item.file || item);
+                    }); 
+                    this.addFiles(fileObjects); // Add only main files to the UI list
+
+                    // Ensure all files are properly structured before adding (including auxiliary)
+                    const structuredDropFiles = newDrop.files.map(item => {
+                        // Get the file name correctly
+                        let fileName;
+                        let fileObj;
+                        
+                        if (item instanceof File) {
+                            fileName = item.name;
+                            fileObj = item;
+                        } else if (item && typeof item === 'object' && item.file) {
+                            fileName = item.file.name;
+                            fileObj = item.file;
+                        } else {
+                            debugLogger.error('Unknown file structure:', item);
+                            return null;
+                        }
+                        
+                        const metadata = newDrop.metadata?.[fileName] || {};
+                        
+                        debugLogger.debug(`upload-everywhere: Structuring file ${fileName} with metadata:`, metadata);
+                        
+                        // If it's already a structured object, merge with metadata
+                        if (item && typeof item === 'object' && item.file) {
+                            return {
+                                ...item,
+                                metadata: metadata
+                            };
+                        }
+                        // If it's a raw File, wrap it with metadata
+                        return {
+                            file: fileObj,
+                            targetPath: null,
+                            fullAppPath: null,
+                            metadata: metadata
+                        };
+                    }).filter(Boolean); // Remove any null entries
+                    
+                    // Append ALL files (including auxiliary) to the upload list
                     this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredDropFiles]; 
-                    console.log('Accumulated structuredFilesForUpload:', this.structuredFilesForUpload);
+                    debugLogger.debug('Accumulated structuredFilesForUpload:', this.structuredFilesForUpload);
+
+                    // Recalculate sizes after adding files (including auxiliary)
+                    this.calculateFileSizes();
 
                     // Clear the prop in the parent immediately after processing
                     this.$emit('update:externalDrop', { files: [], targetPath: null });
@@ -406,6 +532,17 @@ export default {
         closeVideoPreview() {
             this.showVideoPreview = false;
             this.cleanupVideoPlayer();
+            
+            // Clean up preview blob URL if it was created just for preview
+            if (this.previewFile && this.previewFile.src && this.previewFile.src.startsWith('blob:')) {
+                // Only revoke if it's not in our main blobUrls storage
+                const fileName = this.getFileName(this.previewFile);
+                if (!this.blobUrls[fileName] || this.blobUrls[fileName] !== this.previewFile.src) {
+                    URL.revokeObjectURL(this.previewFile.src);
+                    debugLogger.debug(`Cleaned up preview blob URL for ${fileName}`);
+                }
+            }
+            
             this.previewFile = null;
             this.previewFileIndex = null;
         },
@@ -418,12 +555,22 @@ export default {
             
             // For m3u8 files, use processed blob URL if available
             let fileUrl;
-            if (this.previewFile.name.endsWith('.m3u8') && this.blobUrls[this.previewFile.name]) {
-                // Use the processed blob URL with updated segment references
-                fileUrl = this.blobUrls[this.previewFile.name];
-                console.log('Using processed m3u8 blob URL for preview');
+            if (this.previewFile.name.endsWith('.m3u8')) {
+                // Check for attached blob URL first (from transcoding)
+                if (this.previewFile._blobUrl) {
+                    fileUrl = this.previewFile._blobUrl;
+                    debugLogger.debug('Using attached blob URL from transcoding for preview');
+                } else if (this.blobUrls[this.previewFile.name]) {
+                    // Fallback to component's blob URLs
+                    fileUrl = this.blobUrls[this.previewFile.name];
+                    debugLogger.debug('Using component blob URL for preview');
+                } else {
+                    // Create object URL for the file
+                    fileUrl = URL.createObjectURL(this.previewFile);
+                    debugLogger.debug('Creating new blob URL for preview');
+                }
             } else {
-                // Create object URL for the file
+                // Create object URL for non-m3u8 files
                 fileUrl = URL.createObjectURL(this.previewFile);
             }
             
@@ -434,29 +581,39 @@ export default {
                     this.hlsInstance.destroy();
                 }
                 
-                this.hlsInstance = new Hls({
+                // If we have related blob URLs, we need a custom loader
+                const hasRelatedBlobUrls = this.previewFile._relatedBlobUrls && Object.keys(this.previewFile._relatedBlobUrls).length > 0;
+                
+                let hlsConfig = {
                     debug: false,
                     enableWorker: true,
                     startPosition: 0.1,    // Skip first 0.1s to avoid buffer hole
                     backBufferLength: 0,   // Don't retain old buffer
                     maxBufferHole: 0.5     // Tolerate small gaps
-                });
+                };
+                
+                // Add custom loader if we have related blob URLs
+                if (hasRelatedBlobUrls) {
+                    hlsConfig.loader = this.createCustomHlsLoader(this.previewFile._relatedBlobUrls);
+                }
+                
+                this.hlsInstance = new Hls(hlsConfig);
                 
                 this.hlsInstance.loadSource(fileUrl);
                 this.hlsInstance.attachMedia(video);
                 
                 this.hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                     this.videoLoading = false;
-                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                    video.play().catch(e => debugLogger.debug('Autoplay prevented:', e));
                 });
                 
                 this.hlsInstance.on(Hls.Events.ERROR, (event, data) => {
                     if (data.fatal) {
-                        console.error('HLS error:', data);
+                        debugLogger.error('HLS error:', data);
                         this.videoLoading = false;
                     } else if (data.details !== 'bufferSeekOverHole' && data.details !== 'bufferNudgeOnHole') {
                         // Log other non-fatal errors except common buffer holes
-                        console.warn('HLS warning:', data.details);
+                        debugLogger.debug('HLS warning:', data.details);
                     }
                 });
             } else {
@@ -465,7 +622,7 @@ export default {
                 video.load();
                 video.addEventListener('canplay', () => {
                     this.videoLoading = false;
-                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                    video.play().catch(e => debugLogger.debug('Autoplay prevented:', e));
                 }, { once: true });
             }
         },
@@ -491,35 +648,104 @@ export default {
             }
         },
         
+        createCustomHlsLoader(relatedBlobUrls) {
+            // Create a custom loader that can handle blob URLs for related files
+            const self = this;
+            
+            return class CustomLoader extends Hls.DefaultConfig.loader {
+                load(context, config, callbacks) {
+                    const url = context.url;
+                    
+                    // If this is a blob URL, use default loader
+                    if (url.startsWith('blob:')) {
+                        super.load(context, config, callbacks);
+                        return;
+                    }
+                    
+                    // Check if this is a relative reference that we have a blob URL for
+                    const fileName = url.split('/').pop(); // Get just the filename
+                    if (relatedBlobUrls[fileName]) {
+                        // Replace the URL with our blob URL
+                        context.url = relatedBlobUrls[fileName];
+                        debugLogger.debug(`CustomLoader: Redirecting ${fileName} to blob URL`);
+                        super.load(context, config, callbacks);
+                    } else {
+                        // Try default behavior
+                        super.load(context, config, callbacks);
+                    }
+                }
+            };
+        },
+        
         // Blob URL processing for transcoded files (copied from video-transcoder.js)
         async createBlobUrls(files) {
+            debugLogger.info('⚠️ Creating blob URLs for preview only - original files will not be modified');
+            
             // First, create blob URLs for all segment files
             const m3u8Files = [];
+            const masterPlaylist = files.find(f => f.name.endsWith('_master.m3u8') || f.name === 'master.m3u8');
             
             for (const file of files) {
                 if (file.name.endsWith('.ts')) {
                     // Create blob URL for segment
                     const url = URL.createObjectURL(file);
                     this.blobUrls[file.name] = url;
+                    debugLogger.debug(`📎 Created blob URL for segment: ${file.name}`);
                 } else if (file.name.endsWith('.m3u8')) {
                     // Store m3u8 files for processing later
                     m3u8Files.push(file);
                 }
             }
             
-            // Now process m3u8 files with updated segment URLs
+            // Sort m3u8 files to process resolution playlists before master
+            // Master playlist is the one without resolution indicators (480p, 720p, 1080p)
+            m3u8Files.sort((a, b) => {
+                const aHasResolution = /\d{3,4}p/.test(a.name);
+                const bHasResolution = /\d{3,4}p/.test(b.name);
+                // Process files with resolution first
+                if (!aHasResolution && bHasResolution) return 1;
+                if (aHasResolution && !bHasResolution) return -1;
+                return 0;
+            });
+            
+            // Process resolution playlists first (they reference segments)
             for (const m3u8File of m3u8Files) {
+                if (/\d{3,4}p/.test(m3u8File.name)) { // Has resolution indicator
+                    try {
+                        // Update the m3u8 content with segment blob URLs
+                        const updatedBlob = await this.updateM3u8WithBlobUrls(m3u8File);
+                        const updatedUrl = URL.createObjectURL(updatedBlob);
+                        
+                        // Store the updated blob URL
+                        this.blobUrls[m3u8File.name] = updatedUrl;
+                        
+                        // IMPORTANT: We do NOT replace the original file
+                        // The blob URL is only for preview, not for upload
+                        debugLogger.debug(`📎 Created preview blob URL for playlist: ${m3u8File.name}`);
+                        debugLogger.debug(`✅ Original file remains unchanged for upload`);
+                    } catch (error) {
+                        debugLogger.error(`Error processing m3u8 file ${m3u8File.name}:`, error);
+                    }
+                }
+            }
+            
+            // Now process master playlist (it references resolution playlists)
+            const master = m3u8Files.find(f => !/\d{3,4}p/.test(f.name)); // Master is the one without resolution
+            if (master) {
                 try {
-                    // Update the m3u8 content with blob URLs
-                    const updatedBlob = await this.updateM3u8WithBlobUrls(m3u8File);
+                    // Update the master playlist with resolution playlist blob URLs
+                    const updatedBlob = await this.updateM3u8WithBlobUrls(master);
                     const updatedUrl = URL.createObjectURL(updatedBlob);
                     
                     // Store the updated blob URL
-                    this.blobUrls[m3u8File.name] = updatedUrl;
+                    this.blobUrls[master.name] = updatedUrl;
                     
-                    console.log(`Created updated m3u8 blob URL for ${m3u8File.name}`);
+                    // IMPORTANT: We do NOT replace the original file
+                    // The blob URL is only for preview, not for upload
+                    debugLogger.debug(`📎 Created preview blob URL for master playlist: ${master.name}`);
+                    debugLogger.debug(`✅ Original file remains unchanged for upload`);
                 } catch (error) {
-                    console.error(`Error processing m3u8 file ${m3u8File.name}:`, error);
+                    debugLogger.error(`Error processing master m3u8 file ${master.name}:`, error);
                 }
             }
         },
@@ -545,15 +771,33 @@ export default {
                 }
                 
                 // This is a segment reference
-                const segmentName = line.trim();
-                const blobUrl = this.blobUrls[segmentName];
+                let referenceName = line.trim();
+                
+                // Skip if this is already a blob URL or IPFS URL
+                if (referenceName.startsWith('blob:') || 
+                    referenceName.includes('ipfs.dlux.io') || 
+                    referenceName.startsWith('ipfs://') ||
+                    referenceName.includes('/ipfs/')) {
+                    debugLogger.debug(`Skipping already processed URL in m3u8: ${referenceName}`);
+                    return line;
+                }
+                
+                // Remove session prefix if present (e.g., "SESSION_ID__" or "../")
+                if (referenceName.includes('__')) {
+                    referenceName = referenceName.split('__').pop();
+                }
+                if (referenceName.startsWith('../')) {
+                    referenceName = referenceName.replace('../', '');
+                }
+                
+                const blobUrl = this.blobUrls[referenceName];
                 
                 if (blobUrl) {
-                    console.log(`Replaced segment ${segmentName} with blob URL`);
+                    debugLogger.debug(`Replaced reference ${referenceName} with blob URL`);
                     return blobUrl;
                 }
                 
-                console.warn('No blob URL found for segment:', segmentName);
+                debugLogger.debug('No blob URL found for reference:', referenceName);
                 return line;
             });
             
@@ -570,14 +814,14 @@ export default {
             const hasSegments = files.some(file => this.getFileName(file).endsWith('.ts'));
             
             if (hasM3u8 && hasSegments) {
-                console.log('Processing transcoded files for blob URLs');
+                debugLogger.debug('Processing transcoded files for blob URLs');
                 try {
                     // Extract actual File objects for blob URL processing
                     const fileObjects = files.map(file => this.getFileObject(file));
                     await this.createBlobUrls(fileObjects);
-                    console.log('Blob URLs created for transcoded files');
+                    debugLogger.debug('Blob URLs created for transcoded files');
                 } catch (error) {
-                    console.error('Error processing transcoded files:', error);
+                    debugLogger.error('Error processing transcoded files:', error);
                 }
             }
         },
@@ -634,8 +878,13 @@ export default {
                 this.showContractButton = true; // Show button whenever files are added
                 this.pickContract('addFiles'); // Re-evaluate contract after adding files
                 
-                // Process transcoded files for blob URL creation
-                this.processTranscodedFiles(newFilesToAdd);
+                // Process transcoded files for blob URL creation only if they don't already have blob URLs
+                const needsBlobUrls = newFilesToAdd.some(file => 
+                    file.name.endsWith('.m3u8') && !file._blobUrl
+                );
+                if (needsBlobUrls) {
+                    this.processTranscodedFiles(newFilesToAdd);
+                }
                 return;
             }
             
@@ -669,8 +918,13 @@ export default {
                 this.showContractButton = true; // Show button whenever files are added
                 this.pickContract('addFiles'); // Re-evaluate contract after adding files
                 
-                // Process transcoded files for blob URL creation
-                this.processTranscodedFiles(otherFiles);
+                // Process transcoded files for blob URL creation only if they don't already have blob URLs
+                const needsBlobUrls = otherFiles.some(file => 
+                    file.name.endsWith('.m3u8') && !file._blobUrl
+                );
+                if (needsBlobUrls) {
+                    this.processTranscodedFiles(otherFiles);
+                }
             }
             
             // Queue video files for transcoding (only in internal mode)
@@ -705,21 +959,108 @@ export default {
             // Remove the processed video from queue
             this.pendingVideoFiles.shift();
             
+            // Store blob URLs if provided
+            if (result.blobUrls) {
+                this.blobUrls = { ...this.blobUrls, ...result.blobUrls };
+                debugLogger.debug('📹 Stored blob URLs from transcoder:', Object.keys(result.blobUrls));
+            }
+            
             // Add the transcoded files to upload queue
             const filesToAdd = result.files || [];
             
             if (filesToAdd.length > 0) {
-                this.droppedFiles = [...this.droppedFiles, ...filesToAdd];
+                debugLogger.debug(`📥 Received ${filesToAdd.length} files from transcoder:`);
+                filesToAdd.forEach((f, index) => {
+                    const fileName = f.name || (f.getFile && f.getFile().name);
+                    const metadata = f.getMetadata ? f.getMetadata() : null;
+                    debugLogger.debug(`  ${index + 1}. ${fileName} - Role: ${metadata?.role || 'none'}, Auxiliary: ${metadata?.isAuxiliary || false}, Size: ${(f.getFile ? f.getFile().size : f.size) || 'unknown'} bytes`);
+                });
                 
-                // Structure the files for upload
-                const structuredFiles = filesToAdd.map(file => ({
-                    file: file,
-                    targetPath: null,
-                    isStreamable: file.name.endsWith('.m3u8') // Mark m3u8 files
-                }));
+                // Extract raw files from ProcessedFile wrappers while preserving metadata
+                const rawFiles = filesToAdd.map(f => {
+                    const rawFile = f.getFile ? f.getFile() : f;
+                    
+                    // Preserve ProcessedFile metadata as custom properties on raw File
+                    if (f.getFile && f.getMetadata) {
+                        const metadata = f.getMetadata();
+                        rawFile._isAuxiliary = metadata.isAuxiliary;
+                        rawFile._role = metadata.role;
+                        rawFile._parentFile = metadata.parentFile;
+                        rawFile._processorId = metadata.processorId;
+                        
+                        debugLogger.debug(`Preserved metadata for ${rawFile.name}:`, {
+                            isAuxiliary: rawFile._isAuxiliary,
+                            role: rawFile._role,
+                            parentFile: rawFile._parentFile
+                        });
+                    }
+                    
+                    // Attach blob URL if available
+                    if (result.blobUrls && result.blobUrls[rawFile.name]) {
+                        rawFile._blobUrl = result.blobUrls[rawFile.name];
+                        debugLogger.debug(`Attached blob URL to ${rawFile.name}`);
+                    }
+                    
+                    return rawFile;
+                });
+                
+                // Only add non-auxiliary files to droppedFiles (for UI display)
+                const mainFiles = rawFiles.filter(file => !file._isAuxiliary);
+                const auxiliaryFiles = rawFiles.filter(file => file._isAuxiliary);
+                
+                debugLogger.debug(`📂 Separating files: ${mainFiles.length} main files, ${auxiliaryFiles.length} auxiliary files`);
+                this.droppedFiles = [...this.droppedFiles, ...mainFiles];
+                
+                // Store all blob URLs for related files (including auxiliary)
+                if (result.blobUrls) {
+                    // For each main file, store blob URLs for it and its related auxiliary files
+                    mainFiles.forEach(mainFile => {
+                        const relatedBlobUrls = {};
+                        
+                        // Add the main file's blob URL
+                        if (result.blobUrls[mainFile.name]) {
+                            relatedBlobUrls[mainFile.name] = result.blobUrls[mainFile.name];
+                        }
+                        
+                        // Add blob URLs for auxiliary files related to this main file
+                        auxiliaryFiles.forEach(auxFile => {
+                            if (auxFile._parentFile === mainFile.name && result.blobUrls[auxFile.name]) {
+                                relatedBlobUrls[auxFile.name] = result.blobUrls[auxFile.name];
+                            }
+                        });
+                        
+                        // Store the related blob URLs on the main file
+                        mainFile._relatedBlobUrls = relatedBlobUrls;
+                        debugLogger.debug(`Stored ${Object.keys(relatedBlobUrls).length} related blob URLs for ${mainFile.name}`);
+                    });
+                }
+                
+                // Structure the files for upload using the rawFiles that have metadata attached
+                const structuredFiles = rawFiles.map(rawFile => {
+                    // Extract metadata that was attached to the raw file
+                    const metadata = {
+                        isAuxiliary: rawFile._isAuxiliary || false,
+                        role: rawFile._role || '',
+                        parentFile: rawFile._parentFile || null,
+                        processorId: rawFile._processorId || null
+                    };
+                    
+                    debugLogger.debug(`Creating structured file for ${rawFile.name} with metadata:`, metadata);
+                    
+                    return {
+                        file: rawFile,
+                        targetPath: null,
+                        isStreamable: rawFile.name.endsWith('.m3u8'), // Mark m3u8 files
+                        metadata: metadata
+                    };
+                });
                 
                 // Add to structured files array
                 this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredFiles];
+                debugLogger.debug('Structured files created with metadata:', structuredFiles.map(sf => ({
+                    name: sf.file.name,
+                    metadata: sf.metadata
+                })));
                 
                 this.calculateFileSizes();
                 this.showContractButton = true;
@@ -786,11 +1127,11 @@ export default {
             this.contractBuilt = false; // Reset contract built status
 
             if (!this.saccountapi || !this.saccountapi.channels || this.requiredBroca <= 0) {
-                console.log(`pickContract(${info}): Skipping, no channels or no required Broca (${this.requiredBroca})`);
+                debugLogger.debug(`pickContract(${info}): Skipping, no channels or no required Broca (${this.requiredBroca})`);
                 this.loading = false; // Ensure loading is off if we skip early
                 return;
             }
-            console.log(`pickContract(${info}): Looking for contract >= ${this.requiredBroca} BROCA`);
+            debugLogger.debug(`pickContract(${info}): Looking for contract >= ${this.requiredBroca} BROCA`);
 
             // We use requiredBroca (actual need) for finding the contract,
             // displayRequiredBroca (min 100) is for the build button amount.
@@ -812,7 +1153,7 @@ export default {
             }
 
             if (foundContract) {
-                console.log(`pickContract(${info}): Found suitable contract`, foundContract);
+                debugLogger.debug(`pickContract(${info}): Found suitable contract`, foundContract);
                 this.selectedContract = foundContract;
                 this.contractSize = foundContractSize;
                 // Set contractBuilt to true meaning a contract is *selected*,
@@ -820,7 +1161,7 @@ export default {
                 this.contractBuilt = true;
                 this.loading = false; // Contract found (or determined no suitable one exists), stop loading
             } else {
-                console.log(`pickContract(${info}): No suitable contract found.`);
+                debugLogger.debug(`pickContract(${info}): No suitable contract found.`);
                  this.contractBuilt = false; // Explicitly ensure it's false if no contract found
                  this.loading = false; // Stop loading
             }
@@ -829,6 +1170,23 @@ export default {
             // ... (keep existing logic for removing from droppedFiles and structuredFilesForUpload) ...
             const fileToRemove = this.droppedFiles[index];
             if (!fileToRemove) return;
+            
+            // Clean up blob URLs for the removed file
+            const fileName = this.getFileName(fileToRemove);
+            if (this.blobUrls[fileName]) {
+                URL.revokeObjectURL(this.blobUrls[fileName]);
+                delete this.blobUrls[fileName];
+                debugLogger.debug(`Cleaned up blob URL for ${fileName}`);
+            }
+            
+            // Clean up related blob URLs if this is a file with related URLs
+            if (fileToRemove._relatedBlobUrls) {
+                Object.entries(fileToRemove._relatedBlobUrls).forEach(([name, url]) => {
+                    URL.revokeObjectURL(url);
+                    delete this.blobUrls[name];
+                    debugLogger.debug(`Cleaned up related blob URL for ${name}`);
+                });
+            }
 
             this.droppedFiles.splice(index, 1);
 
@@ -839,9 +1197,9 @@ export default {
             });
             if (structuredIndex > -1) {
                 this.structuredFilesForUpload.splice(structuredIndex, 1);
-                console.log('Removed corresponding structured file:', fileToRemove.name);
+                debugLogger.debug('Removed corresponding structured file:', fileToRemove.name);
             } else {
-                 console.warn('Could not find corresponding structured file to remove:', fileToRemove.name);
+                 debugLogger.debug('Could not find corresponding structured file to remove:', fileToRemove.name);
             }
 
             if (this.droppedFiles.length === 0) {
@@ -852,7 +1210,25 @@ export default {
             }
         },
         calculateFileSizes() {
-            this.totalSize = this.droppedFiles.reduce((acc, file) => acc + file.size, 0);
+            // Calculate total size including ALL files (main + auxiliary)
+            let totalSize = 0;
+            
+            // Include files shown in UI (main files)
+            totalSize += this.droppedFiles.reduce((acc, file) => acc + this.getFileSize(file), 0);
+            
+            // Include auxiliary files from structured upload list
+            this.structuredFilesForUpload.forEach(item => {
+                const metadata = item.metadata || {};
+                if (metadata.isAuxiliary) {
+                    const fileSize = this.getFileSize(item.file || item);
+                    totalSize += fileSize;
+                    debugLogger.debug(`Including auxiliary file ${this.getFileName(item.file || item)} (${fileSize} bytes) in total size`);
+                }
+            });
+            
+            this.totalSize = totalSize;
+            debugLogger.debug(`Total size calculation: Main files: ${this.droppedFiles.reduce((acc, file) => acc + this.getFileSize(file), 0)} bytes, Auxiliary files: ${totalSize - this.droppedFiles.reduce((acc, file) => acc + this.getFileSize(file), 0)} bytes, Total: ${totalSize} bytes`);
+            
             const channelBytes = this.stats.channel_bytes || 1024;
             // Calculate actual required Broca (minimum 0)
             this.requiredBroca = Math.max(0, parseInt((this.totalSize / channelBytes) * 1.5));
@@ -880,14 +1256,14 @@ export default {
             this.$emit('tosign', event);
         },
         startUpload() {
-            console.log('startUpload called. Current showUploadModal:', this.showUploadModal);
+            debugLogger.debug('startUpload called. Current showUploadModal:', this.showUploadModal);
             this.showUploadModal = true;
             this.$nextTick(() => {
-              console.log('startUpload finished. New showUploadModal:', this.showUploadModal, 'DOM updated.');
+              debugLogger.debug('startUpload finished. New showUploadModal:', this.showUploadModal, 'DOM updated.');
             });
         },
         closeUploadModal() {
-            console.log('closeUploadModal called.');
+            debugLogger.debug('closeUploadModal called.');
             this.showUploadModal = false;
         },
         handleUploadDone(payload) {
@@ -896,6 +1272,19 @@ export default {
             this.resetComponent(); 
         },
         resetComponent() {
+            // Clean up all blob URLs before resetting
+            Object.values(this.blobUrls).forEach(url => {
+                URL.revokeObjectURL(url);
+            });
+            this.blobUrls = {};
+            debugLogger.debug('Cleaned up all blob URLs in resetComponent');
+            
+            // Clean up video preview if active
+            if (this.showVideoPreview) {
+                this.cleanupVideoPlayer();
+                this.showVideoPreview = false;
+            }
+            
             this.droppedFiles = [];
             this.totalSize = 0;
             this.requiredBroca = 0;
@@ -906,6 +1295,12 @@ export default {
             this.loading = false;
             this.structuredFilesForUpload = []; 
             this.showUploadModal = false; // Ensure upload modal is hidden on reset
+            this.pendingVideoFiles = []; // Clear pending video queue
+            this.showVideoTranscoder = false;
+            this.videoToTranscode = null;
+            this.previewFile = null;
+            this.previewFileIndex = null;
+            
             if (this.$refs.fileInput) {
                 this.$refs.fileInput.value = null;
             }
