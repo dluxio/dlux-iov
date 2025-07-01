@@ -1,4 +1,4 @@
-this.version = "2025.07.01.12";
+this.version = "2025.07.01.13";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.12",
-  "generated": "2025-07-01T19:54:37Z",
+  "version": "2025.07.01.13",
+  "generated": "2025-07-01T20:03:09Z",
   "files": {
-    "/js/replies.js": {
-      "checksum": "01977372c8e04c8da8ac781002e9237b",
-      "size": 12153,
-      "priority": "important"
-    },
     "/js/scene.js": {
       "checksum": "aaed69b3bd0a5b44f45e4b3b3f773510",
       "size": 53733,
@@ -618,7 +613,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "5b4ff834cc4834c1b957f0a12ba14b96",
+      "checksum": "b9399cf964376bb2b7c2d2426950a9f1",
       "size": 36524,
       "priority": "important"
     },
@@ -838,7 +833,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f846413871a20cbd413bdda7efdde122",
+      "checksum": "ac49a51d2ade0da285354d68c38d1d32",
       "size": 7300,
       "priority": "important"
     },
@@ -927,11 +922,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/playground/env_thumbs/tron.png": {
-      "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
-      "size": 129691,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/volcano.png": {
       "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
       "size": 141300,
@@ -972,12 +962,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
