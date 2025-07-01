@@ -74,7 +74,6 @@
   left: 0;
   right: 0;
   height: 0;
-  background-color: #212529;
   border-top: 1px solid #495057;
   border-radius: 1rem 1rem 0 0;
   transition: height 0.3s ease;
@@ -222,7 +221,6 @@
 /* File type icons color coding */
 .fa-video { color: #FF6B6B; }
 .fa-image { color: #4ECDC4; }
-.fa-file { color: #5C94FE; }
 .fa-cube { color: #764BA2; }
 
 /* Add padding only to builder views */

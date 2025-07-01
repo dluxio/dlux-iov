@@ -4106,8 +4106,12 @@ class DocumentManager {
 
             // ✅ SECURITY FIX: Only show files created by the current authenticated user
             const userFiles = files.filter(file => {
-                // Must have a creator and it must match the current user
-                return file.creator && file.creator === this.component.username;
+                // If user is logged in, only show their files
+                if (this.component.username) {
+                    return file.creator === this.component.username;
+                }
+                // If not logged in, only show anonymous files
+                return !file.creator || file.creator === 'anonymous';
             });
 
             this.component.localFiles = userFiles.map(file => ({
@@ -18757,7 +18761,7 @@ export default {
 
     // ==================== HTML TEMPLATE ====================
     template: `
-    <div class="tiptap-editor-modular">
+    <div class="tiptap-editor-modular w-100">
         <!-- ==================== TOP TOOLBAR ==================== -->
         <div class="d-flex rounded-top bg-dark mb-3 px-2 py-1 justify-content-between align-items-center">
           <!-- File Menu -->

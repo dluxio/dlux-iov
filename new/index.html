@@ -284,6 +284,10 @@
             border: 2px dashed #4ECDC4;
             background-color: #1e2329;
         }
+
+        .carousel-slide-content {
+            min-height: 300px;
+        }
    
     </style>
 </head>
@@ -304,23 +308,20 @@
                     <button class="btn btn-primary btn-floating" @click="mediaPanelOpen = true">
                         <i class="fa-solid fa-network-wired"></i>
                     </button>
-                    <button class="btn btn-secondary btn-floating" @click="showEnhanceModal = true">
+                    <!-- <button class="btn btn-secondary btn-floating" @click="showEnhanceModal = true">
                         <i class="fa-solid fa-sparkles"></i>
-                    </button>
+                    </button> -->
                 </div>
                 
                 <!-- Main Content Container - Full Width -->
                 <div class="">
 
-                    
                     <!-- Simple Two Column Layout -->
-                    <div class="row mt-0 mb-4">
+                    <div class="row mt-0">
                         <!-- Left Column: All Content (Blog Editor, dApp Builders) -->
-                        <div class="col-lg-8">
+                        <div class="col-lg-8 d-flex flex-column">
                             <!-- DLUX Enhancement Hub -->
                             <div class="dlux-enhancement-hub p-0 mb-2">
-                                
-                                
                                 <!-- Carousel View (shown when no builder active) -->
                                 <div v-if="!showDappBuilder && !showRemixBuilder && !currentRemixApp" class="carousel-view">
                                       <!-- Bootstrap Carousel -->
@@ -740,7 +741,7 @@
                             
 
                             <!-- Blog Editor (always shown) -->
-                            <div class="bg-dark-1 rounded">
+                            <div class="bg-dark-1 rounded d-flex align-items-center justify-content-center flex-grow-1">
                                 <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username="account"
                                     :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
@@ -753,7 +754,7 @@
                                     }" @content-changed="handlePostContentChanged" @publish-post="handlePostPublish"
                                     @update:file-to-add="fileToAddToPost = null" @tosign="sendIt($event)"
                                     @request-auth-headers="ensureCollaborationAuth"></tiptap-editor-modular>
-                                <div v-else class="text-center text-muted py-5">
+                                <div v-else class="text-center text-muted py-5 my-auto">
                                     <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
                                     <h5>Please Log In</h5>
                                     <p>You need to log in to create and edit posts.</p>
@@ -762,7 +763,7 @@
                         </div>
 
                         <!-- Right Column: SPK Network (Always Visible) -->
-                        <div class="col-lg-4 spk-sidebar">
+                        <div class="col-lg-4 spk-sidebar d-none d-md-block">
                             <div class="spk-panel card bg-dark border-primary">
                                 <div class="card-header bg-primary bg-opacity-10">
                                     <div class="d-flex align-items-center justify-content-between">
@@ -774,7 +775,7 @@
                                         </small>
                                     </div>
                                 </div>
-                                
+                                <div v-if="account" class="vfs-scroll-pass">
                                 <div class="card-body p-1">
                                     <!-- Quick Drop Zone -->
                                     <!-- <div class="spk-quick-drop mb-3" 
@@ -808,21 +809,27 @@
                                             :update-url="false"></contract-vue>
                                     </div>
                                 </div>
+                                </div>
+                                <div v-else class="text-center text-muted py-5 px-3 my-auto">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to use SPK Network.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                 <!-- SPK Network Panel for Mobile (Bottom Sheet) -->
-                <div class="media-panel d-lg-none" :class="{ active: mediaPanelOpen }">
-                    <div class="media-panel-header bg-primary bg-opacity-10">
+                <div class="media-panel bg-dark d-md-none" :class="{ active: mediaPanelOpen }">
+                    <div class="media-panel-header bg-primary">
                         <div class="media-panel-handle" @click="mediaPanelOpen = false"></div>
                         <h5 class="mb-0">
                             <i class="fa-solid fa-network-wired me-2"></i>SPK Network Storage
                         </h5>
                     </div>
-                    <div class="media-panel-content">
+                    <div class="media-panel-content bg-card">
                         <!-- Quick Drop Zone -->
-                        <div class="spk-quick-drop mb-3" 
+                        <div class="d-none spk-quick-drop mb-3" 
                              @drop.prevent="handleUniversalDrop($event)"
                              @dragover.prevent="$event.currentTarget.classList.add('drag-active')"
                              @dragleave="$event.currentTarget.classList.remove('drag-active')">
@@ -833,7 +840,7 @@
                         </div>
                         <!-- Same content as desktop media sidebar -->
                         <!-- Media Tabs -->
-                        <div class="media-tabs">
+                        <!-- <div class="media-tabs">
                             <button class="media-tab" :class="{ active: activeMediaTab === 'files' }" 
                                     @click="activeMediaTab = 'files'">
                                 <i class="fa-solid fa-folder me-1"></i>Files
@@ -842,10 +849,10 @@
                                     @click="activeMediaTab = 'video'">
                                 <i class="fa-solid fa-video me-1"></i>Video Tools
                             </button>
-                        </div>
+                        </div> -->
 
                         <!-- Files Tab -->
-                        <div v-show="activeMediaTab === 'files'">
+                        <div >
                             <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                 :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                 :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
@@ -881,7 +888,7 @@
                      @click="mediaPanelOpen = false"></div>
 
                 <!-- Enhancement Modal for Mobile -->
-                <div class="enhancement-modal d-lg-none" :class="{ active: showEnhanceModal }">
+                <!-- <div class="enhancement-modal d-lg-none" :class="{ active: showEnhanceModal }">
                     <div class="enhancement-modal-header">
                         <h5 class="mb-0"><i class="fa-solid fa-sparkles me-2"></i>Enhance Your Blog</h5>
                         <button class="btn btn-link text-white" @click="showEnhanceModal = false">
@@ -914,7 +921,7 @@
                             <i class="fa-solid fa-plus me-2"></i>Create Custom App
                         </button>
                     </div>
-                </div>
+                </div> -->
 
             </div>
             <!-- End of Mobile-First Layout -->
@@ -1428,9 +1435,6 @@
                         </div>
                     </div>
                 </div>
-
-
-
 
                 <!-- Old TipTap Post Editor - Hidden (moved inline to main editor) -->
                 <div v-if="false" class="accordion border-white-50 rounded mt-3" id="postEditorAccordion">
