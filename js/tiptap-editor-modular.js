@@ -4713,6 +4713,7 @@ export default {
         'content-changed',
         'content-available',
         'publishPost',
+        'publish-to-hive',
         'requestAuthHeaders',
         'request-auth-headers',
         'tosign',
@@ -4734,8 +4735,6 @@ export default {
             default: () => []
         }
     },
-
-    mixins: [methodsCommon],
 
     data() {
         return {
@@ -6420,7 +6419,7 @@ export default {
         // Parent permlink for Hive posts
         parentPermlink() {
             // Default parent for new posts
-            return 'hive-125125'; // DLUX community
+            return 'hive-161511'; // DLUX community
         },
 
         // Convert beneficiaries from reactive array to Hive format
@@ -6624,9 +6623,6 @@ export default {
             // ✅ ENHANCED: Permission-based publish validation
             if (this.currentFile?.type === 'collaborative') {
                 // Collaborative documents require authentication AND publish permission
-                if (!this.isAuthenticated || this.isAuthExpired) {
-                    return false;
-                }
 
                 // Use simplified currentPermissionLevel instead of getUserPermissionLevel
                 return this.isPostable; // This checks for 'postable' or 'owner'
@@ -7908,6 +7904,7 @@ export default {
     },
 
     methods: {
+        ...methodsCommon,
         // ===== CUSTOM JSON PERFORMANCE MONITORING =====
         
         /**
@@ -8146,6 +8143,7 @@ export default {
     },
 
     methods: {
+        ...methodsCommon,
         // ===== STATUS MESSAGE HELPERS =====
 
         // ✅ GET SAVE MESSAGE: Contextual save status messages  
@@ -15005,24 +15003,42 @@ export default {
             });
         },
 
-        // Emit JSON preview data to parent for publishing
         publishToHive() {
             if (!this.jsonPreviewModal.validation.valid) {
                 alert('Please fix all errors before publishing');
                 return;
             }
 
-            console.log('📤 Emitting JSON preview data for publishing');
+            // Build the operations array for Hive
+            const operations = [];
+            
+            // Comment operation (always comes first)
+            const commentOperation = ["comment", this.commentOperation.comment];
+            operations.push(commentOperation);
+            
+            // Add comment_options only if we have non-default values
+            if (this.commentOptionsOperation) {
+                const commentOptionsOperation = ["comment_options", this.commentOptionsOperation.comment_options];
+                operations.push(commentOptionsOperation);
+            }
 
-            // Emit the preview data to parent component or publishing system
-            this.$emit('publish-to-hive', {
-                operations: this.jsonPreview.complete,
-                metadata: this.jsonPreview.metadata,
-                preview: {
-                    comment: this.jsonPreview.comment,
-                    commentOptions: this.jsonPreview.commentOptions
-                }
+            // Console log the complete operation for debugging
+            console.log('🚀 Publishing to Hive:', {
+                operations: operations,
+                operationsCount: operations.length,
+                hasCommentOptions: !!this.commentOptionsOperation,
+                metadata: this.jsonPreview.metadata
             });
+
+            // Package the operation for sendIt() - this is the format expected by the signing system
+            const signOperation = {
+                operations: operations,
+                broadcast: true,
+                username: this.username || 'anonymous'
+            };
+
+            // Call sendIt with the properly formatted operation
+            this.sendIt(signOperation);
 
             // Close the modal
             this.jsonPreviewModal.show = false;
@@ -19846,21 +19862,10 @@ export default {
                       </label>
                     </div>
                   </div>
-
-                  <div v-if="!isAuthenticated || isAuthExpired" class="alert alert-warning border-warning">
-                    <div class="d-flex align-items-center mb-2">
-                      <i class="fas fa-exclamation-triangle me-2"></i>
-                      <strong>Authentication Required</strong>
-                    </div>
-                    <p class="mb-2">You need to authenticate to publish to Hive.</p>
-                    <button @click="requestAuthentication()" class="btn btn-primary btn-sm">
-                      <i class="fas fa-key me-2"></i>Authenticate with Hive
-                    </button>
-                  </div>
                 </div>
                 <div class="modal-footer border-secondary">
                   <button @click="closePublishModal()" class="btn btn-secondary">Cancel</button>
-                  <button @click="publishPost()" class="btn btn-primary" :disabled="!canPublish || !isAuthenticated">
+                  <button @click="publishToHive()" class="btn btn-primary" :disabled="!canPublish">
                     <i class="fas fa-paper-plane me-1"></i>Publish to Hive
                   </button>
                 </div>
