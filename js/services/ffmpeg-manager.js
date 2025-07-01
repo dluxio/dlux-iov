@@ -9,8 +9,21 @@ class FFmpegManager {
         this.progressCallbacks = new Set();
         this.logCallbacks = new Set();
         this.loadPromise = null;
+        this.isMultiThreaded = false;
+        this.supportsSharedArrayBuffer = this.checkSharedArrayBufferSupport();
     }
     
+    // Check SharedArrayBuffer support for multithreading
+    checkSharedArrayBufferSupport() {
+        try {
+            return typeof SharedArrayBuffer !== 'undefined' && 
+                   typeof Atomics !== 'undefined' &&
+                   self.crossOriginIsolated !== false;
+        } catch (e) {
+            return false;
+        }
+    }
+
     // Get singleton instance
     static getInstance() {
         if (!FFmpegManager.instance) {
@@ -58,12 +71,27 @@ class FFmpegManager {
             const { FFmpeg } = window.FFmpegWASM;
             this.ffmpeg = new FFmpeg();
             
-            // Load FFmpeg core
-            const coreURL = '/packages/core/package/dist/umd';
-            await this.ffmpeg.load({
-                coreURL: `${coreURL}/ffmpeg-core.js`,
-                wasmURL: `${coreURL}/ffmpeg-core.wasm`,
-            });
+            // Load FFmpeg core with multithreading support
+            let coreURL, loadOptions;
+            
+            if (this.isMultiThreaded) {
+                coreURL = '/packages/core-mt/package/dist/umd';
+                loadOptions = {
+                    coreURL: `${coreURL}/ffmpeg-core.js`,
+                    wasmURL: `${coreURL}/ffmpeg-core.wasm`,
+                    workerURL: `${coreURL}/ffmpeg-core.worker.js`,
+                };
+                console.log('FFmpeg Manager: Loading with multithreading support');
+            } else {
+                coreURL = '/packages/core/package/dist/umd';
+                loadOptions = {
+                    coreURL: `${coreURL}/ffmpeg-core.js`,
+                    wasmURL: `${coreURL}/ffmpeg-core.wasm`,
+                };
+                console.log('FFmpeg Manager: Loading in single-threaded mode');
+            }
+            
+            await this.ffmpeg.load(loadOptions);
             
             // Try to set up event handlers
             this._setupEventHandlers();
@@ -80,12 +108,27 @@ class FFmpegManager {
         }
     }
     
-    // Load required scripts
+    // Load required scripts with multithreading support
     async _loadScripts() {
-        const scripts = [
-            '/packages/ffmpeg/package/dist/umd/ffmpeg.js',
-            '/packages/util/package/dist/umd/index.js'
-        ];
+        let scripts;
+        
+        if (this.supportsSharedArrayBuffer) {
+            console.log('FFmpeg Manager: SharedArrayBuffer supported, loading multithreaded core');
+            scripts = [
+                '/packages/ffmpeg/package/dist/umd/ffmpeg.js',
+                '/packages/util/package/dist/umd/index.js',
+                '/packages/core-mt/package/dist/umd/ffmpeg-core.js'
+            ];
+            this.isMultiThreaded = true;
+        } else {
+            console.log('FFmpeg Manager: SharedArrayBuffer not supported, loading single-threaded core');
+            scripts = [
+                '/packages/ffmpeg/package/dist/umd/ffmpeg.js',
+                '/packages/util/package/dist/umd/index.js',
+                '/packages/core/package/dist/umd/ffmpeg-core.js'
+            ];
+            this.isMultiThreaded = false;
+        }
         
         for (const src of scripts) {
             await this._loadScript(src);
@@ -225,6 +268,21 @@ class FFmpegManager {
     // Check if FFmpeg is loaded
     isLoaded() {
         return this.loaded;
+    }
+    
+    // Check if multithreading is enabled
+    isMultiThreadingEnabled() {
+        return this.isMultiThreaded && this.loaded;
+    }
+    
+    // Get performance info
+    getPerformanceInfo() {
+        return {
+            isLoaded: this.loaded,
+            isMultiThreaded: this.isMultiThreaded,
+            supportsSharedArrayBuffer: this.supportsSharedArrayBuffer,
+            estimatedSpeedMultiplier: this.isMultiThreaded ? 2.0 : 1.0
+        };
     }
     
     // Get FFmpeg instance (for advanced use)

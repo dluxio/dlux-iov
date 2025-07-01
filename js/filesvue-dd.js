@@ -992,13 +992,22 @@ export default {
 
     <!-- File Preview Modal -->
     <teleport to="body">
-        <div v-if="previewModal.show" 
-             class="modal-overlay d-flex justify-content-center align-items-center"
-             @click.self="closeFilePreview"
-             style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
-            
-            <div class="modal-content bg-dark text-white rounded shadow-lg" 
-                 style="max-width: 90vw; max-height: 90vh; overflow: hidden;">
+        <!-- Backdrop -->
+        <transition name="fade">
+            <div v-if="previewModal.show" 
+                 class="modal-backdrop fade show"
+                 @click="closeFilePreview"></div>
+        </transition>
+        
+        <!-- Modal -->
+        <transition name="modal">
+            <div v-if="previewModal.show" 
+                 class="modal fade show d-block"
+                 tabindex="-1"
+                 role="dialog"
+                 @keyup.esc="closeFilePreview">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content bg-dark text-white">
                 
                 <!-- Modal Header -->
                 <div class="modal-header border-bottom border-secondary p-3">
@@ -1007,13 +1016,24 @@ export default {
                 </div>
                 
                 <!-- Modal Body -->
-                <div class="modal-body p-0" style="max-height: calc(90vh - 120px); overflow: auto;">
+                <div class="modal-body p-0" style="min-height: 400px; max-height: calc(90vh - 120px); overflow: auto; position: relative;">
+                    
+                    <!-- Loading Spinner (Non-blocking) -->
+                    <div v-if="previewModal.loading" 
+                         class="position-absolute top-0 end-0 m-3"
+                         style="z-index: 10;">
+                        <div class="spinner-border text-light" role="status" style="width: 2rem; height: 2rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
                     
                     <!-- Image Preview -->
                     <div v-if="previewModal.file && isImageFile(previewModal.file.type)" 
                          class="text-center p-3">
                         <img :src="previewModal.file.url" 
                              :alt="previewModal.file.name"
+                             @load="previewModal.loading = false"
+                             @error="previewModal.loading = false"
                              class="img-fluid rounded"
                              style="max-width: 100%; max-height: 70vh; object-fit: contain;">
                     </div>
@@ -1078,8 +1098,10 @@ export default {
                         </div>
                     </div>
                 </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </transition>
     </teleport>
     
     <!-- Video Choice Modal -->
@@ -1304,7 +1326,8 @@ export default {
             brocaBalance: 0,
             previewModal: {
                 show: false,
-                file: null
+                file: null,
+                loading: true
             },
             videoObserver: null, // MutationObserver for HLS video setup
             // Video transcoding
@@ -5054,7 +5077,8 @@ export default {
                     url: ipfsUrl,
                     size: this.fancyBytes(file.s),
                     meta: meta
-                }
+                },
+                loading: this.isImageFile(fileType) // Only show spinner for images
             };
         },
 
@@ -5063,6 +5087,7 @@ export default {
             // Each video element manages its own HLS instance
             this.previewModal.show = false;
             this.previewModal.file = null;
+            this.previewModal.loading = true;
         },
 
         getFileUrlWithType(file) {
@@ -5899,6 +5924,14 @@ export default {
         if (this.$refs.container) {
             this.$refs.container.addEventListener('dragleave', this.handleComponentDragLeave);
         }
+        
+        // Add keyboard listener for escape key
+        this.handleEscapeKey = (e) => {
+            if (e.key === 'Escape' && this.previewModal.show) {
+                this.closeFilePreview();
+            }
+        };
+        document.addEventListener('keyup', this.handleEscapeKey);
     },
     beforeUnmount() {
         // Clean up video observer and HLS instances
@@ -5913,6 +5946,11 @@ export default {
         // Remove component-level dragleave listener
         if (this.$refs.container) {
             this.$refs.container.removeEventListener('dragleave', this.handleComponentDragLeave);
+        }
+        
+        // Remove keyboard listener
+        if (this.handleEscapeKey) {
+            document.removeEventListener('keyup', this.handleEscapeKey);
         }
     }
 };

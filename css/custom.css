@@ -16277,24 +16277,6 @@ pre {
   pointer-events: all !important;
 }
 
-/* Fullscreen behavior */
-.hls-video-wrapper.is-fullscreen .hls-quality-selector {
-  z-index: 2147483647; /* Max z-index to be above fullscreen controls */
-}
-
-/* Fullscreen: show when paused or mouse is active */
-.hls-video-wrapper.is-fullscreen:not(.video-playing) .hls-quality-selector,
-.hls-video-wrapper.is-fullscreen.mouse-active .hls-quality-selector {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Fullscreen: hide when playing and mouse inactive (unless menu open) */
-.hls-video-wrapper.is-fullscreen.video-playing:not(.mouse-active) .hls-quality-selector:not(.menu-open) {
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .hls-quality-selector {
@@ -16309,4 +16291,31 @@ pre {
     font-size: 12px;
     padding: 6px 10px;
   }
+}
+/* Vue Modal Transitions */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active, .modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* Image loading transition */
+.transition-opacity {
+  transition: opacity 0.3s ease;
 }/*# sourceMappingURL=custom.css.map */

@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.1",
-  "generated": "2025-06-30T22:03:16Z",
+  "version": "2025.06.30.17",
+  "generated": "2025-07-01T00:19:28Z",
   "files": {
-    "/js/methods-modals.js": {
-      "checksum": "f08a459f5f5c673932b1c1cd51540e0b",
-      "size": 1066,
-      "priority": "important"
-    },
     "/js/methods-spk.js": {
       "checksum": "e434298a33d0318e41336bcdf551e567",
       "size": 7542,
@@ -713,7 +708,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "17bb089009180820343d8cc3d43e1b27",
+      "checksum": "3b0c242126c48a1a830bc207a60b7e73",
       "size": 36523,
       "priority": "important"
     },
@@ -933,7 +928,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "42840f5190028222fea7c3ea8d76b173",
+      "checksum": "b3e7a22ccf696400b9570657dab32260",
       "size": 7299,
       "priority": "important"
     },
@@ -1021,11 +1016,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/scene-test.html": {
-      "checksum": "f556898bea2ca823bca83978ce8f04b8",
-      "size": 2353,
-      "priority": "page-specific"
     },
     "/naf-playground/test-video.html": {
       "checksum": "1ba32579515f864ae6bdf65ba09b3384",
@@ -1162,12 +1152,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
