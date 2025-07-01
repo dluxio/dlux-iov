@@ -1,4 +1,4 @@
-this.version = "2025.07.01.5";
+this.version = "2025.07.01.6";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.09",
-  "generated": "2025-07-01T16:27:39Z",
+  "version": "2025.07.01.6",
+  "generated": "2025-07-01T16:27:51Z",
   "files": {
-    "/js/nftcard.js": {
-      "checksum": "eab916cf74635206cdd5cd2d9f7382ca",
-      "size": 18323,
-      "priority": "important"
-    },
     "/js/nftdetail.js": {
       "checksum": "eaf16d707930e3782ac391a903240751",
       "size": 90543,
@@ -977,11 +972,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/playground/env_thumbs/forest.png": {
-      "checksum": "2b53f99d17a713efa0d95a5eef2df8e5",
-      "size": 140445,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/goaland.png": {
       "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
       "size": 132405,
@@ -1072,12 +1062,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
