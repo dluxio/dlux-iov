@@ -15032,10 +15032,13 @@ export default {
 
             // Package the operation for sendIt() - this is the format expected by the signing system
             const signOperation = {
-                operations: operations,
-                broadcast: true,
-                username: this.username || 'anonymous'
-            };
+                type: "raw",
+                key: "posting",
+                op: JSON.stringify(operations),
+                callbacks: [], //get new replies for a/p
+                txid: `posting...`,
+              }
+            console.log('signOperation', signOperation)
 
             // Call sendIt with the properly formatted operation
             this.sendIt(signOperation);
