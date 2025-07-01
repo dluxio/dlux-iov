@@ -239,58 +239,101 @@ export default {
 
                 </div>
         </div>
-        
-        <!-- Video Processing Section -->
-        <div v-if="processingFiles.length > 0" class="mb-3 border-bottom pb-3 vfs-scroll-pass" style="height: 400px">
-            <h5 class="mb-2">
-                <i class="fa-solid fa-gear fa-spin me-2"></i>
-                Processing Files
-            </h5>
-            <div class="row g-2">
-                <div v-for="pFile in processingFiles" :key="pFile.id" class="">
-                    <div class="card bg-dark border-secondary">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-start mb-2">
-                                <i class="fa-solid fa-video text-primary me-2 mt-1"></i>
-                                <div class="flex-grow-1 text-truncate">
-                                    <h6 class="mb-0 text-truncate">{{ pFile.fileName }}</h6>
-                                    <small class="text-muted">{{ fancyBytes(pFile.fileSize) }}</small>
-                                </div>
-                            </div>
-                            
-                            <!-- Progress Bar -->
-                            <div v-if="pFile.status === 'transcoding'" class="mb-2">
-                                <div class="progress" style="height: 10px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-                                         :style="'width: ' + pFile.progress + '%'">
+        <div class="vfs-scroll" v-show="processingFiles.length > 0 || uploadActive">
+            <!-- Video Processing Section -->
+            <div v-if="processingFiles.length > 0" class="mb-3 border-bottom pb-3">
+                <h5 class="mb-2">
+                    <i class="fa-solid fa-gear fa-spin me-2"></i>
+                    Processing Files
+                </h5>
+                <div class="d-flex flex-column g-2">
+                    <div v-for="pFile in processingFiles" :key="pFile.id" class="">
+                        <div class="card bg-dark border-secondary">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="fa-solid fa-video text-primary me-2 mt-1"></i>
+                                    <div class="flex-grow-1 text-truncate">
+                                        <h6 class="mb-0 text-truncate">{{ pFile.fileName }}</h6>
+                                        <small class="text-muted">{{ fancyBytes(pFile.fileSize) }}</small>
                                     </div>
                                 </div>
-                                <small class="text-muted">
-                                    Transcoding... {{ pFile.progress }}%
-                                    <span v-if="pFile.message" class="ms-1">{{ pFile.message }}</span>
-                                </small>
+                                
+                                <!-- Progress Bar -->
+                                <div v-if="pFile.status === 'transcoding'" class="mb-2">
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                            :style="'width: ' + pFile.progress + '%'">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">
+                                        Transcoding... {{ pFile.progress }}%
+                                        <span v-if="pFile.message" class="ms-1">{{ pFile.message }}</span>
+                                    </small>
+                                </div>
+                                
+                                <!-- Queued State -->
+                                <div v-else-if="pFile.status === 'queued'" class="mb-2">
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-secondary" style="width: 100%"></div>
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa-solid fa-clock me-1"></i>
+                                        Waiting in queue...
+                                    </small>
+                                </div>
+                                
+                                <!-- Failed State -->
+                                <div v-else-if="pFile.status === 'failed'" class="text-danger mb-2">
+                                    <i class="fa-solid fa-exclamation-circle me-1"></i>
+                                    <small>{{ pFile.error || 'Transcoding failed' }}</small>
+                                </div>
+                                
+                                <!-- Complete State -->
+                                <div v-else-if="pFile.status === 'complete'" class="text-success mb-2">
+                                    <i class="fa-solid fa-check-circle me-1"></i>
+                                    <small>Ready to upload</small>
+                                </div>
+                                
+                                
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2 mt-2 align-items-center">
+                                    <!-- Info message for active transcoding -->
+                                    <small v-if="pFile.status === 'transcoding'" class="text-muted">
+                                        <i class="fa-solid fa-info-circle me-1"></i>Cannot cancel once started
+                                    </small>
+                                    
+                                    <!-- Retry button for failed states only -->
+                                    <button v-if="pFile.status === 'failed'" 
+                                            @click="retryProcessing(pFile.id)"
+                                            class="btn btn-sm btn-primary">
+                                        <i class="fa-solid fa-redo me-1"></i>Retry
+                                    </button>
+                                    
+                                    <!-- Delete button - only show when not transcoding -->
+                                    <button v-if="pFile.status !== 'transcoding'"
+                                            @click="deleteProcessingFile(pFile.id)"
+                                            class="btn btn-sm btn-danger"
+                                            title="Remove from queue">
+                                        <i class="fa-solid fa-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                                
                             </div>
-                            
-                            <!-- Failed State -->
-                            <div v-else-if="pFile.status === 'failed'" class="text-danger mb-2">
-                                <i class="fa-solid fa-exclamation-circle me-1"></i>
-                                <small>{{ pFile.error || 'Transcoding failed' }}</small>
-                            </div>
-                            
-                            <!-- Complete State -->
-                            <div v-else-if="pFile.status === 'complete'" class="text-success mb-2">
-                                <i class="fa-solid fa-check-circle me-1"></i>
-                                <small>Ready to upload</small>
-                            </div>
-                            
-                            
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Upload Everywhere Controller -->
+            <div id="UEController"></div>
+        </div>
+        <!-- Warning Box for Trash Folder -->
+        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2"
+            role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
+            <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
         <!-- breadcrumb -->
-    <div  class="breadcrumb d-flex align-items-center w-100 rounded-top bg-darkg mb-0">
+        <div  class="breadcrumb d-flex align-items-center w-100 rounded-top bg-darkg mb-0">
         <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
             @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
             @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
@@ -425,15 +468,7 @@ export default {
             </table>
         </div>
 
-        <!-- Upload Everywhere Controller -->
-        <div id="UEController"></div>
-
-        <!-- Warning Box for Trash Folder -->
-        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2"
-            role="alert">
-            <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
-            <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
-        </div>
+       
     
         <!-- Files -->
         <div v-if="!filesSelect.search" class="d-flex flex-grow-1 vfs-scroll-pass">
@@ -1279,6 +1314,7 @@ export default {
             }, // For rubber-band selection
             initialSelection: [], // Added: To store selection state at drag start
             droppedExternalFiles: { files: [], targetPath: null }, // Added: For external file drops
+            uploadActive: false, // Track if upload-everywhere has content
             labels: {
                 "0": { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
                 "1": { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
@@ -5541,13 +5577,16 @@ export default {
                 // Add to processing queue for transcoding
                 const processingId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 
+                // Check if any other file is actively transcoding
+                const hasActiveTranscoding = this.processingFiles.some(f => f.status === 'transcoding');
+                
                 this.processingFiles.push({
                     id: processingId,
                     file: video.file,
                     fileName: video.file.name,    // Extract from inner file object
                     fileSize: video.file.size,    // Extract from inner file object
                     choice: choice,
-                    status: 'transcoding',
+                    status: hasActiveTranscoding ? 'queued' : 'transcoding',
                     progress: 0,
                     error: null,
                     transcodedFiles: [],
@@ -5555,10 +5594,12 @@ export default {
                     transcoderInstance: null
                 });
                 
-                // Start transcoding in the background
-                this.$nextTick(() => {
-                    this.startVideoTranscoding(processingId);
-                });
+                // Start transcoding in the background (if not queued)
+                if (!hasActiveTranscoding) {
+                    this.$nextTick(() => {
+                        this.startVideoTranscoding(processingId);
+                    });
+                }
             }
             
             // Process next video if any using the new choice modal system
@@ -5577,15 +5618,42 @@ export default {
         
         async startVideoTranscoding(processingId) {
             const processingFile = this.processingFiles.find(f => f.id === processingId);
-            if (!processingFile) return;
+            if (!processingFile) {
+                debugLogger.error(`❌ Cannot start transcoding - no file found with ID: ${processingId}`);
+                return;
+            }
+            
+            debugLogger.info(`🎬 Request to start transcoding for: ${processingFile.fileName} (ID: ${processingId})`);
+            
+            // Check if any other file is actively transcoding
+            const activeTranscoding = this.processingFiles.find(f => 
+                f.id !== processingId && f.status === 'transcoding'
+            );
+            
+            if (activeTranscoding) {
+                // Queue this file to start after the current one finishes
+                processingFile.status = 'queued';
+                processingFile.progress = 0;
+                debugLogger.info(`📋 Queuing ${processingFile.fileName} - waiting for ${activeTranscoding.fileName} to complete`);
+                debugLogger.info(`📊 Current queue status: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
+                return;
+            }
+            
+            // Mark as actively transcoding
+            processingFile.status = 'transcoding';
+            debugLogger.info(`✅ Starting transcoding for: ${processingFile.fileName}`);
             
             // The transcoder component will auto-start
             // Events will be handled by the handlers below
         },
         
         handleProcessingProgress(processingId, progressData) {
+            debugLogger.debug(`📥 handleProcessingProgress called for ID: ${processingId} with data:`, progressData);
+            
             const processingFile = this.processingFiles.find(f => f.id === processingId);
             if (processingFile) {
+                const oldProgress = processingFile.progress;
+                
                 // Handle both number and object formats
                 if (typeof progressData === 'number') {
                     processingFile.progress = progressData;
@@ -5597,6 +5665,15 @@ export default {
                         processingFile.message = progressData.message;
                     }
                 }
+                
+                // Vue 3's reactivity should automatically detect these property changes
+                
+                // Debug logging to verify correct routing
+                if (oldProgress !== processingFile.progress) {
+                    debugLogger.debug(`📊 Progress update for ${processingFile.fileName} (ID: ${processingId}): ${oldProgress}% → ${processingFile.progress}%`);
+                }
+            } else {
+                debugLogger.warn(`⚠️ No processing file found for progress update - ID: ${processingId}`);
             }
         },
         
@@ -5610,12 +5687,18 @@ export default {
                 // Emit progress 100 to ensure UI updates
                 processingFile.progress = 100;
                 
-                debugLogger.debug('Processing complete for:', processingId, 'Auto-moving to ready section');
+                debugLogger.info(`✅ Processing complete for: ${processingFile.fileName} (ID: ${processingId})`);
+                debugLogger.info(`📊 Queue status before cleanup: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
                 
                 // Auto-move to ready section after a brief moment to show completion
                 setTimeout(() => {
                     this.moveToReady(processingFile);
+                    
+                    // Start the next queued video if any
+                    this.processNextQueuedVideo();
                 }, 500);
+            } else {
+                debugLogger.error(`❌ Cannot mark complete - no file found with ID: ${processingId}`);
             }
         },
         
@@ -5624,6 +5707,70 @@ export default {
             if (processingFile) {
                 processingFile.status = 'failed';
                 processingFile.error = error.message || 'Transcoding failed';
+                
+                // Start the next queued video even if this one failed
+                this.processNextQueuedVideo();
+            }
+        },
+        
+        processNextQueuedVideo() {
+            // Find the next queued video
+            const queuedFile = this.processingFiles.find(f => f.status === 'queued');
+            if (queuedFile) {
+                debugLogger.info(`🚀 Processing next queued video: ${queuedFile.fileName} (ID: ${queuedFile.id})`);
+                debugLogger.info(`📊 Queue status: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
+                
+                // Reset status and start transcoding
+                queuedFile.status = 'transcoding';
+                queuedFile.progress = 0;
+                
+                // Give the transcoder time to initialize, then start
+                setTimeout(() => {
+                    const transcoderRef = `transcoder_${queuedFile.id}`;
+                    debugLogger.info(`🔍 Looking for transcoder ref: ${transcoderRef}`);
+                    debugLogger.info(`📋 Available refs:`, Object.keys(this.$refs).filter(k => k.startsWith('transcoder_')));
+                    
+                    if (this.$refs[transcoderRef] && this.$refs[transcoderRef][0]) {
+                        const transcoder = this.$refs[transcoderRef][0];
+                        debugLogger.info(`✅ Found transcoder component, state: ${transcoder.state}`);
+                        
+                        // The transcoder should start automatically, but we can force it
+                        if (transcoder.state === 'ready' && transcoder.startProcess) {
+                            debugLogger.info(`✅ Transcoder ready, starting process for ${queuedFile.fileName}`);
+                            transcoder.uploadChoice = 'transcode';
+                            transcoder.startProcess();
+                        } else if (transcoder.state === 'transcoding') {
+                            debugLogger.info(`⚡ Transcoder already transcoding ${queuedFile.fileName} - no action needed`);
+                        } else if (!transcoder.state || transcoder.state === 'loading') {
+                            debugLogger.info(`⏳ Transcoder not ready (state: ${transcoder.state}), waiting...`);
+                            // Wait for transcoder to be ready
+                            const checkReady = setInterval(() => {
+                                if (transcoder.state === 'ready') {
+                                    clearInterval(checkReady);
+                                    debugLogger.info(`✅ Transcoder now ready, starting process for ${queuedFile.fileName}`);
+                                    transcoder.uploadChoice = 'transcode';
+                                    transcoder.startProcess();
+                                }
+                            }, 100);
+                            
+                            // Stop checking after 10 seconds
+                            setTimeout(() => clearInterval(checkReady), 10000);
+                        }
+                    } else {
+                        debugLogger.error(`❌ Could not find transcoder ref: ${transcoderRef}`);
+                        // Try again after a longer delay
+                        setTimeout(() => {
+                            debugLogger.info(`🔄 Retrying to find transcoder ref: ${transcoderRef}`);
+                            if (this.$refs[transcoderRef] && this.$refs[transcoderRef][0]) {
+                                const transcoder = this.$refs[transcoderRef][0];
+                                if (transcoder.state === 'ready' && transcoder.startProcess) {
+                                    transcoder.uploadChoice = 'transcode';
+                                    transcoder.startProcess();
+                                }
+                            }
+                        }, 1000);
+                    }
+                }, 500);
             }
         },
         
@@ -5640,7 +5787,8 @@ export default {
             this.startVideoTranscoding(processingId);
         },
         
-        cancelProcessing(processingId) {
+        
+        deleteProcessingFile(processingId) {
             const index = this.processingFiles.findIndex(f => f.id === processingId);
             if (index === -1) return;
             
@@ -5736,7 +5884,7 @@ export default {
             });
             
             // Remove from processing queue
-            this.cancelProcessing(processingFile.id);
+            this.deleteProcessingFile(processingFile.id);
         },
     },
     computed: {
@@ -5745,6 +5893,10 @@ export default {
         },
         hasStorageNode() {
             return this.hasStorage();
+        },
+        hasUploadContent() {
+            // Check if there are external files dropped for upload
+            return this.droppedExternalFiles && this.droppedExternalFiles.files && this.droppedExternalFiles.files.length > 0;
         },
         currentFileCount() {
             return this.getFiles(this.selectedUser, this.currentFolderPath).length;
@@ -5938,6 +6090,23 @@ export default {
         this.init()
 
         // Start observing for video elements to setup HLS
+        
+        // Set up MutationObserver to watch UEController for content changes
+        const ueController = document.getElementById('UEController');
+        if (ueController) {
+            const observer = new MutationObserver((mutations) => {
+                // Check if UEController has children
+                this.uploadActive = ueController.children.length > 0;
+            });
+            
+            observer.observe(ueController, { 
+                childList: true, 
+                subtree: false 
+            });
+            
+            // Store observer for cleanup
+            this.ueControllerObserver = observer;
+        }
         this.videoObserver = this.initIpfsVideoSupport();
 
         // Add window mouseup handler for selection box (emergency escape)
@@ -5966,6 +6135,11 @@ export default {
         if (this.videoObserver) {
             this.videoObserver.disconnect();
             window._dluxVideoObserver = null;
+        }
+        
+        // Clean up UEController observer
+        if (this.ueControllerObserver) {
+            this.ueControllerObserver.disconnect();
         }
         
         // Clean up event listeners

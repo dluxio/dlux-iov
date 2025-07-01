@@ -16320,67 +16320,6 @@ pre {
   transition: opacity 0.3s ease;
 }
 
-/* Video Player Aspect Ratio Fixes */
-.video-container,
-.video-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-/* Maintain video aspect ratio */
-video {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-  display: block;
-}
-
-/* Container for video with aspect ratio preservation */
-.video-aspect-wrapper {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-}
-
-.video-aspect-wrapper video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* Preview video modal specific */
-.modal-body video,
-.preview-modal video {
-  width: 100%;
-  height: auto;
-  max-height: 70vh;
-  object-fit: contain;
-}
-
-/* Responsive video controls */
-@media (min-width: 768px) {
-  video {
-    max-height: 80vh;
-    object-fit: contain;
-  }
-}
-
-@media (min-width: 1200px) {
-  .video-container {
-    max-width: 1200px;
-  }
-}
-
-/* Prevent video controls from becoming too wide */
-video::-webkit-media-controls-panel {
-  max-width: 100%;
-}
-
-video::-webkit-media-controls-enclosure {
-  max-width: 100%;
+#UEController:empty {
+  display: none;
 }/*# sourceMappingURL=custom.css.map */

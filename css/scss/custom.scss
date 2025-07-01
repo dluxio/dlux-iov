@@ -4205,3 +4205,7 @@ pre {
 .transition-opacity {
   transition: opacity 0.3s ease;
 }
+
+#UEController:empty {
+  display: none;
+}

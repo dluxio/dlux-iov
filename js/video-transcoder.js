@@ -5,6 +5,9 @@ import { ffmpegManager } from './services/ffmpeg-manager.js';
 import { ProcessedFile, FileRoles } from './utils/processed-file.js';
 import debugLogger from './utils/debug-logger.js';
 
+// Global variable to track the currently active transcoding session
+let activeTranscodingSession = null;
+
 export default {
     name: 'VideoTranscoder',
     
@@ -370,7 +373,8 @@ export default {
             resolutionProgress: new Map(), // Track individual resolution progress
             availableResolutionsForUI: [], // Resolutions being processed for UI display
             currentResolutionHeight: null, // Track which resolution is currently being processed
-            showMultiProgress: false // Whether to show multi-resolution progress UI
+            showMultiProgress: false, // Whether to show multi-resolution progress UI
+            isFFmpegBusy: false // Track if FFmpeg is currently processing
         }
     },
     computed: {
@@ -528,47 +532,7 @@ export default {
                 this.performanceInfo = ffmpegManager.getPerformanceInfo();
                 debugLogger.info('🚀 FFmpeg Performance Info:', this.performanceInfo);
                 
-                // Subscribe to progress events
-                this.unsubscribeProgress = ffmpegManager.onProgress(({ progress, time }) => {
-                    if (this.state === 'transcoding') {
-                        const progressPercent = Math.round(progress * 100);
-                        
-                        // If we're showing multi-progress UI, update the current resolution
-                        if (this.showMultiProgress && this.currentResolutionHeight) {
-                            this.updateResolutionProgress(this.currentResolutionHeight, 'processing', progressPercent, `Processing... ${this.formatTime(time)}`);
-                            // Update overall progress from all resolutions
-                            this.transcodeProgress = this.getOverallProgress();
-                        } else {
-                            // Single progress bar mode
-                            this.transcodeProgress = progressPercent;
-                            // Preserve resolution info in the message if it exists
-                            const resolutionMatch = this.transcodeMessage.match(/Transcoding (\d+p) \((\d+)\/(\d+)\)/);
-                            if (resolutionMatch) {
-                                // Keep resolution info, just update time
-                                const [, resolution, current, total] = resolutionMatch;
-                                this.transcodeMessage = `Transcoding ${resolution} (${current}/${total}) - ${this.formatTime(time)}`;
-                            } else if (!this.transcodeMessage.includes('Transcoding')) {
-                                // Only use generic message if no resolution info
-                                this.transcodeMessage = `Processing... ${this.formatTime(time)}`;
-                            }
-                        }
-                        
-                        // Clear the fallback flag since real progress is working
-                        this.useProgressFallback = false;
-                        // Emit progress event for external listeners
-                        // Include resolution info when available
-                        if (this.currentResolutionHeight && this.availableResolutionsForUI.length > 1) {
-                            const currentIndex = this.getCurrentResolutionIndex();
-                            const total = this.availableResolutionsForUI.length;
-                            this.$emit('progress', {
-                                progress: this.transcodeProgress,
-                                message: `(${this.currentResolutionHeight}p - ${currentIndex}/${total})`
-                            });
-                        } else {
-                            this.$emit('progress', this.transcodeProgress);
-                        }
-                    }
-                });
+                // Don't subscribe to progress here - we'll do it in startProcess when we have a session ID
                 
                 this.state = 'ready';
                 return true;
@@ -602,10 +566,79 @@ export default {
             
             // Generate unique session ID for this transcoding operation
             this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            debugLogger.info(`🎬 Starting transcoding session: ${this.sessionId} for ${this.fileName}`);
+            
+            // Check if another session is active
+            if (activeTranscodingSession && activeTranscodingSession !== this.sessionId) {
+                debugLogger.warn(`⚠️ Another session ${activeTranscodingSession} is active, overriding with ${this.sessionId}`);
+            }
+            
+            // Set this as the active transcoding session
+            activeTranscodingSession = this.sessionId;
+            debugLogger.info(`✅ Set active transcoding session to: ${this.sessionId}`);
             
             // Initialize FFmpeg if needed
             const loaded = await this.initFFmpeg();
             if (!loaded) return;
+            
+            // Subscribe to progress events now that we have a session ID
+            debugLogger.info(`📡 Subscribing to progress events for session ${this.sessionId}`);
+            this.unsubscribeProgress = ffmpegManager.onProgress(({ progress, time }) => {
+                // Only process progress events if this is the active transcoding session
+                const isActiveSession = this.sessionId === activeTranscodingSession;
+                
+                if (!isActiveSession) {
+                    debugLogger.debug(`🚫 Progress event ignored for ${this.fileName} (session: ${this.sessionId}, active: ${activeTranscodingSession})`);
+                    return;
+                }
+                
+                if (this.state === 'transcoding' && this.sessionId && isActiveSession) {
+                    const progressPercent = Math.round(progress * 100);
+                    debugLogger.debug(`📊 Progress event for active session ${this.sessionId}: ${progressPercent}%`);
+                    
+                    // If we're showing multi-progress UI, update the current resolution
+                    if (this.showMultiProgress && this.currentResolutionHeight) {
+                        this.updateResolutionProgress(this.currentResolutionHeight, 'processing', progressPercent, `Processing... ${this.formatTime(time)}`);
+                        // Update overall progress from all resolutions
+                        this.transcodeProgress = this.getOverallProgress();
+                    } else {
+                        // Single progress bar mode
+                        this.transcodeProgress = progressPercent;
+                        // Preserve resolution info in the message if it exists
+                        const resolutionMatch = this.transcodeMessage.match(/Transcoding (\d+p) \((\d+)\/(\d+)\)/);
+                        if (resolutionMatch) {
+                            // Keep resolution info, just update time
+                            const [, resolution, current, total] = resolutionMatch;
+                            this.transcodeMessage = `Transcoding ${resolution} (${current}/${total}) - ${this.formatTime(time)}`;
+                        } else if (!this.transcodeMessage.includes('Transcoding')) {
+                            // Only use generic message if no resolution info
+                            this.transcodeMessage = `Processing... ${this.formatTime(time)}`;
+                        }
+                    }
+                    
+                    // Clear the fallback flag since real progress is working
+                    this.useProgressFallback = false;
+                    
+                    // Emit progress event for external listeners
+                    // Include resolution info when available
+                    if (this.currentResolutionHeight && this.availableResolutionsForUI.length > 1) {
+                        const currentIndex = this.getCurrentResolutionIndex();
+                        const total = this.availableResolutionsForUI.length;
+                        const progressData = {
+                            progress: this.transcodeProgress,
+                            message: `(${this.currentResolutionHeight}p - ${currentIndex}/${total})`
+                        };
+                        debugLogger.debug(`📤 Emitting progress with data:`, progressData);
+                        this.$emit('progress', progressData);
+                    } else {
+                        debugLogger.debug(`📤 Emitting progress: ${this.transcodeProgress}%`);
+                        this.$emit('progress', this.transcodeProgress);
+                    }
+                    
+                    // Debug logging to help track progress routing
+                    debugLogger.debug(`VideoTranscoder ${this.sessionId}: Progress ${this.transcodeProgress}% for ${this.fileName}`);
+                }
+            });
             
             // Start transcoding
             this.state = 'transcoding';
@@ -622,6 +655,14 @@ export default {
                 await this.createBlobUrls(result.files);
                 
                 this.state = 'complete';
+                
+                // Clear active session when complete
+                if (activeTranscodingSession === this.sessionId) {
+                    debugLogger.info(`🏁 Clearing active session ${this.sessionId} after successful completion`);
+                    activeTranscodingSession = null;
+                } else {
+                    debugLogger.warn(`⚠️ Session ${this.sessionId} completed but active session is ${activeTranscodingSession}`);
+                }
                 
                 // Auto-emit complete event in headless mode
                 if (this.headless) {
@@ -650,12 +691,36 @@ export default {
                 
                 this.errorMessage = errorMessage;
                 this.state = 'error';
+                
+                // Clear active session if it's ours (only on actual error)
+                if (activeTranscodingSession === this.sessionId) {
+                    debugLogger.info(`❌ Clearing active session ${this.sessionId} after error`);
+                    activeTranscodingSession = null;
+                }
+                
                 this.$emit('error', error);
+            } finally {
+                // Always reset FFmpeg busy flag
+                this.isFFmpegBusy = false;
+                
+                // Don't clear active session here - it's already handled in the success/error paths
+                if (this.state === 'error' && activeTranscodingSession === this.sessionId) {
+                    // Extra safety check - if we're still in error state and still active, clear it
+                    debugLogger.info(`🧹 Finally block: Clearing lingering active session ${this.sessionId}`);
+                    activeTranscodingSession = null;
+                }
             }
         },
         
         
         async transcodeVideo() {
+            // Check if FFmpeg is already busy
+            if (this.isFFmpegBusy) {
+                this.errorMessage = 'FFmpeg is already processing another video. Please wait.';
+                this.state = 'error';
+                return;
+            }
+            
             /**
              * CRITICAL: Two-Phase Upload System for HLS
              * 
@@ -690,12 +755,16 @@ export default {
             }
             const { fetchFile } = window.FFmpegUtil;
             
-            this.transcodeMessage = 'Reading video file...';
-            const inputData = await fetchFile(this.file);
-            const inputName = `${this.sessionId}_input.${this.getFileExtension(this.fileName)}`;
+            // Set FFmpeg as busy
+            this.isFFmpegBusy = true;
             
-            // Write input file with session-specific name
-            await ffmpegManager.writeFile(inputName, inputData);
+            try {
+                this.transcodeMessage = 'Reading video file...';
+                const inputData = await fetchFile(this.file);
+                const inputName = `${this.sessionId}_input.${this.getFileExtension(this.fileName)}`;
+                
+                // Write input file with session-specific name
+                await ffmpegManager.writeFile(inputName, inputData);
             
             // Determine video dimensions and available resolutions
             const availableResolutions = await this.determineAvailableResolutions(inputName);
@@ -933,6 +1002,12 @@ export default {
                 files: wrappedFiles,
                 m3u8File: this.outputFiles.masterM3u8
             };
+            } catch (error) {
+                // Re-throw the error to be handled by processVideo
+                throw error;
+            } finally {
+                // Reset busy flag is handled in processVideo
+            }
         },
         
         async determineQuality(inputFile) {
@@ -1007,7 +1082,13 @@ export default {
         
         cleanup() {
             // Clean up transcoded files and reset state
-            debugLogger.info('🧹 Cleaning up video transcoder state');
+            debugLogger.info(`🧹 Cleaning up video transcoder state for session: ${this.sessionId}`);
+            
+            // Unsubscribe from progress events first
+            if (this.unsubscribeProgress) {
+                this.unsubscribeProgress();
+                this.unsubscribeProgress = null;
+            }
             
             // Clear transcoded files
             this.transcodedFiles = [];
@@ -1032,6 +1113,14 @@ export default {
             this.errorMessage = '';
             this.showPreview = false;
             this.videoLoading = false;
+            
+            // Clear active session if it's ours
+            if (activeTranscodingSession === this.sessionId) {
+                debugLogger.info(`🧹 Clearing active session ${this.sessionId} during cleanup`);
+                activeTranscodingSession = null;
+            }
+            
+            // Clear session ID last
             this.sessionId = null;
             
             // Clean up HLS player if exists
@@ -1522,6 +1611,31 @@ export default {
             };
             return dimensions[height] || '1280x720';
         },
+        
+        checkAndStartIfReady() {
+            this.$nextTick(() => {
+                // Check parent's processing status
+                const parentProcessingFile = this.$parent?.processingFiles?.find(f => 
+                    f.file === this.file
+                );
+                
+                debugLogger.info(`📋 Parent processing file status: ${parentProcessingFile?.status || 'not found'} for ${this.fileName}`);
+                
+                // Only auto-start if status is 'transcoding', not 'queued'
+                if (!parentProcessingFile || parentProcessingFile.status === 'transcoding') {
+                    debugLogger.info(`✅ Auto-starting transcoder for ${this.fileName}`);
+                    this.initFFmpeg().then(() => {
+                        if (this.state === 'ready') {
+                            // Auto-start the transcoding process
+                            this.uploadChoice = 'transcode'; // Default choice for auto-start
+                            this.startProcess();
+                        }
+                    });
+                } else {
+                    debugLogger.info(`⏸️ VideoTranscoder: Not auto-starting ${this.fileName} because status is ${parentProcessingFile.status}`);
+                }
+            });
+        },
 
         // Build optimized FFmpeg command with performance presets
         buildOptimizedFFmpegCommand(inputName, resWidth, resHeight, bitrate, sessionId) {
@@ -1741,14 +1855,42 @@ export default {
     },
     
     mounted() {
+        debugLogger.info(`🎬 VideoTranscoder mounted for ${this.fileName} (autoStart: ${this.autoStart}, headless: ${this.headless})`);
+        
         if (this.autoStart) {
-            this.initFFmpeg().then(() => {
-                if (this.state === 'ready') {
-                    // Auto-start the transcoding process
-                    this.uploadChoice = 'transcode'; // Default choice for auto-start
-                    this.startProcess();
+            // For headless mode, wait a bit to ensure parent component has set up properly
+            if (this.headless) {
+                // Check and start if appropriate
+                this.checkAndStartIfReady();
+                
+                // Also watch for parent status changes if we're queued
+                if (this.$parent?.processingFiles) {
+                    const checkInterval = setInterval(() => {
+                        const parentFile = this.$parent.processingFiles.find(f => f.file === this.file);
+                        if (parentFile && parentFile.status === 'transcoding' && this.state === 'ready') {
+                            debugLogger.info(`🔄 Parent status changed to transcoding, starting ${this.fileName}`);
+                            clearInterval(checkInterval);
+                            this.uploadChoice = 'transcode';
+                            this.startProcess();
+                        } else if (!parentFile) {
+                            // File was removed from processing
+                            clearInterval(checkInterval);
+                        }
+                    }, 500);
+                    
+                    // Stop checking after 30 seconds
+                    setTimeout(() => clearInterval(checkInterval), 30000);
                 }
-            });
+            } else {
+                // Non-headless mode, start normally
+                this.initFFmpeg().then(() => {
+                    if (this.state === 'ready') {
+                        // Auto-start the transcoding process
+                        this.uploadChoice = 'transcode'; // Default choice for auto-start
+                        this.startProcess();
+                    }
+                });
+            }
         }
     },
     

@@ -26,7 +26,7 @@ export default {
 
     <!-- Teleported UI Elements -->
     <teleport :to="teleportref" v-if="droppedFiles.length > 0">
-        <div class="d-flex flex-column rounded p-2 border border-primary bg-blur-darkg mb-3">
+        <div class="d-flex flex-column rounded p-2 border border-primary bg-blur-darkg mb-3 vfs-scroll">
             <!-- File List -->
             <div v-if="droppedFiles.length > 0" class="mb-3">
                 <h5>Ready to Upload: {{ totalFileCount }} files (Total Size: {{ fancyBytes(totalSize) }})</h5>
@@ -36,7 +36,7 @@ export default {
                             <!-- File type icon -->
                             <i :class="getFileIcon(file)" class="me-2"></i>
                             <div>
-                                <div>{{ getFileName(file) }}</div>
+                                <div class="text-truncate" style="max-width: 200px;">{{ getFileName(file) }}</div>
                                 <small class="text-muted">{{ fancyBytes(getFileSize(file)) }}</small>
                                 <!-- Streaming badge for m3u8 files -->
                                 <span v-if="isStreamableVideo(file)" class="badge bg-success ms-2">

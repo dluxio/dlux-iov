@@ -795,11 +795,6 @@
                                                 <small class="text-muted d-block">Processing</small>
                                                 <strong class="small">{{detectedFileName}}</strong>
                                             </div>
-                                            <div v-if="detectedFileType === 'video' && ffmpegReady">
-                                                <button class="btn btn-sm btn-primary" @click="showTranscodeOptions = true">
-                                                    <i class="fa-solid fa-film"></i>
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
                                     
@@ -811,17 +806,6 @@
                                             @done="getSapi" :postpage="true" :post-type="'blog'"
                                             @add-to-post="handleSPKFileForAssets($event)"
                                             :update-url="false"></contract-vue>
-                                    </div>
-                                    
-                                    <!-- Contextual Video Tools -->
-                                    <div v-if="showTranscodeOptions && ffmpegReady" class="video-transcode-inline mt-3 p-3 bg-dark rounded">
-                                        <h6 class="mb-2">
-                                            <i class="fa-solid fa-film me-2"></i>Video Transcoding
-                                        </h6>
-                                        <p class="small text-muted">Convert to streaming format for better playback</p>
-                                        <button class="btn btn-sm btn-primary w-100" @click="transcode()">
-                                            Start Transcoding
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -1078,64 +1062,6 @@
                                     <div id="video-upload-area" class="mt-3"></div>
                                 </div>
 
-                                <!-- DEPRECATED: Old inline video transcoding UI - Replaced by upload-everywhere component -->
-                                <!-- Video Upload Interface -->
-                                <div v-if="false && (ffmpegReady || ffmpegSkipped)">
-                                    <div class="row">
-                                        <div class="col">
-                                            <h6><i class="fa-solid fa-video fa-fw me-1"></i>Transcode a Video</h6>
-                                            <p class="small text-muted mb-2">
-                                                Transcoding creates multiple quality versions of your video, giving
-                                                users the best
-                                                experience based on their bandwidth while enabling seamless seeking and
-                                                smooth playback.
-                                            </p>
-                                            <input type="file" @change="transcode" accept="video/*"
-                                                class="form-control mb-2">
-                                            <small class="text-muted">Select a video file to transcode into multiple
-                                                resolutions</small>
-                                        </div>
-                                        <div class="col-md-6" v-if="videosrc">
-                                            <h6><i class="fa-solid fa-play fa-fw me-1"></i>Preview</h6>
-                                            <video :src="videosrc" controls class="w-100"
-                                                style="max-height: 200px;"></video>
-                                        </div>
-                                    </div>
-
-                                    <!-- Status Message with Progress Bar -->
-                                    <div v-if="videoMsg && videoMsg !== 'Drop a video file to transcode'" class="mt-2">
-                                        <div class="alert alert-info">
-                                            <i class="fa-solid fa-info-circle fa-fw me-1"></i>{{videoMsg}}
-
-                                            <!-- Progress Bar for Transcoding -->
-                                            <div v-if="videoMsg.includes('Transcoding:') && videoMsg.includes('%')"
-                                                class="mt-2">
-                                                <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                                        role="progressbar"
-                                                        :style="`width: ${extractProgressPercent(videoMsg)}%`"
-                                                        :aria-valuenow="extractProgressPercent(videoMsg)"
-                                                        aria-valuemin="0" aria-valuemax="100">
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Progress Bar for Hashing -->
-                                            <div v-if="videoMsg.includes('Hashing') && hashingProgress.total > 0"
-                                                class="mt-2">
-                                                <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
-                                                        role="progressbar"
-                                                        :style="`width: ${hashingProgress.percentage}%`"
-                                                        :aria-valuenow="hashingProgress.percentage" aria-valuemin="0"
-                                                        aria-valuemax="100">
-                                                    </div>
-                                                </div>
-                                                <small class="text-muted">{{hashingProgress.currentFile}}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Upload Everywhere Component for Video Files -->
                                     <div class="alert alert-info bg-dark-1 border-info">
                                         <h6 class="mb-1">
@@ -1159,46 +1085,6 @@
                                     <!-- Upload area for teleporting -->
                                     <div id="video-upload-area" class="mt-3"></div>
 
-                                    <!-- Video Preview Section -->
-                                    <div v-if="transcodePreview.available" class="card mt-3">
-                                        <div class="card-header">
-                                            <h6 class="mb-0">
-                                                <i class="fa-solid fa-play fa-fw me-2"></i>
-                                                Transcode Preview
-                                            </h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Select Resolution:</label>
-                                                        <select v-model="transcodePreview.selectedResolution"
-                                                            @change="onPreviewResolutionChange()" class="form-select">
-                                                            <option v-for="res in transcodePreview.resolutions"
-                                                                :key="res.resolution" :value="res">
-                                                                {{res.resolution}}p
-                                                            </option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <video v-if="transcodePreview.videoSrc"
-                                                        :src="transcodePreview.videoSrc" controls class="w-100"
-                                                        style="max-height: 300px;"
-                                                        @loadstart="setupHLSPlayer($event.target)">
-                                                        Your browser does not support the video tag.
-                                                    </video>
-                                                </div>
-                                            </div>
-                                            <div class="mt-2">
-                                                <small class="text-muted">
-                                                    <i class="fa-solid fa-info-circle fa-fw me-1"></i>
-                                                    This preview shows the transcoded video at the selected resolution.
-                                                    Upload to make it available on IPFS.
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
