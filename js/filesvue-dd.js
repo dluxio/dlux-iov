@@ -57,8 +57,8 @@ export default {
         </div>
     </div>
     <!-- ACTION BAR -->
-    <div class="d-flex flex-column border-bottom border-white-50">
-    <small>Decentralized Storage For All Your Content</small>
+    <div class="d-flex flex-column justify-content-center border-bottom border-white-50">
+    <small class="text-center mb-1 text-muted">Decentralized Storage For All Your Content</small>
         <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
             <div class="d-flex flex-grow-1 flex-column">
                 <!-- Search -->
@@ -66,7 +66,7 @@ export default {
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                     <input @keyup="render()" @change="render()" @search="render()"
-                        class="ps-4 pe-4 rounded-pill form-control border-0 bg-dark text-info" type="search"
+                        class="ps-4 pe-5 rounded-pill form-control border-0 bg-dark text-info" type="search"
                         placeholder="Search Drive" v-model="filesSelect.search" style="height: 50px;">
                     <a class="position-absolute top-50 end-0 translate-middle-y pe-4 me-1" data-bs-toggle="collapse"
                         href="#choicesCollapse" role="button" aria-expanded="false" aria-controls="choicesCollapse">
@@ -214,22 +214,22 @@ export default {
            
             <div class="d-flex flex-wrap gap-1 w-100">
                 <div class="btn-group me-auto">
-                <button class="btn btn-primary bg-card"><upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
+                <button class="btn btn-secondary"><upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
                     :external-drop="droppedExternalFiles" @update:externalDrop="droppedExternalFiles = $event"
                     @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController"
                     :video-handling-mode="'external'" /></button>
-                <button class="btn btn-dark bg-card" @click="createNewFolder"><i
+                <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                <button class="btn btn-secondary" @click="createNewFolder"><i
                         class="fa-solid fa-folder-plus fa-fw"></i></button>
                 
                </div>
                <div class="btn-group mx-auto">
-               <button class="btn btn-secondary bg-card" @click="refreshDrive" title="Refresh Drive"><i
-                        class="fa-solid fa-sync fa-fw"></i></button>
-                <button class="btn btn-success bg-card" @click="saveChanges"
-                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save"></i></button>
-                <button class="btn btn-danger bg-card" @click="revertPendingChanges"
-                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo"></i></button>
-            </div>
+                    <button class="btn btn-secondary" @click="refreshDrive" title="Refresh Drive"><i class="fa-solid fa-sync fa-fw"></i></button>
+                    <button v-if="Object.keys(pendingChanges).length > 0" type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                    <button v-if="Object.keys(pendingChanges).length > 0" class="btn btn-secondary" @click="saveChanges"><i class="fa-solid fa-save"></i></button>
+                    <button v-if="Object.keys(pendingChanges).length > 0" type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                    <button v-if="Object.keys(pendingChanges).length > 0" class="btn btn-secondary" @click="revertPendingChanges"><i class="fa-solid fa-undo"></i></button>
+                </div>
                 <div class="btn-group ms-auto">
                     <button class="btn" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'"
                         @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
@@ -289,7 +289,36 @@ export default {
                 </div>
             </div>
         </div>
-        
+        <!-- breadcrumb -->
+    <div  class="breadcrumb d-flex align-items-center w-100 rounded-top bg-darkg mb-0">
+        <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
+            @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
+            @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
+            style="cursor: pointer; border-radius: 4px;">
+            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>IPFS Drive
+
+            <!-- Added: Search result count for root -->
+            <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts['']
+                }}</span>
+        </span>
+        <span class="mx-1" v-if="currentFolderPath">/</span>
+        <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
+            <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragover.prevent="dragOverBreadcrumb($event)"
+                @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
+                @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 mx-1"
+                style="cursor: pointer; border-radius: 4px;">{{ part }}
+                <!-- Added: Search result count for this folder level -->
+                <span
+                    v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0"
+                    class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index +
+                    1).join('/')] }}</span>
+            </span>
+            <span class="mx-1">/</span>
+        </template>
+    </div>
+        <!-- Search Results -->
         <div v-if="filesSelect.search" class="table-responsive vfs-scroll">
             <table class="table table-dark table-striped table-hover">
                 <thead>
@@ -405,55 +434,27 @@ export default {
             <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
             <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
-<!-- breadcrumb -->
-    <div class="breadcrumb d-flex align-items-center w-100 rounded-top bg-darkg mb-0">
-        <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
-            @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
-            @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
-            style="cursor: pointer; border-radius: 4px;">
-            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>IPFS Drive
-
-            <!-- Added: Search result count for root -->
-            <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts['']
-                }}</span>
-        </span>
-        <span class="mx-1" v-if="currentFolderPath">/</span>
-        <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-            <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))"
-                @dragover.prevent="dragOverBreadcrumb($event)"
-                @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
-                @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
-                @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 mx-1"
-                style="cursor: pointer; border-radius: 4px;">{{ part }}
-                <!-- Added: Search result count for this folder level -->
-                <span
-                    v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0"
-                    class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index +
-                    1).join('/')] }}</span>
-            </span>
-            <span class="mx-1">/</span>
-        </template>
-    </div>
+    
         <!-- Files -->
         <div v-if="!filesSelect.search" class="d-flex flex-grow-1 vfs-scroll-pass">
-            <div class="d-flex flex-grow-1 vfs-scroll" @contextmenu.prevent="showContextMenu($event, 'background', null)"
+            <div class="d-flex flex-grow-1 vfs-scroll rounded-bottom" @contextmenu.prevent="showContextMenu($event, 'background', null)"
                 @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)"
                 @mousedown="startSelectionBox($event)" @mousemove="updateSelectionBox($event)"
                 @mouseup="endSelectionBox" 
-                style="background-color:rgba(0, 0, 0, 0.2); position: relative; min-height: 200px; border: 2px solid rgba(0, 0, 0, 0); border-radius: 8px; padding: 10px;">
+                style="background-color:rgba(0, 0, 0, 0.2); position: relative; min-height: 200px; border: 2px solid rgba(0, 0, 0, 0);">
                  <!-- count folders files -->
-            <div class="d-flex align-items-center my-1 mx-1">
+            <div class="d-flex align-items-center justify-content-center mx-1">
                 <!-- Added: Search results explanation -->
-                <small v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0">
+                <small v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0 text-muted text-center">
                     <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ?
                     's' :
                     ''}}
                     <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and
                         subfolders</span>
                 </small>
-                <small v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}}
+                <small v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0 text-muted text-center">{{filesArray.length}}
                     File{{filesArray.length > 1 ? 's' : ''}}</small>
-                <small v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{
+                <small v-else class="mb-0 text-muted text-center">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{
                     currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</small>
             </div>
 

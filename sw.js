@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.3",
-  "generated": "2025-07-01T03:50:28Z",
+  "version": "2025.06.30.22",
+  "generated": "2025-07-01T05:44:35Z",
   "files": {
-    "/js/modalvue.js": {
-      "checksum": "e94da9d51e347d514b9d6182e5f52dda",
-      "size": 42661,
-      "priority": "important"
-    },
     "/js/model-viewer.min.js": {
       "checksum": "dd677b435b16f44e4ca08a9f354bac24",
       "size": 955555,
@@ -693,7 +688,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ebfc54e9b87e654d2b5c5cc48a851829",
+      "checksum": "4c61c4d4b820db15400289b6b02a1691",
       "size": 36523,
       "priority": "important"
     },
@@ -913,7 +908,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "e9c300b81570612bf94e591b9549ec43",
+      "checksum": "a9932f1104003f588b5d28eb94d3476a",
       "size": 7299,
       "priority": "important"
     },
@@ -1001,11 +996,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/playground/env_thumbs/checkerboard.png": {
-      "checksum": "1473de04fe511fef22cd990f317b5201",
-      "size": 106971,
-      "priority": "page-specific"
     },
     "/playground/env_thumbs/contact.png": {
       "checksum": "7901857a96f276920a9acc64d6a575fc",
@@ -1122,12 +1112,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
