@@ -588,13 +588,11 @@ export default {
                 const isActiveSession = this.sessionId === activeTranscodingSession;
                 
                 if (!isActiveSession) {
-                    debugLogger.debug(`🚫 Progress event ignored for ${this.fileName} (session: ${this.sessionId}, active: ${activeTranscodingSession})`);
                     return;
                 }
                 
                 if (this.state === 'transcoding' && this.sessionId && isActiveSession) {
                     const progressPercent = Math.round(progress * 100);
-                    debugLogger.debug(`📊 Progress event for active session ${this.sessionId}: ${progressPercent}%`);
                     
                     // If we're showing multi-progress UI, update the current resolution
                     if (this.showMultiProgress && this.currentResolutionHeight) {
@@ -628,15 +626,10 @@ export default {
                             progress: this.transcodeProgress,
                             message: `(${this.currentResolutionHeight}p - ${currentIndex}/${total})`
                         };
-                        debugLogger.debug(`📤 Emitting progress with data:`, progressData);
                         this.$emit('progress', progressData);
                     } else {
-                        debugLogger.debug(`📤 Emitting progress: ${this.transcodeProgress}%`);
                         this.$emit('progress', this.transcodeProgress);
                     }
-                    
-                    // Debug logging to help track progress routing
-                    debugLogger.debug(`VideoTranscoder ${this.sessionId}: Progress ${this.transcodeProgress}% for ${this.fileName}`);
                 }
             });
             
@@ -1619,11 +1612,8 @@ export default {
                     f.file === this.file
                 );
                 
-                debugLogger.info(`📋 Parent processing file status: ${parentProcessingFile?.status || 'not found'} for ${this.fileName}`);
-                
                 // Only auto-start if status is 'transcoding', not 'queued'
                 if (!parentProcessingFile || parentProcessingFile.status === 'transcoding') {
-                    debugLogger.info(`✅ Auto-starting transcoder for ${this.fileName}`);
                     this.initFFmpeg().then(() => {
                         if (this.state === 'ready') {
                             // Auto-start the transcoding process
@@ -1631,8 +1621,6 @@ export default {
                             this.startProcess();
                         }
                     });
-                } else {
-                    debugLogger.info(`⏸️ VideoTranscoder: Not auto-starting ${this.fileName} because status is ${parentProcessingFile.status}`);
                 }
             });
         },
@@ -1868,7 +1856,6 @@ export default {
                     const checkInterval = setInterval(() => {
                         const parentFile = this.$parent.processingFiles.find(f => f.file === this.file);
                         if (parentFile && parentFile.status === 'transcoding' && this.state === 'ready') {
-                            debugLogger.info(`🔄 Parent status changed to transcoding, starting ${this.fileName}`);
                             clearInterval(checkInterval);
                             this.uploadChoice = 'transcode';
                             this.startProcess();

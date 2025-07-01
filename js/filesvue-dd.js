@@ -5623,8 +5623,6 @@ export default {
                 return;
             }
             
-            debugLogger.info(`🎬 Request to start transcoding for: ${processingFile.fileName} (ID: ${processingId})`);
-            
             // Check if any other file is actively transcoding
             const activeTranscoding = this.processingFiles.find(f => 
                 f.id !== processingId && f.status === 'transcoding'
@@ -5635,7 +5633,6 @@ export default {
                 processingFile.status = 'queued';
                 processingFile.progress = 0;
                 debugLogger.info(`📋 Queuing ${processingFile.fileName} - waiting for ${activeTranscoding.fileName} to complete`);
-                debugLogger.info(`📊 Current queue status: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
                 return;
             }
             
@@ -5648,12 +5645,8 @@ export default {
         },
         
         handleProcessingProgress(processingId, progressData) {
-            debugLogger.debug(`📥 handleProcessingProgress called for ID: ${processingId} with data:`, progressData);
-            
             const processingFile = this.processingFiles.find(f => f.id === processingId);
             if (processingFile) {
-                const oldProgress = processingFile.progress;
-                
                 // Handle both number and object formats
                 if (typeof progressData === 'number') {
                     processingFile.progress = progressData;
@@ -5667,13 +5660,6 @@ export default {
                 }
                 
                 // Vue 3's reactivity should automatically detect these property changes
-                
-                // Debug logging to verify correct routing
-                if (oldProgress !== processingFile.progress) {
-                    debugLogger.debug(`📊 Progress update for ${processingFile.fileName} (ID: ${processingId}): ${oldProgress}% → ${processingFile.progress}%`);
-                }
-            } else {
-                debugLogger.warn(`⚠️ No processing file found for progress update - ID: ${processingId}`);
             }
         },
         
@@ -5687,8 +5673,7 @@ export default {
                 // Emit progress 100 to ensure UI updates
                 processingFile.progress = 100;
                 
-                debugLogger.info(`✅ Processing complete for: ${processingFile.fileName} (ID: ${processingId})`);
-                debugLogger.info(`📊 Queue status before cleanup: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
+                debugLogger.info(`✅ Processing complete for: ${processingFile.fileName}`);
                 
                 // Auto-move to ready section after a brief moment to show completion
                 setTimeout(() => {
@@ -5697,8 +5682,6 @@ export default {
                     // Start the next queued video if any
                     this.processNextQueuedVideo();
                 }, 500);
-            } else {
-                debugLogger.error(`❌ Cannot mark complete - no file found with ID: ${processingId}`);
             }
         },
         
@@ -5717,8 +5700,7 @@ export default {
             // Find the next queued video
             const queuedFile = this.processingFiles.find(f => f.status === 'queued');
             if (queuedFile) {
-                debugLogger.info(`🚀 Processing next queued video: ${queuedFile.fileName} (ID: ${queuedFile.id})`);
-                debugLogger.info(`📊 Queue status: ${this.processingFiles.map(f => `${f.fileName}:${f.status}`).join(', ')}`);
+                debugLogger.info(`🚀 Processing next queued video: ${queuedFile.fileName}`);
                 
                 // Reset status and start transcoding
                 queuedFile.status = 'transcoding';
@@ -5727,27 +5709,21 @@ export default {
                 // Give the transcoder time to initialize, then start
                 setTimeout(() => {
                     const transcoderRef = `transcoder_${queuedFile.id}`;
-                    debugLogger.info(`🔍 Looking for transcoder ref: ${transcoderRef}`);
-                    debugLogger.info(`📋 Available refs:`, Object.keys(this.$refs).filter(k => k.startsWith('transcoder_')));
                     
                     if (this.$refs[transcoderRef] && this.$refs[transcoderRef][0]) {
                         const transcoder = this.$refs[transcoderRef][0];
-                        debugLogger.info(`✅ Found transcoder component, state: ${transcoder.state}`);
                         
                         // The transcoder should start automatically, but we can force it
                         if (transcoder.state === 'ready' && transcoder.startProcess) {
-                            debugLogger.info(`✅ Transcoder ready, starting process for ${queuedFile.fileName}`);
                             transcoder.uploadChoice = 'transcode';
                             transcoder.startProcess();
                         } else if (transcoder.state === 'transcoding') {
-                            debugLogger.info(`⚡ Transcoder already transcoding ${queuedFile.fileName} - no action needed`);
+                            // Already transcoding - no action needed
                         } else if (!transcoder.state || transcoder.state === 'loading') {
-                            debugLogger.info(`⏳ Transcoder not ready (state: ${transcoder.state}), waiting...`);
                             // Wait for transcoder to be ready
                             const checkReady = setInterval(() => {
                                 if (transcoder.state === 'ready') {
                                     clearInterval(checkReady);
-                                    debugLogger.info(`✅ Transcoder now ready, starting process for ${queuedFile.fileName}`);
                                     transcoder.uploadChoice = 'transcode';
                                     transcoder.startProcess();
                                 }
@@ -5757,10 +5733,8 @@ export default {
                             setTimeout(() => clearInterval(checkReady), 10000);
                         }
                     } else {
-                        debugLogger.error(`❌ Could not find transcoder ref: ${transcoderRef}`);
                         // Try again after a longer delay
                         setTimeout(() => {
-                            debugLogger.info(`🔄 Retrying to find transcoder ref: ${transcoderRef}`);
                             if (this.$refs[transcoderRef] && this.$refs[transcoderRef][0]) {
                                 const transcoder = this.$refs[transcoderRef][0];
                                 if (transcoder.state === 'ready' && transcoder.startProcess) {

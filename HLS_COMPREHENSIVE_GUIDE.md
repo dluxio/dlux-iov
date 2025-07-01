@@ -59,9 +59,11 @@ https://ipfs.dlux.io/ipfs/QmHash456...?filename=720p_001.ts
 │           Video Transcoder Component                 │
 │         (js/video-transcoder.js)                    │
 │  - FFmpeg.wasm transcodes to HLS                   │
+│  - Manages session-based progress routing           │
 │  - Hashes all files during transcoding             │
 │  - Updates playlists with IPFS URLs                │
 │  - Wraps files with ProcessedFile metadata         │
+│  - Enforces singleton queue management              │
 └────────────────┬────────────────────────────────────┘
                  │
 ┌────────────────▼────────────────────────────────────┐
@@ -137,6 +139,8 @@ The modular video transcoder handles all HLS processing:
 - Hash all files during transcoding
 - Update playlists with IPFS URLs
 - Wrap files with metadata
+- Manage queue for sequential processing (FFmpeg singleton limitation)
+- Route progress events to correct video instance
 
 #### Critical Code Sections:
 
@@ -332,6 +336,36 @@ const hls = new Hls({
 **Problem:** Large segments timeout when loading
 **Solution:** Implement retry logic in IPFS loader
 
+### Issue 6: Progress Bar Routing for Multiple Videos
+**Problem:** Only first video's progress bar updates when multiple videos are queued
+**Root Cause:** FFmpeg singleton broadcasts progress to all instances
+**Solution:** Implement session-based progress filtering:
+```javascript
+// Global session tracking
+let activeTranscodingSession = null;
+
+// In startProcess() after session ID creation:
+this.unsubscribeProgress = ffmpegManager.onProgress(({ progress, time }) => {
+    const isActiveSession = this.sessionId === activeTranscodingSession;
+    if (!isActiveSession) {
+        return;
+    }
+    // Process progress events only for active session
+});
+```
+
+### Issue 7: Vue 3 Reactivity Issues
+**Problem:** `this.$set is not a function` error when updating progress
+**Solution:** Remove Vue 2 API calls, rely on Vue 3's automatic reactivity:
+```javascript
+// WRONG - Vue 2 pattern
+this.$set(this.processingFiles, index, processingFile);
+
+// CORRECT - Vue 3 pattern
+// Just update the object directly
+processingFile.progress = progressData;
+```
+
 ## Best Practices
 
 ### 1. Always Hash During Creation
@@ -367,6 +401,41 @@ file.cid = calculatedCID;
 
 ### 5. Never Modify Files After Hashing
 Once a file has been hashed and its CID calculated, never modify it. All modifications must happen before hashing.
+
+### 6. Handle FFmpeg Singleton Limitations
+```javascript
+// FFmpeg can only process one video at a time
+// Use global session tracking to ensure proper queue management
+let activeTranscodingSession = null;
+
+// When starting transcoding:
+if (activeTranscodingSession && activeTranscodingSession !== this.sessionId) {
+    // Another transcoding is active, wait or queue
+    return;
+}
+activeTranscodingSession = this.sessionId;
+
+// When transcoding completes or cancels:
+if (activeTranscodingSession === this.sessionId) {
+    activeTranscodingSession = null;
+}
+```
+
+### 7. Implement Session-Based Progress Routing
+```javascript
+// Subscribe to progress AFTER creating session ID
+startProcess() {
+    this.sessionId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Subscribe with session filtering
+    this.unsubscribeProgress = ffmpegManager.onProgress(({ progress, time }) => {
+        if (this.sessionId !== activeTranscodingSession) {
+            return; // Ignore if not active session
+        }
+        // Handle progress for this session only
+    });
+}
+```
 
 ## Debugging Guide
 
@@ -433,6 +502,9 @@ https://ipfs.dlux.io/ipfs/{CID}?filename={originalFileName}
 - Allow HLS.js to adapt based on bandwidth
 - Clean up HLS instances when not needed
 - Use IntersectionObserver for lazy loading
+- FFmpeg.wasm runs as singleton - process videos sequentially
+- Properly clean up progress subscriptions to prevent memory leaks
+- Session-based routing ensures correct progress display
 
 ### Security Considerations
 - Verify M3U8 content before parsing
@@ -450,8 +522,11 @@ The DLUX IOV HLS implementation is specifically designed for IPFS compatibility:
 4. **Use IPFS URL format** - `https://ipfs.dlux.io/ipfs/{CID}?filename={name}`
 5. **Pre-assign CIDs** - upload system respects existing CIDs
 6. **Wrap with metadata** - use ProcessedFile for proper handling
+7. **Manage FFmpeg singleton** - queue videos for sequential processing
+8. **Route progress correctly** - use session-based filtering for multiple videos
+9. **Vue 3 reactivity** - avoid Vue 2 patterns like `$set`
 
-This implementation ensures HLS content works correctly on IPFS by handling the unique requirements of content-addressed storage.
+This implementation ensures HLS content works correctly on IPFS by handling the unique requirements of content-addressed storage while properly managing concurrent video processing requests.
 
 ---
 *For questions or issues, please refer to the debugging guide above or check the console logs with debug mode enabled.*
