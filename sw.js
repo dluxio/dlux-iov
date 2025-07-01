@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.9",
-  "generated": "2025-07-01T18:42:33Z",
+  "version": "2025.07.01.12",
+  "generated": "2025-07-01T19:05:31Z",
   "files": {
-    "/js/postvue.js": {
-      "checksum": "9be19c09506b06d603390bce714d77b3",
-      "size": 17552,
-      "priority": "important"
-    },
     "/js/purify.min.js": {
       "checksum": "6d6eab0b233005b7be97072e5b9e1011",
       "size": 21490,
@@ -633,7 +628,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "f30af2898b07ac90a2d326850a631a37",
+      "checksum": "6d2aad81ed83f1a062aa43c0f5b158fd",
       "size": 36523,
       "priority": "important"
     },
@@ -853,7 +848,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "cda0b3f9d4f338ed87b260d23546cee9",
+      "checksum": "4ebb0631f5d347630d5842343b829851",
       "size": 7299,
       "priority": "important"
     },
@@ -942,11 +937,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/playground/env_thumbs/poison.png": {
-      "checksum": "7c827e4377e8848cbb2ad07162169409",
-      "size": 49060,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/starry.png": {
       "checksum": "91e683aa6abe9825904483052a0f2d69",
       "size": 213614,
@@ -1002,12 +992,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

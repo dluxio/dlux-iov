@@ -4090,7 +4090,7 @@ class DocumentManager {
             lastModified: now,
             modified: now,
             hasIndexedDBPersistence: false, // No persistence yet
-            creator: this.component.username || 'anonymous'
+            owner: this.component.username || 'anonymous'
         };
         this.component.fileType = 'temp'; // Temporary file type
         // isCollaborativeMode is now a computed property
@@ -4110,14 +4110,14 @@ class DocumentManager {
             // Load from localStorage metadata
             const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
 
-            // ✅ SECURITY FIX: Only show files created by the current authenticated user
+            // ✅ SECURITY FIX: Only show files owned by the current authenticated user
             const userFiles = files.filter(file => {
                 // If user is logged in, only show their files
                 if (this.component.username) {
-                    return file.creator === this.component.username;
+                    return file.owner === this.component.username;
                 }
                 // If not logged in, only show anonymous files
-                return !file.creator || file.creator === 'anonymous';
+                return !file.owner || file.owner === 'anonymous';
             });
 
             this.component.localFiles = userFiles.map(file => ({
@@ -4192,7 +4192,7 @@ class DocumentManager {
                                 modified: new Date().toISOString(),
                                 isOfflineFirst: true,
                                 hasLocalVersion: true,
-                                creator: this.component.username
+                                owner: this.component.username
                             });
                         }
                     }
@@ -4310,7 +4310,7 @@ class DocumentManager {
                 created: this.component.currentFile.created || new Date().toISOString(),
                 modified: new Date().toISOString(),
                 isOfflineFirst: true,
-                creator: this.component.username,
+                owner: this.component.username,
                 lastModified: new Date().toISOString()
             };
 
@@ -5297,7 +5297,7 @@ export default {
                     if (permissionLevel === 'no-access') {
                         console.log('🔍 Collaborative document with no-access - treating as readonly:', file.name, {
                             type: file.type,
-                            owner: file.owner || file.creator,
+                            owner: file.owner,
                             currentUser: this.username,
                             permissionLevel,
                             reasoning: 'Document in collaborative list implies at least readonly access'
@@ -5312,7 +5312,7 @@ export default {
                 if (!hasAccess) {
                     console.log('🚫 Hiding local file from table - no access:', file.name, {
                         type: file.type,
-                        owner: file.owner || file.creator,
+                        owner: file.owner,
                         currentUser: this.username,
                         permissionLevel
                     });
@@ -5340,8 +5340,8 @@ export default {
                         bValue = b.hasCloudVersion ? 'cloud' : 'local';
                         break;
                     case 'owner':
-                        aValue = (a.owner || a.creator || '').toLowerCase();
-                        bValue = (b.owner || b.creator || '').toLowerCase();
+                        aValue = (a.owner || '').toLowerCase();
+                        bValue = (b.owner || '').toLowerCase();
                         break;
                     case 'access':
                         aValue = this.getUserPermissionLevel(a);
@@ -6343,7 +6343,7 @@ export default {
 
             // ✅ LOCAL DOCUMENTS: Check ownership boundaries
             if (this.currentFile.type === 'local') {
-                const fileOwner = this.currentFile.creator || this.currentFile.author || this.currentFile.owner;
+                const fileOwner = this.currentFile.owner;
                 if (fileOwner && this.username && fileOwner !== this.username) {
                     return true; // Hide immediately - user boundary violation
                 }
@@ -6863,6 +6863,17 @@ export default {
                 // Clear all permission caches
                 this.clearAllPermissionCaches();
                 
+                // ✅ SECURITY: Clear local files immediately to prevent showing other users' files
+                this.localFiles = [];
+                
+                // ✅ VUE BEST PRACTICE: Use $nextTick to ensure username has propagated through reactivity
+                this.$nextTick(() => {
+                    // Refresh document lists to apply new user filter
+                    this.loadLocalFiles().catch(error => {
+                        console.warn('⚠️ Failed to refresh local files after user change:', error);
+                    });
+                });
+                
                 // ✅ SECURITY FIX: Re-validate permissions for ANY open document
                 if (this.currentFile) {
                     // Handle logout scenario (username becomes null/empty)
@@ -6879,14 +6890,25 @@ export default {
                     } else if (this.currentFile.type === 'local' || !this.currentFile.type) {
                         console.log('🔐 Re-validating ownership for current local document');
                         
-                        // Check if new user owns this local document
-                        const fileOwner = this.currentFile.creator || this.currentFile.author || this.currentFile.owner;
+                        // ✅ SECURITY: Check Y.js document owner, not just file object
+                        let fileOwner = this.currentFile.owner;
+                        
+                        // For local documents, the authoritative owner is in Y.js config map
+                        if (this.ydoc) {
+                            const config = this.ydoc.getMap('config');
+                            const yjsOwner = config.get('owner');
+                            if (yjsOwner) {
+                                fileOwner = yjsOwner;
+                            }
+                        }
+                        
                         const hasAccess = !fileOwner || fileOwner === newUsername;
                         
                         if (!hasAccess) {
                             console.log('🚫 Access denied - user does not own this local document', {
                                 fileOwner,
-                                currentUser: newUsername
+                                currentUser: newUsername,
+                                yjsDocument: !!this.ydoc
                             });
                             
                             // Handle access denial
@@ -7297,6 +7319,32 @@ export default {
                     }
                 }
 
+                // ✅ SIMPLE CHECK: If we have a local document, check if current user owns it
+                if (this.currentFile && this.currentFile.type === 'local') {
+                    const currentAuthUser = newHeaders ? newHeaders['x-account'] : null;
+                    
+                    // Get the document owner from Y.js
+                    let documentOwner = null;
+                    if (this.ydoc) {
+                        const config = this.ydoc.getMap('config');
+                        documentOwner = config.get('owner');
+                    }
+                    
+                    // If document has an owner and current user doesn't match, deny access
+                    if (documentOwner && documentOwner !== currentAuthUser) {
+                        console.log('🚫 User does not own this local document', {
+                            documentOwner,
+                            currentUser: currentAuthUser
+                        });
+                        this.$nextTick(async () => {
+                            if (!this.handlingAccessDenial) {
+                                await this.handleDocumentAccessDenied();
+                            }
+                        });
+                        return;
+                    }
+                }
+                
                 // Reset server auth failure when new auth headers are received
                 if (newHeaders && newHeaders['x-account']) {
                     this.serverAuthFailed = false;
@@ -7304,7 +7352,7 @@ export default {
                     // ✅ CRITICAL SECURITY: Check for user boundary violations FIRST
                     const newUser = newHeaders['x-account'];
                     const oldUser = oldHeaders ? oldHeaders['x-account'] : null;
-
+                    
                     if (oldUser && newUser && oldUser !== newUser) {
                         console.log('🚨 USER SWITCH: User authentication changed', {
                             from: oldUser,
@@ -7335,9 +7383,24 @@ export default {
 
                         // ✅ SECURITY: Immediate permission check for current document
                         if (this.currentFile && this.currentFile.type === 'local') {
-                            const localOwner = this.currentFile.creator || this.currentFile.author || this.currentFile.owner;
+                            // ✅ SECURITY: Check Y.js document owner, not just file object
+                            let localOwner = this.currentFile.owner;
+                            
+                            // For local documents, the authoritative owner is in Y.js config map
+                            if (this.ydoc) {
+                                const config = this.ydoc.getMap('config');
+                                const yjsOwner = config.get('owner');
+                                if (yjsOwner) {
+                                    localOwner = yjsOwner;
+                                }
+                            }
+                            
                             if (localOwner && localOwner !== newUser) {
-                                console.warn('🚫 Local document user boundary violation detected');
+                                console.warn('🚫 Local document user boundary violation detected', {
+                                    documentOwner: localOwner,
+                                    newUser: newUser,
+                                    yjsDocument: !!this.ydoc
+                                });
                                 // Trigger immediate access denial
                                 this.$nextTick(async () => {
                                     if (!this.handlingAccessDenial) {
@@ -8690,7 +8753,7 @@ export default {
                             name: documentId,
                             type: 'local',
                             isCollaborative: false,
-                            creator: this.username,
+                            owner: this.username,
                             created: new Date().toISOString(),
                             modified: new Date().toISOString(),
                             permlink: permlink,
@@ -8733,7 +8796,7 @@ export default {
                     name: documentName,
                     type: 'local',
                     isCollaborative: false,
-                    creator: this.username,
+                    owner: this.username,
                     created: new Date().toISOString(),
                     modified: new Date().toISOString(),
                     permlink: permlink,
@@ -11800,7 +11863,7 @@ export default {
                     'unknown';
 
                 const deniedUser = this.currentFile ?
-                    (this.currentFile.creator || this.currentFile.author || this.currentFile.owner) :
+                    this.currentFile.owner :
                     'unknown';
 
                 console.log('🚫 TipTap Security: Document access denied', {
@@ -15225,7 +15288,7 @@ export default {
                     created: new Date().toISOString(),
                     lastModified: new Date().toISOString(),
                     hasIndexedDBPersistence: true,
-                    creator: this.username // CRITICAL: Must set creator for file to appear in drafts
+                    owner: this.username // CRITICAL: Must set owner for file to appear in drafts
                 };
 
                 // Save to localStorage
@@ -15284,7 +15347,7 @@ export default {
                         created: new Date().toISOString(),
                         lastModified: new Date().toISOString(),
                         hasIndexedDBPersistence: false,
-                        creator: this.username
+                        owner: this.username
                     };
 
                     const localFiles = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
@@ -15395,7 +15458,7 @@ export default {
                                 modified: new Date().toISOString(),
                                 isOfflineFirst: true,
                                 hasLocalVersion: true,
-                                creator: this.username
+                                owner: this.username
                             };
                         } catch (error) {
                             console.warn('⚠️ Failed to extract from', dbInfo.name, ':', error.message);
@@ -15480,7 +15543,7 @@ export default {
 
                             if (file.type === 'local') {
                                 // ✅ LOCAL FILES: Fast ownership check
-                                const fileOwner = file.creator || file.author || file.owner;
+                                const fileOwner = file.owner;
                                 if (!this.username) {
                                     permissionLevel = !fileOwner ? 'owner' : 'no-access';
                                 } else {
@@ -18133,7 +18196,7 @@ export default {
 
             // For local documents - check creator/author
             if (file.type === 'local' || (!file.type && !file.owner && !file.permlink)) {
-                const fileOwner = file.creator || file.author;
+                const fileOwner = file.owner;
                 if (!fileOwner || fileOwner === this.username) return 'owner';
                 return 'no-access'; // No access to other users' local files
             }
@@ -18222,7 +18285,7 @@ export default {
             // ✅ STEP 1: Local documents - STRICT ownership check
             const isLocalFile = file.id && !file.owner && !file.permlink;
             if (isLocalFile) {
-                const fileOwner = file.creator || file.author || file.owner;
+                const fileOwner = file.owner;
                 debugInfo.checks.push({ step: 'local-ownership', fileOwner, currentUser: this.username });
 
                 // ✅ SECURITY: Local files require exact user match or anonymous ownership
@@ -19535,7 +19598,7 @@ export default {
                           
                           <!-- Owner -->
                           <td class="col-owner cursor-pointer" @click="canAccessDocument(file) && ((file.preferredType === 'collaborative' ? loadDocument(file) : loadLocalFile(file)), closeLoadModal())">
-                            <small class="text-muted">@{{ file.owner || file.creator || username }}</small>
+                            <small class="text-muted">@{{ file.owner || username }}</small>
                           </td>
                           
                           <!-- Access Level -->
