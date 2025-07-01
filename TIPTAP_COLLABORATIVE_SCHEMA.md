@@ -377,7 +377,7 @@ ydoc.getMap('config')                   // Document metadata & configuration
 ├── version: String                         // '1.0.0'
 ├── appVersion: String                      // 'dlux/1.0.0'
 ├── lastModified: String                    // ISO timestamp
-└── createdBy: String                       // Original creator
+└── owner: String                           // Document owner (Note: localStorage uses 'creator' for legacy compatibility)
 
 // Body content (Y.XmlFragment for TipTap editor)
 ydoc.get('body', Y.XmlFragment)         // Post body content (rich text)

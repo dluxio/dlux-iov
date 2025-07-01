@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.7",
-  "generated": "2025-07-01T17:43:58Z",
+  "version": "2025.07.01.11",
+  "generated": "2025-07-01T18:01:02Z",
   "files": {
-    "/js/onlyhash.js": {
-      "checksum": "ce57237fd9402179b8dfd8ef7aa1e1be",
-      "size": 707437,
-      "priority": "important"
-    },
     "/js/pop-frame.js": {
       "checksum": "679aed3281bcee07fb3942a985e7dbbe",
       "size": 904,
@@ -633,8 +628,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/spkdrive.js": {
-      "checksum": "7576c3cb11a5a92282ae8a3d4e44ec25",
-      "size": 84751,
+      "checksum": "37324d4db496991ac79b8f044b105520",
+      "size": 84653,
       "priority": "important"
     },
     "/js/spkvue.js": {
@@ -653,7 +648,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "4c9567084922434cfb2212428954b53d",
+      "checksum": "a23bf8f5a916657cfe552c181a321674",
       "size": 36523,
       "priority": "important"
     },
@@ -673,8 +668,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "607b77d35b3933cb898895812f5f004f",
-      "size": 725322,
+      "checksum": "7c6dad8ccec7bea9c58d1724e005da9f",
+      "size": 725418,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
@@ -873,7 +868,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "a87953eaa246afe5065286f1c290f027",
+      "checksum": "851e4bee1a2373b9a89b289cc2d23447",
       "size": 7299,
       "priority": "important"
     },
@@ -962,11 +957,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/playground/env_thumbs/japan.png": {
-      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
-      "size": 132145,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/moon.png": {
       "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
       "size": 211072,
@@ -1042,12 +1032,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

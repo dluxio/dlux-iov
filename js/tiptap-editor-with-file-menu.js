@@ -2666,7 +2666,7 @@ export default {
                 // ✅ SECURITY: Verify Y.js document ownership after loading from IndexedDB
                 if (this.ydoc) {
                     const config = this.ydoc.getMap('config');
-                    const docOwner = config.get('owner') || config.get('creator');
+                    const docOwner = config.get('owner');  // ✅ FIX: Removed creator fallback - creator is never written to Y.js
                     if (docOwner && docOwner !== this.username) {
                         console.error('❌ Y.js document ownership mismatch in loadLocalDocument', {
                             yjsOwner: docOwner,
@@ -3926,7 +3926,7 @@ export default {
                 // ✅ SECURITY: Verify Y.js document ownership after loading from IndexedDB
                 if (this.ydoc) {
                     const config = this.ydoc.getMap('config');
-                    const docOwner = config.get('owner') || config.get('creator');
+                    const docOwner = config.get('owner');  // ✅ FIX: Removed creator fallback - creator is never written to Y.js
                     if (docOwner && docOwner !== this.username) {
                         console.error('❌ Y.js document ownership mismatch', {
                             yjsOwner: docOwner,

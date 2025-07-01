@@ -27,10 +27,8 @@ export default {
     template: `
     <div class="d-flex flex-column vfs-scroll-pass">
     <!-- register account -->
-    <div v-if="saccountapi.pubKey == 'NA'">
-        <div class="mx-xl-5">
-            <div class="card p-1 p-md-3 mx-lg-5">
-                <div class="card-body text-center">
+    <div v-if="saccountapi.pubKey == 'NA'" class="d-flex flex-column flex-grow-1 justify-content-center p-3">
+
                 <div class="hero-subtitle mb-2">Activate File Storage</div>
                     <div class="fs-4 lead mb-2">
                         Register your account on SPK Network for free<br>to start pinning your files on IPFS
@@ -39,8 +37,7 @@ export default {
                         <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                     </button>
                 </div>
-            </div>
-        </div>
+
     </div>
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="vfs-scroll-pass d-flex flex-column square rounded-bottom p-0">

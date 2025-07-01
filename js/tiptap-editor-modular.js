@@ -398,6 +398,12 @@ class YjsDocumentManager {
                 config.set('version', '1.0');
                 config.set('documentType', 'collaborative');
                 config.set('lastModified', new Date().toISOString());
+                
+                // ✅ FIX: Set owner for all documents, not just collaborative
+                // This ensures consistency between local and collaborative documents
+                if (this.component?.username) {
+                    config.set('owner', this.component.username);
+                }
 
                 // ✅ SINGLE EDITOR: title moved to titleInput, permlink moved to metadata map
             }, 'schema-init'); // Origin tag to identify this transaction
@@ -18545,7 +18551,7 @@ export default {
                 // Check 6: Fallback to Y.js ownership (lower confidence, but still secure)
                 if (isCurrentDocument && this.ydoc) {
                     const config = this.ydoc.getMap('config');
-                    const docOwner = config.get('owner') || config.get('creator');
+                    const docOwner = config.get('owner');  // ✅ FIX: Removed creator fallback - creator is never written to Y.js
                     debugInfo.checks.push({ step: 'yjs-fallback', docOwner });
 
                     if (docOwner === this.username) {
