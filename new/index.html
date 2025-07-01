@@ -804,7 +804,7 @@
                                         <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                             :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                             :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                            @done="getSapi" :postpage="true" :post-type="'blog'"
+                                            @done="getSapi" :postpage="true" :post-type="'blog'" class="vfs-scroll-pass"
                                             @add-to-post="handleSPKFileForAssets($event)"
                                             :update-url="false"></contract-vue>
                                     </div>

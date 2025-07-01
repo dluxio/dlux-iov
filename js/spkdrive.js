@@ -24,21 +24,20 @@ export default {
         "upload-everywhere": UploadEverywhere,
         "contracts-vue": ContractsModal,
     },
-    template: `
-    <div class="d-flex flex-column vfs-scroll-pass">
+    template: `<div class="d-flex flex-column vfs-scroll-pass">
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'" class="d-flex flex-column flex-grow-1 justify-content-center p-3">
-
-                <div class="hero-subtitle mb-2">Activate File Storage</div>
-                    <div class="fs-4 lead mb-2">
-                        Register your account on SPK Network for free<br>to start pinning your files on IPFS
-                    </div>
-                    <button type="button" class="btn btn-primary mt-2" @click="updatePubkey()">
-                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
-                    </button>
-                </div>
-
+        <div>
+            <div class="hero-subtitle mb-2">Activate File Storage</div>
+            <div class="fs-4 lead mb-2">
+                Register your account on SPK Network for free<br>to start pinning your files on IPFS
+            </div>
+            <button type="button" class="btn btn-primary mt-2" @click="updatePubkey()">
+                <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
+            </button>
+        </div>
     </div>
+
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="vfs-scroll-pass d-flex flex-column square rounded-bottom p-0">
         <!-- top menu -->
@@ -141,7 +140,8 @@ export default {
                     <p class="lead mb-1" v-if="!nodeview">
                         Click <a class="btn btn-sm btn-primary no-decoration small" style="font-size: 0.6em;"
                             role="button" data-bs-toggle="tab" href="#contractsTab"><i
-                                class="fa-solid fa-list fa-fw me-1"></i>Contracts Tab
+                                class="fa-solid fa-list fa-fw me-1"></i>Contracts
+                            Tab
                         </a> to upload files
                     </p>
                 </div>
@@ -163,7 +163,7 @@ export default {
         </div>
         <!-- file system view -->
         <div v-if="!cc" class="vfs-scroll-pass">
-            
+
 
             <!-- no files -->
             <div v-show="!contracts.length">
@@ -198,16 +198,14 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center vfs-scroll-pass">
-                <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
+                <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account"
+                    :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
-                    @update-contract="handleUpdateContract($event)"
-                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"
-                    :file-slots="fileSlots"
-                    @set-logo="handleFileSlot('logo', $event)"
-                    @set-featured="handleFileSlot('featured', $event)"
-                    @set-banner="handleFileSlot('banner', $event)"
-                    @set-wrapped="handleFileSlot('wrapped', $event)"
-                    :update-url="updateUrl"></files-vue>
+                    @update-contract="handleUpdateContract($event)" @tosign="sendIt($event)" :signedtx="signedtx"
+                    :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"
+                    :file-slots="fileSlots" @set-logo="handleFileSlot('logo', $event)"
+                    @set-featured="handleFileSlot('featured', $event)" @set-banner="handleFileSlot('banner', $event)"
+                    @set-wrapped="handleFileSlot('wrapped', $event)" :update-url="updateUrl"></files-vue>
             </div>
         </div>
     </div>
@@ -239,8 +237,7 @@ export default {
             </div>
         </div>
     </teleport>
-</div>
-`,
+</div>`,
     props: {
         signedtx: Array,
         account: {
