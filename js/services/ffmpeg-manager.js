@@ -33,9 +33,13 @@ class FFmpegManager {
     }
     
     // Load FFmpeg (idempotent - safe to call multiple times)
-    async load() {
-        // If already loaded, return immediately
+    async load(useMultiThreaded = null) {
+        // If already loaded with different threading mode, warn but return existing
         if (this.loaded) {
+            const requestedMT = useMultiThreaded !== null ? useMultiThreaded : this.supportsSharedArrayBuffer;
+            if (requestedMT !== this.isMultiThreaded) {
+                console.warn(`FFmpeg Manager: Already loaded with ${this.isMultiThreaded ? 'multi-threaded' : 'single-threaded'} mode, cannot change to ${requestedMT ? 'multi-threaded' : 'single-threaded'} mode without page reload`);
+            }
             return this.ffmpeg;
         }
         
@@ -43,6 +47,9 @@ class FFmpegManager {
         if (this.loading && this.loadPromise) {
             return this.loadPromise;
         }
+        
+        // Always use multi-threaded version if supported
+        this.isMultiThreaded = this.supportsSharedArrayBuffer;
         
         // Start loading
         this.loading = true;

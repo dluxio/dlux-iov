@@ -234,7 +234,7 @@
 .spk-sidebar {
   position: sticky;
   top: 80px; /* Account for navbar */
-  height: calc(100vh - 100px);
+  height: calc(100vh - 110px);
 }
 
 .spk-panel {

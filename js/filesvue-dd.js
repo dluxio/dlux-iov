@@ -57,8 +57,8 @@ export default {
         </div>
     </div>
     <!-- ACTION BAR -->
-    <div class="d-flex border-bottom border-white-50">
-
+    <div class="d-flex flex-column border-bottom border-white-50">
+    <small>Decentralized Storage For All Your Content</small>
         <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
             <div class="d-flex flex-grow-1 flex-column">
                 <!-- Search -->
@@ -67,10 +67,14 @@ export default {
                             class="fa-solid fa-magnifying-glass fa-fw"></i></span>
                     <input @keyup="render()" @change="render()" @search="render()"
                         class="ps-4 pe-4 rounded-pill form-control border-0 bg-dark text-info" type="search"
-                        placeholder="Search in Drive" v-model="filesSelect.search" style="height: 50px;">
-                    <a class="position-absolute top-50 end-0 translate-middle-y pe-2" data-bs-toggle="collapse"
+                        placeholder="Search Drive" v-model="filesSelect.search" style="height: 50px;">
+                    <a class="position-absolute top-50 end-0 translate-middle-y pe-4 me-1" data-bs-toggle="collapse"
                         href="#choicesCollapse" role="button" aria-expanded="false" aria-controls="choicesCollapse">
                         <i class="fa-solid fa-sliders fa-fw"></i>
+                    </a>
+                     <a class="position-absolute top-50 end-0 translate-middle-y pe-2 ms-1" data-bs-toggle="modal"
+                    data-bs-target="#contractsModal" role="button">
+                        <i class="fa-solid fa-chart-pie fa-fw"></i>
                     </a>
                 </div>
                 <div class="collapse" id="choicesCollapse">
@@ -88,7 +92,7 @@ export default {
                 </div>
             </div>
 
-            <div class="d-flex mb-1 flex-wrap align-items-center">
+            <div class="d-flex mb-1 flex-wrap align-items-center d-none">
                 <!-- storage widget -->
                 <a class="ms-auto d-flex align-items-center btn btn-dark" data-bs-toggle="modal"
                     data-bs-target="#contractsModal">
@@ -201,79 +205,43 @@ export default {
         </div>
 
     </div>
-    <!-- breadcrumb -->
-    <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
-        <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
-            @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
-            @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
-            style="cursor: pointer; border-radius: 4px;">
-            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>My Drive
-
-            <!-- Added: Search result count for root -->
-            <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts['']
-                }}</span>
-        </span>
-        <span class="mx-1" v-if="currentFolderPath">/</span>
-        <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-            <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))"
-                @dragover.prevent="dragOverBreadcrumb($event)"
-                @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
-                @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
-                @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 mx-1"
-                style="cursor: pointer; border-radius: 4px;">{{ part }}
-                <!-- Added: Search result count for this folder level -->
-                <span
-                    v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0"
-                    class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index +
-                    1).join('/')] }}</span>
-            </span>
-            <span class="mx-1">/</span>
-        </template>
-    </div>
+    
     <!-- Filesystem View -->
     <div class="d-flex flex-column flex-grow-1 flex-wrap vfs-scroll-pass">
         <h3 class="d-none">@{{ selectedUser }}</h3>
 
-        <div class="d-flex flex-wrap justify-content-end w-100 my-2">
-            <!-- count folders files -->
-            <div class="d-flex align-items-center my-1 mx-1">
-                <!-- Added: Search results explanation -->
-                <h5 v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0">
-                    <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ?
-                    's' :
-                    ''}}
-                    <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and
-                        subfolders</span>
-                </h5>
-                <h5 v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}}
-                    File{{filesArray.length > 1 ? 's' : ''}}</h5>
-                <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{
-                    currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
-            </div>
-            <div class="d-flex flex-wrap ms-auto">
-                <upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
+        <div class="d-flex flex-wrap w-100 my-2">
+           
+            <div class="d-flex flex-wrap gap-1 w-100">
+                <div class="btn-group me-auto">
+                <button class="btn btn-primary bg-card"><upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
                     :external-drop="droppedExternalFiles" @update:externalDrop="droppedExternalFiles = $event"
                     @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController"
-                    :video-handling-mode="'external'" />
-                <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i
-                        class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
-                <button class="btn btn-outline-secondary btn-sm ms-1" @click="refreshDrive" title="Refresh Drive"><i
+                    :video-handling-mode="'external'" /></button>
+                <button class="btn btn-dark bg-card" @click="createNewFolder"><i
+                        class="fa-solid fa-folder-plus fa-fw"></i></button>
+                
+               </div>
+               <div class="btn-group mx-auto">
+               <button class="btn btn-secondary bg-card" @click="refreshDrive" title="Refresh Drive"><i
                         class="fa-solid fa-sync fa-fw"></i></button>
-                <button class="btn btn-success btn-sm ms-2" @click="saveChanges"
-                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
-                <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges"
-                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
-                <div class="btn-group ms-2">
-                    <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'"
+                <button class="btn btn-success bg-card" @click="saveChanges"
+                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save"></i></button>
+                <button class="btn btn-danger bg-card" @click="revertPendingChanges"
+                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo"></i></button>
+            </div>
+                <div class="btn-group ms-auto">
+                    <button class="btn" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'"
                         @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
-                    <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'"
+                    <button class="btn" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'"
                         @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
                 </div>
-            </div>
+
+                </div>
         </div>
         
         <!-- Video Processing Section -->
-        <div v-if="processingFiles.length > 0" class="mb-3 border-bottom pb-3 vfs-scroll-pass">
+        <div v-if="processingFiles.length > 0" class="mb-3 border-bottom pb-3 vfs-scroll-pass" style="height: 400px">
             <h5 class="mb-2">
                 <i class="fa-solid fa-gear fa-spin me-2"></i>
                 Processing Files
@@ -297,7 +265,10 @@ export default {
                                          :style="'width: ' + pFile.progress + '%'">
                                     </div>
                                 </div>
-                                <small class="text-muted">Transcoding... {{ pFile.progress }}%</small>
+                                <small class="text-muted">
+                                    Transcoding... {{ pFile.progress }}%
+                                    <span v-if="pFile.message" class="ms-1">{{ pFile.message }}</span>
+                                </small>
                             </div>
                             
                             <!-- Failed State -->
@@ -424,14 +395,45 @@ export default {
                 </tbody>
             </table>
         </div>
+
         <!-- Upload Everywhere Controller -->
         <div id="UEController"></div>
+
         <!-- Warning Box for Trash Folder -->
         <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2"
             role="alert">
             <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
             <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
+<!-- breadcrumb -->
+    <div class="breadcrumb d-flex align-items-center w-100 rounded-top bg-darkg mb-0">
+        <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
+            @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
+            @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
+            style="cursor: pointer; border-radius: 4px;">
+            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>IPFS Drive
+
+            <!-- Added: Search result count for root -->
+            <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts['']
+                }}</span>
+        </span>
+        <span class="mx-1" v-if="currentFolderPath">/</span>
+        <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
+            <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragover.prevent="dragOverBreadcrumb($event)"
+                @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
+                @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 mx-1"
+                style="cursor: pointer; border-radius: 4px;">{{ part }}
+                <!-- Added: Search result count for this folder level -->
+                <span
+                    v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0"
+                    class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index +
+                    1).join('/')] }}</span>
+            </span>
+            <span class="mx-1">/</span>
+        </template>
+    </div>
         <!-- Files -->
         <div v-if="!filesSelect.search" class="d-flex flex-grow-1 vfs-scroll-pass">
             <div class="d-flex flex-grow-1 vfs-scroll" @contextmenu.prevent="showContextMenu($event, 'background', null)"
@@ -439,7 +441,21 @@ export default {
                 @mousedown="startSelectionBox($event)" @mousemove="updateSelectionBox($event)"
                 @mouseup="endSelectionBox" 
                 style="background-color:rgba(0, 0, 0, 0.2); position: relative; min-height: 200px; border: 2px solid rgba(0, 0, 0, 0); border-radius: 8px; padding: 10px;">
-                <!-- Remove the template-based selection box overlay -->
+                 <!-- count folders files -->
+            <div class="d-flex align-items-center my-1 mx-1">
+                <!-- Added: Search results explanation -->
+                <small v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0">
+                    <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ?
+                    's' :
+                    ''}}
+                    <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and
+                        subfolders</span>
+                </small>
+                <small v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}}
+                    File{{filesArray.length > 1 ? 's' : ''}}</small>
+                <small v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{
+                    currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</small>
+            </div>
 
                 <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap">
                     <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path"
@@ -5491,6 +5507,7 @@ export default {
         
         // New video processing methods
         handleVideoChoice(choice) {
+            
             // Get current video from queue
             const video = this.pendingVideoFiles.shift();
             
@@ -5565,10 +5582,20 @@ export default {
             // Events will be handled by the handlers below
         },
         
-        handleProcessingProgress(processingId, progress) {
+        handleProcessingProgress(processingId, progressData) {
             const processingFile = this.processingFiles.find(f => f.id === processingId);
             if (processingFile) {
-                processingFile.progress = progress;
+                // Handle both number and object formats
+                if (typeof progressData === 'number') {
+                    processingFile.progress = progressData;
+                } else if (typeof progressData === 'object' && progressData !== null) {
+                    if (typeof progressData.progress === 'number') {
+                        processingFile.progress = progressData.progress;
+                    }
+                    if (typeof progressData.message === 'string') {
+                        processingFile.message = progressData.message;
+                    }
+                }
             }
         },
         

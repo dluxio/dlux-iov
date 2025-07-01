@@ -19,10 +19,8 @@ export default {
       @drop="handleDrop"
       @dragover.prevent
       @click="triggerFileInput"
-      class="drop-area btn btn-sm btn-dark me-2 border border-light border-2 border-dashed"
-      style="border-style: dashed !important;"
-    >
-      <i class="fa-solid fa-cloud-arrow-up fa-fw me-1"></i>Upload Files
+      class="drop-area">
+      <i class="fa-solid fa-file-circle-plus fa-fw"></i>
     </div>
     <input type="file" multiple ref="fileInput" @change="handleFileSelect" style="display: none;">
 
@@ -194,11 +192,25 @@ export default {
             <button type="button" class="btn-close btn-close-white" @click="closeVideoTranscoder"></button>
           </div>
           
+          <!-- Transcoding Options -->
+          <div v-if="videoToTranscode && !videoTranscoding" class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" v-model="useParallelProcessing" id="parallelProcessing">
+              <label class="form-check-label" for="parallelProcessing">
+                Use Parallel Processing
+              </label>
+            </div>
+            <small class="form-text text-muted">
+              Process multiple resolutions simultaneously for faster transcoding (experimental)
+            </small>
+          </div>
+          
           <video-transcoder
             v-if="videoToTranscode"
             :file="videoToTranscode.file"
             :file-name="videoToTranscode.fileName"
             :file-size="videoToTranscode.fileSize"
+            :use-parallel-processing="useParallelProcessing"
             @complete="handleTranscodeComplete"
             @skip="skipVideoTranscoding"
             @cancel="closeVideoTranscoder"
@@ -298,6 +310,7 @@ export default {
             hlsInstance: null,
             blobUrls: {}, // Store blob URLs for transcoded files
             fileMetadata: {}, // Store metadata for auxiliary file filtering
+            useParallelProcessing: true, // Default to parallel processing
         };
     },
     computed: {

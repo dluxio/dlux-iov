@@ -97,17 +97,6 @@ export default {
                 </small>
             </div>
 
-            <div v-if="uploadChoice !== 'original'" class="mb-3">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" v-model="useParallelProcessing" id="parallelProcessing">
-                    <label class="form-check-label" for="parallelProcessing">
-                        Parallel Processing (Experimental)
-                    </label>
-                </div>
-                <small class="form-text text-muted">
-                    Process multiple resolutions simultaneously for faster transcoding
-                </small>
-            </div>
 
             <div class="d-flex gap-2">
                 <button class="btn btn-primary" @click="startProcess" :disabled="!uploadChoice">
@@ -120,6 +109,9 @@ export default {
         </div>
 
         <!-- Transcoding Progress -->
+        <!-- WARNING: This UI is NOT VISIBLE when component is used in headless mode! -->
+        <!-- filesvue-dd.js uses this component with :headless="true" so these UI updates are NOT shown to users -->
+        <!-- To update user-visible progress, you must modify the UI in filesvue-dd.js, NOT here! -->
         <div v-else-if="state === 'transcoding'" class="transcoding-progress">
             <h5>Transcoding Video</h5>
             
@@ -127,20 +119,23 @@ export default {
             <div class="mb-3">
                 <div class="d-flex justify-content-between mb-1">
                     <span>{{ transcodeMessage }}</span>
-                    <span v-if="!showMultiProgress">{{ transcodeProgress }}%</span>
-                    <span v-else>{{ getOverallProgress() }}% ({{ getCompletedResolutions() }}/{{ availableResolutionsForUI.length }})</span>
+                    <span>{{ transcodeProgress }}%</span>
+                </div>
+                <!-- Additional info line when processing multiple resolutions -->
+                <div v-if="availableResolutionsForUI.length > 1 && currentResolutionHeight" class="text-muted small">
+                    Processing resolution {{ getCurrentResolutionIndex() }} of {{ availableResolutionsForUI.length }}
                 </div>
                 
-                <!-- Single progress bar for single resolution or when multi-progress is disabled -->
-                <div v-if="!showMultiProgress" class="progress mb-2">
+                <!-- Always show single progress bar -->
+                <div class="progress mb-2">
                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                          :style="'width: ' + transcodeProgress + '%'"
                          role="progressbar">
                     </div>
                 </div>
                 
-                <!-- Individual resolution progress bars -->
-                <div v-else class="resolution-progress-container">
+                <!-- Individual resolution progress bars (disabled for now) -->
+                <div v-if="false && showMultiProgress" class="resolution-progress-container">
                     <div v-for="resolution in availableResolutionsForUI" 
                          :key="resolution.height" 
                          class="resolution-progress-item mb-2"
@@ -170,8 +165,13 @@ export default {
             <p class="text-muted small">
                 <i class="fa-solid fa-info-circle me-1"></i>
                 <span v-if="!showMultiProgress">This may take several minutes depending on video size and quality</span>
-                <span v-else>Processing {{ availableResolutionsForUI.length }} resolutions {{ useParallelProcessing ? 'in parallel' : 'sequentially' }}{{ performanceInfo?.isMultiThreaded ? ' with multi-threading' : '' }}</span>
+                <span v-else>Processing {{ availableResolutionsForUI.length }} resolutions sequentially{{ performanceInfo?.isMultiThreaded ? ' with multi-threading' : '' }}</span>
             </p>
+            
+            <!-- Debug info -->
+            <div v-if="false" class="text-muted small">
+                Debug: showMultiProgress={{ showMultiProgress }}, resolutions={{ availableResolutionsForUI.length }}
+            </div>
         </div>
 
         <!-- Success State -->
@@ -349,7 +349,6 @@ export default {
             selectedQuality: 'auto',
             encodingSpeed: 'balanced',
             qualityMode: 'bitrate',
-            useParallelProcessing: false,
             errorMessage: '',
             outputFiles: {
                 m3u8: null,
@@ -368,8 +367,6 @@ export default {
             videoLoading: false,
             sessionId: null, // Unique ID for this transcoding session
             performanceInfo: null, // FFmpeg performance information
-            workers: [], // Web workers for parallel processing
-            workerResults: new Map(), // Store results from parallel workers
             resolutionProgress: new Map(), // Track individual resolution progress
             availableResolutionsForUI: [], // Resolutions being processed for UI display
             currentResolutionHeight: null, // Track which resolution is currently being processed
@@ -401,6 +398,19 @@ export default {
                 const progress = this.resolutionProgress.get(resolution.height);
                 return progress?.status === 'completed';
             }).length;
+        },
+        
+        getCurrentResolutionIndex() {
+            if (!this.currentResolutionHeight || this.availableResolutionsForUI.length === 0) {
+                return 1;
+            }
+            
+            const currentIndex = this.availableResolutionsForUI.findIndex(
+                res => res.height === this.currentResolutionHeight
+            );
+            
+            // Return 1-based index for display
+            return currentIndex >= 0 ? currentIndex + 1 : 1;
         },
 
         getResolutionProgress(height) {
@@ -482,6 +492,9 @@ export default {
             });
             
             debugLogger.debug(`📊 ${height}p: ${status} - ${progress}% - ${message}`);
+            
+            // Force Vue to re-render when Map changes
+            this.$forceUpdate();
         },
         async initFFmpeg() {
             if (ffmpegManager.isLoaded()) {
@@ -504,7 +517,7 @@ export default {
                     }
                 }, 500);
                 
-                // Load FFmpeg using the manager
+                // Load FFmpeg using the manager (auto-detects best option)
                 await ffmpegManager.load();
                 
                 clearInterval(progressInterval);
@@ -528,13 +541,32 @@ export default {
                         } else {
                             // Single progress bar mode
                             this.transcodeProgress = progressPercent;
-                            this.transcodeMessage = `Processing... ${this.formatTime(time)}`;
+                            // Preserve resolution info in the message if it exists
+                            const resolutionMatch = this.transcodeMessage.match(/Transcoding (\d+p) \((\d+)\/(\d+)\)/);
+                            if (resolutionMatch) {
+                                // Keep resolution info, just update time
+                                const [, resolution, current, total] = resolutionMatch;
+                                this.transcodeMessage = `Transcoding ${resolution} (${current}/${total}) - ${this.formatTime(time)}`;
+                            } else if (!this.transcodeMessage.includes('Transcoding')) {
+                                // Only use generic message if no resolution info
+                                this.transcodeMessage = `Processing... ${this.formatTime(time)}`;
+                            }
                         }
                         
                         // Clear the fallback flag since real progress is working
                         this.useProgressFallback = false;
                         // Emit progress event for external listeners
-                        this.$emit('progress', this.transcodeProgress);
+                        // Include resolution info when available
+                        if (this.currentResolutionHeight && this.availableResolutionsForUI.length > 1) {
+                            const currentIndex = this.getCurrentResolutionIndex();
+                            const total = this.availableResolutionsForUI.length;
+                            this.$emit('progress', {
+                                progress: this.transcodeProgress,
+                                message: `(${this.currentResolutionHeight}p - ${currentIndex}/${total})`
+                            });
+                        } else {
+                            this.$emit('progress', this.transcodeProgress);
+                        }
                     }
                 });
                 
@@ -578,6 +610,7 @@ export default {
             // Start transcoding
             this.state = 'transcoding';
             this.transcodeProgress = 0;
+            this.transcodeMessage = 'Preparing to transcode...';
             
             try {
                 const result = await this.transcodeVideo();
@@ -696,20 +729,13 @@ export default {
             this.showMultiProgress = availableResolutions.length > 1;
             debugLogger.info(`🎯 Multi-resolution UI ${this.showMultiProgress ? 'enabled' : 'disabled'} for ${availableResolutions.length} resolution(s)`);
             
-            // Choose transcoding approach based on user preference
-            let extractedFiles, successfulResolutions;
+            // Always use sequential processing, with auto-detected threading mode
+            const threadingMode = this.performanceInfo?.isMultiThreaded ? 'multi-threaded' : 'single-threaded';
+            debugLogger.info(`🔧 Using sequential processing with ${threadingMode} encoding`);
             
-            if (this.useParallelProcessing && availableResolutions.length > 1) {
-                debugLogger.info('🚀 Using parallel processing for multiple resolutions');
-                const result = await this.transcodeParallel(inputName, availableResolutions);
-                extractedFiles = result.extractedFiles;
-                successfulResolutions = result.successfulResolutions;
-            } else {
-                debugLogger.info('🔧 Using sequential processing');
-                const result = await this.transcodeSequential(inputName, availableResolutions);
-                extractedFiles = result.extractedFiles;
-                successfulResolutions = result.successfulResolutions;
-            }
+            const result = await this.transcodeSequential(inputName, availableResolutions);
+            const extractedFiles = result.extractedFiles;
+            const successfulResolutions = result.successfulResolutions;
             
             
             if (successfulResolutions.length === 0) {
@@ -1547,15 +1573,15 @@ export default {
                 commands.push('-max_muxing_queue_size', '1024');
             }
             
-            // Multithreading optimizations when supported
+            // Multithreading optimization based on system capabilities
             if (this.performanceInfo && this.performanceInfo.isMultiThreaded) {
-                // Enable multithreading for supported operations
+                // Enable multithreading when system supports it
                 commands.push('-threads', '0'); // Auto-detect thread count
-                debugLogger.debug('🚀 Using multithreaded encoding');
+                debugLogger.debug('🚀 Using multithreaded encoding (system supported)');
             } else {
-                // Single-threaded optimization for WASM
+                // Single-threaded optimization for systems without MT support
                 commands.push('-threads', '1');
-                debugLogger.debug('🔧 Using single-threaded encoding');
+                debugLogger.debug('🔧 Using single-threaded encoding (system not supported)');
             }
             
             // HLS segmentation settings
@@ -1608,7 +1634,16 @@ export default {
                         this.transcodeProgress = Math.min(Math.round(simulatedProgress), 95);
                         const elapsed = Math.round((Date.now() - this.transcodeStartTime) / 1000);
                         this.transcodeMessage = `Transcoding... ${this.transcodeProgress}% (${elapsed}s elapsed)`;
-                        this.$emit('progress', this.transcodeProgress);
+                        // Emit progress with message for fallback mode
+                        if (this.currentResolutionHeight && availableResolutions.length > 1) {
+                            const currentIdx = availableResolutions.findIndex(r => r.height === this.currentResolutionHeight) + 1;
+                            this.$emit('progress', {
+                                progress: this.transcodeProgress,
+                                message: `(${this.currentResolutionHeight}p - ${currentIdx}/${availableResolutions.length})`
+                            });
+                        } else {
+                            this.$emit('progress', this.transcodeProgress);
+                        }
                     }
                 }, 2000);
             }
@@ -1626,11 +1661,19 @@ export default {
                     // Update progress for current resolution
                     this.updateResolutionProgress(resHeight, 'processing', 0, 'Starting...');
                     this.transcodeMessage = `Transcoding ${resHeight}p (${i + 1}/${availableResolutions.length})...`;
+                    // Force Vue to update the UI
+                    this.$nextTick(() => {
+                        this.$forceUpdate();
+                    });
+                    debugLogger.info(`📺 Setting message: "${this.transcodeMessage}"`);
                     debugLogger.debug(`🎬 Transcoding resolution ${resHeight}p (${resWidth}x${resHeight}) at ${bitrate}k bitrate`);
                     
                     const commands = this.buildOptimizedFFmpegCommand(
                         inputName, resWidth, resHeight, bitrate, this.sessionId
                     );
+                    
+                    // Small delay to ensure UI updates before FFmpeg starts
+                    await new Promise(resolve => setTimeout(resolve, 100));
                     
                     try {
                         await ffmpegManager.exec(commands);
@@ -1695,209 +1738,6 @@ export default {
             return { extractedFiles, successfulResolutions };
         },
 
-        // Parallel transcoding using Web Workers  
-        async transcodeParallel(inputName, availableResolutions) {
-            const extractedFiles = new Map();
-            const successfulResolutions = [];
-            this.workerResults.clear();
-            
-            this.transcodeMessage = 'Initializing parallel transcoding...';
-            
-            try {
-                // Check if Web Workers are supported
-                if (typeof Worker === 'undefined') {
-                    throw new Error('Web Workers not supported in this browser');
-                }
-                
-                // Read input file data once
-                const inputData = await ffmpegManager.readFile(inputName);
-                debugLogger.debug(`📊 Input data size: ${inputData.length} bytes`);
-                
-                // Initialize progress for all resolutions
-                for (const resolution of availableResolutions) {
-                    this.updateResolutionProgress(resolution.height, 'queued', 0, 'Waiting for worker...');
-                }
-                
-                // Create workers for each resolution
-                debugLogger.info(`🚀 Creating ${availableResolutions.length} workers for parallel processing`);
-                const workerPromises = availableResolutions.map((resolution, index) => {
-                    debugLogger.debug(`👷 Creating worker ${index} for ${resolution.height}p`);
-                    return this.createTranscodeWorker(inputData, inputName, resolution, index);
-                });
-                
-                // Track overall progress
-                let completedWorkers = 0;
-                const totalWorkers = workerPromises.length;
-                
-                // Wait for all workers to complete
-                const results = await Promise.allSettled(workerPromises);
-                
-                // Process results
-                for (let i = 0; i < results.length; i++) {
-                    const result = results[i];
-                    const resolution = availableResolutions[i];
-                    
-                    if (result.status === 'fulfilled' && result.value) {
-                        successfulResolutions.push(resolution.height);
-                        
-                        // Merge extracted files from this worker
-                        for (const [filename, data] of result.value) {
-                            extractedFiles.set(filename, data);
-                        }
-                        
-                        debugLogger.debug(`✅ Parallel transcoding completed for ${resolution.height}p`);
-                    } else {
-                        debugLogger.error(`❌ Parallel transcoding failed for ${resolution.height}p:`, result.reason);
-                    }
-                }
-                
-                this.transcodeProgress = 100;
-                this.transcodeMessage = 'Parallel transcoding completed';
-                
-            } catch (error) {
-                debugLogger.error('❌ Parallel transcoding error:', error);
-                throw error;
-            } finally {
-                // Clean up workers
-                this.cleanupWorkers();
-            }
-
-            return { extractedFiles, successfulResolutions };
-        },
-
-        // Create a worker for transcoding a specific resolution
-        async createTranscodeWorker(inputData, inputName, resolution, workerId) {
-            return new Promise((resolve, reject) => {
-                let worker;
-                
-                try {
-                    // Try to create worker with proper path resolution
-                    const workerPath = new URL('/js/workers/video-transcoder-worker.js', window.location.origin).href;
-                    debugLogger.debug(`🔧 Creating worker for ${resolution.height}p with path: ${workerPath}`);
-                    
-                    worker = new Worker(workerPath, { type: 'module' });
-                    this.workers.push(worker);
-                } catch (workerError) {
-                    debugLogger.error(`❌ Failed to create worker for ${resolution.height}p:`, workerError);
-                    reject(new Error(`Worker creation failed: ${workerError.message}`));
-                    return;
-                }
-                
-                const operationId = `${this.sessionId}_${resolution.height}p_${workerId}`;
-                let workerInitialized = false;
-                
-                worker.onmessage = (e) => {
-                    const { type, data } = e.data;
-                    
-                    switch (type) {
-                        case 'initialized':
-                            debugLogger.debug(`🔧 Worker ${workerId} initialized for ${resolution.height}p`);
-                            workerInitialized = true;
-                            this.updateResolutionProgress(resolution.height, 'initializing', 0, 'Worker initialized');
-                            
-                            // Start transcoding
-                            worker.postMessage({
-                                type: 'transcode-resolution',
-                                data: {
-                                    inputData: inputData,
-                                    inputName: `worker_${workerId}_${inputName}`,
-                                    resolution,
-                                    sessionId: this.sessionId,
-                                    operationId,
-                                    encodingOptions: {
-                                        encodingSpeed: this.encodingSpeed,
-                                        qualityMode: this.qualityMode,
-                                        isMultiThreaded: this.performanceInfo?.isMultiThreaded || false
-                                    }
-                                }
-                            });
-                            break;
-                            
-                        case 'progress':
-                            if (data.operationId === operationId) {
-                                // Set current resolution for progress tracking
-                                this.currentResolutionHeight = data.resolution;
-                                
-                                // Update progress for this specific resolution
-                                this.updateResolutionProgress(data.resolution, 'processing', data.progress, `${data.progress}%`);
-                                
-                                // Update overall progress
-                                const avgProgress = this.getOverallProgress();
-                                this.transcodeProgress = avgProgress;
-                                this.transcodeMessage = `Processing resolutions... ${avgProgress}%`;
-                                this.$emit('progress', this.transcodeProgress);
-                            }
-                            break;
-                            
-                        case 'resolution-complete':
-                            if (data.operationId === operationId) {
-                                debugLogger.debug(`✅ Worker completed ${resolution.height}p transcoding`);
-                                this.updateResolutionProgress(resolution.height, 'completed', 100, 'Complete');
-                                
-                                // Clear current resolution when done
-                                if (this.currentResolutionHeight === resolution.height) {
-                                    this.currentResolutionHeight = null;
-                                }
-                                
-                                resolve(data.extractedFiles);
-                            }
-                            break;
-                            
-                        case 'error':
-                            debugLogger.error(`❌ Worker error for ${resolution.height}p:`, data.message);
-                            this.updateResolutionProgress(resolution.height, 'error', 0, data.message || 'Worker error');
-                            reject(new Error(data.message));
-                            break;
-                    }
-                };
-                
-                worker.onerror = (error) => {
-                    debugLogger.error(`❌ Worker runtime error for ${resolution.height}p:`, error);
-                    reject(error);
-                };
-                
-                // Initialize the worker
-                worker.postMessage({ type: 'initialize' });
-                
-                // Timeout for worker initialization
-                setTimeout(() => {
-                    if (!workerInitialized) {
-                        reject(new Error(`Worker ${workerId} initialization timeout`));
-                    }
-                }, 10000);
-            });
-        },
-
-        // Calculate average progress across all workers
-        calculateAverageProgress(currentResolution, currentProgress) {
-            // Store progress for this resolution
-            this.workerResults.set(currentResolution, currentProgress);
-            
-            // Calculate average progress across all workers
-            let totalProgress = 0;
-            let activeWorkers = 0;
-            
-            for (const [resolution, progress] of this.workerResults.entries()) {
-                totalProgress += progress;
-                activeWorkers++;
-            }
-            
-            return activeWorkers > 0 ? Math.round(totalProgress / activeWorkers) : 0;
-        },
-
-        // Clean up all workers
-        cleanupWorkers() {
-            for (const worker of this.workers) {
-                try {
-                    worker.postMessage({ type: 'terminate' });
-                    worker.terminate();
-                } catch (error) {
-                    debugLogger.debug('Worker cleanup error:', error);
-                }
-            }
-            this.workers = [];
-            this.workerResults.clear();
-        }
     },
     
     mounted() {
@@ -1917,10 +1757,6 @@ export default {
         if (this.unsubscribeProgress) {
             this.unsubscribeProgress();
         }
-        
-        // Clean up workers
-        this.cleanupWorkers();
-        
         // Clean up player
         this.cleanupPlayer();
         

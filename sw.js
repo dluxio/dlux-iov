@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.01.2",
-  "generated": "2025-07-01T00:21:50Z",
+  "version": "2025.06.30.20",
+  "generated": "2025-07-01T03:50:14Z",
   "files": {
-    "/js/mfi-vue.js": {
-      "checksum": "7fbd69d4f3b44ab70507017b7cb61e94",
-      "size": 15064,
-      "priority": "important"
-    },
     "/js/modal-manager.js": {
       "checksum": "051b4cf0394772b91ff1ff0a8a507de0",
       "size": 5286,
@@ -703,7 +698,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "3b0c242126c48a1a830bc207a60b7e73",
+      "checksum": "ebfc54e9b87e654d2b5c5cc48a851829",
       "size": 36523,
       "priority": "important"
     },
@@ -748,8 +743,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/upload-everywhere.js": {
-      "checksum": "2c886c1780536942f5d6abc66117302b",
-      "size": 61678,
+      "checksum": "c269b91ee3339f8fa5d050fd52099069",
+      "size": 62296,
       "priority": "important"
     },
     "/js/uploadvue-dd.js": {
@@ -858,8 +853,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "17e42c4346cb20eceb900ec8c06a206a",
-      "size": 123331,
+      "checksum": "8f59654d6ee1b9fa7a351f521d58aa8e",
+      "size": 122081,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -923,7 +918,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b3e7a22ccf696400b9570657dab32260",
+      "checksum": "e9c300b81570612bf94e591b9549ec43",
       "size": 7299,
       "priority": "important"
     },
@@ -1011,11 +1006,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/playground/copy.html": {
-      "checksum": "eaa6a972fcae4bb48121274d44b29367",
-      "size": 2450,
-      "priority": "page-specific"
     },
     "/playground/env_thumbs/arches.png": {
       "checksum": "459b3df0b2d88977b2358145393e6055",
@@ -1142,12 +1132,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
