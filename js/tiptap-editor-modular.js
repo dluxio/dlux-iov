@@ -13269,7 +13269,9 @@ export default {
                     Image,
                     CodeBlock,
                     TextAlign,
-                    SpkVideo
+                    SpkVideo,
+                    Dropcursor,
+                    Gapcursor
                 } = tiptapBundle;
                 
                 if (!renderToMarkdown) {
@@ -13299,7 +13301,9 @@ export default {
                     Link,
                     Image,
                     CodeBlock,
-                    SpkVideo
+                    SpkVideo,
+                    Dropcursor,
+                    Gapcursor
                 ].filter(ext => ext !== undefined && ext !== null);
                 
                 // Using TipTap static renderer with custom node mappings for Hive-compatible markdown

@@ -4,6 +4,23 @@
 
 This document describes the markdown export implementation for the DLUX IOV editor, which uses TipTap v3's static renderer with custom node mappings to generate Hive blockchain-compatible markdown.
 
+## Critical Design Principle: Extension Synchronization
+
+**The markdown exporter MUST include every extension that the editor uses.** This is a fundamental requirement of TipTap's static renderer architecture.
+
+### Why This Matters
+1. The static renderer uses extensions to build the ProseMirror schema
+2. The schema defines what node types are valid in the document
+3. If an extension is missing, its nodes become "unknown" and cause errors
+4. This applies even to extensions that don't produce visible markdown output
+
+### Synchronization Checklist
+- [ ] Every extension in your editor configuration must be in the markdown export
+- [ ] Check StarterKit default extensions (it includes many by default)
+- [ ] Include cursor/UI extensions even though they don't affect output
+- [ ] When adding new extensions to the editor, also add them to markdown export
+- [ ] Test markdown export after any editor configuration changes
+
 ## Architecture
 
 ### Core Components
@@ -131,24 +148,45 @@ async publishToHive() {
 
 ## Extension Requirements
 
-The following TipTap extensions must be available:
-- Document, Text (core)
-- Paragraph, Heading (block nodes)
-- Bold, Italic, Strike, Code (marks)
-- BulletList, OrderedList, ListItem (lists)
-- Blockquote, HorizontalRule, HardBreak (blocks)
-- Link, Image (inline)
-- CodeBlock (code)
-- TextAlign (functionality)
-- SpkVideo (custom video)
+**ALL extensions used in the editor MUST be included in the markdown export**, regardless of whether they produce visible markdown output.
+
+### Required Extensions (from StarterKit):
+- **Core**: Document, Text
+- **Block Nodes**: Paragraph, Heading, Blockquote, HorizontalRule
+- **List Nodes**: BulletList, OrderedList, ListItem
+- **Inline Nodes**: HardBreak, Image
+- **Marks**: Bold, Italic, Strike, Code, Link
+- **Code**: CodeBlock
+- **Cursor Helpers**: Dropcursor, Gapcursor (no markdown output but required for schema)
+
+### Additional Extensions:
+- **TextAlign**: Functionality extension for text alignment
+- **SpkVideo**: Custom video node for Hive compatibility
+
+### Extensions NOT included:
+- **History**: Intentionally disabled when using Collaboration extension
+- **Collaboration/CollaborationCaret**: Only needed for live editing, not export
 
 ## Best Practices
 
 1. **Always Use Static Renderer**: Never manually construct markdown
-2. **Complete Node Mappings**: Provide mappings for all nodes to avoid HTML fallback
-3. **Recursive Processing**: Use `renderChildren` helper for nested content
-4. **Preserve Hive Elements**: Keep `<center>` and `<video>` tags intact
-5. **Extension Array**: Filter undefined extensions before passing to renderer
+2. **Include ALL Extensions**: EVERY extension used in the editor MUST be included in the markdown export
+3. **Complete Node Mappings**: Provide mappings for all nodes to avoid HTML fallback
+4. **Recursive Processing**: Use `renderChildren` helper for nested content
+5. **Preserve Hive Elements**: Keep `<center>` and `<video>` tags intact
+6. **Extension Array**: Filter undefined extensions before passing to renderer
+
+### Critical Extension Requirement
+
+**⚠️ IMPORTANT**: The static renderer uses the extensions array to build the document schema. Any extension that's active in your editor but missing from the markdown export will cause an "Unknown node type" error.
+
+This includes:
+- All extensions from StarterKit (even if they don't produce visible markdown output)
+- Cursor extensions (Dropcursor, Gapcursor, HardBreak)
+- Custom extensions (TextAlign, SpkVideo)
+- Any extension that might create nodes or marks in the document
+
+Even extensions that don't have visual representation in markdown (like Dropcursor) must be included for the parser to understand the document structure.
 
 ## Troubleshooting
 
@@ -158,9 +196,14 @@ The following TipTap extensions must be available:
    - Cause: Missing extension in array
    - Fix: Filter undefined values from extensions array
 
-2. **"Unknown node type: [nodetype]"** (e.g., hardBreak)
-   - Cause: Extension not included in extensions array for static renderer
-   - Fix: Import and add the missing extension to both bundle and markdown export
+2. **"Unknown node type: [nodetype]"** (e.g., hardBreak, dropcursor, gapcursor)
+   - Cause: Extension used in editor but not included in markdown export extensions array
+   - Fix: 
+     1. Check if extension is in StarterKit (most are included by default)
+     2. Ensure it's exported from collaboration bundle
+     3. Import it in getMarkdownContent()
+     4. Add to extensions array
+   - Prevention: Keep editor and markdown export extensions synchronized
 
 3. **HTML in Output**
    - Cause: Missing node mapping
