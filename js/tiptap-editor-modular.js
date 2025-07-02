@@ -1852,6 +1852,9 @@ class EditorFactory {
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
+        const TextAlign = tiptapBundle.TextAlign;
+        const SpkVideo = tiptapBundle.SpkVideo;
+        const renderToMarkdown = tiptapBundle.renderToMarkdown;
 
         console.log('✅ FINAL COMPONENT CHECK:', {
             usingDefaultExport: tiptapBundle === window.TiptapCollaboration.default,
@@ -1860,7 +1863,10 @@ class EditorFactory {
             Collaboration: !!Collaboration,
             CollaborationCaret: !!CollaborationCaret,
             Placeholder: !!Placeholder,
-            BubbleMenu: !!BubbleMenu
+            BubbleMenu: !!BubbleMenu,
+            TextAlign: !!TextAlign,
+            SpkVideo: !!SpkVideo,
+            renderToMarkdown: !!renderToMarkdown
         });
 
         console.log('TipTap component access:', {
@@ -1917,7 +1923,12 @@ class EditorFactory {
             }),
             Placeholder.configure({
                 placeholder: 'Start writing your content...'
-            })
+            }),
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+                alignments: ['left', 'center', 'right', 'justify'],
+            }),
+            SpkVideo
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -2228,6 +2239,8 @@ class EditorFactory {
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
+        const TextAlign = tiptapBundle.TextAlign;
+        const SpkVideo = tiptapBundle.SpkVideo;
 
 
         if (!Editor || !StarterKit || !Collaboration) {
@@ -2254,7 +2267,12 @@ class EditorFactory {
             }),
             Placeholder.configure({
                 placeholder: 'Start writing your content...'
-            })
+            }),
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+                alignments: ['left', 'center', 'right', 'justify'],
+            }),
+            SpkVideo
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -7131,29 +7149,79 @@ export default {
         this.handleSPKFileSelection = (event) => {
             if (!event.data || typeof event.data !== 'object') return;
             
-            const { type, file, url } = event.data;
+            const { type, file, url, metadata } = event.data;
             
             // Handle SPK file selection for video
             if (type === 'spkFileSelected' && event.data.target === 'editor') {
-                console.log('📹 Received video file selection:', { file, url });
+                console.log('📹 Received video file selection:', { file, url, metadata });
                 
                 // Check if it's a video file
                 const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
                 const isVideo = file && videoExtensions.some(ext => file.toLowerCase().endsWith(ext));
                 
                 if (isVideo && url) {
-                    this.insertVideoEmbed(url);
+                    // Pass metadata to insertVideoEmbed for proper type detection
+                    this.insertVideoEmbed(url, metadata);
                 }
             }
         };
         
         window.addEventListener('message', this.handleSPKFileSelection);
+        
+        // Initialize video support for HLS playback
+        console.log('🎥 Initializing video observer...', {
+            hasMethodsCommon: !!methodsCommon,
+            hasInitFunction: !!(methodsCommon && methodsCommon.initIpfsVideoSupport)
+        });
+        
+        if (methodsCommon && methodsCommon.initIpfsVideoSupport) {
+            this.videoObserver = methodsCommon.initIpfsVideoSupport();
+            console.log('🎥 Video observer initialized:', !!this.videoObserver);
+            
+            // Force check existing videos after a delay
+            setTimeout(() => {
+                const videos = document.querySelectorAll('video');
+                console.log('🎥 Checking existing videos:', videos.length);
+                
+                // Check what's in the TipTap document
+                if (this.bodyEditor) {
+                    console.log('🎥 Checking TipTap document for video nodes:');
+                    this.bodyEditor.state.doc.descendants((node, pos) => {
+                        if (node.type.name === 'video') {
+                            console.log('🎥 Video node in editor:', {
+                                attrs: node.attrs,
+                                pos: pos
+                            });
+                        }
+                    });
+                }
+                
+                videos.forEach((video, index) => {
+                    console.log(`🎥 Video ${index + 1} on page:`, {
+                        src: video.src,
+                        type: video.getAttribute('type'),
+                        dataType: video.getAttribute('data-type'),
+                        hasHlsInstance: !!video.hlsInstance,
+                        isM3u8: video.src.includes('.m3u8')
+                    });
+                    
+                });
+            }, 1000);
+        } else {
+            console.error('🎥 methodsCommon.initIpfsVideoSupport not found!');
+        }
     },
     
     beforeUnmount() {
         // Clean up message listener
         if (this.handleSPKFileSelection) {
             window.removeEventListener('message', this.handleSPKFileSelection);
+        }
+        
+        // Clean up video observer
+        if (this.videoObserver) {
+            this.videoObserver.disconnect();
+            this.videoObserver = null;
         }
         
         // Clean up editors and providers
@@ -13156,21 +13224,192 @@ export default {
 
         // ===== EXPORT FUNCTIONALITY =====
         getMarkdownContent() {
-            // ✅ TIPTAP BEST PRACTICE: Use editor methods for export only
+            // ✅ TIPTAP BEST PRACTICE: Process JSON directly for custom markdown conversion
             try {
                 const titleText = this.titleInput ? this.titleInput.trim() : '';
-                const bodyHTML = this.bodyEditor ? this.bodyEditor.getHTML() : '';
+                
+                if (!this.bodyEditor) {
+                    return titleText ? `# ${titleText}` : '';
+                }
 
-                let markdown = this.htmlToMarkdown(bodyHTML);
+                // Get the editor JSON content
+                const doc = this.bodyEditor.getJSON();
+                
+                console.log('📝 Document structure for markdown conversion:', JSON.stringify(doc, null, 2));
+                
+                // Process the JSON document to generate markdown
+                const processDocument = (docJson) => {
+                    const lines = [];
+                    
+                    const processNode = (node, parentContext = {}) => {
+                        if (!node) return '';
+                        
+                        // Handle video nodes
+                        if (node.type === 'video') {
+                            const attrs = node.attrs || {};
+                            let html = '<video';
+                            if (attrs.src) html += ` src="${attrs.src}"`;
+                            if (attrs.type) html += ` type="${attrs.type}"`;
+                            if (attrs['data-type']) html += ` data-type="${attrs['data-type']}"`;
+                            if (attrs['data-original-src']) html += ` data-original-src="${attrs['data-original-src']}"`;
+                            if (attrs.width) html += ` width="${attrs.width}"`;
+                            if (attrs.height) html += ` height="${attrs.height}"`;
+                            html += ' controls></video>';
+                            lines.push(html);
+                            lines.push('');
+                            return;
+                        }
+                        
+                        // Handle paragraphs with text alignment
+                        if (node.type === 'paragraph') {
+                            const textContent = node.content ? node.content.map(child => processInlineNode(child)).join('') : '';
+                            if (node.attrs?.textAlign === 'center') {
+                                lines.push(`<center>${textContent}</center>`);
+                            } else {
+                                lines.push(textContent);
+                            }
+                            lines.push('');
+                            return;
+                        }
+                        
+                        // Handle headings with text alignment
+                        if (node.type === 'heading') {
+                            const level = node.attrs?.level || 1;
+                            const hashes = '#'.repeat(level);
+                            const textContent = node.content ? node.content.map(child => processInlineNode(child)).join('') : '';
+                            
+                            if (node.attrs?.textAlign === 'center') {
+                                lines.push(`<center>${hashes} ${textContent}</center>`);
+                            } else {
+                                lines.push(`${hashes} ${textContent}`);
+                            }
+                            lines.push('');
+                            return;
+                        }
+                        
+                        // Handle other block nodes
+                        if (node.type === 'bulletList' || node.type === 'orderedList') {
+                            if (node.content) {
+                                node.content.forEach(child => processNode(child, { listType: node.type }));
+                            }
+                            lines.push('');
+                            return;
+                        }
+                        
+                        if (node.type === 'listItem') {
+                            const textContent = node.content ? node.content.map(child => {
+                                if (child.type === 'paragraph' && child.content) {
+                                    return child.content.map(c => processInlineNode(c)).join('');
+                                }
+                                return processInlineNode(child);
+                            }).join('') : '';
+                            
+                            const prefix = parentContext.listType === 'orderedList' ? '1. ' : '- ';
+                            lines.push(`${prefix}${textContent}`);
+                            return;
+                        }
+                        
+                        if (node.type === 'blockquote') {
+                            if (node.content) {
+                                const quotedLines = [];
+                                const originalLines = [...lines];
+                                lines.length = 0;
+                                node.content.forEach(child => processNode(child));
+                                quotedLines.push(...lines);
+                                lines.length = 0;
+                                lines.push(...originalLines);
+                                quotedLines.forEach(line => {
+                                    if (line) lines.push(`> ${line}`);
+                                    else lines.push('>');
+                                });
+                            }
+                            lines.push('');
+                            return;
+                        }
+                        
+                        if (node.type === 'horizontalRule') {
+                            lines.push('---');
+                            lines.push('');
+                            return;
+                        }
+                        
+                        if (node.type === 'codeBlock') {
+                            lines.push('```');
+                            if (node.content) {
+                                node.content.forEach(child => {
+                                    if (child.text) lines.push(child.text);
+                                });
+                            }
+                            lines.push('```');
+                            lines.push('');
+                            return;
+                        }
+                        
+                        // Process content of other nodes
+                        if (node.content) {
+                            node.content.forEach(child => processNode(child, parentContext));
+                        }
+                    };
+                    
+                    const processInlineNode = (node) => {
+                        if (!node) return '';
+                        
+                        if (node.type === 'text') {
+                            let text = node.text || '';
+                            
+                            // Apply marks
+                            if (node.marks) {
+                                node.marks.forEach(mark => {
+                                    switch (mark.type) {
+                                        case 'bold':
+                                            text = `**${text}**`;
+                                            break;
+                                        case 'italic':
+                                            text = `*${text}*`;
+                                            break;
+                                        case 'strike':
+                                            text = `~~${text}~~`;
+                                            break;
+                                        case 'code':
+                                            text = `\`${text}\``;
+                                            break;
+                                        case 'link':
+                                            text = `[${text}](${mark.attrs?.href || ''})`;
+                                            break;
+                                    }
+                                });
+                            }
+                            
+                            return text;
+                        }
+                        
+                        return '';
+                    };
+                    
+                    // Process all content nodes
+                    if (docJson.content) {
+                        docJson.content.forEach(node => processNode(node));
+                    }
+                    
+                    return lines.join('\n').trim();
+                };
+                
+                // Generate markdown from the JSON
+                const markdown = processDocument(doc);
+                
+                console.log('📝 Markdown generated:', {
+                    markdownLength: markdown.length,
+                    markdownPreview: markdown.substring(0, 200)
+                });
 
                 if (titleText) {
-                    markdown = `# ${titleText}\n\n${markdown}`;
+                    return `# ${titleText}\n\n${markdown}`;
                 }
 
                 return markdown;
             } catch (error) {
                 console.error('Error generating markdown:', error);
-                return this.getPlainTextContent();
+                throw error;
             }
         },
 
@@ -13183,8 +13422,29 @@ export default {
         },
 
         htmlToMarkdown(html) {
-            // Basic HTML to Markdown conversion
-            return html
+            // Enhanced HTML to Markdown conversion that preserves video and center tags
+            let markdown = html;
+            
+            // Preserve video tags (both self-closing and with closing tag)
+            markdown = markdown.replace(/<video([^>]*)(\/?>|><\/video>)/g, (match) => {
+                // Keep video tags as-is for Hive compatibility
+                return match;
+            });
+            
+            // Preserve center tags
+            markdown = markdown.replace(/<center>([^<]*)<\/center>/g, (match) => {
+                // Keep center tags as-is for Hive compatibility
+                return match;
+            });
+            
+            // Handle headings inside center tags
+            markdown = markdown.replace(/<center><h([1-6])>([^<]*)<\/h[1-6]><\/center>/g, (match, level, content) => {
+                const hashes = '#'.repeat(parseInt(level));
+                return `<center>${hashes} ${content}</center>`;
+            });
+            
+            // Convert other HTML to markdown
+            markdown = markdown
                 .replace(/<h([1-6])>/g, (match, level) => '#'.repeat(parseInt(level)) + ' ')
                 .replace(/<\/h[1-6]>/g, '\n\n')
                 .replace(/<p>/g, '')
@@ -13193,9 +13453,26 @@ export default {
                 .replace(/<\/strong>/g, '**')
                 .replace(/<em>/g, '*')
                 .replace(/<\/em>/g, '*')
+                .replace(/<strike>/g, '~~')
+                .replace(/<\/strike>/g, '~~')
+                .replace(/<code>/g, '`')
+                .replace(/<\/code>/g, '`')
                 .replace(/<br\s*\/?>/g, '\n')
-                .replace(/<[^>]*>/g, '')
+                .replace(/<hr\s*\/?>/g, '\n---\n')
+                .replace(/<blockquote>/g, '> ')
+                .replace(/<\/blockquote>/g, '\n')
+                .replace(/<ul>/g, '')
+                .replace(/<\/ul>/g, '\n')
+                .replace(/<ol>/g, '')
+                .replace(/<\/ol>/g, '\n')
+                .replace(/<li>/g, '- ')
+                .replace(/<\/li>/g, '\n')
+                .replace(/<a\s+href="([^"]+)">([^<]+)<\/a>/g, '[$2]($1)')
+                .replace(/<img\s+src="([^"]+)"\s*\/?>/g, '![]($1)')
+                .replace(/<[^>]*>/g, '') // Remove any remaining tags
                 .trim();
+            
+            return markdown;
         },
 
         // ===== TOOLBAR FORMAT METHODS =====
@@ -13276,6 +13553,29 @@ export default {
                 this.bodyEditor.chain().focus().toggleHeading({ level }).run();
             } catch (error) {
                 console.error('Heading command failed:', error);
+            }
+        },
+
+        setTextAlign(alignment) {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+
+            try {
+                console.log('Setting text alignment to:', alignment);
+                const success = this.bodyEditor.chain().focus().setTextAlign(alignment).run();
+                console.log('Text alignment command result:', success);
+                
+                // Log the current selection's JSON to verify the attribute was set
+                setTimeout(() => {
+                    const { from, to } = this.bodyEditor.state.selection;
+                    const selectedNode = this.bodyEditor.state.doc.nodeAt(from);
+                    console.log('After alignment - selected node:', {
+                        node: selectedNode,
+                        attrs: selectedNode?.attrs,
+                        textAlign: selectedNode?.attrs?.textAlign
+                    });
+                }, 100);
+            } catch (error) {
+                console.error('Text align command failed:', error);
             }
         },
 
@@ -13365,45 +13665,102 @@ export default {
                     target: 'editor'
                 }, '*');
             } else {
-                // Fallback for standalone editor
-                const url = prompt('Enter video URL (streaming m3u8 or direct video file):');
-                if (url) {
-                    this.insertVideoEmbed(url);
-                }
+                // Fallback for standalone editor - create a simple dialog
+                const dialog = document.createElement('div');
+                dialog.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#212529;border:1px solid #495057;padding:20px;border-radius:8px;z-index:10000;';
+                dialog.innerHTML = `
+                    <h5 style="color:#fff;margin:0 0 15px 0;">Insert Video</h5>
+                    <input type="text" id="videoUrl" placeholder="Enter video URL" style="width:400px;padding:8px;margin-bottom:10px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
+                    <br>
+                    <label style="color:#adb5bd;display:flex;align-items:center;margin-bottom:15px;">
+                        <input type="checkbox" id="isHls" style="margin-right:8px;">
+                        This is an HLS/streaming video (m3u8)
+                    </label>
+                    <div style="text-align:right;">
+                        <button onclick="this.closest('div').remove()" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
+                        <button id="insertBtn" style="padding:6px 12px;background:#0d6efd;border:none;color:#fff;border-radius:4px;cursor:pointer;">Insert</button>
+                    </div>
+                `;
+                
+                const backdrop = document.createElement('div');
+                backdrop.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;';
+                backdrop.onclick = () => {
+                    dialog.remove();
+                    backdrop.remove();
+                };
+                
+                document.body.appendChild(backdrop);
+                document.body.appendChild(dialog);
+                
+                const urlInput = dialog.querySelector('#videoUrl');
+                const hlsCheckbox = dialog.querySelector('#isHls');
+                const insertBtn = dialog.querySelector('#insertBtn');
+                
+                urlInput.focus();
+                
+                const handleInsert = () => {
+                    const url = urlInput.value.trim();
+                    if (url) {
+                        const isHls = hlsCheckbox.checked;
+                        this.insertVideoEmbed(url, isHls ? { type: 'm3u8' } : null);
+                        dialog.remove();
+                        backdrop.remove();
+                    }
+                };
+                
+                insertBtn.onclick = handleInsert;
+                urlInput.onkeypress = (e) => {
+                    if (e.key === 'Enter') handleInsert();
+                };
             }
         },
         
-        insertVideoEmbed(url) {
+        insertVideoEmbed(url, metadata = null) {
             if (!this.bodyEditor || !url) return;
             
-            // Determine if it's a streaming video (m3u8)
-            const isStreaming = url.toLowerCase().includes('.m3u8');
-            
-            // Insert appropriate HTML based on video type
-            let html;
-            if (isStreaming) {
-                // For HLS streaming videos, add a special class
-                html = `<div class="video-container hls-video" data-src="${url}">
-                    <video controls class="w-100">
-                        <source src="${url}" type="application/x-mpegURL">
-                        Your browser does not support HLS video playback.
-                    </video>
-                </div>`;
-            } else {
-                // For regular video files
-                html = `<div class="video-container">
-                    <video controls class="w-100">
-                        <source src="${url}">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>`;
+            // Ensure URL has protocol
+            let videoUrl = url.trim();
+            if (!videoUrl.startsWith('http://') && !videoUrl.startsWith('https://')) {
+                // Add https:// if no protocol is specified
+                videoUrl = 'https://' + videoUrl;
             }
             
-            // Insert the HTML at current cursor position
+            // Detect if it's an HLS video
+            let videoType = null;
+            let dataType = null;
+            
+            // First check SPK metadata if available
+            if (metadata) {
+                console.log('🎬 Using SPK metadata for type detection:', metadata);
+                if (metadata.type === 'm3u8' || metadata.meta?.type === 'm3u8') {
+                    videoType = 'application/x-mpegURL';
+                    dataType = 'm3u8';
+                    console.log('🎬 Detected m3u8 from SPK metadata');
+                }
+            }
+            
+            
+            // Use the SpkVideo extension's setVideo command
+            const videoAttrs = {
+                src: videoUrl,
+                controls: true,
+                width: '100%',
+                height: 'auto',
+                crossorigin: 'anonymous'
+            };
+            
+            if (videoType) {
+                videoAttrs.type = videoType;
+                videoAttrs['data-type'] = dataType;
+                videoAttrs['data-mime-type'] = videoType;
+            }
+            
             this.bodyEditor.chain()
                 .focus()
-                .insertContent(html)
+                .setVideo(videoAttrs)
                 .run();
+                
+            console.log('🎬 Video inserted with attributes:', videoAttrs);
                 
             // Mark document as having unsaved changes
             this.hasUnsavedChanges = true;
@@ -13415,6 +13772,13 @@ export default {
             // ✅ TIPTAP v3: Safe active state check
             if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
             try {
+                // Handle object syntax for text alignment checks
+                if (typeof name === 'object' && name.textAlign) {
+                    // For text alignment, check if any node has the specified textAlign attribute
+                    return this.bodyEditor.isActive('paragraph', { textAlign: name.textAlign }) || 
+                           this.bodyEditor.isActive('heading', { textAlign: name.textAlign });
+                }
+                // Standard string-based check
                 return this.bodyEditor.isActive(name, attrs);
             } catch (error) {
                 // During Y.js sync, isActive might fail
@@ -14457,13 +14821,33 @@ export default {
 
         extractCurrentDocumentData() {
             // Extract all current document data
+            const bodyHtml = this.bodyEditor ? this.bodyEditor.getHTML() : '';
+            
+            // Debug: Check if video attributes are being saved
+            if (bodyHtml.includes('<video')) {
+                console.log('💾 Saving document with video content');
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = bodyHtml;
+                const videos = tempDiv.querySelectorAll('video');
+                videos.forEach(video => {
+                    console.log('💾 Video attributes in saved HTML:', {
+                        src: video.getAttribute('src'),
+                        type: video.getAttribute('type'),
+                        'data-type': video.getAttribute('data-type'),
+                        'data-mime-type': video.getAttribute('data-mime-type'),
+                        crossorigin: video.getAttribute('crossorigin'),
+                        outerHTML: video.outerHTML.substring(0, 200) + '...'
+                    });
+                });
+            }
+            
             const data = {
                 // Get document name from Y.js config
                 documentName: this.ydoc?.getMap('config').get('documentName') || this.currentFile?.name || 'Untitled',
                 
                 // Content from editors (following TipTap best practices)
                 title: this.titleInput || '',
-                body: this.bodyEditor ? this.bodyEditor.getHTML() : '',
+                body: bodyHtml,
                 
                 // Metadata from reactive properties
                 tags: [...(this.reactiveTags || [])],
@@ -14573,7 +14957,34 @@ export default {
                 // Use nextTick to ensure editor is ready
                 await this.$nextTick();
                 if (!this.bodyEditor.isDestroyed) {
+                    console.log('📄 Loading content into editor, checking for video elements...');
+                    
+                    // Debug: Check if video attributes are present in the HTML
+                    if (data.body.includes('<video')) {
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = data.body;
+                        const videos = tempDiv.querySelectorAll('video');
+                        videos.forEach(video => {
+                            console.log('📄 Video in saved HTML:', {
+                                src: video.getAttribute('src'),
+                                type: video.getAttribute('type'),
+                                'data-type': video.getAttribute('data-type'),
+                                'data-mime-type': video.getAttribute('data-mime-type'),
+                                crossorigin: video.getAttribute('crossorigin')
+                            });
+                        });
+                    }
+                    
                     this.bodyEditor.commands.setContent(data.body);
+                    
+                    // Debug: Check what TipTap parsed
+                    setTimeout(() => {
+                        this.bodyEditor.state.doc.descendants((node) => {
+                            if (node.type.name === 'video') {
+                                console.log('📄 Video node after loading:', node.attrs);
+                            }
+                        });
+                    }, 100);
                 }
             }
 
@@ -14824,67 +15235,12 @@ export default {
 
         // ===== JSON PREVIEW METHODS =====
 
-        // Get body content as HTML or markdown
-        getBodyContent(format = 'html') {
+        // Get body content as markdown (Hive posts are markdown)
+        getBodyContent() {
             if (!this.bodyEditor) return '';
 
-            if (format === 'markdown') {
-                // Convert to markdown if needed
-                return this.convertToMarkdown(this.bodyEditor.getHTML());
-            }
-            return this.bodyEditor.getHTML();
-        },
-
-        // Convert HTML to markdown
-        convertToMarkdown(html) {
-            // Basic HTML to markdown conversion
-            // In production, you might want to use a proper library like turndown.js
-            let markdown = html;
-
-            // Convert headers
-            markdown = markdown.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n');
-            markdown = markdown.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n');
-            markdown = markdown.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n');
-
-            // Convert paragraphs
-            markdown = markdown.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n');
-
-            // Convert bold and italic
-            markdown = markdown.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
-            markdown = markdown.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
-            markdown = markdown.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
-            markdown = markdown.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
-
-            // Convert links
-            markdown = markdown.replace(/<a[^>]+href="([^"]+)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
-
-            // Convert images
-            markdown = markdown.replace(/<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*>/gi, '![$2]($1)');
-            markdown = markdown.replace(/<img[^>]+src="([^"]+)"[^>]*>/gi, '![]($1)');
-
-            // Convert lists
-            markdown = markdown.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
-                return content.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n') + '\n';
-            });
-            markdown = markdown.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
-                let counter = 1;
-                return content.replace(/<li[^>]*>(.*?)<\/li>/gi, () => {
-                    return `${counter++}. $1\n`;
-                }) + '\n';
-            });
-
-            // Convert code blocks
-            markdown = markdown.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gis, '```\n$1\n```\n\n');
-            markdown = markdown.replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`');
-
-            // Clean up remaining HTML tags
-            markdown = markdown.replace(/<[^>]+>/g, '');
-
-            // Clean up extra whitespace
-            markdown = markdown.replace(/\n{3,}/g, '\n\n');
-            markdown = markdown.trim();
-
-            return markdown;
+            // Always return markdown for Hive posts
+            return this.getMarkdownContent().replace(/^# .*\n\n/, ''); // Remove title if present
         },
 
         // Open JSON preview modal
@@ -19248,6 +19604,32 @@ export default {
                           class="btn btn-sm btn-dark" title="Numbered List"
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-list-ol"></i>
+                  </button>
+                </div>
+
+                <div class="vr"></div>
+
+                <!-- Text Alignment -->
+                <div role="group">
+                  <button @click="setTextAlign('left')" @mousedown.prevent :class="{active: isActive({textAlign: 'left'})}" 
+                          class="btn btn-sm btn-dark" title="Align Left"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-left"></i>
+                  </button>
+                  <button @click="setTextAlign('center')" @mousedown.prevent :class="{active: isActive({textAlign: 'center'})}" 
+                          class="btn btn-sm btn-dark" title="Align Center"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-center"></i>
+                  </button>
+                  <button @click="setTextAlign('right')" @mousedown.prevent :class="{active: isActive({textAlign: 'right'})}" 
+                          class="btn btn-sm btn-dark" title="Align Right"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-right"></i>
+                  </button>
+                  <button @click="setTextAlign('justify')" @mousedown.prevent :class="{active: isActive({textAlign: 'justify'})}" 
+                          class="btn btn-sm btn-dark" title="Justify"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-justify"></i>
                   </button>
                 </div>
 

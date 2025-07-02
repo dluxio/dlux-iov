@@ -371,3 +371,34 @@
 .bubble-menu {
   position: absolute !important;
 }
+
+/* Video element styling in TipTap editor */
+.ProseMirror video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure videos are responsive and visible */
+.ProseMirror video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  min-height: 200px; /* Ensure minimum height for visibility */
+  background-color: #000; /* Black background while loading */
+  margin: 1rem 0;
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ProseMirror video[width="100%"] {
+  width: 100%;
+}
+
+/* Ensure video controls are visible */
+.ProseMirror video[controls] {
+  cursor: pointer;
+}

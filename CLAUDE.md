@@ -189,6 +189,8 @@ this.canManagePermissions   // Permission management (owner only)
 - **TipTap Authentication**: https://next.tiptap.dev/docs/collaboration/getting-started/authenticate
 - **TipTap Offline Support**: https://next.tiptap.dev/docs/guides/offline-support
 - **TipTap Vue.js Integration**: https://next.tiptap.dev/docs/editor/getting-started/install/vue3
+- **TipTap Static Renderer**: https://next.tiptap.dev/docs/editor/api/utilities/static-renderer
+- **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
 - **Y.js Documentation**: https://docs.yjs.dev/
 - **Y.js Protocols**: https://github.com/yjs/y-protocols
 
@@ -196,6 +198,7 @@ this.canManagePermissions   // Permission management (owner only)
 - **TipTap StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
 - **TipTap Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
 - **TipTap CollaborationCaret**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
+- **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 - **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 
 ### Server Implementation

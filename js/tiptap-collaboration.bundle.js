@@ -213,6 +213,49 @@ __webpack_require__.d(yjs_namespaceObject, {
   typeMapGetSnapshot: () => (typeMapGetSnapshot)
 });
 
+;// ./node_modules/@babel/runtime/helpers/esm/typeof.js
+function _typeof(o) {
+  "@babel/helpers - typeof";
+
+  return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return typeof o;
+  } : function (o) {
+    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+  }, _typeof(o);
+}
+
+;// ./node_modules/@babel/runtime/helpers/esm/toPrimitive.js
+
+function toPrimitive(t, r) {
+  if ("object" != _typeof(t) || !t) return t;
+  var e = t[Symbol.toPrimitive];
+  if (void 0 !== e) {
+    var i = e.call(t, r || "default");
+    if ("object" != _typeof(i)) return i;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r ? String : Number)(t);
+}
+
+;// ./node_modules/@babel/runtime/helpers/esm/toPropertyKey.js
+
+
+function toPropertyKey(t) {
+  var i = toPrimitive(t, "string");
+  return "symbol" == _typeof(i) ? i : i + "";
+}
+
+;// ./node_modules/@babel/runtime/helpers/esm/defineProperty.js
+
+function _defineProperty(e, r, t) {
+  return (r = toPropertyKey(r)) in e ? Object.defineProperty(e, r, {
+    value: t,
+    enumerable: !0,
+    configurable: !0,
+    writable: !0
+  }) : e[r] = t, e;
+}
+
 ;// ./node_modules/@hocuspocus/common/dist/hocuspocus-common.esm.js
 /**
  * Common Math expressions.
@@ -65235,6 +65278,749 @@ var BubbleMenu = Extension.create({
 var extension_bubble_menu_dist_index_default = BubbleMenu;
 
 //# sourceMappingURL=index.js.map
+;// ./node_modules/@tiptap/static-renderer/dist/pm/markdown/index.js
+// src/pm/extensionRenderer.ts
+
+
+
+// src/helpers.ts
+
+function markdown_getAttributes(nodeOrMark, extensionAttributes, onlyRenderedAttributes) {
+  const nodeOrMarkAttributes = nodeOrMark.attrs;
+  if (!nodeOrMarkAttributes) {
+    return {};
+  }
+  return extensionAttributes.filter((item) => {
+    if (item.type !== (typeof nodeOrMark.type === "string" ? nodeOrMark.type : nodeOrMark.type.name)) {
+      return false;
+    }
+    if (onlyRenderedAttributes) {
+      return item.attribute.rendered;
+    }
+    return true;
+  }).map((item) => {
+    if (!item.attribute.renderHTML) {
+      return {
+        [item.name]: item.name in nodeOrMarkAttributes ? nodeOrMarkAttributes[item.name] : item.attribute.default
+      };
+    }
+    return item.attribute.renderHTML(nodeOrMarkAttributes) || {
+      [item.name]: item.name in nodeOrMarkAttributes ? nodeOrMarkAttributes[item.name] : item.attribute.default
+    };
+  }).reduce((attributes, attribute) => mergeAttributes(attributes, attribute), {});
+}
+function getHTMLAttributes(nodeOrMark, extensionAttributes) {
+  return markdown_getAttributes(nodeOrMark, extensionAttributes, true);
+}
+
+// src/pm/extensionRenderer.ts
+function mapNodeExtensionToReactNode(domOutputSpecToElement, extension, extensionAttributes, options) {
+  const context = {
+    name: extension.name,
+    options: extension.options,
+    storage: extension.storage,
+    parent: extension.parent
+  };
+  const renderToHTML = getExtensionField(extension, "renderHTML", context);
+  if (!renderToHTML) {
+    if (options == null ? void 0 : options.unhandledNode) {
+      return [extension.name, options.unhandledNode];
+    }
+    return [
+      extension.name,
+      () => {
+        throw new Error(
+          `[tiptap error]: Node ${extension.name} cannot be rendered, it is missing a "renderToHTML" method, please implement it or override the corresponding "nodeMapping" method to have a custom rendering`
+        );
+      }
+    ];
+  }
+  return [
+    extension.name,
+    ({ node, children }) => {
+      try {
+        return domOutputSpecToElement(
+          renderToHTML({
+            node,
+            HTMLAttributes: getHTMLAttributes(node, extensionAttributes)
+          })
+        )(children);
+      } catch (e) {
+        throw new Error(
+          `[tiptap error]: Node ${extension.name} cannot be rendered, it's "renderToHTML" method threw an error: ${e.message}`,
+          { cause: e }
+        );
+      }
+    }
+  ];
+}
+function mapMarkExtensionToReactNode(domOutputSpecToElement, extension, extensionAttributes, options) {
+  const context = {
+    name: extension.name,
+    options: extension.options,
+    storage: extension.storage,
+    parent: extension.parent
+  };
+  const renderToHTML = getExtensionField(extension, "renderHTML", context);
+  if (!renderToHTML) {
+    if (options == null ? void 0 : options.unhandledMark) {
+      return [extension.name, options.unhandledMark];
+    }
+    return [
+      extension.name,
+      () => {
+        throw new Error(`Node ${extension.name} cannot be rendered, it is missing a "renderToHTML" method`);
+      }
+    ];
+  }
+  return [
+    extension.name,
+    ({ mark, children }) => {
+      try {
+        return domOutputSpecToElement(
+          renderToHTML({
+            mark,
+            HTMLAttributes: getHTMLAttributes(mark, extensionAttributes)
+          })
+        )(children);
+      } catch (e) {
+        throw new Error(
+          `[tiptap error]: Mark ${extension.name} cannot be rendered, it's "renderToHTML" method threw an error: ${e.message}`,
+          { cause: e }
+        );
+      }
+    }
+  ];
+}
+function renderToElement({
+  renderer,
+  domOutputSpecToElement,
+  mapDefinedTypes,
+  content,
+  extensions,
+  options
+}) {
+  extensions = resolveExtensions(extensions);
+  const extensionAttributes = getAttributesFromExtensions(extensions);
+  const { nodeExtensions, markExtensions } = splitExtensions(extensions);
+  if (!(content instanceof dist_Node)) {
+    content = dist_Node.fromJSON(getSchemaByResolvedExtensions(extensions), content);
+  }
+  return renderer({
+    ...options,
+    nodeMapping: {
+      ...Object.fromEntries(
+        nodeExtensions.filter((e) => {
+          if (e.name in mapDefinedTypes) {
+            return false;
+          }
+          if (options == null ? void 0 : options.nodeMapping) {
+            return !(e.name in options.nodeMapping);
+          }
+          return true;
+        }).map(
+          (nodeExtension) => mapNodeExtensionToReactNode(domOutputSpecToElement, nodeExtension, extensionAttributes, options)
+        )
+      ),
+      ...mapDefinedTypes,
+      ...options == null ? void 0 : options.nodeMapping
+    },
+    markMapping: {
+      ...Object.fromEntries(
+        markExtensions.filter((e) => {
+          if (options == null ? void 0 : options.markMapping) {
+            return !(e.name in options.markMapping);
+          }
+          return true;
+        }).map((mark) => mapMarkExtensionToReactNode(domOutputSpecToElement, mark, extensionAttributes, options))
+      ),
+      ...options == null ? void 0 : options.markMapping
+    }
+  })({ content });
+}
+
+// src/json/renderer.ts
+function TiptapStaticRenderer(renderComponent, {
+  nodeMapping,
+  markMapping,
+  unhandledNode,
+  unhandledMark
+}) {
+  return function renderContent({
+    content,
+    parent
+  }) {
+    var _a;
+    const nodeType = typeof content.type === "string" ? content.type : content.type.name;
+    const NodeHandler = (_a = nodeMapping[nodeType]) != null ? _a : unhandledNode;
+    if (!NodeHandler) {
+      throw new Error(`missing handler for node type ${nodeType}`);
+    }
+    const nodeContent = renderComponent({
+      component: NodeHandler,
+      props: {
+        node: content,
+        parent,
+        renderElement: renderContent,
+        // Lazily compute the children to avoid unnecessary recursion
+        get children() {
+          const children = [];
+          if (content.content) {
+            content.content.forEach((child) => {
+              children.push(
+                renderContent({
+                  content: child,
+                  parent: content
+                })
+              );
+            });
+          }
+          return children;
+        }
+      }
+    });
+    const markedContent = content.marks ? content.marks.reduce((acc, mark) => {
+      var _a2;
+      const markType = typeof mark.type === "string" ? mark.type : mark.type.name;
+      const MarkHandler = (_a2 = markMapping[markType]) != null ? _a2 : unhandledMark;
+      if (!MarkHandler) {
+        throw new Error(`missing handler for mark type ${markType}`);
+      }
+      return renderComponent({
+        component: MarkHandler,
+        props: {
+          mark,
+          parent,
+          node: content,
+          children: acc
+        }
+      });
+    }, nodeContent) : nodeContent;
+    return markedContent;
+  };
+}
+
+// src/json/html-string/string.ts
+function renderJSONContentToString(options) {
+  return TiptapStaticRenderer((ctx) => {
+    return ctx.component(ctx.props);
+  }, options);
+}
+function serializeAttrsToHTMLString(attrs) {
+  const output = Object.entries(attrs || {}).map(([key, value]) => `${key.split(" ").at(-1)}=${JSON.stringify(value)}`).join(" ");
+  return output ? ` ${output}` : "";
+}
+function serializeChildrenToHTMLString(children) {
+  return [].concat(children || "").filter(Boolean).join("");
+}
+
+// src/pm/html-string/html-string.ts
+function domOutputSpecToHTMLString(content) {
+  if (typeof content === "string") {
+    return () => content;
+  }
+  if (typeof content === "object" && "length" in content) {
+    const [_tag, attrs, children, ...rest] = content;
+    let tag = _tag;
+    const parts = tag.split(" ");
+    if (parts.length > 1) {
+      tag = `${parts[1]} xmlns="${parts[0]}"`;
+    }
+    if (attrs === void 0) {
+      return () => `<${tag}/>`;
+    }
+    if (attrs === 0) {
+      return (child) => `<${tag}>${serializeChildrenToHTMLString(child)}</${tag}>`;
+    }
+    if (typeof attrs === "object") {
+      if (Array.isArray(attrs)) {
+        if (children === void 0) {
+          return (child) => `<${tag}>${domOutputSpecToHTMLString(attrs)(child)}</${tag}>`;
+        }
+        if (children === 0) {
+          return (child) => `<${tag}>${domOutputSpecToHTMLString(attrs)(child)}</${tag}>`;
+        }
+        return (child) => `<${tag}>${domOutputSpecToHTMLString(attrs)(child)}${[children].concat(rest).map((a) => domOutputSpecToHTMLString(a)(child))}</${tag}>`;
+      }
+      if (children === void 0) {
+        return () => `<${tag}${serializeAttrsToHTMLString(attrs)}/>`;
+      }
+      if (children === 0) {
+        return (child) => `<${tag}${serializeAttrsToHTMLString(attrs)}>${serializeChildrenToHTMLString(child)}</${tag}>`;
+      }
+      return (child) => `<${tag}${serializeAttrsToHTMLString(attrs)}>${[children].concat(rest).map((a) => domOutputSpecToHTMLString(a)(child)).join("")}</${tag}>`;
+    }
+  }
+  throw new Error(
+    "[tiptap error]: Unsupported DomOutputSpec type, check the `renderHTML` method output or implement a node mapping",
+    {
+      cause: content
+    }
+  );
+}
+function renderToHTMLString({
+  content,
+  extensions,
+  options
+}) {
+  return renderToElement({
+    renderer: renderJSONContentToString,
+    domOutputSpecToElement: domOutputSpecToHTMLString,
+    mapDefinedTypes: {
+      // Map a doc node to concatenated children
+      doc: ({ children }) => serializeChildrenToHTMLString(children),
+      // Map a text node to its text content
+      text: ({ node }) => {
+        var _a;
+        return (_a = node.text) != null ? _a : "";
+      }
+    },
+    content,
+    extensions,
+    options
+  });
+}
+
+// src/pm/markdown/markdown.ts
+function renderToMarkdown({
+  content,
+  extensions,
+  options
+}) {
+  return renderToHTMLString({
+    content,
+    extensions,
+    options: {
+      nodeMapping: {
+        bulletList({ children }) {
+          return `
+${serializeChildrenToHTMLString(children)}`;
+        },
+        orderedList({ children }) {
+          return `
+${serializeChildrenToHTMLString(children)}`;
+        },
+        listItem({ node, children, parent }) {
+          if ((parent == null ? void 0 : parent.type.name) === "bulletList") {
+            return `- ${serializeChildrenToHTMLString(children).trim()}
+`;
+          }
+          if ((parent == null ? void 0 : parent.type.name) === "orderedList") {
+            let number = parent.attrs.start || 1;
+            parent.forEach((parentChild, _offset, index) => {
+              if (node === parentChild) {
+                number = index + 1;
+              }
+            });
+            return `${number}. ${serializeChildrenToHTMLString(children).trim()}
+`;
+          }
+          return serializeChildrenToHTMLString(children);
+        },
+        paragraph({ children }) {
+          return `
+${serializeChildrenToHTMLString(children)}
+`;
+        },
+        heading({ node, children }) {
+          const level = node.attrs.level;
+          return `${new Array(level).fill("#").join("")} ${children}
+`;
+        },
+        codeBlock({ node, children }) {
+          return `
+\`\`\`${node.attrs.language}
+${serializeChildrenToHTMLString(children)}
+\`\`\`
+`;
+        },
+        blockquote({ children }) {
+          return `
+${serializeChildrenToHTMLString(children).trim().split("\n").map((a) => `> ${a}`).join("\n")}`;
+        },
+        image({ node }) {
+          return `![${node.attrs.alt}](${node.attrs.src})`;
+        },
+        hardBreak() {
+          return "\n";
+        },
+        horizontalRule() {
+          return "\n---\n";
+        },
+        table({ children, node }) {
+          if (!Array.isArray(children)) {
+            return `
+${serializeChildrenToHTMLString(children)}
+`;
+          }
+          return `
+${serializeChildrenToHTMLString(children[0])}| ${new Array(node.childCount - 2).fill("---").join(" | ")} |
+${serializeChildrenToHTMLString(children.slice(1))}
+`;
+        },
+        tableRow({ children }) {
+          if (Array.isArray(children)) {
+            return `| ${children.join(" | ")} |
+`;
+          }
+          return `${serializeChildrenToHTMLString(children)}
+`;
+        },
+        tableHeader({ children }) {
+          return serializeChildrenToHTMLString(children).trim();
+        },
+        tableCell({ children }) {
+          return serializeChildrenToHTMLString(children).trim();
+        },
+        ...options == null ? void 0 : options.nodeMapping
+      },
+      markMapping: {
+        bold({ children }) {
+          return `**${serializeChildrenToHTMLString(children)}**`;
+        },
+        italic({ children, node }) {
+          let isBoldToo = false;
+          if (node == null ? void 0 : node.marks.some((m) => m.type.name === "bold")) {
+            isBoldToo = true;
+          }
+          if (isBoldToo) {
+            return `*${serializeChildrenToHTMLString(children)}*`;
+          }
+          return `_${serializeChildrenToHTMLString(children)}_`;
+        },
+        code({ children }) {
+          return `\`${serializeChildrenToHTMLString(children)}\``;
+        },
+        strike({ children }) {
+          return `~~${serializeChildrenToHTMLString(children)}~~`;
+        },
+        underline({ children }) {
+          return `<u>${serializeChildrenToHTMLString(children)}</u>`;
+        },
+        subscript({ children }) {
+          return `<sub>${serializeChildrenToHTMLString(children)}</sub>`;
+        },
+        superscript({ children }) {
+          return `<sup>${serializeChildrenToHTMLString(children)}</sup>`;
+        },
+        link({ node, children }) {
+          return `[${serializeChildrenToHTMLString(children)}](${node.attrs.href})`;
+        },
+        highlight({ children }) {
+          return `==${serializeChildrenToHTMLString(children)}==`;
+        },
+        ...options == null ? void 0 : options.markMapping
+      },
+      ...options
+    }
+  });
+}
+
+//# sourceMappingURL=index.js.map
+;// ./node_modules/@tiptap/static-renderer/dist/pm/html-string/index.js
+// src/pm/extensionRenderer.ts
+
+
+
+// src/helpers.ts
+
+function html_string_getAttributes(nodeOrMark, extensionAttributes, onlyRenderedAttributes) {
+  const nodeOrMarkAttributes = nodeOrMark.attrs;
+  if (!nodeOrMarkAttributes) {
+    return {};
+  }
+  return extensionAttributes.filter((item) => {
+    if (item.type !== (typeof nodeOrMark.type === "string" ? nodeOrMark.type : nodeOrMark.type.name)) {
+      return false;
+    }
+    if (onlyRenderedAttributes) {
+      return item.attribute.rendered;
+    }
+    return true;
+  }).map((item) => {
+    if (!item.attribute.renderHTML) {
+      return {
+        [item.name]: item.name in nodeOrMarkAttributes ? nodeOrMarkAttributes[item.name] : item.attribute.default
+      };
+    }
+    return item.attribute.renderHTML(nodeOrMarkAttributes) || {
+      [item.name]: item.name in nodeOrMarkAttributes ? nodeOrMarkAttributes[item.name] : item.attribute.default
+    };
+  }).reduce((attributes, attribute) => mergeAttributes(attributes, attribute), {});
+}
+function html_string_getHTMLAttributes(nodeOrMark, extensionAttributes) {
+  return html_string_getAttributes(nodeOrMark, extensionAttributes, true);
+}
+
+// src/pm/extensionRenderer.ts
+function html_string_mapNodeExtensionToReactNode(domOutputSpecToElement, extension, extensionAttributes, options) {
+  const context = {
+    name: extension.name,
+    options: extension.options,
+    storage: extension.storage,
+    parent: extension.parent
+  };
+  const renderToHTML = getExtensionField(extension, "renderHTML", context);
+  if (!renderToHTML) {
+    if (options == null ? void 0 : options.unhandledNode) {
+      return [extension.name, options.unhandledNode];
+    }
+    return [
+      extension.name,
+      () => {
+        throw new Error(
+          `[tiptap error]: Node ${extension.name} cannot be rendered, it is missing a "renderToHTML" method, please implement it or override the corresponding "nodeMapping" method to have a custom rendering`
+        );
+      }
+    ];
+  }
+  return [
+    extension.name,
+    ({ node, children }) => {
+      try {
+        return domOutputSpecToElement(
+          renderToHTML({
+            node,
+            HTMLAttributes: html_string_getHTMLAttributes(node, extensionAttributes)
+          })
+        )(children);
+      } catch (e) {
+        throw new Error(
+          `[tiptap error]: Node ${extension.name} cannot be rendered, it's "renderToHTML" method threw an error: ${e.message}`,
+          { cause: e }
+        );
+      }
+    }
+  ];
+}
+function html_string_mapMarkExtensionToReactNode(domOutputSpecToElement, extension, extensionAttributes, options) {
+  const context = {
+    name: extension.name,
+    options: extension.options,
+    storage: extension.storage,
+    parent: extension.parent
+  };
+  const renderToHTML = getExtensionField(extension, "renderHTML", context);
+  if (!renderToHTML) {
+    if (options == null ? void 0 : options.unhandledMark) {
+      return [extension.name, options.unhandledMark];
+    }
+    return [
+      extension.name,
+      () => {
+        throw new Error(`Node ${extension.name} cannot be rendered, it is missing a "renderToHTML" method`);
+      }
+    ];
+  }
+  return [
+    extension.name,
+    ({ mark, children }) => {
+      try {
+        return domOutputSpecToElement(
+          renderToHTML({
+            mark,
+            HTMLAttributes: html_string_getHTMLAttributes(mark, extensionAttributes)
+          })
+        )(children);
+      } catch (e) {
+        throw new Error(
+          `[tiptap error]: Mark ${extension.name} cannot be rendered, it's "renderToHTML" method threw an error: ${e.message}`,
+          { cause: e }
+        );
+      }
+    }
+  ];
+}
+function html_string_renderToElement({
+  renderer,
+  domOutputSpecToElement,
+  mapDefinedTypes,
+  content,
+  extensions,
+  options
+}) {
+  extensions = resolveExtensions(extensions);
+  const extensionAttributes = getAttributesFromExtensions(extensions);
+  const { nodeExtensions, markExtensions } = splitExtensions(extensions);
+  if (!(content instanceof dist_Node)) {
+    content = dist_Node.fromJSON(getSchemaByResolvedExtensions(extensions), content);
+  }
+  return renderer({
+    ...options,
+    nodeMapping: {
+      ...Object.fromEntries(
+        nodeExtensions.filter((e) => {
+          if (e.name in mapDefinedTypes) {
+            return false;
+          }
+          if (options == null ? void 0 : options.nodeMapping) {
+            return !(e.name in options.nodeMapping);
+          }
+          return true;
+        }).map(
+          (nodeExtension) => html_string_mapNodeExtensionToReactNode(domOutputSpecToElement, nodeExtension, extensionAttributes, options)
+        )
+      ),
+      ...mapDefinedTypes,
+      ...options == null ? void 0 : options.nodeMapping
+    },
+    markMapping: {
+      ...Object.fromEntries(
+        markExtensions.filter((e) => {
+          if (options == null ? void 0 : options.markMapping) {
+            return !(e.name in options.markMapping);
+          }
+          return true;
+        }).map((mark) => html_string_mapMarkExtensionToReactNode(domOutputSpecToElement, mark, extensionAttributes, options))
+      ),
+      ...options == null ? void 0 : options.markMapping
+    }
+  })({ content });
+}
+
+// src/json/renderer.ts
+function html_string_TiptapStaticRenderer(renderComponent, {
+  nodeMapping,
+  markMapping,
+  unhandledNode,
+  unhandledMark
+}) {
+  return function renderContent({
+    content,
+    parent
+  }) {
+    var _a;
+    const nodeType = typeof content.type === "string" ? content.type : content.type.name;
+    const NodeHandler = (_a = nodeMapping[nodeType]) != null ? _a : unhandledNode;
+    if (!NodeHandler) {
+      throw new Error(`missing handler for node type ${nodeType}`);
+    }
+    const nodeContent = renderComponent({
+      component: NodeHandler,
+      props: {
+        node: content,
+        parent,
+        renderElement: renderContent,
+        // Lazily compute the children to avoid unnecessary recursion
+        get children() {
+          const children = [];
+          if (content.content) {
+            content.content.forEach((child) => {
+              children.push(
+                renderContent({
+                  content: child,
+                  parent: content
+                })
+              );
+            });
+          }
+          return children;
+        }
+      }
+    });
+    const markedContent = content.marks ? content.marks.reduce((acc, mark) => {
+      var _a2;
+      const markType = typeof mark.type === "string" ? mark.type : mark.type.name;
+      const MarkHandler = (_a2 = markMapping[markType]) != null ? _a2 : unhandledMark;
+      if (!MarkHandler) {
+        throw new Error(`missing handler for mark type ${markType}`);
+      }
+      return renderComponent({
+        component: MarkHandler,
+        props: {
+          mark,
+          parent,
+          node: content,
+          children: acc
+        }
+      });
+    }, nodeContent) : nodeContent;
+    return markedContent;
+  };
+}
+
+// src/json/html-string/string.ts
+function html_string_renderJSONContentToString(options) {
+  return html_string_TiptapStaticRenderer((ctx) => {
+    return ctx.component(ctx.props);
+  }, options);
+}
+function html_string_serializeAttrsToHTMLString(attrs) {
+  const output = Object.entries(attrs || {}).map(([key, value]) => `${key.split(" ").at(-1)}=${JSON.stringify(value)}`).join(" ");
+  return output ? ` ${output}` : "";
+}
+function html_string_serializeChildrenToHTMLString(children) {
+  return [].concat(children || "").filter(Boolean).join("");
+}
+
+// src/pm/html-string/html-string.ts
+function html_string_domOutputSpecToHTMLString(content) {
+  if (typeof content === "string") {
+    return () => content;
+  }
+  if (typeof content === "object" && "length" in content) {
+    const [_tag, attrs, children, ...rest] = content;
+    let tag = _tag;
+    const parts = tag.split(" ");
+    if (parts.length > 1) {
+      tag = `${parts[1]} xmlns="${parts[0]}"`;
+    }
+    if (attrs === void 0) {
+      return () => `<${tag}/>`;
+    }
+    if (attrs === 0) {
+      return (child) => `<${tag}>${html_string_serializeChildrenToHTMLString(child)}</${tag}>`;
+    }
+    if (typeof attrs === "object") {
+      if (Array.isArray(attrs)) {
+        if (children === void 0) {
+          return (child) => `<${tag}>${html_string_domOutputSpecToHTMLString(attrs)(child)}</${tag}>`;
+        }
+        if (children === 0) {
+          return (child) => `<${tag}>${html_string_domOutputSpecToHTMLString(attrs)(child)}</${tag}>`;
+        }
+        return (child) => `<${tag}>${html_string_domOutputSpecToHTMLString(attrs)(child)}${[children].concat(rest).map((a) => html_string_domOutputSpecToHTMLString(a)(child))}</${tag}>`;
+      }
+      if (children === void 0) {
+        return () => `<${tag}${html_string_serializeAttrsToHTMLString(attrs)}/>`;
+      }
+      if (children === 0) {
+        return (child) => `<${tag}${html_string_serializeAttrsToHTMLString(attrs)}>${html_string_serializeChildrenToHTMLString(child)}</${tag}>`;
+      }
+      return (child) => `<${tag}${html_string_serializeAttrsToHTMLString(attrs)}>${[children].concat(rest).map((a) => html_string_domOutputSpecToHTMLString(a)(child)).join("")}</${tag}>`;
+    }
+  }
+  throw new Error(
+    "[tiptap error]: Unsupported DomOutputSpec type, check the `renderHTML` method output or implement a node mapping",
+    {
+      cause: content
+    }
+  );
+}
+function html_string_renderToHTMLString({
+  content,
+  extensions,
+  options
+}) {
+  return html_string_renderToElement({
+    renderer: html_string_renderJSONContentToString,
+    domOutputSpecToElement: html_string_domOutputSpecToHTMLString,
+    mapDefinedTypes: {
+      // Map a doc node to concatenated children
+      doc: ({ children }) => html_string_serializeChildrenToHTMLString(children),
+      // Map a text node to its text content
+      text: ({ node }) => {
+        var _a;
+        return (_a = node.text) != null ? _a : "";
+      }
+    },
+    content,
+    extensions,
+    options
+  });
+}
+
+//# sourceMappingURL=index.js.map
 ;// ./node_modules/@tiptap/extension-document/dist/index.js
 
 
@@ -66715,7 +67501,341 @@ var TextStyleKit = Extension.create({
 });
 
 //# sourceMappingURL=index.js.map
+;// ./node_modules/@tiptap/extension-text-align/dist/index.js
+// src/text-align.ts
+
+var TextAlign = Extension.create({
+  name: "textAlign",
+  addOptions() {
+    return {
+      types: [],
+      alignments: ["left", "center", "right", "justify"],
+      defaultAlignment: null
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          textAlign: {
+            default: this.options.defaultAlignment,
+            parseHTML: (element) => {
+              const alignment = element.style.textAlign;
+              return this.options.alignments.includes(alignment) ? alignment : this.options.defaultAlignment;
+            },
+            renderHTML: (attributes) => {
+              if (!attributes.textAlign) {
+                return {};
+              }
+              return { style: `text-align: ${attributes.textAlign}` };
+            }
+          }
+        }
+      }
+    ];
+  },
+  addCommands() {
+    return {
+      setTextAlign: (alignment) => ({ commands }) => {
+        if (!this.options.alignments.includes(alignment)) {
+          return false;
+        }
+        return this.options.types.map((type) => commands.updateAttributes(type, { textAlign: alignment })).every((response) => response);
+      },
+      unsetTextAlign: () => ({ commands }) => {
+        return this.options.types.map((type) => commands.resetAttributes(type, "textAlign")).every((response) => response);
+      },
+      toggleTextAlign: (alignment) => ({ editor, commands }) => {
+        if (!this.options.alignments.includes(alignment)) {
+          return false;
+        }
+        if (editor.isActive({ textAlign: alignment })) {
+          return commands.unsetTextAlign();
+        }
+        return commands.setTextAlign(alignment);
+      }
+    };
+  },
+  addKeyboardShortcuts() {
+    return {
+      "Mod-Shift-l": () => this.editor.commands.setTextAlign("left"),
+      "Mod-Shift-e": () => this.editor.commands.setTextAlign("center"),
+      "Mod-Shift-r": () => this.editor.commands.setTextAlign("right"),
+      "Mod-Shift-j": () => this.editor.commands.setTextAlign("justify")
+    };
+  }
+});
+
+// src/index.ts
+var extension_text_align_dist_index_default = TextAlign;
+
+//# sourceMappingURL=index.js.map
+;// ./node_modules/@tiptap/extension-youtube/dist/index.js
+// src/youtube.ts
+
+
+// src/utils.ts
+var YOUTUBE_REGEX = /^((?:https?:)?\/\/)?((?:www|m|music)\.)?((?:youtube\.com|youtu\.be|youtube-nocookie\.com))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/;
+var YOUTUBE_REGEX_GLOBAL = /^((?:https?:)?\/\/)?((?:www|m|music)\.)?((?:youtube\.com|youtu\.be|youtube-nocookie\.com))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/g;
+var isValidYoutubeUrl = (url) => {
+  return url.match(YOUTUBE_REGEX);
+};
+var getYoutubeEmbedUrl = (nocookie, isPlaylist) => {
+  if (isPlaylist) {
+    return "https://www.youtube-nocookie.com/embed/videoseries?list=";
+  }
+  return nocookie ? "https://www.youtube-nocookie.com/embed/" : "https://www.youtube.com/embed/";
+};
+var getEmbedUrlFromYoutubeUrl = (options) => {
+  const {
+    url,
+    allowFullscreen,
+    autoplay,
+    ccLanguage,
+    ccLoadPolicy,
+    controls,
+    disableKBcontrols,
+    enableIFrameApi,
+    endTime,
+    interfaceLanguage,
+    ivLoadPolicy,
+    loop,
+    modestBranding,
+    nocookie,
+    origin,
+    playlist,
+    progressBarColor,
+    startAt,
+    rel
+  } = options;
+  if (!isValidYoutubeUrl(url)) {
+    return null;
+  }
+  if (url.includes("/embed/")) {
+    return url;
+  }
+  if (url.includes("youtu.be")) {
+    const id = url.split("/").pop();
+    if (!id) {
+      return null;
+    }
+    return `${getYoutubeEmbedUrl(nocookie)}${id}`;
+  }
+  const videoIdRegex = /(?:(v|list)=|shorts\/)([-\w]+)/gm;
+  const matches = videoIdRegex.exec(url);
+  if (!matches || !matches[2]) {
+    return null;
+  }
+  let outputUrl = `${getYoutubeEmbedUrl(nocookie, matches[1] === "list")}${matches[2]}`;
+  const params = [];
+  if (allowFullscreen === false) {
+    params.push("fs=0");
+  }
+  if (autoplay) {
+    params.push("autoplay=1");
+  }
+  if (ccLanguage) {
+    params.push(`cc_lang_pref=${ccLanguage}`);
+  }
+  if (ccLoadPolicy) {
+    params.push("cc_load_policy=1");
+  }
+  if (!controls) {
+    params.push("controls=0");
+  }
+  if (disableKBcontrols) {
+    params.push("disablekb=1");
+  }
+  if (enableIFrameApi) {
+    params.push("enablejsapi=1");
+  }
+  if (endTime) {
+    params.push(`end=${endTime}`);
+  }
+  if (interfaceLanguage) {
+    params.push(`hl=${interfaceLanguage}`);
+  }
+  if (ivLoadPolicy) {
+    params.push(`iv_load_policy=${ivLoadPolicy}`);
+  }
+  if (loop) {
+    params.push("loop=1");
+  }
+  if (modestBranding) {
+    params.push("modestbranding=1");
+  }
+  if (origin) {
+    params.push(`origin=${origin}`);
+  }
+  if (playlist) {
+    params.push(`playlist=${playlist}`);
+  }
+  if (startAt) {
+    params.push(`start=${startAt}`);
+  }
+  if (progressBarColor) {
+    params.push(`color=${progressBarColor}`);
+  }
+  if (rel !== void 0) {
+    params.push(`rel=${rel}`);
+  }
+  if (params.length) {
+    outputUrl += `${matches[1] === "v" ? "?" : "&"}${params.join("&")}`;
+  }
+  return outputUrl;
+};
+
+// src/youtube.ts
+var Youtube = Node3.create({
+  name: "youtube",
+  addOptions() {
+    return {
+      addPasteHandler: true,
+      allowFullscreen: true,
+      autoplay: false,
+      ccLanguage: void 0,
+      ccLoadPolicy: void 0,
+      controls: true,
+      disableKBcontrols: false,
+      enableIFrameApi: false,
+      endTime: 0,
+      height: 480,
+      interfaceLanguage: void 0,
+      ivLoadPolicy: 0,
+      loop: false,
+      modestBranding: false,
+      HTMLAttributes: {},
+      inline: false,
+      nocookie: false,
+      origin: "",
+      playlist: "",
+      progressBarColor: void 0,
+      width: 640,
+      rel: 1
+    };
+  },
+  inline() {
+    return this.options.inline;
+  },
+  group() {
+    return this.options.inline ? "inline" : "block";
+  },
+  draggable: true,
+  addAttributes() {
+    return {
+      src: {
+        default: null
+      },
+      start: {
+        default: 0
+      },
+      width: {
+        default: this.options.width
+      },
+      height: {
+        default: this.options.height
+      }
+    };
+  },
+  parseHTML() {
+    return [
+      {
+        tag: "div[data-youtube-video] iframe"
+      }
+    ];
+  },
+  addCommands() {
+    return {
+      setYoutubeVideo: (options) => ({ commands }) => {
+        if (!isValidYoutubeUrl(options.src)) {
+          return false;
+        }
+        return commands.insertContent({
+          type: this.name,
+          attrs: options
+        });
+      }
+    };
+  },
+  addPasteRules() {
+    if (!this.options.addPasteHandler) {
+      return [];
+    }
+    return [
+      nodePasteRule({
+        find: YOUTUBE_REGEX_GLOBAL,
+        type: this.type,
+        getAttributes: (match) => {
+          return { src: match.input };
+        }
+      })
+    ];
+  },
+  renderHTML({ HTMLAttributes }) {
+    const embedUrl = getEmbedUrlFromYoutubeUrl({
+      url: HTMLAttributes.src,
+      allowFullscreen: this.options.allowFullscreen,
+      autoplay: this.options.autoplay,
+      ccLanguage: this.options.ccLanguage,
+      ccLoadPolicy: this.options.ccLoadPolicy,
+      controls: this.options.controls,
+      disableKBcontrols: this.options.disableKBcontrols,
+      enableIFrameApi: this.options.enableIFrameApi,
+      endTime: this.options.endTime,
+      interfaceLanguage: this.options.interfaceLanguage,
+      ivLoadPolicy: this.options.ivLoadPolicy,
+      loop: this.options.loop,
+      modestBranding: this.options.modestBranding,
+      nocookie: this.options.nocookie,
+      origin: this.options.origin,
+      playlist: this.options.playlist,
+      progressBarColor: this.options.progressBarColor,
+      startAt: HTMLAttributes.start || 0,
+      rel: this.options.rel
+    });
+    HTMLAttributes.src = embedUrl;
+    return [
+      "div",
+      { "data-youtube-video": "" },
+      [
+        "iframe",
+        mergeAttributes(
+          this.options.HTMLAttributes,
+          {
+            width: this.options.width,
+            height: this.options.height,
+            allowfullscreen: this.options.allowFullscreen,
+            autoplay: this.options.autoplay,
+            ccLanguage: this.options.ccLanguage,
+            ccLoadPolicy: this.options.ccLoadPolicy,
+            disableKBcontrols: this.options.disableKBcontrols,
+            enableIFrameApi: this.options.enableIFrameApi,
+            endTime: this.options.endTime,
+            interfaceLanguage: this.options.interfaceLanguage,
+            ivLoadPolicy: this.options.ivLoadPolicy,
+            loop: this.options.loop,
+            modestBranding: this.options.modestBranding,
+            origin: this.options.origin,
+            playlist: this.options.playlist,
+            progressBarColor: this.options.progressBarColor,
+            rel: this.options.rel
+          },
+          HTMLAttributes
+        )
+      ]
+    ];
+  }
+});
+
+// src/index.ts
+var extension_youtube_dist_index_default = Youtube;
+
+//# sourceMappingURL=index.js.map
 ;// ./src/collaboration-bundle.js
+
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 // TipTap v3 Collaboration Bundle
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
 
@@ -66739,6 +67859,10 @@ var TextStyleKit = Extension.create({
 
 
 // BubbleMenu extension for floating formatting toolbar
+
+
+// Static renderer for markdown/HTML conversion
+
 
 
 // These may still be individual packages
@@ -66768,6 +67892,186 @@ var TextStyleKit = Extension.create({
 
  // Named export in v3
 
+
+
+
+// Create custom SpkVideo extension by extending Youtube
+var SpkVideo = extension_youtube_dist_index_default.extend({
+  name: 'video',
+  addAttributes: function addAttributes() {
+    return {
+      src: {
+        "default": null,
+        parseHTML: function parseHTML(element) {
+          // Check for original src first (for blob URL recovery)
+          var originalSrc = element.getAttribute('data-original-src');
+          if (originalSrc) {
+            return originalSrc;
+          }
+          // Check if current src is a blob URL and we have type information
+          var currentSrc = element.getAttribute('src');
+          if (currentSrc && currentSrc.startsWith('blob:') && (element.getAttribute('type') === 'application/x-mpegURL' || element.getAttribute('data-type') === 'm3u8')) {
+            // This is likely an HLS video with a blob URL, but we lost the original
+            console.warn('Found HLS video with blob URL but no original src preserved');
+          }
+          return currentSrc;
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (!attributes.src) return {};
+          return {
+            src: attributes.src
+          };
+        }
+      },
+      controls: {
+        "default": true,
+        parseHTML: function parseHTML(element) {
+          return element.hasAttribute('controls');
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (attributes.controls) {
+            return {
+              controls: 'controls'
+            };
+          }
+          return {};
+        }
+      },
+      width: {
+        "default": '100%',
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('width') || '100%';
+        },
+        renderHTML: function renderHTML(attributes) {
+          return {
+            width: attributes.width || '100%'
+          };
+        }
+      },
+      height: {
+        "default": 'auto',
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('height') || 'auto';
+        },
+        renderHTML: function renderHTML(attributes) {
+          return {
+            height: attributes.height || 'auto'
+          };
+        }
+      },
+      type: {
+        "default": null,
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('type');
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (!attributes.type) return {};
+          return {
+            type: attributes.type
+          };
+        }
+      },
+      crossorigin: {
+        "default": 'anonymous',
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('crossorigin') || 'anonymous';
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (attributes.crossorigin) {
+            return {
+              crossorigin: attributes.crossorigin
+            };
+          }
+          return {};
+        }
+      },
+      'data-type': {
+        "default": null,
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('data-type');
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (!attributes['data-type']) return {};
+          return {
+            'data-type': attributes['data-type']
+          };
+        }
+      },
+      'data-mime-type': {
+        "default": null,
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('data-mime-type');
+        },
+        renderHTML: function renderHTML(attributes) {
+          if (!attributes['data-mime-type']) return {};
+          return {
+            'data-mime-type': attributes['data-mime-type']
+          };
+        }
+      },
+      'data-original-src': {
+        "default": null,
+        parseHTML: function parseHTML(element) {
+          return element.getAttribute('data-original-src');
+        },
+        renderHTML: function renderHTML(attributes) {
+          // Always preserve original src if we have it
+          if (attributes.src && !attributes.src.startsWith('blob:')) {
+            return {
+              'data-original-src': attributes.src
+            };
+          }
+          // Keep existing data-original-src if present
+          if (attributes['data-original-src']) {
+            return {
+              'data-original-src': attributes['data-original-src']
+            };
+          }
+          return {};
+        }
+      }
+    };
+  },
+  parseHTML: function parseHTML() {
+    return [{
+      tag: 'video[src]'
+    }];
+  },
+  renderHTML: function renderHTML(_ref) {
+    var HTMLAttributes = _ref.HTMLAttributes;
+    // Create a clean copy of attributes to avoid mutation issues
+    var attrs = _objectSpread({}, HTMLAttributes);
+
+    // Ensure controls attribute is properly formatted
+    if (attrs.controls === true || attrs.controls === 'true') {
+      attrs.controls = 'controls';
+    } else if (attrs.controls === false || attrs.controls === 'false') {
+      delete attrs.controls;
+    }
+
+    // Apply defaults if not explicitly set
+    if (!attrs.width) attrs.width = '100%';
+    if (!attrs.height) attrs.height = 'auto';
+    if (!attrs.crossorigin && attrs.src && attrs.src.includes('ipfs')) {
+      attrs.crossorigin = 'anonymous';
+    }
+    return ['video', attrs];
+  },
+  addCommands: function addCommands() {
+    var _this = this;
+    return {
+      setVideo: function setVideo(options) {
+        return function (_ref2) {
+          var commands = _ref2.commands;
+          return commands.insertContent({
+            type: _this.name,
+            attrs: options
+          });
+        };
+      }
+    };
+  }
+});
 
 // Create collaborative document helper
 function createCollaborativeDocument() {
@@ -66825,7 +68129,14 @@ var TiptapCollaboration = {
   Subscript: extension_subscript_dist_index_default,
   Superscript: extension_superscript_dist_index_default,
   TextStyle: extension_text_style_dist_TextStyle,
-  Underline: extension_underline_dist_index_default
+  Underline: extension_underline_dist_index_default,
+  TextAlign: extension_text_align_dist_index_default,
+  // Media extensions
+  Youtube: extension_youtube_dist_index_default,
+  SpkVideo: SpkVideo,
+  // Static renderer utilities
+  renderToMarkdown: renderToMarkdown,
+  renderToHTMLString: html_string_renderToHTMLString
 };
 
 // Make globally available

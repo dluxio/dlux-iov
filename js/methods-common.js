@@ -659,16 +659,24 @@ export default {
           console.log('IPFS Loader handling blob URL for preview:', url);
           ipfsUrl = url; // Use blob URL directly
         } else if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
-          const cid = url.split('/ipfs/')[1].split('?')[0];
-          let filename = 'file';
+          const cidWithPath = url.split('/ipfs/')[1].split('?')[0];
+          
+          // Check if URL already has an extension
+          if (cidWithPath.includes('.')) {
+            // URL already has extension, use as-is
+            ipfsUrl = `${this.gatewayUrl}/ipfs/${cidWithPath}`;
+          } else {
+            // No extension, add filename parameter for IPFS gateway
+            let filename = 'file';
 
-          if (context.type === 'manifest' || context.type === 'level' || url.includes('.m3u8')) {
-            filename = 'playlist.m3u8';
-          } else if (context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-            filename = 'segment.ts';
+            if (context.type === 'manifest' || context.type === 'level') {
+              filename = 'playlist.m3u8';
+            } else if (context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+              filename = 'segment.ts';
+            }
+
+            ipfsUrl = `${this.gatewayUrl}/ipfs/${cidWithPath}?filename=${filename}`;
           }
-
-          ipfsUrl = `${this.gatewayUrl}/ipfs/${cid}?filename=${filename}`;
         }
 
         console.log('IPFS Loader fetching:', ipfsUrl);
@@ -779,11 +787,26 @@ export default {
     const videoType = videoElement.type;
     // Video setup logging removed to reduce noise
 
+    // Preserve original src before HLS.js replaces it with blob URL
+    if (!videoSrc.startsWith('blob:') && !videoElement.getAttribute('data-original-src')) {
+      videoElement.setAttribute('data-original-src', videoSrc);
+    }
+
     // Handle blob URLs for preview (they contain M3U8 playlists)
+    let currentVideoSrc = videoSrc;
     if (videoSrc.startsWith('blob:')) {
       // Processing blob URL for HLS preview
       // Allow blob URLs to be processed by HLS if they're M3U8 playlists
       // Don't skip them - they might be transcoded preview playlists
+      // Check if we have the original src preserved
+      const originalSrc = videoElement.getAttribute('data-original-src');
+      if (originalSrc && videoElement.type === 'application/x-mpegURL') {
+        // This is likely a reload scenario - restore the original URL
+        console.log('Restoring original m3u8 URL from data-original-src:', originalSrc);
+        videoElement.src = originalSrc;
+        currentVideoSrc = originalSrc;
+        // Continue processing with the restored URL
+      }
     }
 
     // Skip if HLS instance already exists for this element
@@ -799,7 +822,7 @@ export default {
     }
 
     // Enhanced HLS detection with multiple fallback methods
-    const srcLower = videoSrc.toLowerCase();
+    const srcLower = currentVideoSrc.toLowerCase();
     const isM3U8 = 
       // Explicit type checks
       videoType === 'application/x-mpegURL' || 
@@ -818,8 +841,11 @@ export default {
       srcLower.includes('/index.m3u8') ||
       // Check for HLS-related strings in the URL
       (srcLower.includes('hls') && srcLower.includes('playlist'));
-
-    if (isM3U8) {
+    
+    // Also check for tryHls flag (for IPFS videos)
+    const shouldTryHls = videoElement.dataset.tryHls === 'true';
+    
+    if (isM3U8 || shouldTryHls) {
       // Log if we're using fallback detection (no explicit .m3u8 extension)
       if (!srcLower.endsWith('.m3u8') && !srcLower.includes('.m3u8?') && !srcLower.includes('.m3u8#')) {
         // HLS detected via fallback pattern
@@ -863,10 +889,16 @@ export default {
         loader: IpfsLoader
       });
 
-            videoElement.hlsInstance = hls;
+      // Preserve original src before HLS replaces it with blob URL
+      if (!videoElement.getAttribute('data-original-src') && !videoSrc.startsWith('blob:')) {
+        videoElement.setAttribute('data-original-src', videoSrc);
+        console.log('💾 Preserved original video src:', videoSrc);
+      }
+
+      videoElement.hlsInstance = hls;
       
       // Loading HLS source
-      hls.loadSource(videoSrc);
+      hls.loadSource(currentVideoSrc);
       
       // Attaching media to video element
       hls.attachMedia(videoElement);
@@ -875,19 +907,31 @@ export default {
         // HLS initialized successfully
         console.log('✅ HLS playback ready for:', videoSrc);
         
-        // Add quality selector if available
-        try {
-          const createQualitySelector = await this.loadQualitySelector();
-          if (createQualitySelector && hls.levels.length > 1) {
-            videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
-              position: 'top-right',
-              showBitrate: true,
-              persistQuality: true
-            });
+        // If this was a tryHls attempt and it worked, set the type for future persistence
+        if (shouldTryHls) {
+          console.log('✅ IPFS video is HLS! Setting type attributes for persistence');
+          videoElement.setAttribute('type', 'application/x-mpegURL');
+          videoElement.setAttribute('data-type', 'm3u8');
+        }
+        
+        // Add quality selector if available (but not for videos inside TipTap editor)
+        const isInTipTapEditor = videoElement.closest('.ProseMirror') !== null;
+        if (!isInTipTapEditor) {
+          try {
+            const createQualitySelector = await this.loadQualitySelector();
+            if (createQualitySelector && hls.levels.length > 1) {
+              videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
+                position: 'top-right',
+                showBitrate: true,
+                persistQuality: true
+              });
+            }
+          } catch (e) {
+            // Quality selector is optional, continue without it
+            console.log('Could not add quality selector:', e);
           }
-        } catch (e) {
-          // Quality selector is optional, continue without it
-          console.log('Could not add quality selector:', e);
+        } else {
+          console.log('Quality selector disabled for video in TipTap editor');
         }
         
         // Autoplay the video (muted to ensure it works in all browsers)
@@ -918,6 +962,19 @@ export default {
         console.error('❌ HLS error:', data);
         if (data.fatal) {
           console.error('💀 Fatal HLS error:', data.type, data.details);
+          
+          // If this was a tryHls attempt and it failed, fall back to native playback
+          if (shouldTryHls && (data.details === 'manifestParsingError' || data.details === 'manifestLoadError')) {
+            console.log('🔄 HLS attempt failed for IPFS video, falling back to native playback');
+            hls.destroy();
+            delete videoElement.hlsInstance;
+            videoElement.dataset.hlsProcessed = 'false';
+            videoElement.dataset.tryHls = 'false';
+            // Let the browser try to play it natively
+            videoElement.load();
+            return;
+          }
+          
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.log('🔄 Attempting to recover from network error');
@@ -952,11 +1009,25 @@ export default {
       }
       processedVideos.add(video);
       
+      // Check if this is a blob URL that needs restoration
+      if (video.src && video.src.startsWith('blob:') && 
+          (video.getAttribute('type') === 'application/x-mpegURL' || 
+           video.getAttribute('data-type') === 'm3u8')) {
+        // This is an HLS video with a blob URL - check for original src
+        const originalSrc = video.getAttribute('data-original-src');
+        if (originalSrc) {
+          console.log('🔄 Restoring video from blob URL to original:', originalSrc);
+          video.src = originalSrc;
+          video.type = 'application/x-mpegURL';
+          // Continue processing
+        }
+      }
+      
       // Enhanced HLS detection with multiple fallbacks
       if (video.src && !video.type) {
         // Check multiple indicators for HLS content
         const srcLower = video.src.toLowerCase();
-        const isM3U8 = 
+        let isM3U8 = 
           // Standard extension checks
           srcLower.endsWith('.m3u8') || 
           srcLower.includes('.m3u8?') ||
@@ -966,9 +1037,17 @@ export default {
           // Common HLS patterns
           srcLower.includes('/manifest.m3u8') ||
           srcLower.includes('/playlist.m3u8') ||
-          srcLower.includes('/master.m3u8') ||
-          // Blob URLs for preview
-          video.src.startsWith('blob:');
+          srcLower.includes('/master.m3u8');
+          
+        // Special handling for blob URLs - don't automatically assume they're m3u8
+        if (video.src.startsWith('blob:')) {
+          // Check if we have explicit type information
+          if (video.getAttribute('type') === 'application/x-mpegURL' || 
+              video.getAttribute('data-type') === 'm3u8') {
+            // This is confirmed to be an m3u8 blob
+            isM3U8 = true;
+          }
+        }
           
         if (isM3U8) {
           video.type = 'application/x-mpegURL';
@@ -1004,7 +1083,7 @@ export default {
 
         if (mutation.type === 'attributes' &&
             mutation.target.tagName === 'VIDEO' &&
-            mutation.attributeName === 'src') {
+            (mutation.attributeName === 'src' || mutation.attributeName === 'type' || mutation.attributeName === 'data-type')) {
           processVideo(mutation.target);
         }
       });
@@ -1014,7 +1093,7 @@ export default {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['src']
+      attributeFilter: ['src', 'type', 'data-type']
     });
 
     // Setup existing video elements
