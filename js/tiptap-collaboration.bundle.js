@@ -52231,7 +52231,7 @@ var HardBreak = Node3.create({
 });
 
 // src/index.ts
-var extension_hard_break_dist_index_default = (/* unused pure expression or super */ null && (HardBreak));
+var extension_hard_break_dist_index_default = HardBreak;
 
 //# sourceMappingURL=index.js.map
 ;// ./node_modules/@tiptap/starter-kit/node_modules/@tiptap/extension-heading/dist/index.js
@@ -67881,6 +67881,7 @@ function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t =
 
 
 
+
 // History extension removed - not compatible with Collaboration extension
 
 
@@ -68114,6 +68115,7 @@ var TiptapCollaboration = {
   TaskItem: extension_task_item_dist_index_default,
   Blockquote: dist_Blockquote,
   HorizontalRule: dist_HorizontalRule,
+  HardBreak: extension_hard_break_dist_index_default,
   // Additional extensions
   // History, // Removed - not compatible with Collaboration extension
   Link: extension_link_dist_index_default,

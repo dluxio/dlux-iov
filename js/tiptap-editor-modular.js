@@ -13264,6 +13264,7 @@ export default {
                     ListItem,
                     Blockquote,
                     HorizontalRule,
+                    HardBreak,
                     Link,
                     Image,
                     CodeBlock,
@@ -13294,6 +13295,7 @@ export default {
                     ListItem,
                     Blockquote,
                     HorizontalRule,
+                    HardBreak,
                     Link,
                     Image,
                     CodeBlock,
@@ -13436,6 +13438,11 @@ export default {
                     // Horizontal rule
                     horizontalRule() {
                         return '---\n\n';
+                    },
+                    
+                    // Hard break (line break with Shift+Enter)
+                    hardBreak() {
+                        return '\n';
                     },
                     
                     // Code block

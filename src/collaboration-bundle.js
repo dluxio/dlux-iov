@@ -48,6 +48,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Blockquote from '@tiptap/extension-blockquote';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
+import HardBreak from '@tiptap/extension-hard-break';
 // History extension removed - not compatible with Collaboration extension
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
@@ -254,6 +255,7 @@ const TiptapCollaboration = {
   TaskItem,
   Blockquote,
   HorizontalRule,
+  HardBreak,
   
   // Additional extensions
   // History, // Removed - not compatible with Collaboration extension

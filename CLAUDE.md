@@ -487,6 +487,16 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - Implemented three-state edit pattern for inline fields
 - Updated permlink handling with proper state management
 
+## Recent Updates (v2025.07.02)
+### ✅ Markdown Export HardBreak Fix
+- **Issue Fixed**: "Unknown node type: hardBreak" error when exporting markdown
+- **Root Cause**: StarterKit includes HardBreak by default, but it wasn't included in static renderer extensions
+- **Solution**: 
+  - Added HardBreak import to collaboration bundle
+  - Included HardBreak in markdown export extensions array
+  - Added hardBreak node mapping (returns single newline)
+- **Result**: Documents with line breaks (Shift+Enter) now export correctly to markdown
+
 ## Development Workflow
 1. Check `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` for patterns
 2. Follow Y.js transaction patterns with origin tags

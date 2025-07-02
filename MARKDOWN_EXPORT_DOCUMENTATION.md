@@ -84,6 +84,7 @@ getMarkdownContent() {
 | `listItem` | `- ` or `1. ` prefix | Auto-detects parent list type |
 | `blockquote` | `> ` prefix per line | Handles multi-line content |
 | `horizontalRule` | `---` | Standard markdown |
+| `hardBreak` | Single newline | Line break (Shift+Enter) |
 | `codeBlock` | `` ``` ``lang...`` ``` `` | Preserves language attribute |
 | `image` | `![alt](src "title")` | Standard markdown image |
 | `video` | `<video>` HTML | Preserves all attributes for Hive |
@@ -135,7 +136,7 @@ The following TipTap extensions must be available:
 - Paragraph, Heading (block nodes)
 - Bold, Italic, Strike, Code (marks)
 - BulletList, OrderedList, ListItem (lists)
-- Blockquote, HorizontalRule (blocks)
+- Blockquote, HorizontalRule, HardBreak (blocks)
 - Link, Image (inline)
 - CodeBlock (code)
 - TextAlign (functionality)
@@ -157,11 +158,15 @@ The following TipTap extensions must be available:
    - Cause: Missing extension in array
    - Fix: Filter undefined values from extensions array
 
-2. **HTML in Output**
+2. **"Unknown node type: [nodetype]"** (e.g., hardBreak)
+   - Cause: Extension not included in extensions array for static renderer
+   - Fix: Import and add the missing extension to both bundle and markdown export
+
+3. **HTML in Output**
    - Cause: Missing node mapping
    - Fix: Add mapping for the node type
 
-3. **Missing Formatting**
+4. **Missing Formatting**
    - Cause: Marks not being applied
    - Fix: Ensure `applyMarks` is called for text nodes
 

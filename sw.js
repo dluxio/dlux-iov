@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.02.2",
-  "generated": "2025-07-02T07:19:50Z",
+  "version": "2025.07.02.10",
+  "generated": "2025-07-02T17:33:00Z",
   "files": {
-    "/js/simple-field-editor.js": {
-      "checksum": "68b87c94d41b38740f445068e1188c2f",
-      "size": 6226,
-      "priority": "important"
-    },
     "/js/spk-js.js": {
       "checksum": "f5907a46fadd42a17504c9aa6a4978b8",
       "size": 564485,
@@ -593,7 +588,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "c298f4b18374c771597c5849f6b7d29e",
+      "checksum": "79ad362ec63932a251d903ccd5a7be11",
       "size": 36523,
       "priority": "important"
     },
@@ -608,8 +603,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "fccc7d08055018128a2ba093fdf71dfc",
-      "size": 2277557,
+      "checksum": "a9702bb660b51469139fec070a0473a0",
+      "size": 2277562,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -813,13 +808,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "c6e7f00d0c570ba46ec02da107657966",
+      "checksum": "e4af23f481b65752751d9f7d870dcc64",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "d242cc0a8241e0e181aa4ba3f20d5edb",
-      "size": 9341,
+      "checksum": "f938613128099984a6f70d1f436ba188",
+      "size": 9408,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -902,11 +897,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/playground/index-monaco.html": {
-      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
-      "size": 69233,
-      "priority": "page-specific"
-    },
     "/playground/index.html": {
       "checksum": "575f56ba019b1780f56f116799e7648f",
       "size": 48598,
@@ -922,12 +912,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
