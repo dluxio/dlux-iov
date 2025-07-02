@@ -13223,8 +13223,20 @@ export default {
         },
 
         // ===== EXPORT FUNCTIONALITY =====
+        /**
+         * Generates markdown content from the TipTap editor using the static renderer
+         * with custom node mappings for Hive blockchain compatibility.
+         * 
+         * Features:
+         * - Uses TipTap v3 static renderer with custom node mappings
+         * - Preserves HTML tags needed for Hive: <center> for alignment, <video> for media
+         * - Handles all standard markdown formatting (bold, italic, lists, etc.)
+         * - Recursively processes nested content structures
+         * 
+         * @returns {string} Markdown string with title as H1 and body content
+         */
         getMarkdownContent() {
-            // ✅ TIPTAP BEST PRACTICE: Process JSON directly for custom markdown conversion
+            // ✅ TIPTAP BEST PRACTICE: Use static renderer for proper markdown conversion
             try {
                 const titleText = this.titleInput ? this.titleInput.trim() : '';
                 
@@ -13235,180 +13247,247 @@ export default {
                 // Get the editor JSON content
                 const doc = this.bodyEditor.getJSON();
                 
-                console.log('📝 Document structure for markdown conversion:', JSON.stringify(doc, null, 2));
+                // Get TipTap extensions from the global bundle
+                const tiptapBundle = window.TiptapCollaboration?.default || window.TiptapCollaboration || {};
+                const {
+                    renderToMarkdown,
+                    Document,
+                    Paragraph,
+                    Text,
+                    Heading,
+                    Bold,
+                    Italic,
+                    Strike,
+                    Code,
+                    BulletList,
+                    OrderedList,
+                    ListItem,
+                    Blockquote,
+                    HorizontalRule,
+                    Link,
+                    Image,
+                    CodeBlock,
+                    TextAlign,
+                    SpkVideo
+                } = tiptapBundle;
                 
-                // Process the JSON document to generate markdown
-                const processDocument = (docJson) => {
-                    const lines = [];
-                    
-                    const processNode = (node, parentContext = {}) => {
-                        if (!node) return '';
-                        
-                        // Handle video nodes
-                        if (node.type === 'video') {
-                            const attrs = node.attrs || {};
-                            let html = '<video';
-                            if (attrs.src) html += ` src="${attrs.src}"`;
-                            if (attrs.type) html += ` type="${attrs.type}"`;
-                            if (attrs['data-type']) html += ` data-type="${attrs['data-type']}"`;
-                            if (attrs['data-original-src']) html += ` data-original-src="${attrs['data-original-src']}"`;
-                            if (attrs.width) html += ` width="${attrs.width}"`;
-                            if (attrs.height) html += ` height="${attrs.height}"`;
-                            html += ' controls></video>';
-                            lines.push(html);
-                            lines.push('');
-                            return;
-                        }
-                        
-                        // Handle paragraphs with text alignment
-                        if (node.type === 'paragraph') {
-                            const textContent = node.content ? node.content.map(child => processInlineNode(child)).join('') : '';
-                            if (node.attrs?.textAlign === 'center') {
-                                lines.push(`<center>${textContent}</center>`);
-                            } else {
-                                lines.push(textContent);
+                if (!renderToMarkdown) {
+                    throw new Error('TipTap static renderer not available');
+                }
+                
+                // Build extensions array
+                const extensions = [
+                    Document,
+                    Text,
+                    TextAlign && TextAlign.configure({
+                        types: ['heading', 'paragraph'],
+                        alignments: ['left', 'center', 'right', 'justify']
+                    }),
+                    Paragraph,
+                    Heading,
+                    Bold,
+                    Italic,
+                    Strike,
+                    Code,
+                    BulletList,
+                    OrderedList,
+                    ListItem,
+                    Blockquote,
+                    HorizontalRule,
+                    Link,
+                    Image,
+                    CodeBlock,
+                    SpkVideo
+                ].filter(ext => ext !== undefined && ext !== null);
+                
+                // Using TipTap static renderer with custom node mappings for Hive-compatible markdown
+                
+                /**
+                 * Recursively renders child nodes using the appropriate node mappings.
+                 * This is necessary because the static renderer doesn't provide a built-in
+                 * children serializer for custom mappings.
+                 * 
+                 * @param {Array|string} children - Child nodes or string content
+                 * @param {Object} options - Options object containing nodeMapping
+                 * @returns {string} Rendered markdown string
+                 */
+                const renderChildren = (children, options) => {
+                    if (!children) return '';
+                    if (typeof children === 'string') return children;
+                    if (Array.isArray(children)) {
+                        return children.map(child => {
+                            if (typeof child === 'string') return child;
+                            if (child.type === 'text') {
+                                return options.nodeMapping.text ? options.nodeMapping.text({ node: child }) : child.text || '';
                             }
-                            lines.push('');
-                            return;
-                        }
-                        
-                        // Handle headings with text alignment
-                        if (node.type === 'heading') {
-                            const level = node.attrs?.level || 1;
-                            const hashes = '#'.repeat(level);
-                            const textContent = node.content ? node.content.map(child => processInlineNode(child)).join('') : '';
-                            
-                            if (node.attrs?.textAlign === 'center') {
-                                lines.push(`<center>${hashes} ${textContent}</center>`);
-                            } else {
-                                lines.push(`${hashes} ${textContent}`);
-                            }
-                            lines.push('');
-                            return;
-                        }
-                        
-                        // Handle other block nodes
-                        if (node.type === 'bulletList' || node.type === 'orderedList') {
-                            if (node.content) {
-                                node.content.forEach(child => processNode(child, { listType: node.type }));
-                            }
-                            lines.push('');
-                            return;
-                        }
-                        
-                        if (node.type === 'listItem') {
-                            const textContent = node.content ? node.content.map(child => {
-                                if (child.type === 'paragraph' && child.content) {
-                                    return child.content.map(c => processInlineNode(c)).join('');
-                                }
-                                return processInlineNode(child);
-                            }).join('') : '';
-                            
-                            const prefix = parentContext.listType === 'orderedList' ? '1. ' : '- ';
-                            lines.push(`${prefix}${textContent}`);
-                            return;
-                        }
-                        
-                        if (node.type === 'blockquote') {
-                            if (node.content) {
-                                const quotedLines = [];
-                                const originalLines = [...lines];
-                                lines.length = 0;
-                                node.content.forEach(child => processNode(child));
-                                quotedLines.push(...lines);
-                                lines.length = 0;
-                                lines.push(...originalLines);
-                                quotedLines.forEach(line => {
-                                    if (line) lines.push(`> ${line}`);
-                                    else lines.push('>');
+                            const mapping = options.nodeMapping[child.type];
+                            if (mapping) {
+                                return mapping({ 
+                                    node: child, 
+                                    children: child.content || [],
+                                    options 
                                 });
                             }
-                            lines.push('');
-                            return;
-                        }
-                        
-                        if (node.type === 'horizontalRule') {
-                            lines.push('---');
-                            lines.push('');
-                            return;
-                        }
-                        
-                        if (node.type === 'codeBlock') {
-                            lines.push('```');
-                            if (node.content) {
-                                node.content.forEach(child => {
-                                    if (child.text) lines.push(child.text);
-                                });
-                            }
-                            lines.push('```');
-                            lines.push('');
-                            return;
-                        }
-                        
-                        // Process content of other nodes
-                        if (node.content) {
-                            node.content.forEach(child => processNode(child, parentContext));
-                        }
-                    };
-                    
-                    const processInlineNode = (node) => {
-                        if (!node) return '';
-                        
-                        if (node.type === 'text') {
-                            let text = node.text || '';
-                            
-                            // Apply marks
-                            if (node.marks) {
-                                node.marks.forEach(mark => {
-                                    switch (mark.type) {
-                                        case 'bold':
-                                            text = `**${text}**`;
-                                            break;
-                                        case 'italic':
-                                            text = `*${text}*`;
-                                            break;
-                                        case 'strike':
-                                            text = `~~${text}~~`;
-                                            break;
-                                        case 'code':
-                                            text = `\`${text}\``;
-                                            break;
-                                        case 'link':
-                                            text = `[${text}](${mark.attrs?.href || ''})`;
-                                            break;
-                                    }
-                                });
-                            }
-                            
-                            return text;
-                        }
-                        
-                        return '';
-                    };
-                    
-                    // Process all content nodes
-                    if (docJson.content) {
-                        docJson.content.forEach(node => processNode(node));
+                            return '';
+                        }).join('');
                     }
-                    
-                    return lines.join('\n').trim();
+                    return '';
                 };
                 
-                // Generate markdown from the JSON
-                const markdown = processDocument(doc);
+                /**
+                 * Applies TipTap marks (bold, italic, etc.) to text content.
+                 * Handles nested marks in the correct order for proper markdown rendering.
+                 * 
+                 * @param {string} text - The plain text content
+                 * @param {Array} marks - Array of TipTap mark objects
+                 * @returns {string} Text with markdown formatting applied
+                 */
+                const applyMarks = (text, marks) => {
+                    if (!marks || marks.length === 0) return text;
+                    
+                    let result = text;
+                    marks.forEach(mark => {
+                        switch (mark.type) {
+                            case 'bold':
+                                result = `**${result}**`;
+                                break;
+                            case 'italic':
+                                result = `*${result}*`;
+                                break;
+                            case 'strike':
+                                result = `~~${result}~~`;
+                                break;
+                            case 'code':
+                                result = `\`${result}\``;
+                                break;
+                            case 'link':
+                                result = `[${result}](${mark.attrs?.href || ''})`;
+                                break;
+                        }
+                    });
+                    return result;
+                };
                 
-                console.log('📝 Markdown generated:', {
-                    markdownLength: markdown.length,
-                    markdownPreview: markdown.substring(0, 200)
+                /**
+                 * Complete node mapping configuration for TipTap static renderer.
+                 * Each mapping function receives:
+                 * - node: The current TipTap node to render
+                 * - children: Child nodes (array or string)
+                 * - options: Options object containing nodeMapping for recursion
+                 * 
+                 * Custom mappings handle:
+                 * - Center alignment via <center> tags (Hive compatibility)
+                 * - Video elements with full attribute preservation
+                 * - Standard markdown elements (headings, lists, etc.)
+                 */
+                const nodeMapping = {
+                    // Text node
+                    text({ node }) {
+                        const text = node.text || '';
+                        return applyMarks(text, node.marks);
+                    },
+                    
+                    // Paragraph with center support
+                    paragraph({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        if (node.attrs?.textAlign === 'center') {
+                            return `<center>${content}</center>\n\n`;
+                        }
+                        return `${content}\n\n`;
+                    },
+                    
+                    // Heading with center support
+                    heading({ node, children, options }) {
+                        const level = node.attrs?.level || 1;
+                        const content = renderChildren(children, options);
+                        const hashes = '#'.repeat(level);
+                        
+                        if (node.attrs?.textAlign === 'center') {
+                            return `<center>${hashes} ${content}</center>\n\n`;
+                        }
+                        return `${hashes} ${content}\n\n`;
+                    },
+                    
+                    // Lists
+                    bulletList({ node, children, options }) {
+                        const items = renderChildren(children, options);
+                        return `${items}\n`;
+                    },
+                    
+                    orderedList({ node, children, options }) {
+                        const items = renderChildren(children, options);
+                        return `${items}\n`;
+                    },
+                    
+                    listItem({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        // Determine if parent is ordered or unordered
+                        const isOrdered = node.parent && node.parent.type === 'orderedList';
+                        const prefix = isOrdered ? '1. ' : '- ';
+                        return `${prefix}${content.trim()}\n`;
+                    },
+                    
+                    // Blockquote
+                    blockquote({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        return content.split('\n').map(line => line ? `> ${line}` : '>').join('\n') + '\n\n';
+                    },
+                    
+                    // Horizontal rule
+                    horizontalRule() {
+                        return '---\n\n';
+                    },
+                    
+                    // Code block
+                    codeBlock({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        const lang = node.attrs?.language || '';
+                        return `\`\`\`${lang}\n${content}\n\`\`\`\n\n`;
+                    },
+                    
+                    // Image
+                    image({ node }) {
+                        const alt = node.attrs?.alt || '';
+                        const src = node.attrs?.src || '';
+                        const title = node.attrs?.title ? ` "${node.attrs.title}"` : '';
+                        return `![${alt}](${src}${title})\n\n`;
+                    },
+                    
+                    // Video (custom)
+                    video({ node }) {
+                        const attrs = node.attrs || {};
+                        let html = '<video';
+                        if (attrs.src) html += ` src="${attrs.src}"`;
+                        if (attrs.type) html += ` type="${attrs.type}"`;
+                        if (attrs['data-type']) html += ` data-type="${attrs['data-type']}"`;
+                        if (attrs['data-original-src']) html += ` data-original-src="${attrs['data-original-src']}"`;
+                        if (attrs.width) html += ` width="${attrs.width}"`;
+                        if (attrs.height) html += ` height="${attrs.height}"`;
+                        html += ' controls></video>';
+                        return html + '\n\n';
+                    },
+                    
+                    // Document node
+                    doc({ node, children, options }) {
+                        return renderChildren(children, options);
+                    }
+                };
+                
+                const finalMarkdown = renderToMarkdown({
+                    extensions,
+                    content: doc,
+                    options: {
+                        nodeMapping
+                    }
                 });
 
                 if (titleText) {
-                    return `# ${titleText}\n\n${markdown}`;
+                    return `# ${titleText}\n\n${finalMarkdown}`;
                 }
 
-                return markdown;
+                return finalMarkdown;
             } catch (error) {
-                console.error('Error generating markdown:', error);
+                console.error('Error generating markdown with static renderer:', error);
                 throw error;
             }
         },
@@ -13421,6 +13500,8 @@ export default {
             return title ? `${title}\n\n${body}` : body;
         },
 
+        // DEPRECATED: This method is no longer used - keeping for backward compatibility
+        // The static renderer with custom node mappings is now used for all markdown conversion
         htmlToMarkdown(html) {
             // Enhanced HTML to Markdown conversion that preserves video and center tags
             let markdown = html;
