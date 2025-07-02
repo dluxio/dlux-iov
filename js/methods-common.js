@@ -3,6 +3,40 @@ import hlsDebug from '/js/utils/hls-debug.js';
 import IPFSHLSPlayer from '/js/services/ipfs-hls-player.js';
 
 export default {
+  searchHiveAccounts(query, limit = 10) {
+    return new Promise((resolve, reject) => {
+      if (!query || query.length < 1) {
+        resolve([]);
+        return;
+      }
+      
+      fetch("https://hive-api.dlux.io", {
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "condenser_api.lookup_accounts",
+          params: [query.toLowerCase(), limit],
+          id: 1
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.result) {
+            resolve(data.result);
+          } else {
+            resolve([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Error searching Hive accounts:", error);
+          resolve([]);
+        });
+    });
+  },
+  
   accountCheck(a) {
     return new Promise((resolve, e) => {
       fetch("https://hive-api.dlux.io", {

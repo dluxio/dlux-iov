@@ -200,6 +200,7 @@ this.canManagePermissions   // Permission management (owner only)
 - **TipTap CollaborationCaret**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 - **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
+- **TipTap Mention Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/mention
 
 ### Server Implementation
 - **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus

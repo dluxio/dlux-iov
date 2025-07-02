@@ -1,4 +1,4 @@
-this.version = "2025.07.02.5";
+this.version = "2025.07.02.6";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.02.5",
-  "generated": "2025-07-02T17:39:59Z",
+  "version": "2025.07.02.12",
+  "generated": "2025-07-02T19:27:09Z",
   "files": {
-    "/js/spkvue.js": {
-      "checksum": "99073aee13e303e83415618eaa6dfbdb",
-      "size": 92106,
-      "priority": "important"
-    },
     "/js/standard-modal.js": {
       "checksum": "5293322d7f75e2e2f70eb203c644230d",
       "size": 7356,
@@ -573,7 +568,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "8c177e6dbe70b7f2332790da846d6a75",
+      "checksum": "fa0a064d3b22d36e26c018f626e6247f",
       "size": 36523,
       "priority": "important"
     },
@@ -588,8 +583,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "a9702bb660b51469139fec070a0473a0",
-      "size": 2277562,
+      "checksum": "6b6d637f08ffafed8162819d84699dee",
+      "size": 2429549,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -728,8 +723,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "8beeb1516d2f5cdcbe151c4653e5018a",
-      "size": 113839,
+      "checksum": "02d8c81081bb4873170c7ce82ae7bda1",
+      "size": 124992,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -793,13 +788,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f9c7a5a4390f7e2b70058b3538583bb1",
+      "checksum": "90726832ff6a338df0fbdab8cc2c3212",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "f938613128099984a6f70d1f436ba188",
-      "size": 9408,
+      "checksum": "21de127e6985de5bd5c297484acd0934",
+      "size": 9688,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -878,16 +873,16 @@ self.cacheManifest =
       "priority": "important"
     },
     "/webpack.config.js": {
-      "checksum": "273ac7907252d9c47389428022d1e912",
-      "size": 854,
+      "checksum": "32b6e3c30415873ded646fa2497f6abf",
+      "size": 939,
       "priority": "important"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

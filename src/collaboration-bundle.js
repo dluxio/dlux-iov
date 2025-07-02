@@ -8,7 +8,7 @@ import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
 import { Editor } from '@tiptap/core';
-import { EditorContent, useEditor } from '@tiptap/vue-3';
+import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCaret from '@tiptap/extension-collaboration-caret';
@@ -24,6 +24,7 @@ import {
 // Typography and Mention are separate packages in v3
 import Typography from '@tiptap/extension-typography';
 import Mention from '@tiptap/extension-mention';
+import suggestion from '@tiptap/suggestion';
 
 // BubbleMenu extension for floating formatting toolbar
 import BubbleMenu from '@tiptap/extension-bubble-menu';
@@ -31,6 +32,10 @@ import BubbleMenu from '@tiptap/extension-bubble-menu';
 // Static renderer for markdown/HTML conversion
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string';
+
+// Tippy.js for tooltips and dropdowns
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
 
 // These may still be individual packages
 import Document from '@tiptap/extension-document';
@@ -227,6 +232,7 @@ const TiptapCollaboration = {
   Editor,
   EditorContent,
   useEditor,
+  VueRenderer,
   StarterKit,
   
   // Collaboration extensions
@@ -282,7 +288,13 @@ const TiptapCollaboration = {
   
   // Static renderer utilities
   renderToMarkdown,
-  renderToHTMLString
+  renderToHTMLString,
+  
+  // Tippy.js for tooltips/dropdowns
+  tippy,
+  
+  // Suggestion utility for mentions
+  suggestion
 };
 
 // Make globally available

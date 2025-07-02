@@ -402,3 +402,133 @@
 .ProseMirror video[controls] {
   cursor: pointer;
 }
+
+/* Tippy.js Dark Theme for DLUX */
+.tippy-box[data-theme~='dlux-dark'] {
+  background-color: var(--bs-dark, #212529);
+  color: var(--bs-light, #f8f9fa);
+  border: 1px solid var(--bs-gray-700, #495057);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.tippy-box[data-theme~='dlux-dark'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: var(--bs-dark, #212529);
+}
+
+.tippy-box[data-theme~='dlux-dark'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: var(--bs-dark, #212529);
+}
+
+.tippy-box[data-theme~='dlux-dark'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: var(--bs-dark, #212529);
+}
+
+.tippy-box[data-theme~='dlux-dark'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: var(--bs-dark, #212529);
+}
+
+/* Mention Dropdown Styles */
+.tippy-box[data-theme~='mention-popup'] {
+  background-color: var(--bs-dark, #212529);
+  padding: 0;
+  max-width: 320px;
+}
+
+.mention-dropdown {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--bs-dark, #212529);
+  border-radius: 0.375rem;
+}
+
+.mention-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--bs-light, #f8f9fa);
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.1s ease;
+}
+
+.mention-item:hover,
+.mention-item.is-selected {
+  background-color: var(--bs-gray-800, #343a40);
+  color: #fff;
+}
+
+.mention-item.is-selected {
+  background-color: var(--bs-primary, #5C94FE);
+}
+
+.mention-item.mention-empty {
+  color: var(--bs-gray-600, #6c757d);
+  justify-content: center;
+  cursor: default;
+}
+
+.mention-item.mention-empty:hover {
+  background-color: transparent;
+}
+
+.mention-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: var(--bs-gray-700, #495057);
+  flex-shrink: 0;
+}
+
+.mention-username {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mention tags in the editor */
+.ProseMirror .mention {
+  color: var(--bs-info, #0dcaf0);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0 0.125rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.1s ease;
+}
+
+.ProseMirror .mention:hover {
+  background-color: rgba(13, 202, 240, 0.1);
+  text-decoration: none;
+}
+
+/* Loading state for mentions */
+.mention-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--bs-gray-600, #6c757d);
+}
+
+.mention-loading::after {
+  content: '';
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.5rem;
+  border: 2px solid var(--bs-gray-600, #6c757d);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: mention-spin 0.6s linear infinite;
+}
+
+@keyframes mention-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

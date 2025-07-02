@@ -1,5 +1,6 @@
 import methodsCommon from './methods-common.js';
 import { markRaw } from '/js/vue.esm-browser.js';
+import { createMentionSuggestion } from '/js/services/mention-suggestion.js';
 
 /**
  * ⚠️ CRITICAL: TipTap Editor Modular Architecture - Following Official Best Practices
@@ -1854,6 +1855,8 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const Mention = tiptapBundle.Mention;
+        const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
 
         console.log('✅ FINAL COMPONENT CHECK:', {
@@ -1928,7 +1931,21 @@ class EditorFactory {
                 types: ['heading', 'paragraph'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
-            SpkVideo
+            SpkVideo,
+            Mention.configure({
+                HTMLAttributes: {
+                    class: 'mention',
+                    target: '_blank',
+                },
+                renderHTML({ node }) {
+                    return ['a', {
+                        href: `/@${node.attrs.id}`,
+                        class: 'mention',
+                        target: '_blank'
+                    }, `@${node.attrs.label ?? node.attrs.id}`];
+                },
+                suggestion: createMentionSuggestion()
+            })
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -2241,6 +2258,8 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const Mention = tiptapBundle.Mention;
+        const tippy = tiptapBundle.tippy;
 
 
         if (!Editor || !StarterKit || !Collaboration) {
@@ -2272,7 +2291,21 @@ class EditorFactory {
                 types: ['heading', 'paragraph'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
-            SpkVideo
+            SpkVideo,
+            Mention.configure({
+                HTMLAttributes: {
+                    class: 'mention',
+                    target: '_blank',
+                },
+                renderHTML({ node }) {
+                    return ['a', {
+                        href: `/@${node.attrs.id}`,
+                        class: 'mention',
+                        target: '_blank'
+                    }, `@${node.attrs.label ?? node.attrs.id}`];
+                },
+                suggestion: createMentionSuggestion()
+            })
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -13270,6 +13303,7 @@ export default {
                     CodeBlock,
                     TextAlign,
                     SpkVideo,
+                    Mention,
                     Dropcursor,
                     Gapcursor
                 } = tiptapBundle;
@@ -13302,6 +13336,7 @@ export default {
                     Image,
                     CodeBlock,
                     SpkVideo,
+                    Mention,
                     Dropcursor,
                     Gapcursor
                 ].filter(ext => ext !== undefined && ext !== null);
@@ -13462,6 +13497,12 @@ export default {
                         const src = node.attrs?.src || '';
                         const title = node.attrs?.title ? ` "${node.attrs.title}"` : '';
                         return `![${alt}](${src}${title})\n\n`;
+                    },
+                    
+                    // Mention
+                    mention({ node }) {
+                        const username = node.attrs?.label || node.attrs?.id || '';
+                        return `@${username}`;
                     },
                     
                     // Video (custom)
