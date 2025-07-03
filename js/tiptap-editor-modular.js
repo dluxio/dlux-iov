@@ -1953,11 +1953,25 @@ class EditorFactory {
             bodyExtensions.push(
                 BubbleMenu.configure({
                     element: this.component.$refs.bubbleMenu,
-                    shouldShow: ({ from, to }) => {
+                    shouldShow: ({ editor, from, to }) => {
+                        // Check if editor is destroyed or component is unmounting
+                        if (!editor || editor.isDestroyed || this.component.isUnmounting) {
+                            return false;
+                        }
                         // Only show when text is selected and not in readonly mode
                         return !this.component.isReadOnlyMode && from !== to
                     },
-                    updateDelay: 100  // Add small delay for better UX
+                    updateDelay: 250,  // Increased delay to reduce positioning calls
+                    tippyOptions: {
+                        onHide: () => {
+                            // Cleanup when bubble menu hides
+                            return true;
+                        },
+                        onDestroy: () => {
+                            // Ensure positioning calculations are cancelled
+                            return true;
+                        }
+                    }
                 })
             );
         } else {
@@ -2313,11 +2327,25 @@ class EditorFactory {
             bodyExtensions.push(
                 BubbleMenu.configure({
                     element: this.component.$refs.bubbleMenu,
-                    shouldShow: ({ from, to }) => {
+                    shouldShow: ({ editor, from, to }) => {
+                        // Check if editor is destroyed or component is unmounting
+                        if (!editor || editor.isDestroyed || this.component.isUnmounting) {
+                            return false;
+                        }
                         // Only show when text is selected and not in readonly mode
                         return !this.component.isReadOnlyMode && from !== to
                     },
-                    updateDelay: 100  // Add small delay for better UX
+                    updateDelay: 250,  // Increased delay to reduce positioning calls
+                    tippyOptions: {
+                        onHide: () => {
+                            // Cleanup when bubble menu hides
+                            return true;
+                        },
+                        onDestroy: () => {
+                            // Ensure positioning calculations are cancelled
+                            return true;
+                        }
+                    }
                 })
             );
         } else {
@@ -4816,6 +4844,7 @@ export default {
             fileType: 'local', // 'local' or 'collaborative'
             isLoadingDocument: false, // ✅ SECURITY: Prevent user intent detection during document loading
             editorInitialized: false, // ✅ FIX: Prevent false triggers during editor initialization
+            isUnmounting: false, // ✅ FIX: Prevent BubbleMenu positioning errors during unmount
 
             // ===== SAVE STATUS DISPLAY =====
             saveMessageVisible: false,
@@ -7246,6 +7275,9 @@ export default {
     },
     
     beforeUnmount() {
+        // ✅ FIX: Set unmounting flag to prevent BubbleMenu positioning errors
+        this.isUnmounting = true;
+        
         // Clean up message listener
         if (this.handleSPKFileSelection) {
             window.removeEventListener('message', this.handleSPKFileSelection);
@@ -7891,6 +7923,13 @@ export default {
 
     async beforeUnmount() {
         this.isUnmounting = true;
+
+        // ✅ BUBBLE MENU CLEANUP: Force hide bubble menu to cancel any pending positioning
+        if (this.$refs.bubbleMenu) {
+            // Hide the bubble menu element to stop any pending Floating UI calculations
+            this.$refs.bubbleMenu.style.display = 'none';
+            this.$refs.bubbleMenu.style.visibility = 'hidden';
+        }
 
         // ✅ TIPTAP v3: Clear command queue
         this.commandQueue = [];

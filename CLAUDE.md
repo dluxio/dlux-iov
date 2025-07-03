@@ -343,6 +343,15 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Styling**: Added dark-themed bubble menu styles to `css/tiptap-editor.css` with `display: none` initial state
 - **Fixed**: Corrected visibility logic - let TipTap extension handle show/hide rather than Vue template conditions
 
+### ✅ BubbleMenu "domFromPos" Error Fix
+- **Issue Fixed**: "Cannot read properties of null (reading 'domFromPos')" error when unmounting component
+- **Root Cause**: Floating UI async positioning calculations continuing after editor destruction
+- **Solution 1**: Added `editor.isDestroyed` and `isUnmounting` checks in shouldShow callback
+- **Solution 2**: Force hide bubble menu element in beforeUnmount to cancel pending calculations
+- **Solution 3**: Increased updateDelay from 100ms to 250ms to reduce positioning frequency
+- **Solution 4**: Added tippyOptions with onHide/onDestroy handlers for cleanup
+- **Result**: No more errors during rapid document switching or component unmounting
+
 ### ✅ Document Duplicate Functionality - NEW FEATURE  
 - **Feature Added**: Duplicate button in File menu dropdown creates exact copy of current document
 - **Implementation**: Complete duplicate system for both local and collaborative documents
@@ -487,6 +496,20 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - Fixed Vue 3 computed property access patterns
 - Implemented three-state edit pattern for inline fields
 - Updated permlink handling with proper state management
+
+## Recent Updates (v2025.07.03)
+### ✅ BubbleMenu "domFromPos" Error Fix
+- **Issue Fixed**: "Cannot read properties of null (reading 'domFromPos')" error in tiptap-collaboration.bundle.js
+- **Error Context**: Occurred during coordsAtPos → posToDOMRect → getBoundingClientRect → Floating UI positioning
+- **Root Cause**: BubbleMenu's Floating UI tried to calculate positions after editor view was destroyed
+- **Timing Issue**: Async computePosition calls continued after component unmount/editor destruction
+- **Solutions Implemented**:
+  1. Added safety checks in shouldShow: `editor.isDestroyed` and `component.isUnmounting`
+  2. Force hide bubble menu DOM element in beforeUnmount lifecycle hook
+  3. Increased updateDelay from 100ms to 250ms (TipTap default) to reduce positioning frequency
+  4. Added tippyOptions with cleanup handlers for better lifecycle management
+- **Prevention**: All format methods already check `bodyEditor.isDestroyed` before execution
+- **Result**: Eliminated errors during rapid document switching, permission changes, and component unmounting
 
 ## Recent Updates (v2025.07.02)
 ### ✅ Markdown Export Extension Synchronization
