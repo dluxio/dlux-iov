@@ -1,4 +1,4 @@
-this.version = "2025.07.04.5";
+this.version = "2025.07.04.6";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.04.12",
-  "generated": "2025-07-04T19:16:07Z",
+  "version": "2025.07.04.6",
+  "generated": "2025-07-04T19:16:18Z",
   "files": {
-    "/js/tiptap-file-manager.js": {
-      "checksum": "e3a24394bea2f379796abfc85a9b7c47",
-      "size": 39205,
-      "priority": "important"
-    },
     "/js/toastvue.js": {
       "checksum": "15a042f49546393a84afe492cbe516d3",
       "size": 2374,
@@ -837,12 +832,12 @@ self.cacheManifest =
       "size": 1330,
       "priority": "important"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
