@@ -235,105 +235,8 @@ const CustomTableCell = TableCell.extend({
       new Plugin({
         key: new PluginKey('preventNestedTables'),
         
-        filterTransaction: (transaction, state) => {
-          try {
-            // ✅ SAFETY: Ensure we have valid state
-            if (!transaction || !state || !state.doc) {
-              return true;
-            }
-            
-            const { doc } = state;
-            
-            // Log all steps to understand transaction structure
-            console.log('🔄 Transaction with', transaction.steps.length, 'steps:', {
-              steps: transaction.steps.map((step, i) => ({
-                index: i,
-                type: step.constructor.name,
-                from: step.from,
-                to: step.to,
-                hasSlice: !!step.slice,
-                sliceSize: step.slice?.size || 0,
-                sliceContent: step.slice?.content?.firstChild?.type?.name
-              }))
-            });
-            
-            // Check each step in the transaction
-            for (let i = 0; i < transaction.steps.length; i++) {
-              const step = transaction.steps[i];
-              // Check if this step contains a table
-              let movingTable = false;
-              let targetPos = null;
-              
-              if (step.slice && step.slice.content) {
-                // Check if the slice contains a table
-                step.slice.content.descendants((node) => {
-                  if (node && node.type && node.type.name === 'table') {
-                    movingTable = true;
-                    return false;
-                  }
-                });
-                
-                // Get the target position
-                if (movingTable) {
-                  // For drag operations, we need to find the INSERT step
-                  // The INSERT step has content (slice.size > 0)
-                  // The DELETE step has no content in its slice
-                  
-                  if (step.slice.size === 0) {
-                    // This is likely a delete step, skip it
-                    console.log('📤 Skipping empty slice step (likely delete)');
-                    continue;
-                  }
-                  
-                  // This should be the insert step
-                  targetPos = step.from;
-                  console.log('📍 Table INSERT detected:', {
-                    from: step.from,
-                    to: step.to,
-                    targetPos,
-                    stepType: step.constructor.name,
-                    sliceSize: step.slice.size,
-                    stepIndex: i,
-                    totalSteps: transaction.steps.length
-                  });
-                }
-              }
-              
-              // If we're moving a table, check if target is inside a table cell
-              if (movingTable && targetPos !== null) {
-                const $target = doc.resolve(targetPos);
-                
-                console.log('🔍 Checking table drop position:', {
-                  targetPos,
-                  depth: $target.depth,
-                  parentNode: $target.parent.type.name,
-                  nodes: Array.from({ length: $target.depth + 1 }, (_, i) => ({
-                    depth: i,
-                    node: $target.node(i).type.name
-                  }))
-                });
-                
-                // Check if target position is inside a table cell or header
-                for (let depth = $target.depth; depth > 0; depth--) {
-                  const node = $target.node(depth);
-                  if (node && node.type && (node.type.name === 'tableCell' || node.type.name === 'tableHeader')) {
-                    console.log('🚫 Prevented dropping table into table cell/header at depth:', depth);
-                    return false; // Block this transaction
-                  }
-                }
-                
-                console.log('✅ Table drop allowed - not inside a cell');
-              }
-            }
-            
-            return true; // Allow transaction
-          } catch (error) {
-            console.warn('⚠️ Error in nested table prevention plugin:', error);
-            return true; // ✅ GRACEFUL DEGRADATION: Allow transaction on error to prevent editor breaking
-          }
-        },
+        // Removed filterTransaction - handleDrop handles everything now
         
-        // Also prevent drop cursor and actual drop operation
         props: {
           handleDragOver(view, event) {
             // Check if we're dragging something that might contain a table
@@ -385,53 +288,82 @@ const CustomTableCell = TableCell.extend({
           },
           
           handleDrop(view, event, slice, moved) {
+            // Enhanced: Get precise drop position
+            const dropPos = view.posAtCoords({
+              left: event.clientX,
+              top: event.clientY
+            });
+            
+            if (!dropPos) return false;
+            
             // Check if we're dropping a table
-            let hasTable = false;
+            let droppingTable = false;
+            let tableNode = null;
+            
             if (slice && slice.content) {
               slice.content.descendants((node) => {
                 if (node.type.name === 'table') {
-                  hasTable = true;
+                  droppingTable = true;
+                  tableNode = node;
                   return false;
                 }
               });
             }
             
-            if (hasTable) {
-              // Check if drop position is in a table cell or header
-              const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-              if (pos) {
-                const $pos = view.state.doc.resolve(pos.pos);
-                
-                // Debug: log what position we got and full hierarchy
-                const hierarchy = [];
-                for (let d = 0; d <= $pos.depth; d++) {
-                  hierarchy.push({
-                    depth: d,
-                    type: $pos.node(d).type.name
-                  });
-                }
-                
-                console.log('🎯 handleDrop checking position:', {
-                  pos: pos.pos,
-                  coords: { x: event.clientX, y: event.clientY },
-                  parentType: $pos.parent.type.name,
-                  depth: $pos.depth
-                });
-                console.log('📊 Document hierarchy at drop position:', hierarchy);
-                
-                for (let d = $pos.depth; d > 0; d--) {
-                  const node = $pos.node(d);
-                  if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
-                    // Prevent the drop
-                    console.log('🚫 Prevented table drop via handleDrop at depth:', d);
-                    event.preventDefault();
-                    return true; // Handled - prevents drop
-                  }
-                }
+            if (!droppingTable) return false; // Let default handle non-tables
+            
+            // Enhanced: More accurate position resolution
+            const $pos = view.state.doc.resolve(dropPos.pos);
+            
+            // Check if dropping into a table cell
+            for (let d = $pos.depth; d > 0; d--) {
+              const node = $pos.node(d);
+              if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
+                console.log('🚫 Prevented table drop into cell at depth:', d);
+                event.preventDefault();
+                return true; // Block the drop
               }
             }
             
-            return false; // Not handled, continue with default
+            // Enhanced: Handle the drop ourselves for better control when moving tables
+            if (moved && tableNode) {
+              console.log('🎯 Enhanced handleDrop for moved table');
+              
+              // Get the current selection (where the table is being moved from)
+              const { from, to } = view.state.selection;
+              
+              // Create a new transaction
+              const tr = view.state.tr;
+              
+              // Calculate the target position
+              let targetPos = dropPos.pos;
+              
+              // If dragging downward (target is after source), we need to adjust
+              if (targetPos > from) {
+                // Adjust target position by the size of content being removed
+                targetPos = targetPos - (to - from);
+                console.log('📍 Adjusted target position for downward drag:', {
+                  original: dropPos.pos,
+                  adjusted: targetPos,
+                  contentSize: to - from
+                });
+              }
+              
+              // Delete from old position
+              tr.delete(from, to);
+              
+              // Insert at new position (already adjusted if needed)
+              tr.insert(targetPos, tableNode);
+              
+              // Dispatch the transaction
+              view.dispatch(tr);
+              
+              console.log('✅ Table moved successfully');
+              return true; // We handled it
+            }
+            
+            // For non-moved content (copy/paste), let ProseMirror handle it
+            return false;
           }
         }
       })
@@ -445,7 +377,7 @@ const CustomTableHeader = TableHeader.extend({
 });
 
 
-// ✅ CUSTOM DROPCURSOR: Simple solution that hides dropcursor when dragging tables over cells
+// ✅ CUSTOM DROPCURSOR: Modular solution that hides dropcursor when dragging blocked content over cells
 const CustomDropcursor = Dropcursor.extend({
   name: 'customDropcursor',
   
@@ -457,12 +389,15 @@ const CustomDropcursor = Dropcursor.extend({
     }
     console.log('🔧 CustomDropcursor: Initializing');
     
-    // Simple plugin that tracks table dragging and hides dropcursor over cells
+    // Modular block list - easily expandable in the future
+    const BLOCKED_NODE_TYPES = ['table']; // Add more types here as needed
+    
+    // Plugin that tracks dragging and hides dropcursor for blocked content over cells
     const controlPlugin = new Plugin({
       key: new PluginKey('tableDragControl'),
       
       view(editorView) {
-        let isDraggingTable = false;
+        let draggingNodeType = null; // Track what type of node is being dragged
         let styleElement = null;
         
         // Create a style element to control dropcursor visibility
@@ -532,33 +467,43 @@ const CustomDropcursor = Dropcursor.extend({
         // Listen for drag events at document level (drag handles are outside editor)
         const handleDragStart = (event) => {
           if (event.target.hasAttribute?.('data-drag-handle')) {
-            // Check if we're dragging a table by looking at the component's tracked node
+            // Check what type of node we're dragging
             const hoveredNode = window.dluxEditor?.dragHandleHoveredNode;
             
-            if (hoveredNode && hoveredNode.type.name === 'table') {
-              isDraggingTable = true;
-              console.log('🎯 Started dragging table (detected via hoveredNode)');
+            if (hoveredNode) {
+              draggingNodeType = hoveredNode.type.name;
+              console.log('🎯 Started dragging:', draggingNodeType);
             } else {
-              // Fallback to selection-based detection for backward compatibility
+              // Fallback to selection-based detection
               const { state } = editorView;
               const { from } = state.selection;
-              const $from = state.doc.resolve(from);
+              const node = state.doc.nodeAt(from);
               
-              // Check if we're inside a table
-              for (let depth = $from.depth; depth >= 0; depth--) {
-                const parent = $from.node(depth);
-                if (parent.type.name === 'table') {
-                  isDraggingTable = true;
-                  console.log('🎯 Started dragging table (detected via selection)');
-                  break;
+              if (node) {
+                draggingNodeType = node.type.name;
+              } else {
+                // Try to get parent node type
+                const $from = state.doc.resolve(from);
+                if ($from.parent) {
+                  draggingNodeType = $from.parent.type.name;
                 }
+              }
+              
+              if (draggingNodeType) {
+                console.log('🎯 Started dragging (via selection):', draggingNodeType);
               }
             }
           }
         };
         
         const handleDragOver = (event) => {
-          if (!isDraggingTable) {
+          // Only hide dropcursor if dragging a blocked node type
+          if (!draggingNodeType || !BLOCKED_NODE_TYPES.includes(draggingNodeType)) {
+            // Not dragging a blocked type - ensure dropcursor is visible
+            if (styleElement) {
+              removeStyleElement();
+              editorView.dom.classList.remove('table-drag-over-cell');
+            }
             return;
           }
           
@@ -579,14 +524,14 @@ const CustomDropcursor = Dropcursor.extend({
             
             if (isOverTableCell) {
               if (!styleElement) {
-                console.log('🚫 Hiding dropcursor over table cell');
+                console.log(`🚫 Hiding dropcursor - dragging ${draggingNodeType} over table cell`);
                 createStyleElement();
               }
               // Add class to change cursor
               editorView.dom.classList.add('table-drag-over-cell');
             } else {
               if (styleElement) {
-                console.log('✅ Showing dropcursor outside table cell');
+                console.log(`✅ Showing dropcursor - dragging ${draggingNodeType} outside table cell`);
                 removeStyleElement();
               }
               // Remove class to restore normal cursor
@@ -596,9 +541,9 @@ const CustomDropcursor = Dropcursor.extend({
         };
         
         const handleDragEnd = () => {
-          if (isDraggingTable) {
-            console.log('🧹 Drag ended');
-            isDraggingTable = false;
+          if (draggingNodeType) {
+            console.log('🧹 Drag ended for:', draggingNodeType);
+            draggingNodeType = null;
             removeStyleElement();
             // Clean up cursor class
             editorView.dom.classList.remove('table-drag-over-cell');

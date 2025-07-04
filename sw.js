@@ -1,4 +1,4 @@
-this.version = "2025.07.04.2";
+this.version = "2025.07.04.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.04.2",
-  "generated": "2025-07-04T17:20:59Z",
+  "version": "2025.07.04.10",
+  "generated": "2025-07-04T17:44:51Z",
   "files": {
-    "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "d307be9a0985814498ea3e441cc3208d",
-      "size": 1356594,
-      "priority": "important"
-    },
     "/js/tiptap-editor-with-file-menu.js": {
       "checksum": "7c6dad8ccec7bea9c58d1724e005da9f",
       "size": 725418,
@@ -763,13 +758,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "c67625931479e624ccfa1567c5d11412",
+      "checksum": "261bbc3205ef0fdecdeb2b060169ecc3",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "9db85b622d4bcf21156a7cbb29cb2e8a",
-      "size": 26382,
+      "checksum": "f07103e69a4a3f6d0bd53f3666bb335b",
+      "size": 23907,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -852,12 +847,12 @@ self.cacheManifest =
       "size": 1330,
       "priority": "important"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
