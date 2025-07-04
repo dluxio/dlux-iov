@@ -1856,6 +1856,12 @@ class EditorFactory {
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const Mention = tiptapBundle.Mention;
+        const TableKit = tiptapBundle.TableKit;
+        const CustomTableCell = tiptapBundle.CustomTableCell;
+        const CustomTableHeader = tiptapBundle.CustomTableHeader;
+        const DragHandle = tiptapBundle.DragHandle;
+        const CustomDropcursor = tiptapBundle.CustomDropcursor;
+        const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
 
@@ -1869,6 +1875,10 @@ class EditorFactory {
             BubbleMenu: !!BubbleMenu,
             TextAlign: !!TextAlign,
             SpkVideo: !!SpkVideo,
+            CustomDropcursor: !!CustomDropcursor,
+            Extension: !!Extension,
+            Plugin: !!window.TiptapCollaboration?.Plugin,
+            PluginKey: !!window.TiptapCollaboration?.PluginKey,
             renderToMarkdown: !!renderToMarkdown
         });
 
@@ -1918,7 +1928,8 @@ class EditorFactory {
         // Build body extensions array - single editor only
         const bodyExtensions = [
             StarterKit.configure({
-                undoRedo: false  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                undoRedo: false,  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                dropcursor: false  // ✅ Disable default dropcursor to use CustomDropcursor
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -1945,7 +1956,48 @@ class EditorFactory {
                     }, `@${node.attrs.label ?? node.attrs.id}`];
                 },
                 suggestion: createMentionSuggestion()
-            })
+            }),
+            TableKit && TableKit.configure({
+                // Disable tableCell and tableHeader since we're providing our own custom versions
+                tableCell: false,
+                tableHeader: false,
+                // Configure the table extension within the kit
+                table: {
+                    resizable: false,              // No column resizing
+                    handleWidth: 0,               // No resize handles
+                    allowTableNodeSelection: false // Simple selection only
+                }
+            }),
+            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell and CustomTableHeader with nested table prevention
+            CustomTableCell && CustomTableCell,
+            CustomTableHeader && CustomTableHeader,
+            // ✅ Add CustomDropcursor that controls visibility when dragging tables
+            CustomDropcursor && CustomDropcursor.configure({
+                color: '#5C94FE',
+                width: 2,
+                class: 'custom-dropcursor'
+            }),
+            DragHandle && DragHandle.configure({
+                render: () => {
+                    const element = document.createElement('div');
+                    element.classList.add('ProseMirror-drag-handle');
+                    element.setAttribute('draggable', 'true');
+                    element.setAttribute('data-drag-handle', '');
+                    return element;
+                },
+                onNodeChange: ({ node }) => {
+                    // Track which node the drag handle is hovering over
+                    this.component.dragHandleHoveredNode = node;
+                    if (node) {
+                        console.log('🎯 DragHandle hovering over:', node.type.name);
+                    }
+                },
+                tippyOptions: {
+                    duration: 0,
+                    placement: 'left',
+                    hideOnClick: false,
+                }
+            }),
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -1977,6 +2029,7 @@ class EditorFactory {
         } else {
             console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
         }
+
 
         // ✅ DEBUG: Log Y.js document state before creating editor
         console.log('🔍 Y.js document state before editor creation:', {
@@ -2016,9 +2069,14 @@ class EditorFactory {
 
         let bodyEditor;
         try {
+            // Filter out any null/undefined extensions
+            const validExtensions = bodyExtensions.filter(ext => ext != null);
+            console.log('📦 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
+            console.log('📦 Extension names:', validExtensions.map(ext => ext.name || 'unnamed'));
+            
             bodyEditor = new Editor({
                 element: this.component.$refs.bodyEditor,
-                extensions: bodyExtensions,
+                extensions: validExtensions,
                 editable: isEditable,
                 // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
                 // ✅ v3 PERFORMANCE: Enable shouldRerenderOnTransaction for better collaborative performance
@@ -2039,6 +2097,8 @@ class EditorFactory {
                         isReadOnlyMode: this.component.isReadOnlyMode,
                         editorCreatedAt: this.component.editorCreatedAt
                     });
+                    
+
 
                     // ✅ FIX: Set editorInitialized flag after a delay to prevent false triggers
                     // This ensures that initialization-triggered updates don't cause persistence
@@ -2185,6 +2245,27 @@ class EditorFactory {
                     }
                 },
                 onSelectionUpdate: ({ editor }) => {
+                    // ✅ TABLE STATE TRACKING: Update reactive property for CSS-based toolbar
+                    const wasInTable = this.component.isInTable;
+                    this.component.isInTable = editor.isActive('table');
+                    
+                    // Update toolbar position when entering a table or navigating within tables
+                    if (this.component.isInTable) {
+                        // Use double nextTick to ensure DOM is fully updated after table insertion
+                        this.component.$nextTick(() => {
+                            this.component.$nextTick(() => {
+                                this.component.updateTableToolbarPosition();
+                            });
+                        });
+                    }
+                    
+                    // Log state changes for debugging
+                    if (wasInTable !== this.component.isInTable) {
+                        console.log('📊 Table state changed:', {
+                            isInTable: this.component.isInTable
+                        });
+                    }
+                    
                     // ✅ STATE MONITORING: Track selection changes
                     if (this.component.enableStateMonitoring) {
                         const selection = editor.state.selection;
@@ -2273,8 +2354,13 @@ class EditorFactory {
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const Mention = tiptapBundle.Mention;
+        const TableKit = tiptapBundle.TableKit;
+        const CustomTableCell = tiptapBundle.CustomTableCell;
+        const CustomTableHeader = tiptapBundle.CustomTableHeader;
+        const DragHandle = tiptapBundle.DragHandle;
+        const CustomDropcursor = tiptapBundle.CustomDropcursor;
+        const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
-
 
         if (!Editor || !StarterKit || !Collaboration) {
             throw new Error('Required TipTap components missing from bundle and window');
@@ -2292,7 +2378,8 @@ class EditorFactory {
         // Build body extensions array - single editor only (like Tier 1)
         const bodyExtensions = [
             StarterKit.configure({
-                undoRedo: false  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                undoRedo: false,  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                dropcursor: false  // ✅ Disable default dropcursor to use CustomDropcursor
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2319,7 +2406,48 @@ class EditorFactory {
                     }, `@${node.attrs.label ?? node.attrs.id}`];
                 },
                 suggestion: createMentionSuggestion()
-            })
+            }),
+            TableKit && TableKit.configure({
+                // Disable tableCell and tableHeader since we're providing our own custom versions
+                tableCell: false,
+                tableHeader: false,
+                // Configure the table extension within the kit
+                table: {
+                    resizable: false,              // No column resizing
+                    handleWidth: 0,               // No resize handles
+                    allowTableNodeSelection: false // Simple selection only
+                }
+            }),
+            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell and CustomTableHeader with nested table prevention
+            CustomTableCell && CustomTableCell,
+            CustomTableHeader && CustomTableHeader,
+            // ✅ Add CustomDropcursor that controls visibility when dragging tables
+            CustomDropcursor && CustomDropcursor.configure({
+                color: '#5C94FE',
+                width: 2,
+                class: 'custom-dropcursor'
+            }),
+            DragHandle && DragHandle.configure({
+                render: () => {
+                    const element = document.createElement('div');
+                    element.classList.add('ProseMirror-drag-handle');
+                    element.setAttribute('draggable', 'true');
+                    element.setAttribute('data-drag-handle', '');
+                    return element;
+                },
+                onNodeChange: ({ node }) => {
+                    // Track which node the drag handle is hovering over
+                    this.component.dragHandleHoveredNode = node;
+                    if (node) {
+                        console.log('🎯 DragHandle hovering over:', node.type.name);
+                    }
+                },
+                tippyOptions: {
+                    duration: 0,
+                    placement: 'left',
+                    hideOnClick: false,
+                }
+            }),
         ];
 
         // ✅ BUBBLE MENU: Add after DOM ref check to ensure element exists
@@ -2351,6 +2479,7 @@ class EditorFactory {
         } else {
             console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
         }
+
 
         // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret for all users (server will handle read-only awareness)
         if (webSocketProvider && CollaborationCaret) {
@@ -2387,9 +2516,13 @@ class EditorFactory {
             throw new Error('bodyEditor DOM element not ready');
         }
 
+        // Filter out any null/undefined extensions
+        const validExtensions = bodyExtensions.filter(ext => ext != null);
+        console.log('📦 Tier2 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
+        
         const bodyEditor = new Editor({
             element: this.component.$refs.bodyEditor,
-            extensions: bodyExtensions,
+            extensions: validExtensions,
             editable: isEditable,
             // ✅ REMOVED: content parameter - let Y.js handle content via Collaboration extension
             // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
@@ -2425,6 +2558,26 @@ class EditorFactory {
 
                     // ✅ PERFORMANCE: Tier 2 editors are always for stable documents
                     this.component.clearUnsavedAfterSync();
+                }
+            },
+            onSelectionUpdate: ({ editor }) => {
+                // ✅ TABLE STATE TRACKING: Update reactive property for CSS-based toolbar
+                const wasInTable = this.component.isInTable;
+                this.component.isInTable = editor.isActive('table');
+                
+                // Update toolbar position whenever table state changes or we're in a table
+                if (this.component.isInTable && (!wasInTable || this.component.isInTable)) {
+                    // Always update position when in a table to handle table-to-table navigation
+                    this.component.$nextTick(() => {
+                        this.component.updateTableToolbarPosition();
+                    });
+                }
+                
+                // Log state changes for debugging
+                if (wasInTable !== this.component.isInTable) {
+                    console.log('📊 Table state changed (Tier 2):', {
+                        isInTable: this.component.isInTable
+                    });
                 }
             }
         });
@@ -4845,6 +4998,9 @@ export default {
             isLoadingDocument: false, // ✅ SECURITY: Prevent user intent detection during document loading
             editorInitialized: false, // ✅ FIX: Prevent false triggers during editor initialization
             isUnmounting: false, // ✅ FIX: Prevent BubbleMenu positioning errors during unmount
+            
+            // ===== DRAG TRACKING =====
+            dragHandleHoveredNode: null, // Track which node the drag handle is hovering over
 
             // ===== SAVE STATUS DISPLAY =====
             saveMessageVisible: false,
@@ -5180,12 +5336,17 @@ export default {
                 auth: null,
                 document: null,
                 permissions: null
-            }
+            },
+
+            // ===== TABLE TOOLBAR STATE =====
+            // Track table state for CSS-based toolbar
+            isInTable: false,
 
         };
     },
 
     computed: {
+        
 
         // ✅ CONSOLIDATED USERNAME: Single source of truth for username with proper auth state handling
         username() {
@@ -7025,6 +7186,9 @@ export default {
             }
         }, 1000); // 1 second timeout
 
+        // Expose component for drag tracking
+        window.dluxEditor = this;
+        
         try {
             // Initialize managers
             this.documentManager = new DocumentManager(this);
@@ -13343,7 +13507,8 @@ export default {
                     TextAlign,
                     SpkVideo,
                     Mention,
-                    Dropcursor,
+                    TableKit,
+                    DragHandle,
                     Gapcursor
                 } = tiptapBundle;
                 
@@ -13376,7 +13541,14 @@ export default {
                     CodeBlock,
                     SpkVideo,
                     Mention,
-                    Dropcursor,
+                    TableKit && TableKit.configure({
+                        table: {
+                            resizable: false,
+                            handleWidth: 0,
+                            allowTableNodeSelection: false
+                        }
+                    }),
+                    DragHandle,
                     Gapcursor
                 ].filter(ext => ext !== undefined && ext !== null);
                 
@@ -13394,24 +13566,30 @@ export default {
                 const renderChildren = (children, options) => {
                     if (!children) return '';
                     if (typeof children === 'string') return children;
-                    if (Array.isArray(children)) {
-                        return children.map(child => {
-                            if (typeof child === 'string') return child;
-                            if (child.type === 'text') {
-                                return options.nodeMapping.text ? options.nodeMapping.text({ node: child }) : child.text || '';
-                            }
-                            const mapping = options.nodeMapping[child.type];
-                            if (mapping) {
-                                return mapping({ 
-                                    node: child, 
-                                    children: child.content || [],
-                                    options 
-                                });
-                            }
-                            return '';
-                        }).join('');
+                    
+                    // Handle both array of children and content object with content array
+                    let childArray = children;
+                    if (children.content && Array.isArray(children.content)) {
+                        childArray = children.content;
+                    } else if (!Array.isArray(children)) {
+                        return '';
                     }
-                    return '';
+                    
+                    return childArray.map(child => {
+                        if (typeof child === 'string') return child;
+                        if (child.type === 'text') {
+                            return options.nodeMapping.text ? options.nodeMapping.text({ node: child }) : child.text || '';
+                        }
+                        const mapping = options.nodeMapping[child.type];
+                        if (mapping) {
+                            return mapping({ 
+                                node: child, 
+                                children: child.content || child,
+                                options 
+                            });
+                        }
+                        return '';
+                    }).join('');
                 };
                 
                 /**
@@ -13544,6 +13722,87 @@ export default {
                         return `@${username}`;
                     },
                     
+                    // Table - return the children (rows) with proper spacing
+                    table({ children }) {
+                        // Handle different types of children
+                        if (typeof children === 'function') {
+                            const result = children();
+                            if (Array.isArray(result)) {
+                                return result.join('') + '\n';
+                            }
+                            return result + '\n';
+                        } else if (Array.isArray(children)) {
+                            return children.join('') + '\n';
+                        }
+                        return (children || '') + '\n';
+                    },
+                    
+                    // Table row - format as markdown row
+                    tableRow({ node, children }) {
+                        // Check if this is a header row
+                        const isHeaderRow = node.content && node.content.content && 
+                                          node.content.content.some(cell => cell.type === 'tableHeader');
+                        
+                        let rowOutput = '';
+                        
+                        // Convert children to array if it's not already
+                        let cellsArray = [];
+                        if (Array.isArray(children)) {
+                            cellsArray = children;
+                        } else if (typeof children === 'function') {
+                            // If children is a getter function, call it
+                            const result = children();
+                            cellsArray = Array.isArray(result) ? result : [result];
+                        } else if (children) {
+                            // Single child case
+                            cellsArray = [children];
+                        }
+                        
+                        // Clean up cell content (remove delimiters if present)
+                        const cells = cellsArray.map(cell => {
+                            if (typeof cell === 'string') {
+                                return cell.replace(/\|\|\|CELL\|\|\|/g, '').trim();
+                            }
+                            return String(cell).trim();
+                        });
+                        
+                        if (cells.length > 0) {
+                            rowOutput = '| ' + cells.join(' | ') + ' |\n';
+                        } else {
+                            // No cells - create empty cells based on node content
+                            const cellCount = node.content ? node.content.content.length : 1;
+                            const emptyCells = Array(cellCount).fill('');
+                            rowOutput = '| ' + emptyCells.join(' | ') + ' |\n';
+                        }
+                        
+                        if (isHeaderRow) {
+                            // Add separator row after header
+                            const cellCount = cells.length || (node.content ? node.content.content.length : 1);
+                            const separator = Array(cellCount).fill('---').join(' | ');
+                            rowOutput += '| ' + separator + ' |\n';
+                        }
+                        
+                        return rowOutput;
+                    },
+                    
+                    // Table cell - just return the content
+                    tableCell({ children }) {
+                        // If children is a function (getter), call it
+                        if (typeof children === 'function') {
+                            return String(children());
+                        }
+                        return String(children || '');
+                    },
+                    
+                    // Table header - just return the content
+                    tableHeader({ children }) {
+                        // If children is a function (getter), call it
+                        if (typeof children === 'function') {
+                            return String(children());
+                        }
+                        return String(children || '');
+                    },
+                    
                     // Video (custom)
                     video({ node }) {
                         const attrs = node.attrs || {};
@@ -13559,8 +13818,14 @@ export default {
                     },
                     
                     // Document node
-                    doc({ node, children, options }) {
-                        return renderChildren(children, options);
+                    doc({ children }) {
+                        if (Array.isArray(children)) {
+                            return children.join('');
+                        } else if (typeof children === 'function') {
+                            const result = children();
+                            return Array.isArray(result) ? result.join('') : result;
+                        }
+                        return children || '';
                     }
                 };
                 
@@ -13571,10 +13836,6 @@ export default {
                         nodeMapping
                     }
                 });
-
-                if (titleText) {
-                    return `# ${titleText}\n\n${finalMarkdown}`;
-                }
 
                 return finalMarkdown;
             } catch (error) {
@@ -13820,10 +14081,120 @@ export default {
         },
 
         insertTable() {
-            // ✅ TIPTAP v3: Table extension not included in StarterKit
-            console.warn('Table insertion not available - Table extension not loaded');
-            alert('Table insertion is not available in this editor configuration.');
-            return;
+            if (!this.bodyEditor) return;
+            
+            // ✅ NESTED TABLE PREVENTION: Check if cursor is currently inside a table
+            // This is now handled by disabling the button, but keep as safety check
+            if (this.bodyEditor.isActive('table')) {
+                console.log('🚫 Cannot insert table inside another table - button should be disabled');
+                return;
+            }
+            
+            // Check if we're in an empty document (only has an empty paragraph)
+            const { doc, selection } = this.bodyEditor.state;
+            const isEmptyDoc = doc.childCount === 1 && 
+                              doc.firstChild.type.name === 'paragraph' && 
+                              doc.firstChild.content.size === 0;
+            
+            if (isEmptyDoc) {
+                // Replace the empty paragraph with the table
+                this.bodyEditor.chain()
+                    .focus()
+                    .deleteRange({ from: 0, to: doc.content.size })
+                    .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                    .run();
+            } else {
+                // Insert normally
+                this.bodyEditor.chain()
+                    .focus()
+                    .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                    .run();
+            }
+        },
+        
+        // Table manipulation methods
+        addTableRowBefore() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().addRowBefore().run();
+        },
+        
+        addTableRowAfter() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().addRowAfter().run();
+        },
+        
+        addTableColumnBefore() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().addColumnBefore().run();
+        },
+        
+        addTableColumnAfter() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().addColumnAfter().run();
+        },
+        
+        deleteTableRow() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().deleteRow().run();
+        },
+        
+        deleteTableColumn() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().deleteColumn().run();
+        },
+        
+        deleteTable() {
+            if (!this.bodyEditor) return;
+            this.bodyEditor.chain().focus().deleteTable().run();
+        },
+        
+        updateTableToolbarPosition() {
+            if (!this.bodyEditor || !this.isInTable) return;
+            
+            // Get the table toolbar element
+            const toolbar = document.querySelector('.table-toolbar');
+            if (!toolbar) return;
+            
+            // Get the editor element
+            const editorEl = this.$refs.bodyEditor;
+            if (!editorEl) return;
+            
+            // Find the table with selected cells or the table containing the cursor
+            let tableEl = null;
+            
+            // First try to find a table with selected cells
+            const selectedCell = editorEl.querySelector('.ProseMirror .selectedCell');
+            if (selectedCell) {
+                tableEl = selectedCell.closest('table');
+            }
+            
+            // If no selected cells, find the table containing the cursor
+            if (!tableEl) {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const container = range.commonAncestorContainer;
+                    const element = container.nodeType === Node.TEXT_NODE ? container.parentElement : container;
+                    tableEl = element.closest('.ProseMirror table');
+                }
+            }
+            
+            if (!tableEl) {
+                // Table element not found - this shouldn't happen with double nextTick
+                // Just return silently as the table toolbar will be hidden by CSS
+                return;
+            }
+            
+            const tableRect = tableEl.getBoundingClientRect();
+            
+            // Position the toolbar above the table
+            toolbar.style.left = `${tableRect.left}px`;
+            toolbar.style.top = `${tableRect.top - 50}px`; // 50px above the table
+            
+            console.log('📐 Table toolbar positioned:', {
+                left: tableRect.left,
+                top: tableRect.top - 50
+            });
         },
         
         insertVideo() {
@@ -19840,8 +20211,9 @@ export default {
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-video"></i>
                   </button>
-                  <button @click="insertTable()" class="btn btn-sm btn-dark" title="Insert Table"
-                          :disabled="isReadOnlyMode">
+                  <button @click="insertTable()" class="btn btn-sm btn-dark" 
+                          :title="isInTable ? 'Cannot insert table inside another table' : 'Insert Table'"
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-table"></i>
                   </button>
                 </div>
@@ -19900,6 +20272,63 @@ export default {
                         :disabled="!bodyEditor"
                         title="Insert/Edit Link">
                   <i class="fas fa-link"></i>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Table Toolbar - CSS controls visibility and positioning -->
+            <div class="table-toolbar" :class="{ 'table-toolbar-visible': isInTable }">
+              <div class="btn-group" role="group">
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="addTableRowBefore()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Add row above">
+                  <i class="fas fa-plus"></i><i class="fas fa-arrow-up ms-1"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="addTableRowAfter()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Add row below">
+                  <i class="fas fa-plus"></i><i class="fas fa-arrow-down ms-1"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="addTableColumnBefore()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Add column before">
+                  <i class="fas fa-plus"></i><i class="fas fa-arrow-left ms-1"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="addTableColumnAfter()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Add column after">
+                  <i class="fas fa-plus"></i><i class="fas fa-arrow-right ms-1"></i>
+                </button>
+                <div class="btn-group-divider mx-1"></div>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="deleteTableRow()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Delete row">
+                  <i class="fas fa-minus"></i><i class="fas fa-grip-lines ms-1"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        @click="deleteTableColumn()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Delete column">
+                  <i class="fas fa-minus"></i><i class="fas fa-grip-lines-vertical ms-1"></i>
+                </button>
+                <div class="btn-group-divider mx-1"></div>
+                <button type="button" 
+                        class="btn btn-sm btn-danger"
+                        @click="deleteTable()"
+                        :disabled="!bodyEditor || isReadOnlyMode"
+                        title="Delete table">
+                  <i class="fas fa-trash"></i>
                 </button>
               </div>
             </div>

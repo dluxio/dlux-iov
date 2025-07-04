@@ -190,23 +190,47 @@ this.canManagePermissions   // Permission management (owner only)
 - **TipTap Offline Support**: https://next.tiptap.dev/docs/guides/offline-support
 - **TipTap Vue.js Integration**: https://next.tiptap.dev/docs/editor/getting-started/install/vue3
 - **TipTap Static Renderer**: https://next.tiptap.dev/docs/editor/api/utilities/static-renderer
-- **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
 - **Y.js Documentation**: https://docs.yjs.dev/
 - **Y.js Protocols**: https://github.com/yjs/y-protocols
+tippy.js: https://atomiks.github.io/tippyjs/v6/all-props/
+prosemirror: https://prosemirror.net/docs/ref/
 
 ### Extensions and Features
 - **TipTap StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
+- **TipTap Table Kit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/table-kit
 - **TipTap Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
 - **TipTap CollaborationCaret**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
-- **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
-- **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 - **TipTap Mention Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/mention
+- **TipTap FloatingMenu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/floatingmenu
+- **TipTap Drag Handle Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle
+- **TipTap Drag Handle Vue Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle-vue
+- **TipTap Drag Bubble Menu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/bubble-menu
+- **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
+
+When extending always import standalone extension, do not import from kits like starter kit or table kit
+- **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
+- **TipTap Table Cell Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/table-cell
+- **TipTap Drop Cursor Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/dropcursor
+- **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
+
 
 ### Server Implementation
 - **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
 - **TipTap Provider Integration**: https://next.tiptap.dev/docs/collaboration/provider/integration
 - **TipTap Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
 - **TipTap REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
+
+### TipTap API
+https://next.tiptap.dev/docs/editor/api/editor
+https://next.tiptap.dev/docs/editor/api/commands
+https://next.tiptap.dev/docs/editor/api/commands/content
+https://next.tiptap.dev/docs/editor/api/commands/nodes-and-marks
+https://next.tiptap.dev/docs/editor/api/commands/lists
+https://next.tiptap.dev/docs/editor/api/commands/selection
+https://next.tiptap.dev/docs/editor/api/utilities
+https://next.tiptap.dev/docs/editor/api/node-positions
+https://next.tiptap.dev/docs/editor/api/events
+
 
 ## Common Issues & Solutions
 
@@ -510,6 +534,64 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
   4. Added tippyOptions with cleanup handlers for better lifecycle management
 - **Prevention**: All format methods already check `bodyEditor.isDestroyed` before execution
 - **Result**: Eliminated errors during rapid document switching, permission changes, and component unmounting
+
+### ✅ Table Toolbar Implementation - CSS-Based Positioning
+- **Feature Added**: Floating toolbar above tables for table manipulation
+- **Initial Approach**: Tried FloatingMenu extension but it positions at cursor, not above table blocks
+- **Solution**: CSS-based positioning with DOM selection tracking
+- **Implementation Details**:
+  1. **State Tracking**: `isInTable` reactive property tracks when cursor is in a table via `editor.isActive('table')`
+  2. **onSelectionUpdate Handler**: Updates `isInTable` and always calls `updateTableToolbarPosition()` when in a table
+  3. **CSS Visibility**: `.table-toolbar-visible` class controls show/hide with opacity transitions
+  4. **Position Calculation**: Uses standard DOM APIs to find the active table element
+- **Best Practices Applied**:
+  - No ProseMirror internals - avoided `domAtPos` and position calculations
+  - Uses TipTap's `.selectedCell` class when cells are selected
+  - Falls back to browser's `window.getSelection()` API for cursor position
+  - Simple DOM traversal with `element.closest('.ProseMirror table')`
+  - Fixed positioning with calculated `left` and `top` values
+- **Table-to-Table Navigation Fix**: 
+  - Original issue: Toolbar stayed on first table when moving between tables
+  - Root cause: Only updated position on state change, but `isActive('table')` stays true
+  - Solution: Always update position when in any table, not just on state changes
+- **Clean Architecture**:
+  - Removed FloatingMenu extension and all related code
+  - Single `isInTable` boolean for state tracking
+  - Standard DOM methods for element finding
+  - CSS handles all animations and transitions
+- **Result**: Performant table toolbar that appears above tables and correctly repositions when navigating between tables
+
+### ✅ Table Markdown Export Fix
+- **Issue Fixed**: Table content not exporting to markdown, then pipe structure broken
+- **Root Cause**: TipTap static renderer passes `children` as either a function getter, array, or string depending on the node type
+- **Solution**: Handle all possible types of children parameter:
+  ```javascript
+  tableRow({ node, children }) {
+      // Convert children to array regardless of type
+      let cellsArray = [];
+      if (Array.isArray(children)) {
+          cellsArray = children;
+      } else if (typeof children === 'function') {
+          // If children is a getter function, call it
+          const result = children();
+          cellsArray = Array.isArray(result) ? result : [result];
+      } else if (children) {
+          cellsArray = [children];
+      }
+      
+      // Format cells as markdown table row
+      const cells = cellsArray.map(cell => String(cell).trim());
+      let rowOutput = '| ' + cells.join(' | ') + ' |\n';
+      
+      if (isHeaderRow) {
+          const separator = Array(cells.length).fill('---').join(' | ');
+          rowOutput += '| ' + separator + ' |\n';
+      }
+      return rowOutput;
+  }
+  ```
+- **Key Insight**: The static renderer uses lazy evaluation with getter functions for performance, so we must check the type and handle accordingly
+- **Result**: Tables now export correctly to markdown with proper pipe structure and content
 
 ## Recent Updates (v2025.07.02)
 ### ✅ Markdown Export Extension Synchronization

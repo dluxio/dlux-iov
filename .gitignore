@@ -22,3 +22,6 @@ js/.DS_Store
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Webpack chunk files
+js/[0-9]*.tiptap-collaboration.bundle.js

@@ -253,22 +253,7 @@
   min-height: 0; /* Important for nested flex containers */
 }
 
-/* Pass scroll  */
-.vfs-scroll-pass {
-  flex: 1;
-  overflow: hidden; /* Changed to hidden to contain children */
-  min-height: 0; /* Important for flexbox overflow */
-  display: flex;
-  flex-direction: column;
-}
 
-.vfs-scroll {
-  flex: 1;
-  overflow: scroll; /* Contain children */
-  min-height: 0; /* Important for flexbox overflow */
-  display: flex;
-  flex-direction: column;
-}
 
 
 

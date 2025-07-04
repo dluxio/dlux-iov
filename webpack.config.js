@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
@@ -15,7 +16,12 @@ module.exports = {
     'bootstrap': 'bootstrap'
   },
   resolve: {
-    extensions: ['.js', '.ts']
+    extensions: ['.js', '.ts'],
+    fallback: {
+      "crypto": false,
+      "stream": false,
+      "buffer": false
+    }
   },
   module: {
     rules: [
@@ -37,6 +43,13 @@ module.exports = {
     ]
   },
   optimization: {
-    minimize: false // Keep readable for debugging
-  }
+    minimize: true, // Enable minification for production
+    splitChunks: false, // Completely disable code splitting
+    runtimeChunk: false // Don't create separate runtime chunk
+  },
+  plugins: [
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1 // Force everything into a single chunk
+    })
+  ]
 };
