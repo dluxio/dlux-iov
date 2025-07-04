@@ -1,4 +1,4 @@
-this.version = "2025.07.04.4";
+this.version = "2025.07.04.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.04.4",
-  "generated": "2025-07-04T17:45:02Z",
+  "version": "2025.07.04.12",
+  "generated": "2025-07-04T19:16:07Z",
   "files": {
-    "/js/tiptap-editor.js": {
-      "checksum": "f96826534f8ff1d4edd88a6aca40deeb",
-      "size": 19217,
-      "priority": "important"
-    },
     "/js/tiptap-file-manager.js": {
       "checksum": "e3a24394bea2f379796abfc85a9b7c47",
       "size": 39205,
@@ -688,8 +683,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "beb9e61b26e824763351d65fc7c2f518",
-      "size": 125001,
+      "checksum": "8253b148ea6159fae612f469e6955471",
+      "size": 123801,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -753,13 +748,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "261bbc3205ef0fdecdeb2b060169ecc3",
+      "checksum": "f9122d32ccc15ba012572e7a275ccb80",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "f07103e69a4a3f6d0bd53f3666bb335b",
-      "size": 23907,
+      "checksum": "8a428c257f819c69f635d48af5e6cb61",
+      "size": 21995,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -842,12 +837,12 @@ self.cacheManifest =
       "size": 1330,
       "priority": "important"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

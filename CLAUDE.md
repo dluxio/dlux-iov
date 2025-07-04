@@ -178,6 +178,72 @@ this.canManagePermissions   // Permission management (owner only)
 - CollaborationCursor renamed to CollaborationCaret
 - Import from `@tiptap/vue-3`, not `@tiptap/vue-2`
 
+### Modular Drag & Drop System
+
+The editor implements a modular block list system that controls what content can be dropped into specific nodes (e.g., preventing tables from being dropped into table cells).
+
+#### How It Works
+
+1. **Registry-Based Block Lists** (`src/collaboration-bundle.js`):
+```javascript
+const nodeBlockLists = {
+  tableCell: ['table'],    // tableCell blocks tables only
+  tableHeader: ['table']   // tableHeader blocks tables only
+};
+```
+
+2. **Utility Function** checks if content is blocked at a position:
+```javascript
+function isContentBlockedAt(state, pos, contentType) {
+  // Checks all ancestor nodes for block lists
+  // Returns { blocked: true/false, byNode, atDepth }
+}
+```
+
+3. **CustomDropcursor** hides the drop cursor for blocked content:
+- Tracks what's being dragged
+- Uses `isContentBlockedAt` to check if it's blocked
+- Hides dropcursor and shows "not-allowed" cursor when over blocked areas
+
+4. **CustomTableCell** enforces the block rules:
+- Uses same `isContentBlockedAt` check
+- Prevents drops of blocked content
+- Handles position adjustment for downward drags
+
+#### Adding Content to Block Lists
+
+To block additional content types from being dropped into table cells:
+
+```javascript
+// In src/collaboration-bundle.js
+const nodeBlockLists = {
+  tableCell: ['table', 'image'],    // Example: Add 'image' to also block images
+  tableHeader: ['table', 'image']   // Keep consistent
+};
+```
+
+To add block lists for new node types:
+
+```javascript
+const nodeBlockLists = {
+  tableCell: ['table'],
+  tableHeader: ['table'],
+  codeBlock: ['table', 'image']     // New node with its own block list
+};
+```
+
+#### Architecture Benefits
+- **Single Source of Truth**: Block lists defined in one registry
+- **Automatic Coordination**: Dropcursor and drop handling stay in sync
+- **Easy Extension**: Just update the registry, no code changes needed
+- **Type-Safe**: Each node declares what it blocks
+
+#### Implementation Details
+- CustomTableCell replaces the default tableCell from TableKit
+- TableHeader uses the default from TableKit (no custom version needed)
+- Both Tier 1 and Tier 2 editors use the same extensions
+- Markdown export includes all custom extensions
+
 ## Official Documentation
 
 ### Core Collaboration Framework
@@ -192,8 +258,8 @@ this.canManagePermissions   // Permission management (owner only)
 - **TipTap Static Renderer**: https://next.tiptap.dev/docs/editor/api/utilities/static-renderer
 - **Y.js Documentation**: https://docs.yjs.dev/
 - **Y.js Protocols**: https://github.com/yjs/y-protocols
-tippy.js: https://atomiks.github.io/tippyjs/v6/all-props/
-prosemirror: https://prosemirror.net/docs/ref/
+- **Tippy.js**: https://atomiks.github.io/tippyjs/v6/all-props/
+- **ProseMirror**: https://prosemirror.net/docs/ref/
 
 ### Extensions and Features
 - **TipTap StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
@@ -212,7 +278,6 @@ When extending always import standalone extension, do not import from kits like 
 - **TipTap Table Cell Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/table-cell
 - **TipTap Drop Cursor Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/dropcursor
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
-
 
 ### Server Implementation
 - **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus

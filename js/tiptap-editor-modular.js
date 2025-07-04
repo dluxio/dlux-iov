@@ -2,6 +2,9 @@ import methodsCommon from './methods-common.js';
 import { markRaw } from '/js/vue.esm-browser.js';
 import { createMentionSuggestion } from '/js/services/mention-suggestion.js';
 
+// Debug flag to control logging - set to true to enable verbose logging
+const DEBUG = false;
+
 /**
  * ⚠️ CRITICAL: TipTap Editor Modular Architecture - Following Official Best Practices
  * Version: 2025.01.21.1 - Fixed fragment initialization
@@ -255,7 +258,7 @@ class YjsDocumentManager {
             // All documents require authenticated user
             const userIdentifier = this.component.username;
             indexedDBKey = `${userIdentifier}__${documentId}`;
-            console.log('🔐 Using user-isolated IndexedDB key for collaborative document:', {
+            if (DEBUG) console.log('🔐 Using user-isolated IndexedDB key for collaborative document:', {
                 originalKey: documentId,
                 userIsolatedKey: indexedDBKey,
                 userIdentifier: userIdentifier,
@@ -281,10 +284,10 @@ class YjsDocumentManager {
                 // ✅ STABILIZATION: Track Y.js sync completion for command timing
                 if (this.component) {
                     this.component.lastContentChange = Date.now();
-                    console.log('🔍 Y.js sync completed for existing document - updating lastContentChange for stabilization');
+                    if (DEBUG) console.log('🔍 Y.js sync completed for existing document - updating lastContentChange for stabilization');
                 }
 
-                console.log('💾 IndexedDB synced for document:', {
+                if (DEBUG) console.log('💾 IndexedDB synced for document:', {
                     indexedDBKey: indexedDBKey,
                     isCollaborative: isCollaborative,
                     hasDocumentMetadata: hasDocumentMetadata
@@ -293,7 +296,7 @@ class YjsDocumentManager {
                 // ✅ DEBUG: Check Y.js document state after sync
                 // NOTE: We cannot directly access Y.js fragments - this violates TipTap best practices
 
-                console.log('💾 IndexedDB onSynced:', {
+                if (DEBUG) console.log('💾 IndexedDB onSynced:', {
                     indexedDBKey: indexedDBKey,
                     isCollaborative: isCollaborative,
                     hasDocumentName: !!yjsDocumentName,
@@ -315,7 +318,7 @@ class YjsDocumentManager {
 
                     // Update for local documents OR if current name is fallback
                     if (isLocalDocument || (isUsernameFallback && yjsDocumentName !== this.component.currentFile.name)) {
-                        console.log('📝 Updating file object with document name from Y.js:', {
+                        if (DEBUG) console.log('📝 Updating file object with document name from Y.js:', {
                             oldName: this.component.currentFile.name,
                             newName: yjsDocumentName,
                             isLocalDocument: isLocalDocument
@@ -350,7 +353,7 @@ class YjsDocumentManager {
 
                 // ✅ SEQUENCING FIX: Use $nextTick to ensure Vue reactivity is updated
                 this.component.$nextTick(() => {
-                    console.log('📊 IndexedDB content readiness signaled to Vue:', {
+                    if (DEBUG) console.log('📊 IndexedDB content readiness signaled to Vue:', {
                         indexedDBContentReady: this.component.indexedDBContentReady,
                         yjsContentAvailable: this.component.yjsContentAvailable,
                         hasDocumentMetadata: hasDocumentMetadata
@@ -463,7 +466,7 @@ class PersistenceManager {
 
         // ✅ DEBUG: Log document ID and user for read-only debugging
         const expectedIndexedDBKey = `${this.component.username}__${documentId}`;
-        console.log('🔑 Setting up cloud persistence with document ID:', {
+        if (DEBUG) console.log('🔑 Setting up cloud persistence with document ID:', {
             documentId,
             fileId: file.id,
             owner: file.owner,
@@ -491,7 +494,7 @@ class PersistenceManager {
                 persistenceManager.component.provider = webSocket;
 
                 // ✅ DUPLICATE PREVENTION: onConnect callback handles upgrade, no need for duplicate here
-                console.log('🔌 WebSocket provider created - upgrade will be handled by onConnect callback', {
+                if (DEBUG) console.log('🔌 WebSocket provider created - upgrade will be handled by onConnect callback', {
                     hasProvider: !!persistenceManager.component.provider,
                     permissionLevel: persistenceManager.component.currentFile?.permissionLevel,
                     isReadOnly: persistenceManager.component.isReadOnlyMode,
@@ -527,7 +530,7 @@ class PersistenceManager {
         }
 
         // ✅ AUTHENTICATED ACCESS: Proceed with WebSocket connection for authenticated users
-        console.log('🔌 WebSocket connection attempt', {
+        if (DEBUG) console.log('🔌 WebSocket connection attempt', {
             document: `${file.owner}/${file.permlink}`,
             permissionLevel: file.permissionLevel,
             isAuthenticated: this.component.isAuthenticated,
@@ -591,7 +594,7 @@ class PersistenceManager {
                 Math.round((Date.now() / 1000) - parseInt(this.component.authHeaders['x-challenge'])) : null;
             const isChallengeTooOldForWebSocket = challengeAge > (24 * 60 * 60); // 24 hours same as API
 
-            console.log('🔍 AUTH HEADERS INVESTIGATION:', {
+            if (DEBUG) console.log('🔍 AUTH HEADERS INVESTIGATION:', {
                 hasAuthHeaders: !!this.component.authHeaders,
                 authHeaderKeys: this.component.authHeaders ? Object.keys(this.component.authHeaders) : [],
                 account: this.component.authHeaders?.['x-account'],
@@ -613,18 +616,18 @@ class PersistenceManager {
                 });
 
                 // ✅ CRITICAL FIX: Wait for fresh auth headers instead of proceeding
-                console.log('🔄 Requesting fresh auth headers and waiting...');
+                if (DEBUG) console.log('🔄 Requesting fresh auth headers and waiting...');
                 this.component.$emit('request-auth-headers');
 
                 // ✅ SOLUTION: Return a promise that waits for fresh headers
                 return new Promise((resolve, reject) => {
-                    console.log('⏳ Waiting for fresh auth headers before WebSocket connection...');
+                    if (DEBUG) console.log('⏳ Waiting for fresh auth headers before WebSocket connection...');
 
                     // Set up a one-time watcher for fresh auth headers
                     const unwatchAuth = this.component.$watch('authHeaders', (newHeaders) => {
                         if (newHeaders && newHeaders['x-challenge']) {
                             const newChallengeAge = Math.round((Date.now() / 1000) - parseInt(newHeaders['x-challenge']));
-                            console.log('🔍 New auth headers received:', {
+                            if (DEBUG) console.log('🔍 New auth headers received:', {
                                 newChallengeAge: newChallengeAge + 's',
                                 isFresh: newChallengeAge < 300, // Less than 5 minutes
                                 isValidForWebSocket: newChallengeAge < (24 * 60 * 60) // Less than 24 hours
@@ -632,7 +635,7 @@ class PersistenceManager {
 
                             // ✅ WEBSOCKET FIX: Accept headers that are valid for WebSocket (< 24 hours)
                             if (newChallengeAge < (24 * 60 * 60)) { // Valid for WebSocket (< 24 hours)
-                                console.log('✅ WebSocket-compatible auth headers received, proceeding with connection...');
+                                if (DEBUG) console.log('✅ WebSocket-compatible auth headers received, proceeding with connection...');
                                 unwatchAuth(); // Stop watching
 
                                 // Restart the WebSocket setup with fresh headers
@@ -665,7 +668,7 @@ class PersistenceManager {
             const detectedPermissionLevel = file.permissionLevel || this.component.getUserPermissionLevel(file);
             const finalPermissionLevel = detectedPermissionLevel !== 'unknown' ? detectedPermissionLevel : 'readonly';
 
-            console.log('🔍 PERMISSION RESOLUTION for WebSocket auth:', {
+            if (DEBUG) console.log('🔍 PERMISSION RESOLUTION for WebSocket auth:', {
                 filePermissionLevel: file.permissionLevel,
                 detectedLevel: detectedPermissionLevel,
                 finalLevel: finalPermissionLevel,
@@ -683,7 +686,7 @@ class PersistenceManager {
             });
 
             // ✅ DEBUG: Log WebSocket auth token details
-            console.log('🔐 WebSocket auth token for collaborative document:', {
+            if (DEBUG) console.log('🔐 WebSocket auth token for collaborative document:', {
                 documentPath: docPath,
                 username: this.component.username,
                 account: this.component.authHeaders?.['x-account'],
@@ -701,7 +704,7 @@ class PersistenceManager {
             // ✅ TIPTAP COMPLIANCE: No artificial delays in WebSocket setup
             // HocuspocusProvider handles connection timing automatically
 
-            console.log('🔧 Creating HocuspocusProvider with config:', {
+            if (DEBUG) console.log('🔧 Creating HocuspocusProvider with config:', {
                 url: wsUrl,
                 name: docPath,
                 hasYjsDoc: !!yjsDoc,
@@ -719,7 +722,7 @@ class PersistenceManager {
             let yjsUpdateObserver = null;
             if (this.component.isReadOnlyMode) {
                 yjsUpdateObserver = (update, origin) => {
-                    console.log('📝 Y.js update received for read-only user:', {
+                    if (DEBUG) console.log('📝 Y.js update received for read-only user:', {
                         updateSize: update.length,
                         originType: typeof origin,
                         originName: origin?.constructor?.name || 'unknown',
@@ -731,11 +734,11 @@ class PersistenceManager {
                     // Check if editors need to be notified
                     // NOTE: Y.js share access removed - TipTap will handle sync automatically
                     if (update.length > 0) {
-                        console.log('✅ Content update received - TipTap will sync automatically');
+                        if (DEBUG) console.log('✅ Content update received - TipTap will sync automatically');
 
                         // ✅ REACTIVE PATTERN: Trust TipTap Collaboration to sync automatically
                         // The extension will trigger editor onUpdate events when content arrives
-                        console.log('✅ Y.js update received - TipTap Collaboration will sync to editors');
+                        if (DEBUG) console.log('✅ Y.js update received - TipTap Collaboration will sync to editors');
 
                         // Remove observer after significant update
                         yjsDoc.off('update', yjsUpdateObserver);
@@ -772,19 +775,19 @@ class PersistenceManager {
 
                 // ✅ TIPTAP BEST PRACTICE: Use onSynced callback for collaborative sync completion
                 onSynced() {
-                    console.log('🔄 WebSocket Y.js sync completed for collaborative document');
+                    if (DEBUG) console.log('🔄 WebSocket Y.js sync completed for collaborative document');
 
                     // ✅ TIPTAP v3: Clear Y.js syncing flag
 
                     // Process any queued commands
                     persistenceManager.component.$nextTick(() => {
                         if (persistenceManager.component.commandQueue && persistenceManager.component.commandQueue.length > 0) {
-                            console.log('🔄 Processing queued commands after WebSocket sync');
+                            if (DEBUG) console.log('🔄 Processing queued commands after WebSocket sync');
                             // Process commands here if needed
                         }
                     });
 
-                    console.log('🔄 WebSocket onSynced called - checking current state:', {
+                    if (DEBUG) console.log('🔄 WebSocket onSynced called - checking current state:', {
                         hasComponent: !!persistenceManager.component,
                         hasBodyEditor: !!persistenceManager.component?.bodyEditor,
                         isReadOnlyMode: persistenceManager.component?.isReadOnlyMode,
@@ -800,7 +803,7 @@ class PersistenceManager {
                     const documentName = config.get('documentName');
                     const lastModified = config.get('lastModified');
 
-                    console.log('📊 Y.js document state after WebSocket sync:', {
+                    if (DEBUG) console.log('📊 Y.js document state after WebSocket sync:', {
                         hasDocumentName: !!documentName,
                         documentName: documentName,
                         lastModified: lastModified,
@@ -816,7 +819,7 @@ class PersistenceManager {
                     // ✅ FIX: Initialize config map if empty after WebSocket sync
                     // This happens when server returns empty document for new collaborative docs
                     if (config.size === 0 && !persistenceManager.component.isReadOnlyMode) {
-                        console.log('⚠️ Config map is empty after WebSocket sync - initializing...');
+                        if (DEBUG) console.log('⚠️ Config map is empty after WebSocket sync - initializing...');
                         yjsDoc.transact(() => {
                             config.set('created', new Date().toISOString());
                             config.set('version', '1.0');
@@ -833,14 +836,14 @@ class PersistenceManager {
                                                          file.name;
                             if (preservedDocumentName && !preservedDocumentName.includes('/')) {
                                 config.set('documentName', preservedDocumentName);
-                                console.log('✅ Preserved document name in config:', preservedDocumentName);
+                                if (DEBUG) console.log('✅ Preserved document name in config:', preservedDocumentName);
                             }
                         }, 'websocket-sync-init');
                     }
 
                     // ✅ DEBUG: Check if content is actually in Y.js for read-only users
                     if (persistenceManager.component.isReadOnlyMode) {
-                        console.log('📖 Read-only document Y.js content check after WebSocket sync:', {
+                        if (DEBUG) console.log('📖 Read-only document Y.js content check after WebSocket sync:', {
                             titleContent: persistenceManager.component.titleInput || 'no title',
                             bodyContent: persistenceManager.component.bodyEditor?.getText()?.substring(0, 100) || 'no editor',
                             // NOTE: Content checks via editors, not Y.js shares
@@ -872,7 +875,7 @@ class PersistenceManager {
                             config.set('cloudSyncActive', true);
                         }, 'websocket-sync'); // Origin tag to identify this transaction
                     } else {
-                        console.log('📖 Read-only user - skipping Y.js config updates in onSynced');
+                        if (DEBUG) console.log('📖 Read-only user - skipping Y.js config updates in onSynced');
                     }
 
                     // ✅ DOCUMENT NAME SYNC: Update currentFile with document name from cloud sync (metadata only)
@@ -882,7 +885,7 @@ class PersistenceManager {
                             persistenceManager.component.currentFile.name.includes('/');
 
                         if (isUsernameFallback && yjsDocumentName !== persistenceManager.component.currentFile.name) {
-                            console.log('📝 Updating file object with document name from cloud sync:', {
+                            if (DEBUG) console.log('📝 Updating file object with document name from cloud sync:', {
                                 oldName: persistenceManager.component.currentFile.name,
                                 newName: yjsDocumentName
                             });
@@ -914,7 +917,7 @@ class PersistenceManager {
                     const titleHasContent = (persistenceManager.component.titleInput || '').trim().length > 0;
                     const bodyHasContent = persistenceManager.component.bodyEditor?.getText()?.length > 0;
 
-                    console.log('🔄 WebSocket sync content check:', {
+                    if (DEBUG) console.log('🔄 WebSocket sync content check:', {
                         titleHasContent,
                         bodyHasContent,
                         hasBodyEditor: !!persistenceManager.component.bodyEditor,
@@ -927,13 +930,13 @@ class PersistenceManager {
 
                     if (persistenceManager.component.bodyEditor) {
                         // ✅ UPGRADE FOR ALL USERS: Both editable and read-only users get Tier 2 with cursors
-                        console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with CollaborationCaret...');
-                        console.log('👥 User type:', persistenceManager.component.isReadOnlyMode ? 'read-only' : 'editable');
+                        if (DEBUG) console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with CollaborationCaret...');
+                        if (DEBUG) console.log('👥 User type:', persistenceManager.component.isReadOnlyMode ? 'read-only' : 'editable');
 
                         // ✅ PERMISSION REFRESH: Set collaborative activity flag for faster permission checking
                         if (!persistenceManager.component.isActivelyCollaborating) {
                             persistenceManager.component.isActivelyCollaborating = true;
-                            console.log('🚀 COLLABORATIVE ACTIVITY: Enabled fast permission refresh for real-time updates');
+                            if (DEBUG) console.log('🚀 COLLABORATIVE ACTIVITY: Enabled fast permission refresh for real-time updates');
 
                             // Restart permission refresh with faster rate
                             persistenceManager.component.startPermissionRefresh();
@@ -951,14 +954,14 @@ class PersistenceManager {
                 },
 
                 onConnect() {
-                    console.log('🔌 WebSocket connected to collaboration server');
+                    if (DEBUG) console.log('🔌 WebSocket connected to collaboration server');
                     persistenceManager.component.connectionStatus = 'connected';
                     persistenceManager.component.connectionMessage = 'Connected to collaboration server';
                     
                     // ✅ FIX: Reset loading flag when WebSocket connects successfully
                     // Document is now fully loaded and user interactions should be tracked
                     persistenceManager.component.isLoadingDocument = false;
-                    console.log('📄 Document loading complete via WebSocket - user interactions will now be tracked');
+                    if (DEBUG) console.log('📄 Document loading complete via WebSocket - user interactions will now be tracked');
 
                     // ✅ TIPTAP COMPLIANCE: Set awareness user info after connection
                     if (provider.awareness) {
@@ -968,22 +971,22 @@ class PersistenceManager {
                             permissionLevel: file.permissionLevel,
                             isReadOnly: persistenceManager.component.isReadOnlyMode
                         });
-                        console.log('✅ Awareness user info set after connection');
+                        if (DEBUG) console.log('✅ Awareness user info set after connection');
                     }
 
 
                     // ✅ TIPTAP COMPLIANCE: Track reconnection for exponential backoff
                     if (persistenceManager.component.reconnectAttempts > 0) {
-                        console.log('✅ WebSocket reconnected after', persistenceManager.component.reconnectAttempts, 'attempts');
+                        if (DEBUG) console.log('✅ WebSocket reconnected after', persistenceManager.component.reconnectAttempts, 'attempts');
                         persistenceManager.component.reconnectAttempts = 0;
                     }
 
                     // ✅ FIX: Don't upgrade editors immediately - wait for onSynced
                     // The WebSocket needs to sync Y.js content first
-                    console.log('⏳ WebSocket connected, waiting for Y.js sync before upgrading editors...');
+                    if (DEBUG) console.log('⏳ WebSocket connected, waiting for Y.js sync before upgrading editors...');
 
                     // ✅ DEBUG: Check provider sync state
-                    console.log('🔍 Provider state after connection:', {
+                    if (DEBUG) console.log('🔍 Provider state after connection:', {
                         isConnected: provider.isConnected,
                         isSynced: provider.synced,
                         status: provider.status,
@@ -993,17 +996,17 @@ class PersistenceManager {
 
                     // ✅ FIX: For read-only users, check if we need to trigger sync
                     if (persistenceManager.component.isReadOnlyMode) {
-                        console.log('📖 Read-only user connected - monitoring sync status...');
+                        if (DEBUG) console.log('📖 Read-only user connected - monitoring sync status...');
 
                         // ✅ TIPTAP BEST PRACTICE: Read-only awareness is already set in onConnect
-                        console.log('📖 Read-only user - awareness state already configured in onConnect');
+                        if (DEBUG) console.log('📖 Read-only user - awareness state already configured in onConnect');
 
                         // 🔍 DEBUG: Server currently treats this as unauthorized_edit_attempt
 
                         // ✅ REACTIVE PATTERN: Use provider sync events for read-only users
                         const handleReadOnlySync = async () => {
                             if (provider.synced) {
-                                console.log('✅ Read-only user successfully synced');
+                                if (DEBUG) console.log('✅ Read-only user successfully synced');
                                 provider.off('synced', handleReadOnlySync);
                             }
                         };
@@ -1014,10 +1017,10 @@ class PersistenceManager {
                         // ✅ REACTIVE PATTERN: Use status event for fallback logic
                         const statusHandler = async ({ status }) => {
                             if (status === 'disconnected' && persistenceManager.component.isReadOnlyMode) {
-                                console.log('⚠️ Read-only user disconnected - may need HTTP fallback');
+                                if (DEBUG) console.log('⚠️ Read-only user disconnected - may need HTTP fallback');
 
                                 // Log provider state for debugging
-                                console.log('🔍 Provider debug state:', {
+                                if (DEBUG) console.log('🔍 Provider debug state:', {
                                     isConnected: provider.isConnected,
                                     isSynced: provider.synced,
                                     hasAwareness: !!provider.awareness,
@@ -1028,7 +1031,7 @@ class PersistenceManager {
                                 // ✅ FALLBACK: Use HTTP API to fetch document content for read-only users
                                 try {
                                     const infoUrl = `https://data.dlux.io/api/collaboration/info/${docPath}`;
-                                    console.log('🌐 Fetching document via HTTP:', infoUrl);
+                                    if (DEBUG) console.log('🌐 Fetching document via HTTP:', infoUrl);
 
                                     const response = await fetch(infoUrl, {
                                         headers: persistenceManager.component.authHeaders || {}
@@ -1036,7 +1039,7 @@ class PersistenceManager {
 
                                     if (response.ok) {
                                         const data = await response.json();
-                                        console.log('📦 HTTP response received:', {
+                                        if (DEBUG) console.log('📦 HTTP response received:', {
                                             hasYdocState: !!data.ydocState,
                                             stateSize: data.ydocState?.length || 0,
                                             documentName: data.document_name
@@ -1047,7 +1050,7 @@ class PersistenceManager {
                                             const update = new Uint8Array(data.ydocState);
                                             Y.applyUpdate(yjsDoc, update);
 
-                                            console.log('✅ Applied HTTP document state to Y.js');
+                                            if (DEBUG) console.log('✅ Applied HTTP document state to Y.js');
 
                                             // Trigger sync through provider
                                             if (!provider.synced) {
@@ -1086,13 +1089,13 @@ class PersistenceManager {
                         // ✅ TIPTAP COMPLIANCE: Track reconnection attempts for exponential backoff
                         persistenceManager.component.reconnectAttempts++;
                         if (persistenceManager.component.reconnectAttempts > 1) {
-                            console.log('⚠️ WebSocket disconnected, reconnection attempt', persistenceManager.component.reconnectAttempts);
+                            if (DEBUG) console.log('⚠️ WebSocket disconnected, reconnection attempt', persistenceManager.component.reconnectAttempts);
                         }
 
                         // ✅ PERMISSION REFRESH: Reset collaborative activity flag and restart permission refresh at normal rate
                         if (persistenceManager.component.isActivelyCollaborating) {
                             persistenceManager.component.isActivelyCollaborating = false;
-                            console.log('🔄 COLLABORATIVE ACTIVITY: Disabled - switching to normal permission refresh rate');
+                            if (DEBUG) console.log('🔄 COLLABORATIVE ACTIVITY: Disabled - switching to normal permission refresh rate');
                             persistenceManager.component.startPermissionRefresh();
                         }
                     });
@@ -1113,7 +1116,7 @@ class PersistenceManager {
                     console.error('🔒 WebSocket authentication failed', data);
 
                     // ✅ DEBUG: Log authentication failure details
-                    console.log('🚫 Authentication failure details:', {
+                    if (DEBUG) console.log('🚫 Authentication failure details:', {
                         data: data,
                         documentPath: docPath,
                         permissionLevel: file.permissionLevel,
@@ -1126,7 +1129,7 @@ class PersistenceManager {
                     });
 
                     // ✅ DEBUG: Enhanced logging for WebSocket authentication failures
-                    console.log('🔍 WEBSOCKET AUTH FAILURE ANALYSIS:', {
+                    if (DEBUG) console.log('🔍 WEBSOCKET AUTH FAILURE ANALYSIS:', {
                         reason: data.reason,
                         hasAuthHeaders: !!persistenceManager.component.authHeaders,
                         authHeaderKeys: persistenceManager.component.authHeaders ? Object.keys(persistenceManager.component.authHeaders) : [],
@@ -1147,7 +1150,7 @@ class PersistenceManager {
 
                         // Log auth details for debugging
                         if (persistenceManager.component.authHeaders) {
-                            console.log('🔍 Auth headers being sent:', {
+                            if (DEBUG) console.log('🔍 Auth headers being sent:', {
                                 account: persistenceManager.component.authHeaders['x-account'],
                                 challenge: persistenceManager.component.authHeaders['x-challenge'],
                                 hasPubkey: !!persistenceManager.component.authHeaders['x-pubkey'],
@@ -1163,7 +1166,7 @@ class PersistenceManager {
                     // Try to refresh authentication for editable users
                     if (!persistenceManager.component.isReadOnlyMode && persistenceManager.component.loadCollaborationAuthHeaders) {
                         persistenceManager.component.loadCollaborationAuthHeaders(true).then(() => {
-                            console.log('🔄 Authentication headers refreshed - reconnection may be attempted');
+                            if (DEBUG) console.log('🔄 Authentication headers refreshed - reconnection may be attempted');
                         }).catch(error => {
                             console.error('❌ Failed to refresh authentication headers:', error);
                         });
@@ -1174,7 +1177,7 @@ class PersistenceManager {
                     console.error('❌ WebSocket error:', error);
 
                     // ✅ DEBUG: Log full error details
-                    console.log('🔍 WebSocket error details:', {
+                    if (DEBUG) console.log('🔍 WebSocket error details:', {
                         message: error.message,
                         type: error.type,
                         code: error.code,
@@ -1214,7 +1217,7 @@ class PersistenceManager {
 
                 // Add debugging for provider events (but don't interfere with message handling)
                 onOpen() {
-                    console.log('🔓 WebSocket onOpen event fired', {
+                    if (DEBUG) console.log('🔓 WebSocket onOpen event fired', {
                         documentPath: docPath,
                         isReadOnly: persistenceManager.component.isReadOnlyMode,
                         permissionLevel: file.permissionLevel,
@@ -1223,7 +1226,7 @@ class PersistenceManager {
                 },
 
                 onStatus(event) {
-                    console.log('📊 WebSocket onStatus event:', {
+                    if (DEBUG) console.log('📊 WebSocket onStatus event:', {
                         status: event.status,
                         documentPath: docPath,
                         isReadOnly: persistenceManager.component.isReadOnlyMode,
@@ -1239,7 +1242,7 @@ class PersistenceManager {
 
                     // ✅ DEBUG: Track heartbeat/keepalive messages
                     if (data && (data.type === 'pong' || data.type === 'ping' || data.type === 'heartbeat')) {
-                        console.log('💓 WebSocket heartbeat received', {
+                        if (DEBUG) console.log('💓 WebSocket heartbeat received', {
                             type: data.type,
                             messageNumber: messageCount,
                             timeSinceLastMessage: timeSinceLastMessage + 'ms'
@@ -1258,7 +1261,7 @@ class PersistenceManager {
                             if (lowerData.includes('permission') || lowerData.includes('access') || lowerData.includes('grant') || lowerData.includes('revoke')) {
                                 hasPermissionData = true;
                                 messageInfo = 'potential-permission-broadcast';
-                                console.log('🔍 POTENTIAL PERMISSION MESSAGE:', data);
+                                if (DEBUG) console.log('🔍 POTENTIAL PERMISSION MESSAGE:', data);
                             }
                         }
 
@@ -1270,7 +1273,7 @@ class PersistenceManager {
                                 if (decoded.includes('permission') || decoded.includes('access')) {
                                     hasPermissionData = true;
                                     messageInfo = 'yjs-update-with-permission-data';
-                                    console.log('🔍 Y.js UPDATE WITH PERMISSION DATA:', decoded.substring(0, 200));
+                                    if (DEBUG) console.log('🔍 Y.js UPDATE WITH PERMISSION DATA:', decoded.substring(0, 200));
                                 }
                             } catch (e) {
                                 // Expected for binary Y.js updates
@@ -1280,7 +1283,7 @@ class PersistenceManager {
                         console.warn('⚠️ Error analyzing message for permission data:', e);
                     }
 
-                    console.log('📨 WebSocket message received', {
+                    if (DEBUG) console.log('📨 WebSocket message received', {
                         messageNumber: messageCount,
                         timeSinceLastMessage: timeSinceLastMessage + 'ms',
                         dataType: typeof data,
@@ -1298,18 +1301,18 @@ class PersistenceManager {
 
                     // First message is typically the sync response
                     if (messageCount === 1) {
-                        console.log('🌟 First WebSocket message received - likely initial sync');
+                        if (DEBUG) console.log('🌟 First WebSocket message received - likely initial sync');
                     }
 
                     // Check if sync completed after message
                     if (provider.synced && messageCount <= 3) {
-                        console.log('✅ Provider synced after message', messageCount);
+                        if (DEBUG) console.log('✅ Provider synced after message', messageCount);
                     }
                 },
 
                 // ✅ DEBUG: Add more event handlers to understand sync issue
                 onStateless(payload) {
-                    console.log('📨 WebSocket onStateless event:', {
+                    if (DEBUG) console.log('📨 WebSocket onStateless event:', {
                         hasPayload: !!payload,
                         payloadKeys: payload ? Object.keys(payload) : [],
                         documentPath: docPath,
@@ -1332,7 +1335,7 @@ class PersistenceManager {
                     );
 
                     if (isPermissionBroadcast) {
-                        console.log('🔐 Permission broadcast detected:', {
+                        if (DEBUG) console.log('🔐 Permission broadcast detected:', {
                             type: payload.type || payload.event || payload.action || 'implicit',
                             targetAccount: payload.targetAccount || payload.account || payload.user,
                             permissionType: payload.permissionType || payload.permission || payload.access,
@@ -1353,20 +1356,20 @@ class PersistenceManager {
 
                         // Check if this permission update is for the current user
                         if (normalizedPayload.targetAccount === persistenceManager.component.username) {
-                            console.log('🎯 Permission update is for current user - processing...');
+                            if (DEBUG) console.log('🎯 Permission update is for current user - processing...');
 
                             // Use Vue's nextTick to ensure reactive updates
                             persistenceManager.component.$nextTick(() => {
                                 persistenceManager.component.handleRemotePermissionUpdate(normalizedPayload);
                             });
                         } else {
-                            console.log('ℹ️ Permission update for different user:', normalizedPayload.targetAccount);
+                            if (DEBUG) console.log('ℹ️ Permission update for different user:', normalizedPayload.targetAccount);
                         }
                     }
 
                     // ✅ LEGACY FORMAT: Handle original permission-update type
                     if (payload && payload.type === 'permission-update') {
-                        console.log('🔐 Legacy permission update broadcast received:', {
+                        if (DEBUG) console.log('🔐 Legacy permission update broadcast received:', {
                             targetAccount: payload.targetAccount,
                             newPermission: payload.permissionType,
                             grantedBy: payload.grantedBy,
@@ -1375,20 +1378,20 @@ class PersistenceManager {
 
                         // Check if this permission update is for the current user
                         if (payload.targetAccount === persistenceManager.component.username) {
-                            console.log('🎯 Legacy permission update is for current user');
+                            if (DEBUG) console.log('🎯 Legacy permission update is for current user');
 
                             // Use Vue's nextTick to ensure reactive updates
                             persistenceManager.component.$nextTick(() => {
                                 persistenceManager.component.handleRemotePermissionUpdate(payload);
                             });
                         } else {
-                            console.log('ℹ️ Legacy permission update for different user:', payload.targetAccount);
+                            if (DEBUG) console.log('ℹ️ Legacy permission update for different user:', payload.targetAccount);
                         }
                     }
 
                     // ✅ REACTIVE PERMISSIONS: Handle permission revocation broadcasts
                     if (payload && payload.type === 'permission-revoke') {
-                        console.log('🚫 Permission revocation broadcast received:', {
+                        if (DEBUG) console.log('🚫 Permission revocation broadcast received:', {
                             targetAccount: payload.targetAccount,
                             revokedBy: payload.revokedBy,
                             documentPath: docPath
@@ -1396,7 +1399,7 @@ class PersistenceManager {
 
                         // Check if this revocation is for the current user
                         if (payload.targetAccount === persistenceManager.component.username) {
-                            console.log('🎯 Permission revocation is for current user');
+                            if (DEBUG) console.log('🎯 Permission revocation is for current user');
 
                             // Handle as no-access permission update
                             const revokePayload = {
@@ -1416,7 +1419,7 @@ class PersistenceManager {
                 beforeBroadcastStateless(payload) {
                     // Debug: Log all broadcast attempts with more detail
                     const payloadStr = payload ? JSON.stringify(payload).substring(0, 100) : 'null';
-                    console.log('🔍 beforeBroadcastStateless called:', {
+                    if (DEBUG) console.log('🔍 beforeBroadcastStateless called:', {
                         isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
                         hasPayload: !!payload,
                         payloadType: typeof payload,
@@ -1430,7 +1433,7 @@ class PersistenceManager {
 
                 // Allow regular broadcasts - server handles permissions
                 beforeBroadcast(data) {
-                    console.log('🔍 beforeBroadcast called:', {
+                    if (DEBUG) console.log('🔍 beforeBroadcast called:', {
                         isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
                         hasData: !!data,
                         dataType: typeof data,
@@ -1442,7 +1445,7 @@ class PersistenceManager {
                 }
             });
 
-            console.log('✅ HocuspocusProvider created successfully', {
+            if (DEBUG) console.log('✅ HocuspocusProvider created successfully', {
                 providerExists: !!provider,
                 isConnected: provider.isConnected,
                 isSynced: provider.synced,
@@ -1482,7 +1485,7 @@ class PersistenceManager {
 
             // ✅ REACTIVE PATTERN: Use provider events instead of timers
             provider.on('status', ({ status }) => {
-                console.log('🔍 WebSocket provider status changed:', {
+                if (DEBUG) console.log('🔍 WebSocket provider status changed:', {
                     status,
                     isConnected: provider.isConnected,
                     isSynced: provider.synced,
@@ -1491,9 +1494,9 @@ class PersistenceManager {
 
                 // ✅ REACTIVE PATTERN: Handle sync completion through events
                 if (status === 'connected' && !provider.synced) {
-                    console.log('🔄 Provider connected but not synced yet');
+                    if (DEBUG) console.log('🔄 Provider connected but not synced yet');
                 } else if (status === 'connected' && provider.synced) {
-                    console.log('✅ Provider connected and synced');
+                    if (DEBUG) console.log('✅ Provider connected and synced');
                 }
             });
 
@@ -1506,7 +1509,7 @@ class PersistenceManager {
 
                 // Check if manual intervention needed
                 if (provider.ws && provider.ws.readyState === WebSocket.CLOSED) {
-                    console.log('🔌 WebSocket closed - provider will handle reconnection');
+                    if (DEBUG) console.log('🔌 WebSocket closed - provider will handle reconnection');
                 }
             });
 
@@ -1522,7 +1525,7 @@ class PersistenceManager {
 
     async recreateReadOnlyEditors(yjsDoc) {
         // ✅ RECOVERY METHOD: Recreate read-only editors when content sync fails
-        console.log('🔄 Starting read-only editor recreation...');
+        if (DEBUG) console.log('🔄 Starting read-only editor recreation...');
 
         try {
             // Destroy existing editors
@@ -1545,7 +1548,7 @@ class PersistenceManager {
             // Re-setup sync listeners
             this.component.syncManager.setupSyncListeners(editors, yjsDoc);
 
-            console.log('✅ Read-only editors recreated successfully');
+            if (DEBUG) console.log('✅ Read-only editors recreated successfully');
 
             // ✅ COMPLIANCE: Debug code removed - no content access in timeouts
 
@@ -1558,19 +1561,19 @@ class PersistenceManager {
     async upgradeToCloudEditors(yjsDoc, webSocketProvider) {
         // ✅ CONCURRENCY PROTECTION: Prevent operations during unmounting or cleanup
         if (this.component.creatingEditors || this.component.isInitializingEditors || this.component.isUnmounting || this.component.isCleaningUp) {
-            console.log('🔄 Upgrade blocked - component busy');
+            if (DEBUG) console.log('🔄 Upgrade blocked - component busy');
             return;
         }
 
         // ✅ PREREQUISITE CHECK: Ensure editors exist before upgrading
         if (!this.component.bodyEditor) {
-            console.log('⚠️ Upgrade blocked - no editor to upgrade');
+            if (DEBUG) console.log('⚠️ Upgrade blocked - no editor to upgrade');
             return;
         }
 
         // ✅ DUPLICATE PREVENTION: Check if editor already has cursors (Tier 2)
         if (this.component.bodyEditor?.extensionManager?.extensions?.find(ext => ext.name === 'collaborationCursor')) {
-            console.log('🔄 Upgrade skipped - editor already has collaboration cursors');
+            if (DEBUG) console.log('🔄 Upgrade skipped - editor already has collaboration cursors');
             return;
         }
 
@@ -1604,7 +1607,7 @@ class PersistenceManager {
             const titleContent = this.component.titleInput || '';
 
             // ✅ DEBUG: Log editor upgrade for read-only documents
-            console.log('🔄 Editor upgrade verification:', {
+            if (DEBUG) console.log('🔄 Editor upgrade verification:', {
                 isReadOnlyMode: this.component.isReadOnlyMode,
                 permissionLevel: this.component.currentFile?.permissionLevel,
                 beforeUpgrade: beforeUpgrade,
@@ -1725,7 +1728,7 @@ class PersistenceManager {
                 files[fileIndex].modified = timestamp;
                 localStorage.setItem('dlux_tiptap_files', JSON.stringify(files));
 
-                console.log('✅ Updated local file timestamp:', {
+                if (DEBUG) console.log('✅ Updated local file timestamp:', {
                     fileId,
                     timestamp
                 });
@@ -1755,13 +1758,13 @@ class EditorFactory {
     async createEditors(yjsDoc, tier, webSocketProvider = null) {
         // ✅ CONCURRENCY PROTECTION: Prevent operations during unmounting or cleanup
         if (this.component.creatingEditors || this.component.isInitializingEditors || this.component.isUnmounting || this.component.isCleaningUp) {
-            console.log('🔄 Editor creation blocked - component busy');
+            if (DEBUG) console.log('🔄 Editor creation blocked - component busy');
             return null;
         }
 
         // ✅ DUPLICATE PREVENTION: Check if editor already exists (single editor solution)
         if (this.component.bodyEditor) {
-            console.log('🔄 Editor creation skipped - editor already exists');
+            if (DEBUG) console.log('🔄 Editor creation skipped - editor already exists');
             return {
                 bodyEditor: this.component.bodyEditor
             };
@@ -1798,7 +1801,7 @@ class EditorFactory {
         }
 
         // ✅ VERIFY: Check Y.js document state before creating editor
-        console.log('📋 Y.js document state before editor creation:', {
+        if (DEBUG) console.log('📋 Y.js document state before editor creation:', {
             clientID: yjsDoc.clientID,
             gc: yjsDoc.gc,
             shareKeys: Object.keys(yjsDoc.share || {}),
@@ -1812,7 +1815,7 @@ class EditorFactory {
         }
 
         // ✅ ULTIMATE FIX: Comprehensive bundle access debugging and resolution
-        console.log('🔍 ULTIMATE BUNDLE DEBUG:', {
+        if (DEBUG) console.log('🔍 ULTIMATE BUNDLE DEBUG:', {
             windowTiptapCollaboration: !!window.TiptapCollaboration,
             windowTiptapCollaborationType: typeof window.TiptapCollaboration,
             windowTiptapCollaborationKeys: window.TiptapCollaboration ? Object.keys(window.TiptapCollaboration) : [],
@@ -1858,14 +1861,13 @@ class EditorFactory {
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
-        const CustomTableHeader = tiptapBundle.CustomTableHeader;
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
 
-        console.log('✅ FINAL COMPONENT CHECK:', {
+        if (DEBUG) console.log('✅ FINAL COMPONENT CHECK:', {
             usingDefaultExport: tiptapBundle === window.TiptapCollaboration.default,
             Editor: !!Editor,
             StarterKit: !!StarterKit,
@@ -1882,7 +1884,7 @@ class EditorFactory {
             renderToMarkdown: !!renderToMarkdown
         });
 
-        console.log('TipTap component access:', {
+        if (DEBUG) console.log('TipTap component access:', {
             Editor: !!Editor,
             StarterKit: !!StarterKit,
             Collaboration: !!Collaboration,
@@ -1908,7 +1910,7 @@ class EditorFactory {
         }
 
         // ✅ DEBUG: Log Y.js document state before creating editors
-        console.log('🔨 Creating Tier 1 editors with Y.js document state:', {
+        if (DEBUG) console.log('🔨 Creating Tier 1 editors with Y.js document state:', {
             hasDocumentName: !!yjsDoc.getMap('config').get('documentName'),
             documentName: yjsDoc.getMap('config').get('documentName'),
             isReadOnlyMode: this.component.isReadOnlyMode
@@ -1917,7 +1919,7 @@ class EditorFactory {
         // ✅ TIPTAP BEST PRACTICE: Include CollaborationCaret when WebSocket is available
         // This follows TipTap's recommendation for read-only users with cursor visibility
         const isEditable = !this.component.isReadOnlyMode;
-        console.log('🔧 Creating Tier 1 editors with:', {
+        if (DEBUG) console.log('🔧 Creating Tier 1 editors with:', {
             isEditable,
             isReadOnlyMode: this.component.isReadOnlyMode,
             hasWebSocketProvider: !!webSocketProvider,
@@ -1958,9 +1960,9 @@ class EditorFactory {
                 suggestion: createMentionSuggestion()
             }),
             TableKit && TableKit.configure({
-                // Disable tableCell and tableHeader since we're providing our own custom versions
+                // Disable tableCell since we're providing our own custom version
                 tableCell: false,
-                tableHeader: false,
+                // tableHeader uses the default from TableKit
                 // Configure the table extension within the kit
                 table: {
                     resizable: false,              // No column resizing
@@ -1968,9 +1970,8 @@ class EditorFactory {
                     allowTableNodeSelection: false // Simple selection only
                 }
             }),
-            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell and CustomTableHeader with nested table prevention
+            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell with nested table prevention
             CustomTableCell && CustomTableCell,
-            CustomTableHeader && CustomTableHeader,
             // ✅ Add CustomDropcursor that controls visibility when dragging tables
             CustomDropcursor && CustomDropcursor.configure({
                 color: '#5C94FE',
@@ -1988,9 +1989,6 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
-                    if (node) {
-                        console.log('🎯 DragHandle hovering over:', node.type.name);
-                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2032,7 +2030,7 @@ class EditorFactory {
 
 
         // ✅ DEBUG: Log Y.js document state before creating editor
-        console.log('🔍 Y.js document state before editor creation:', {
+        if (DEBUG) console.log('🔍 Y.js document state before editor creation:', {
             yjsDocExists: !!yjsDoc,
             yjsDocClientID: yjsDoc?.clientID,
             yjsDocGc: yjsDoc?.gc,
@@ -2052,7 +2050,7 @@ class EditorFactory {
             };
 
             bodyExtensions.push(CollaborationCaret.configure(cursorConfig));
-            console.log('✅ CollaborationCaret added for cursor visibility', {
+            if (DEBUG) console.log('✅ CollaborationCaret added for cursor visibility', {
                 isReadOnlyMode: this.component.isReadOnlyMode,
                 username: this.component.username
             });
@@ -2071,8 +2069,8 @@ class EditorFactory {
         try {
             // Filter out any null/undefined extensions
             const validExtensions = bodyExtensions.filter(ext => ext != null);
-            console.log('📦 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
-            console.log('📦 Extension names:', validExtensions.map(ext => ext.name || 'unnamed'));
+            if (DEBUG) console.log('📦 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
+            if (DEBUG) console.log('📦 Extension names:', validExtensions.map(ext => ext.name || 'unnamed'));
             
             bodyEditor = new Editor({
                 element: this.component.$refs.bodyEditor,
@@ -2090,7 +2088,7 @@ class EditorFactory {
                     this.component.editorCreatedAt = Date.now();
 
                     // ✅ DEBUG: Check editor state immediately after creation
-                    console.log('🎯 Body editor onCreate fired:', {
+                    if (DEBUG) console.log('🎯 Body editor onCreate fired:', {
                         isEditable: editor.isEditable,
                         hasContent: editor.getText().length > 0,
                         contentLength: editor.getText().length,
@@ -2104,12 +2102,12 @@ class EditorFactory {
                     // This ensures that initialization-triggered updates don't cause persistence
                     setTimeout(() => {
                         this.component.editorInitialized = true;
-                        console.log('✅ Editor fully initialized - ready for user interaction');
+                        if (DEBUG) console.log('✅ Editor fully initialized - ready for user interaction');
                     }, 1500); // 1.5 second delay to allow all initialization to complete
 
                     // ✅ STATE MONITORING: Track ProseMirror state for debugging
                     if (this.component.enableStateMonitoring) {
-                        console.log('🔍 ProseMirror initial state:', {
+                        if (DEBUG) console.log('🔍 ProseMirror initial state:', {
                             docSize: editor.state.doc.content.size,
                             selectionFrom: editor.state.selection.from,
                             selectionTo: editor.state.selection.to,
@@ -2135,7 +2133,7 @@ class EditorFactory {
 
                     // ✅ STATE MONITORING: Log transaction details for debugging
                     if (this.component.enableStateMonitoring && transaction) {
-                        console.log('🔄 ProseMirror transaction:', {
+                        if (DEBUG) console.log('🔄 ProseMirror transaction:', {
                             docChanged: transaction.docChanged,
                             steps: transaction.steps.length,
                             time: transaction.time,
@@ -2171,7 +2169,7 @@ class EditorFactory {
                     // ✅ FIX: Skip persistence triggers during editor initialization
                     // Check if this is an initialization update (no actual content changes)
                     if (!transaction.docChanged || transaction.steps.length === 0) {
-                        console.log('🔍 Skipping onUpdate - no doc changes:', {
+                        if (DEBUG) console.log('🔍 Skipping onUpdate - no doc changes:', {
                             docChanged: transaction.docChanged,
                             steps: transaction.steps.length
                         });
@@ -2184,7 +2182,7 @@ class EditorFactory {
                         // Check if this is just initialization content
                         const bodyText = editor.getText().trim();
                         if (!bodyText || bodyText.length === 0) {
-                            console.log('🔍 Skipping onUpdate - editor just created with no content:', {
+                            if (DEBUG) console.log('🔍 Skipping onUpdate - editor just created with no content:', {
                                 timeSinceCreation,
                                 hasContent: false
                             });
@@ -2203,7 +2201,7 @@ class EditorFactory {
                         // ✅ FIX: Don't set intent flags for temporary documents until we verify content
                         if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
                             // For persistent documents, always track changes
-                            console.log('🔍 Setting hasUnsavedChanges = true from body editor');
+                            if (DEBUG) console.log('🔍 Setting hasUnsavedChanges = true from body editor');
                             this.component.hasUnsavedChanges = true;
                             this.component.hasUserIntent = true;
                             // Call updateSaveStatus directly to ensure message shows
@@ -2221,7 +2219,7 @@ class EditorFactory {
                         if (this.component.editorInitialized && !this.component.isLoadingDocument) {
                             this.component.debouncedUpdateContent();
                         } else {
-                            console.log('🔍 Skipping debouncedUpdateContent - editor not fully initialized:', {
+                            if (DEBUG) console.log('🔍 Skipping debouncedUpdateContent - editor not fully initialized:', {
                                 editorInitialized: this.component.editorInitialized,
                                 isLoadingDocument: this.component.isLoadingDocument
                             });
@@ -2241,7 +2239,7 @@ class EditorFactory {
                 onBeforeCreate: ({ editor }) => {
                     // ✅ STATE MONITORING: Track editor lifecycle
                     if (this.component.enableStateMonitoring) {
-                        console.log('🔨 Editor onBeforeCreate - preparing state');
+                        if (DEBUG) console.log('🔨 Editor onBeforeCreate - preparing state');
                     }
                 },
                 onSelectionUpdate: ({ editor }) => {
@@ -2261,7 +2259,7 @@ class EditorFactory {
                     
                     // Log state changes for debugging
                     if (wasInTable !== this.component.isInTable) {
-                        console.log('📊 Table state changed:', {
+                        if (DEBUG) console.log('📊 Table state changed:', {
                             isInTable: this.component.isInTable
                         });
                     }
@@ -2269,7 +2267,7 @@ class EditorFactory {
                     // ✅ STATE MONITORING: Track selection changes
                     if (this.component.enableStateMonitoring) {
                         const selection = editor.state.selection;
-                        console.log('🕸️ Selection update:', {
+                        if (DEBUG) console.log('🕸️ Selection update:', {
                             from: selection.from,
                             to: selection.to,
                             empty: selection.empty,
@@ -2280,7 +2278,7 @@ class EditorFactory {
                 onTransaction: ({ editor, transaction }) => {
                     // ✅ STATE MONITORING: Detailed transaction tracking
                     if (this.component.enableStateMonitoring && transaction.docChanged) {
-                        console.log('📊 Transaction analysis:', {
+                        if (DEBUG) console.log('📊 Transaction analysis:', {
                             steps: transaction.steps.map(step => ({
                                 type: step.constructor.name,
                                 from: step.from || 0,
@@ -2356,7 +2354,6 @@ class EditorFactory {
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
-        const CustomTableHeader = tiptapBundle.CustomTableHeader;
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const Extension = tiptapBundle.Extension;
@@ -2408,9 +2405,9 @@ class EditorFactory {
                 suggestion: createMentionSuggestion()
             }),
             TableKit && TableKit.configure({
-                // Disable tableCell and tableHeader since we're providing our own custom versions
+                // Disable tableCell since we're providing our own custom version
                 tableCell: false,
-                tableHeader: false,
+                // tableHeader uses the default from TableKit
                 // Configure the table extension within the kit
                 table: {
                     resizable: false,              // No column resizing
@@ -2418,9 +2415,8 @@ class EditorFactory {
                     allowTableNodeSelection: false // Simple selection only
                 }
             }),
-            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell and CustomTableHeader with nested table prevention
+            // ✅ TIPTAP BEST PRACTICE: Add CustomTableCell with nested table prevention
             CustomTableCell && CustomTableCell,
-            CustomTableHeader && CustomTableHeader,
             // ✅ Add CustomDropcursor that controls visibility when dragging tables
             CustomDropcursor && CustomDropcursor.configure({
                 color: '#5C94FE',
@@ -2438,9 +2434,6 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
-                    if (node) {
-                        console.log('🎯 DragHandle hovering over:', node.type.name);
-                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2492,7 +2485,7 @@ class EditorFactory {
             };
 
             bodyExtensions.push(CollaborationCaret.configure(cursorConfig));
-            console.log('✅ CollaborationCaret added for cursor visibility', {
+            if (DEBUG) console.log('✅ CollaborationCaret added for cursor visibility', {
                 isReadOnlyMode: this.component.isReadOnlyMode,
                 username: this.component.username
             });
@@ -2500,7 +2493,7 @@ class EditorFactory {
 
         // ✅ CRITICAL FIX: Calculate editable state based on current permissions
         const isEditable = !this.component.isReadOnlyMode;
-        console.log('🔧 Creating Tier 2 bodyEditor (single editor) with editable state:', {
+        if (DEBUG) console.log('🔧 Creating Tier 2 bodyEditor (single editor) with editable state:', {
             isEditable,
             isReadOnlyMode: this.component.isReadOnlyMode,
             permissionLevel: this.component.currentFile?.permissionLevel,
@@ -2518,7 +2511,7 @@ class EditorFactory {
 
         // Filter out any null/undefined extensions
         const validExtensions = bodyExtensions.filter(ext => ext != null);
-        console.log('📦 Tier2 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
+        if (DEBUG) console.log('📦 Tier2 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
         
         const bodyEditor = new Editor({
             element: this.component.$refs.bodyEditor,
@@ -2535,7 +2528,7 @@ class EditorFactory {
             onCreate: ({ editor }) => {
                 // ✅ FIX: Track editor creation time to prevent initialization triggers
                 this.component.editorCreatedAt = Date.now();
-                console.log('🎯 Tier 2 body editor onCreate fired:', {
+                if (DEBUG) console.log('🎯 Tier 2 body editor onCreate fired:', {
                     isEditable: editor.isEditable,
                     editorCreatedAt: this.component.editorCreatedAt
                 });
@@ -2575,7 +2568,7 @@ class EditorFactory {
                 
                 // Log state changes for debugging
                 if (wasInTable !== this.component.isInTable) {
-                    console.log('📊 Table state changed (Tier 2):', {
+                    if (DEBUG) console.log('📊 Table state changed (Tier 2):', {
                         isInTable: this.component.isInTable
                     });
                 }
@@ -2672,10 +2665,10 @@ class SyncManager {
             // ✅ TIPTAP COMPLIANCE: Memory monitoring works for all users (read-only safe)
             const textLength = editor.getText().length;
             if (textLength > 50000 && !this.component.memoryMonitorInterval) {
-                console.log('📊 Large document detected, starting memory monitoring');
+                if (DEBUG) console.log('📊 Large document detected, starting memory monitoring');
                 this.component.startMemoryMonitoring();
             } else if (textLength < 30000 && this.component.memoryMonitorInterval) {
-                console.log('📊 Document size reduced, stopping memory monitoring');
+                if (DEBUG) console.log('📊 Document size reduced, stopping memory monitoring');
                 this.component.stopMemoryMonitoring();
             }
         });
@@ -2703,7 +2696,7 @@ class SyncManager {
             return;
         }
 
-        console.log('🔍 [AUTO-NAMING] Starting auto-naming process');
+        if (DEBUG) console.log('🔍 [AUTO-NAMING] Starting auto-naming process');
 
         try {
             const config = this.component.ydoc.getMap('config');
@@ -2720,7 +2713,7 @@ class SyncManager {
                 return;
             }
 
-            console.log('📝 Document name eligible for auto-naming:', {
+            if (DEBUG) console.log('📝 Document name eligible for auto-naming:', {
                 existingName: existingDocumentName || '(none)',
                 isEligible: true
             });
@@ -2730,13 +2723,13 @@ class SyncManager {
 
             // Check if it's safe to read from editor
             if (this.component.isExecutingCommand || this.component.isYjsSyncing) {
-                console.log('🔍 [AUTO-NAMING] Skipping - command in progress or Y.js syncing');
+                if (DEBUG) console.log('🔍 [AUTO-NAMING] Skipping - command in progress or Y.js syncing');
                 return;
             }
 
-            console.log('🔍 [AUTO-NAMING] About to read body content from editor');
+            if (DEBUG) console.log('🔍 [AUTO-NAMING] About to read body content from editor');
             const bodyContent = editors.bodyEditor?.getText()?.trim() || '';
-            console.log('🔍 [AUTO-NAMING] Body content read, length:', bodyContent.length);
+            if (DEBUG) console.log('🔍 [AUTO-NAMING] Body content read, length:', bodyContent.length);
 
             // Auto-generate document name from whichever has content first (ONCE ONLY)
             let autoDocumentName = '';
@@ -2758,16 +2751,16 @@ class SyncManager {
 
                 // ✅ CORRECT: Store document name in Y.js config (NOT title content)
                 // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
-                console.log('🔍 [AUTO-NAMING] About to create Y.js transaction for document name:', autoDocumentName);
+                if (DEBUG) console.log('🔍 [AUTO-NAMING] About to create Y.js transaction for document name:', autoDocumentName);
 
                 // Defer Y.js transaction to avoid interfering with editor state
                 setTimeout(() => {
-                    console.log('🔍 [AUTO-NAMING] Executing deferred Y.js transaction');
+                    if (DEBUG) console.log('🔍 [AUTO-NAMING] Executing deferred Y.js transaction');
                     this.component.ydoc.transact(() => {
                         config.set('documentName', autoDocumentName);
                         config.set('lastModified', new Date().toISOString());
                     }, 'auto-naming'); // Origin tag to identify this transaction
-                    console.log('🔍 [AUTO-NAMING] Y.js transaction completed');
+                    if (DEBUG) console.log('🔍 [AUTO-NAMING] Y.js transaction completed');
 
                     // ✅ REACTIVITY FIX: Update reactive property for Vue
                     this.component.updateReactiveDocumentName(autoDocumentName);
@@ -2888,7 +2881,7 @@ class SyncManager {
                 // ✅ VUE 3 BEST PRACTICE: Clear array first, then push new items
                 // This ensures Vue 3 detects the change properly
                 if (event.keysChanged.has('beneficiaries')) {
-                    console.log('🎯 Beneficiaries changed in Y.js metadata:', beneficiaries);
+                    if (DEBUG) console.log('🎯 Beneficiaries changed in Y.js metadata:', beneficiaries);
                     
                     // Clear the array first
                     this.component.reactiveBeneficiaries.length = 0;
@@ -2898,12 +2891,12 @@ class SyncManager {
                         this.component.reactiveBeneficiaries.push(ben);
                     });
                     
-                    console.log('🎯 Updated reactiveBeneficiaries to:', this.component.reactiveBeneficiaries);
+                    if (DEBUG) console.log('🎯 Updated reactiveBeneficiaries to:', this.component.reactiveBeneficiaries);
                     
                     // Use nextTick to log after DOM update
                     this.component.$nextTick(() => {
-                        console.log('🔄 After nextTick - displayBeneficiaries:', this.component.displayBeneficiaries);
-                        console.log('🔄 DOM should be updated now');
+                        if (DEBUG) console.log('🔄 After nextTick - displayBeneficiaries:', this.component.displayBeneficiaries);
+                        if (DEBUG) console.log('🔄 DOM should be updated now');
                     });
                 } else {
                     // For other fields, use spread operator
@@ -2917,7 +2910,7 @@ class SyncManager {
 
                 // Also sync custom JSON string for the editor
                 if (event.keysChanged.has('customJson')) {
-                    console.log('🔄 Custom JSON changed in Y.js, updating UI:', customJson);
+                    if (DEBUG) console.log('🔄 Custom JSON changed in Y.js, updating UI:', customJson);
                     this.component.customJsonString = JSON.stringify(customJson, null, 2);
                     this.component.content.custom_json = customJson; // Legacy support
                     
@@ -2927,7 +2920,7 @@ class SyncManager {
                     // ✅ IFRAME INTEGRATION: Broadcast custom JSON changes to registered iframes
                     if (this.component.customJsonMessageHandler) {
                         this.component.customJsonMessageHandler.broadcastCustomJsonUpdate(customJson);
-                        console.log('📢 Broadcasted custom JSON update from Y.js to iframes');
+                        if (DEBUG) console.log('📢 Broadcasted custom JSON update from Y.js to iframes');
                     }
                 }
 
@@ -2995,7 +2988,7 @@ class SyncManager {
                     );
 
                     if (significantChanges.length > 0) {
-                        console.log('📝 Y.js metadata changed:', significantChanges);
+                        if (DEBUG) console.log('📝 Y.js metadata changed:', significantChanges);
                     }
 
                     // Only set flags if document is not temporary or already has persistence
@@ -3023,7 +3016,7 @@ class SyncManager {
                         if (key.startsWith('update_') && change.action === 'add') {
                             const permissionUpdate = permissions.get(key);
                             if (permissionUpdate && permissionUpdate.broadcastType) {
-                                console.log('🔄 PERMISSION BROADCAST RECEIVED:', permissionUpdate);
+                                if (DEBUG) console.log('🔄 PERMISSION BROADCAST RECEIVED:', permissionUpdate);
                                 
                                 // Check if this affects the current user
                                 const currentUsername = this.component.username;
@@ -3073,7 +3066,7 @@ class SyncManager {
                     this.permissionObserver = null;
                 }
                 
-                console.log('✅ Y.js observers cleaned up');
+                if (DEBUG) console.log('✅ Y.js observers cleaned up');
             } catch (error) {
                 console.warn('⚠️ Error cleaning up Y.js observers:', error);
             }
@@ -3088,7 +3081,7 @@ class SyncManager {
         try {
             const { account, permissionType, grantedBy, timestamp, broadcastType } = permissionUpdate;
             
-            console.log('🔄 PROCESSING PERMISSION BROADCAST:', {
+            if (DEBUG) console.log('🔄 PROCESSING PERMISSION BROADCAST:', {
                 account,
                 permissionType,
                 grantedBy,
@@ -3116,7 +3109,7 @@ class SyncManager {
                         if (this.component.showNotification) {
                             this.component.showNotification(message, broadcastType === 'permission_granted' ? 'success' : 'warning');
                         } else {
-                            console.log('📢 PERMISSION NOTIFICATION:', message);
+                            if (DEBUG) console.log('📢 PERMISSION NOTIFICATION:', message);
                         }
                     }
                     
@@ -3124,7 +3117,7 @@ class SyncManager {
                     const newPermissionLevel = this.component.getUserPermissionLevel(this.component.currentFile);
                     const oldReadOnlyMode = this.component.isReadOnlyMode;
                     
-                    console.log('🔄 PERMISSION CHANGE DETECTED:', {
+                    if (DEBUG) console.log('🔄 PERMISSION CHANGE DETECTED:', {
                         oldReadOnlyMode,
                         newPermissionLevel,
                         broadcastType
@@ -3179,13 +3172,13 @@ class SyncManager {
                             
                             // ✅ WEBSOCKET RECONNECTION: Reconnect with new permission level for server validation
                             if (this.component.provider && this.component.lifecycleManager) {
-                                console.log('🔄 Reconnecting WebSocket with new permission level...');
+                                if (DEBUG) console.log('🔄 Reconnecting WebSocket with new permission level...');
                                 await this.component.lifecycleManager.reconnectWebSocketForPermissionUpgrade();
                             }
                         }
                     }
                     
-                    console.log('✅ Permission broadcast processed successfully');
+                    if (DEBUG) console.log('✅ Permission broadcast processed successfully');
                     
                 } catch (error) {
                     console.error('❌ Error processing permission broadcast:', error);
@@ -3240,7 +3233,7 @@ class CustomJsonMessageHandler {
         this.messageHandler = this.handleMessage.bind(this);
         window.addEventListener('message', this.messageHandler);
         
-        console.log('🔧 CustomJsonMessageHandler initialized for enhanced post components');
+        if (DEBUG) console.log('🔧 CustomJsonMessageHandler initialized for enhanced post components');
     }
     
     /**
@@ -3261,7 +3254,7 @@ class CustomJsonMessageHandler {
             return;
         }
         
-        console.log('📨 Received iframe message:', { type, iframeId, payloadSize: JSON.stringify(payload || {}).length });
+        if (DEBUG) console.log('📨 Received iframe message:', { type, iframeId, payloadSize: JSON.stringify(payload || {}).length });
         
         switch(type) {
             case 'CUSTOM_JSON_UPDATE':
@@ -3314,7 +3307,7 @@ class CustomJsonMessageHandler {
             lastUpdate: null
         });
         
-        console.log('✅ Iframe registered:', {
+        if (DEBUG) console.log('✅ Iframe registered:', {
             iframeId,
             type: metadata.type,
             version: metadata.version,
@@ -3331,7 +3324,7 @@ class CustomJsonMessageHandler {
     unregisterIframe(iframeId) {
         if (this.iframeRegistry.has(iframeId)) {
             this.iframeRegistry.delete(iframeId);
-            console.log('👋 Iframe unregistered:', { iframeId, remaining: this.iframeRegistry.size });
+            if (DEBUG) console.log('👋 Iframe unregistered:', { iframeId, remaining: this.iframeRegistry.size });
         }
     }
     
@@ -3365,7 +3358,7 @@ class CustomJsonMessageHandler {
             iframe.source = source; // Update source in case it changed
         }
         
-        console.log('📥 Queued custom JSON update:', {
+        if (DEBUG) console.log('📥 Queued custom JSON update:', {
             iframeId,
             updateSize,
             queueLength: this.updateQueue.length,
@@ -3411,7 +3404,7 @@ class CustomJsonMessageHandler {
                 totalSize += size;
             }
             
-            console.log('🔄 Processing batched custom JSON updates:', {
+            if (DEBUG) console.log('🔄 Processing batched custom JSON updates:', {
                 batchSize: queueSnapshot.length,
                 totalSize,
                 iframes: [...new Set(queueSnapshot.map(u => u.iframeId))]
@@ -3447,7 +3440,7 @@ class CustomJsonMessageHandler {
             this.metrics.batchedUpdates++;
             this.metrics.averageLatency = (this.metrics.averageLatency + latency) / 2;
             
-            console.log('✅ Custom JSON batch update completed:', {
+            if (DEBUG) console.log('✅ Custom JSON batch update completed:', {
                 latency: latency + 'ms',
                 totalUpdatesProcessed: this.metrics.totalUpdates,
                 batchesProcessed: this.metrics.batchedUpdates
@@ -3489,7 +3482,7 @@ class CustomJsonMessageHandler {
             
             target.postMessage(message, '*');
             
-            console.log('📤 Sent custom JSON state to iframe:', {
+            if (DEBUG) console.log('📤 Sent custom JSON state to iframe:', {
                 iframeId,
                 jsonSize: JSON.stringify(customJson).length,
                 hasContent: Object.keys(customJson).length > 0
@@ -3522,7 +3515,7 @@ class CustomJsonMessageHandler {
             }
         }
         
-        console.log('📢 Broadcasted custom JSON updates to', this.iframeRegistry.size, 'iframes');
+        if (DEBUG) console.log('📢 Broadcasted custom JSON updates to', this.iframeRegistry.size, 'iframes');
     }
     
     /**
@@ -3550,7 +3543,7 @@ class CustomJsonMessageHandler {
         this.iframeRegistry.clear();
         this.updateQueue = [];
         
-        console.log('🧹 CustomJsonMessageHandler destroyed');
+        if (DEBUG) console.log('🧹 CustomJsonMessageHandler destroyed');
     }
 }
 
@@ -3604,7 +3597,7 @@ class LifecycleManager {
                 try {
                     // ✅ VERIFICATION: Check if editor is already destroyed
                     if (instance.isDestroyed) {
-                        console.log(`🔧 Editor ${name} already destroyed`);
+                        if (DEBUG) console.log(`🔧 Editor ${name} already destroyed`);
                         this.component[name] = null;
                         continue;
                     }
@@ -3620,7 +3613,7 @@ class LifecycleManager {
 
                     // ✅ VERIFICATION: Confirm destruction succeeded
                     if (instance.isDestroyed) {
-                        console.log(`✅ Editor ${name} destroyed successfully`);
+                        if (DEBUG) console.log(`✅ Editor ${name} destroyed successfully`);
                     } else {
                         console.warn(`⚠️ Editor ${name} destroy() called but not confirmed destroyed`);
                         // ✅ TIPTAP COMPLIANCE: Wait for destroy confirmation with proper timeout
@@ -3697,7 +3690,7 @@ class LifecycleManager {
 
         const oldPermissionLevel = this.component.getUserPermissionLevel(this.component.currentFile);
 
-        console.log('🔄 PERMISSION UPGRADE: Starting WebSocket reconnection', {
+        if (DEBUG) console.log('🔄 PERMISSION UPGRADE: Starting WebSocket reconnection', {
             document: `${this.component.currentFile.owner}/${this.component.currentFile.permlink}`,
             oldReadOnlyMode: this.component.isReadOnlyMode,
             oldPermissionLevel: oldPermissionLevel,
@@ -3716,7 +3709,7 @@ class LifecycleManager {
                 throw new Error('Failed to create new WebSocket provider');
             }
 
-            console.log('✅ PERMISSION UPGRADE: WebSocket reconnected successfully with new permissions');
+            if (DEBUG) console.log('✅ PERMISSION UPGRADE: WebSocket reconnected successfully with new permissions');
 
             // Provider will automatically trigger onSynced and upgrade editors
 
@@ -3729,7 +3722,7 @@ class LifecycleManager {
     async cleanupYjsDocument() {
         if (this.component.ydoc) {
             try {
-                console.log('🔧 Cleaning up Y.js document...');
+                if (DEBUG) console.log('🔧 Cleaning up Y.js document...');
 
                 // ✅ BEST PRACTICE: Clean up Y.js observers before destroying document
                 if (this.component.syncManager) {
@@ -3738,10 +3731,10 @@ class LifecycleManager {
 
                 // ✅ VERIFICATION: Check if document is already destroyed
                 if (this.component.ydoc.isDestroyed) {
-                    console.log('🔧 Y.js document already destroyed');
+                    if (DEBUG) console.log('🔧 Y.js document already destroyed');
                 } else {
                     this.component.ydoc.destroy();
-                    console.log('✅ Y.js document destroyed successfully');
+                    if (DEBUG) console.log('✅ Y.js document destroyed successfully');
                 }
 
             } catch (error) {
@@ -3754,7 +3747,7 @@ class LifecycleManager {
 
         if (this.component.indexeddbProvider) {
             try {
-                console.log('🧹 Cleaning up IndexedDB provider...');
+                if (DEBUG) console.log('🧹 Cleaning up IndexedDB provider...');
 
                 // ✅ IMPORTANT: Only clear data for collaborative documents to prevent cross-user contamination
                 // For local documents, we want to preserve the data in IndexedDB
@@ -3762,13 +3755,13 @@ class LifecycleManager {
                     this.component.indexeddbProvider.clearData &&
                     typeof this.component.indexeddbProvider.clearData === 'function') {
                     await this.component.indexeddbProvider.clearData();
-                    console.log('✅ IndexedDB data cleared for collaborative document - preventing cross-user contamination');
+                    if (DEBUG) console.log('✅ IndexedDB data cleared for collaborative document - preventing cross-user contamination');
 
                     // ✅ ADDITIONAL LOGGING: Log which user-specific key was cleared
                     if (this.component.currentFile) {
                         const userIdentifier = this.component.username;
                         const clearedKey = `${userIdentifier}__${this.component.currentFile.owner}/${this.component.currentFile.permlink}`;
-                        console.log('🔐 Cleared user-isolated IndexedDB data:', {
+                        if (DEBUG) console.log('🔐 Cleared user-isolated IndexedDB data:', {
                             userIdentifier: userIdentifier,
                             document: `${this.component.currentFile.owner}/${this.component.currentFile.permlink}`,
                             clearedKey: clearedKey,
@@ -3777,12 +3770,12 @@ class LifecycleManager {
                         });
                     }
                 } else if (this.component.fileType === 'local') {
-                    console.log('📁 Preserving IndexedDB data for local document - data remains persisted');
+                    if (DEBUG) console.log('📁 Preserving IndexedDB data for local document - data remains persisted');
                 }
 
                 // Then destroy the provider
                 this.component.indexeddbProvider.destroy();
-                console.log('✅ IndexedDB provider destroyed');
+                if (DEBUG) console.log('✅ IndexedDB provider destroyed');
 
             } catch (error) {
                 console.error('❌ Error during IndexedDB cleanup:', error.message);
@@ -3951,7 +3944,7 @@ class DocumentManager {
 
     async loadDocument(file) {
         // ✅ TIPTAP BEST PRACTICE: Follow official loading patterns
-        console.log('🚀 DocumentManager.loadDocument called with:', {
+        if (DEBUG) console.log('🚀 DocumentManager.loadDocument called with:', {
             fileId: file?.id,
             owner: file?.owner,
             permlink: file?.permlink,
@@ -4038,7 +4031,7 @@ class DocumentManager {
                 const bodyContent = this.component.bodyEditor?.getText() || '';
 
                 if (titleContent.length > 0 || bodyContent.length > 0) {
-                    console.log('✅ Editor content loaded via reactive pattern:', {
+                    if (DEBUG) console.log('✅ Editor content loaded via reactive pattern:', {
                         titleHasContent: titleContent.length > 0,
                         bodyHasContent: bodyContent.length > 0,
                         titlePreview: titleContent.substring(0, 50),
@@ -4063,7 +4056,7 @@ class DocumentManager {
                 const titleContent = this.component.titleInput || '';
                 const bodyContent = this.component.bodyEditor?.getText() || '';
 
-                console.log('🔍 Initial content check after editor creation:', {
+                if (DEBUG) console.log('🔍 Initial content check after editor creation:', {
                     titleHasContent: titleContent.length > 0,
                     bodyHasContent: bodyContent.length > 0,
                     hasIndexedDBPersistence: this.component.hasIndexedDBPersistence,
@@ -4150,7 +4143,7 @@ class DocumentManager {
             // Fallback: Check Y.js config if it was updated during sync
             const yjsDocumentName = this.component.ydoc?.getMap('config').get('documentName');
             if (yjsDocumentName && yjsDocumentName !== file.name && !yjsDocumentName.includes('/')) {
-                console.log('📝 SYNC: Using Y.js document name during loadDocument', {
+                if (DEBUG) console.log('📝 SYNC: Using Y.js document name during loadDocument', {
                     document: documentKey,
                     yjsName: yjsDocumentName,
                     originalName: file.name,
@@ -4187,7 +4180,7 @@ class DocumentManager {
         // ✅ REACTIVITY FIX: Update reactive document name for Vue display
         this.component.reactiveDocumentName = finalFile.name || finalFile.documentName || 'Untitled';
 
-        console.log('💾 Setting currentFile with collaborative flags:', {
+        if (DEBUG) console.log('💾 Setting currentFile with collaborative flags:', {
             hasOwner: !!finalFile.owner,
             hasPermlink: !!finalFile.permlink,
             type: finalFile.type,
@@ -4222,7 +4215,7 @@ class DocumentManager {
             }
         }
 
-        console.log('📊 Document state after loading:', {
+        if (DEBUG) console.log('📊 Document state after loading:', {
             tier: tier,
             fileType: this.component.fileType,
             isCollaborativeMode: this.component.isCollaborativeMode,
@@ -4235,7 +4228,7 @@ class DocumentManager {
 
         // ✅ Force status update after state changes
         this.component.$nextTick(() => {
-            console.log('📊 Status check after nextTick:', {
+            if (DEBUG) console.log('📊 Status check after nextTick:', {
                 isCollaborativeMode: this.component.isCollaborativeMode,
                 hasIndexedDBPersistence: this.component.hasIndexedDBPersistence,
                 connectionStatus: this.component.connectionStatus,
@@ -4270,7 +4263,7 @@ class DocumentManager {
         this.component.indexeddbProvider = null;
         this.component.hasIndexedDBPersistence = false;
 
-        console.log('✅ True temp document created (Y.js in memory only):', {
+        if (DEBUG) console.log('✅ True temp document created (Y.js in memory only):', {
             documentId,
             hasPersistence: false,
             willPersistOnIntent: true
@@ -4595,9 +4588,9 @@ class DocumentManager {
                     this.component.indexeddbProvider.clearData &&
                     typeof this.component.indexeddbProvider.clearData === 'function') {
                     await this.component.indexeddbProvider.clearData();
-                    console.log('✅ IndexedDB data cleared for collaborative document - preventing cross-user contamination');
+                    if (DEBUG) console.log('✅ IndexedDB data cleared for collaborative document - preventing cross-user contamination');
                 } else if (this.component.fileType === 'local') {
-                    console.log('📁 Preserving IndexedDB data for local document');
+                    if (DEBUG) console.log('📁 Preserving IndexedDB data for local document');
                 }
                 this.component.indexeddbProvider.destroy();
                 this.component.indexeddbProvider = null;
@@ -4683,13 +4676,13 @@ class RecoveryManager {
      * ✅ TIPTAP COMPLIANCE: Recover corrupted Y.js document
      */
     async recoverCorruptedDocument(documentId) {
-        console.log('🔧 Attempting Y.js document recovery', { documentId });
+        if (DEBUG) console.log('🔧 Attempting Y.js document recovery', { documentId });
 
         try {
             // Step 1: Try to restore from IndexedDB
             const recovered = await this.restoreFromIndexedDB(documentId);
             if (recovered) {
-                console.log('✅ Document recovered from IndexedDB');
+                if (DEBUG) console.log('✅ Document recovered from IndexedDB');
                 return recovered;
             }
 
@@ -4697,7 +4690,7 @@ class RecoveryManager {
             if (this.component.currentFile?.type === 'collaborative') {
                 const serverDoc = await this.restoreFromServer(documentId);
                 if (serverDoc) {
-                    console.log('✅ Document recovered from server');
+                    if (DEBUG) console.log('✅ Document recovered from server');
                     return serverDoc;
                 }
             }
@@ -5535,7 +5528,7 @@ export default {
                 // If they appear in the collaborative list, user has at least readonly access
                 if (file.type === 'collaborative') {
                     if (permissionLevel === 'no-access') {
-                        console.log('🔍 Collaborative document with no-access - treating as readonly:', file.name, {
+                        if (DEBUG) console.log('🔍 Collaborative document with no-access - treating as readonly:', file.name, {
                             type: file.type,
                             owner: file.owner,
                             currentUser: this.username,
@@ -5550,7 +5543,7 @@ export default {
                 const hasAccess = permissionLevel !== 'no-access';
 
                 if (!hasAccess) {
-                    console.log('🚫 Hiding local file from table - no access:', file.name, {
+                    if (DEBUG) console.log('🚫 Hiding local file from table - no access:', file.name, {
                         type: file.type,
                         owner: file.owner,
                         currentUser: this.username,
@@ -5951,7 +5944,7 @@ export default {
             // 2. Document has unsaved changes (even if creating persistence)
             const visible = (!this.isTemporaryDocument || this.hasIndexedDBPersistence || this.hasUnsavedChanges);
 
-            console.log('🔍 saveStatus computed:', {
+            if (DEBUG) console.log('🔍 saveStatus computed:', {
                 isTemporaryDocument: this.isTemporaryDocument,
                 hasIndexedDBPersistence: this.hasIndexedDBPersistence,
                 hasUnsavedChanges: this.hasUnsavedChanges,
@@ -6880,7 +6873,7 @@ export default {
         hasUnsavedChanges: {
             handler(newValue, oldValue) {
                 if (newValue !== oldValue) {
-                    console.log('🔍 hasUnsavedChanges changed:', {
+                    if (DEBUG) console.log('🔍 hasUnsavedChanges changed:', {
                         newValue,
                         oldValue,
                         hasIndexedDBPersistence: this.hasIndexedDBPersistence,
@@ -6888,7 +6881,7 @@ export default {
                         saveStatusMessage: this.saveStatus.message
                     });
                     this.$nextTick(() => {
-                        console.log('🔍 Calling updateSaveStatus from watcher');
+                        if (DEBUG) console.log('🔍 Calling updateSaveStatus from watcher');
                         this.updateSaveStatus();
                     });
                 }
@@ -6933,7 +6926,7 @@ export default {
                 // Check if we have persistence (either not temporary OR has IndexedDB)
                 if (this.ydoc && newTitle !== oldTitle && (!this.isTemporaryDocument || this.indexeddbProvider)) {
                     // Set unsaved changes flag
-                    console.log('🔍 Title watcher: Setting hasUnsavedChanges = true');
+                    if (DEBUG) console.log('🔍 Title watcher: Setting hasUnsavedChanges = true');
                     this.hasUnsavedChanges = true;
                     this.hasUserIntent = true;
 
@@ -6944,7 +6937,7 @@ export default {
 
                     // Trigger auto-save for local documents
                     if (this.currentFile && this.currentFile.type === 'local') {
-                        console.log('📝 Title changed, triggering auto-save for local document');
+                        if (DEBUG) console.log('📝 Title changed, triggering auto-save for local document');
                         this.debouncedAutoSaveLocalDocument();
                     }
                 }
@@ -6957,7 +6950,7 @@ export default {
             handler(newPermlink, oldPermlink) {
                 // ✅ RECURSION PROTECTION: Multiple defensive guards
                 if (this._isUpdatingPermlink) {
-                    console.log('🔄 Skipping permlink sync - currently updating');
+                    if (DEBUG) console.log('🔄 Skipping permlink sync - currently updating');
                     return;
                 }
 
@@ -6970,7 +6963,7 @@ export default {
                 }
 
                 // ✅ DEFENSIVE: Only sync actual user changes
-                console.log('📝 Permlink input changed:', { from: oldPermlink, to: newPermlink });
+                if (DEBUG) console.log('📝 Permlink input changed:', { from: oldPermlink, to: newPermlink });
                 this.debouncedSetPermlinkInMetadata();
             },
             immediate: false // Don't trigger on initial value
@@ -6980,7 +6973,7 @@ export default {
         authLoading: {
             immediate: true,
             handler(newValue, oldValue) {
-                console.log('🔐 authLoading watcher triggered:', {
+                if (DEBUG) console.log('🔐 authLoading watcher triggered:', {
                     newValue,
                     oldValue,
                     isAuthenticated: this.isAuthenticated,
@@ -6992,13 +6985,13 @@ export default {
 
                 // Also check for initial false value
                 if (oldValue === undefined && newValue === false) {
-                    console.log('🔐 Auth loading initially false, checking for deferred connections');
+                    if (DEBUG) console.log('🔐 Auth loading initially false, checking for deferred connections');
                 }
 
                 // Check for deferred collaborative connection
                 if (this.deferredCollabConnection && this.isAuthenticated) {
                     const { owner, permlink } = this.deferredCollabConnection;
-                    console.log('🔄 Processing deferred collaborative connection from authLoading watcher:', {
+                    if (DEBUG) console.log('🔄 Processing deferred collaborative connection from authLoading watcher:', {
                         owner,
                         permlink,
                         authState: this.authenticationState
@@ -7026,7 +7019,7 @@ export default {
                     const collabPermlink = urlParams.get('collab_permlink');
 
                     if (collabOwner && collabPermlink && !this.isLoadingFromURL) {
-                        console.log('🔐 Authentication loading complete, loading collaborative document:', {
+                        if (DEBUG) console.log('🔐 Authentication loading complete, loading collaborative document:', {
                             owner: collabOwner,
                             permlink: collabPermlink
                         });
@@ -7060,7 +7053,7 @@ export default {
 
                     if (collabOwner && collabPermlink) {
                         // ✅ FIX: No document loaded yet, but we have URL params - load the collaborative document
-                        console.log('🔐 Auth loaded, no current document, loading collaborative from URL:', {
+                        if (DEBUG) console.log('🔐 Auth loaded, no current document, loading collaborative from URL:', {
                             owner: collabOwner,
                             permlink: collabPermlink
                         });
@@ -7091,7 +7084,7 @@ export default {
                 // Skip if username hasn't actually changed
                 if (newUsername === oldUsername) return;
                 
-                console.log('🔐 Username changed - invalidating permission caches:', {
+                if (DEBUG) console.log('🔐 Username changed - invalidating permission caches:', {
                     from: oldUsername,
                     to: newUsername,
                     hasCurrentFile: !!this.currentFile
@@ -7115,17 +7108,17 @@ export default {
                 if (this.currentFile) {
                     // Handle logout scenario (username becomes null/empty)
                     if (!newUsername) {
-                        console.log('🚫 User logged out - closing current document');
+                        if (DEBUG) console.log('🚫 User logged out - closing current document');
                         this.handleDocumentAccessDenied();
                         return;
                     }
                     
                     if (this.currentFile.type === 'collaborative') {
-                        console.log('🔐 Re-validating permissions for current collaborative document');
+                        if (DEBUG) console.log('🔐 Re-validating permissions for current collaborative document');
                         // Force immediate permission check
                         this.validateCurrentDocumentPermissions();
                     } else if (this.currentFile.type === 'local' || !this.currentFile.type) {
-                        console.log('🔐 Re-validating ownership for current local document');
+                        if (DEBUG) console.log('🔐 Re-validating ownership for current local document');
                         
                         // ✅ SECURITY: Check Y.js document owner, not just file object
                         let fileOwner = this.currentFile.owner;
@@ -7142,7 +7135,7 @@ export default {
                         const hasAccess = !fileOwner || fileOwner === newUsername;
                         
                         if (!hasAccess) {
-                            console.log('🚫 Access denied - user does not own this local document', {
+                            if (DEBUG) console.log('🚫 Access denied - user does not own this local document', {
                                 fileOwner,
                                 currentUser: newUsername,
                                 yjsDocument: !!this.ydoc
@@ -7169,13 +7162,13 @@ export default {
         // Set a timeout to mark auth as loaded if no headers arrive
         setTimeout(() => {
             if (!this.hasReceivedInitialAuthHeaders) {
-                console.log('⏱️ Auth timeout - marking as loaded without headers');
+                if (DEBUG) console.log('⏱️ Auth timeout - marking as loaded without headers');
                 this.hasReceivedInitialAuthHeaders = true;
 
                 // Process any deferred local connections (collaborative won't work without auth)
                 if (this.deferredLocalConnection) {
                     const { owner, permlink } = this.deferredLocalConnection;
-                    console.log('🔄 Processing deferred local connection after timeout:', { owner, permlink });
+                    if (DEBUG) console.log('🔄 Processing deferred local connection after timeout:', { owner, permlink });
                     this.deferredLocalConnection = null;
                     this.$nextTick(() => {
                         this.autoConnectToLocalDocument(owner, permlink).catch(error => {
@@ -7207,7 +7200,7 @@ export default {
             const localOwner = urlParams.get('local_owner');
             const localPermlink = urlParams.get('local_permlink');
 
-            console.log('🔍 URL Parameters detected (checking first):', {
+            if (DEBUG) console.log('🔍 URL Parameters detected (checking first):', {
                 collabOwner, collabPermlink, localOwner, localPermlink
             });
 
@@ -7220,7 +7213,7 @@ export default {
                 this.preloadCollaborativePermissions(collabOwner, collabPermlink);
                 const cachedMetadata = this.preloadCollaborativeMetadata(collabOwner, collabPermlink);
                 if (cachedMetadata && cachedMetadata.documentName) {
-                    console.log('📄 Preloaded document name from cache:', cachedMetadata.documentName);
+                    if (DEBUG) console.log('📄 Preloaded document name from cache:', cachedMetadata.documentName);
                     this.reactiveDocumentName = cachedMetadata.documentName;
                 }
             }
@@ -7228,12 +7221,12 @@ export default {
             if (collabOwner && collabPermlink) {
                 // ✅ AUTHENTICATION CHECK: Handle auth loading state properly
                 if (this.authLoading) {
-                    console.log('🔐 Authentication loading, deferring collaborative document load');
+                    if (DEBUG) console.log('🔐 Authentication loading, deferring collaborative document load');
                     // The authenticationState watcher will handle it when auth completes
                     // Create a temp document for now
                     this.documentManager.newDocument();
                 } else if (this.isAuthenticated) {
-                    console.log('🔐 Already authenticated, loading collaborative document immediately');
+                    if (DEBUG) console.log('🔐 Already authenticated, loading collaborative document immediately');
                     this.isLoadingFromURL = true;
                     this.autoConnectToCollaborativeDocument(collabOwner, collabPermlink).catch(error => {
                         console.error('❌ Failed to auto-connect to collaborative document:', error);
@@ -7254,7 +7247,7 @@ export default {
                             this.documentManager.newDocument();
                         } else {
                             // Keep URL for temporary errors - show error but allow retry
-                            console.log('🔗 MOUNTED: Keeping URL for temporary error - user can refresh to retry');
+                            if (DEBUG) console.log('🔗 MOUNTED: Keeping URL for temporary error - user can refresh to retry');
                             // Still create a temp document so user has something to work with
                             this.documentManager.newDocument();
                             // ✅ FIX: Reset loading flag to allow retry
@@ -7262,7 +7255,7 @@ export default {
                         }
                     });
                 } else {
-                    console.log('🔐 Not authenticated yet, will load collaborative document when auth completes', {
+                    if (DEBUG) console.log('🔐 Not authenticated yet, will load collaborative document when auth completes', {
                         authLoading: this.authLoading,
                         isAuthenticated: this.isAuthenticated,
                         authState: this.authenticationState
@@ -7347,7 +7340,7 @@ export default {
             if (deferredCollabOwner && deferredCollabPermlink && !this.isLoadingFromURL && !this.currentFile) {
                 // Check if auth has already completed
                 if (!this.authLoading && this.isAuthenticated) {
-                    console.log('🔐 Component mounted with auth ready, loading collaborative document');
+                    if (DEBUG) console.log('🔐 Component mounted with auth ready, loading collaborative document');
                     this.isLoadingFromURL = true;
                     this.autoConnectToCollaborativeDocument(deferredCollabOwner, deferredCollabPermlink).catch(error => {
                         console.error('❌ Failed to auto-connect to collaborative document:', error);
@@ -7379,7 +7372,7 @@ export default {
             
             // Handle SPK file selection for video
             if (type === 'spkFileSelected' && event.data.target === 'editor') {
-                console.log('📹 Received video file selection:', { file, url, metadata });
+                if (DEBUG) console.log('📹 Received video file selection:', { file, url, metadata });
                 
                 // Check if it's a video file
                 const videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.webm', '.m3u8', '.flv', '.wmv', '.mpg', '.mpeg', '.3gp', '.ogv'];
@@ -7395,26 +7388,26 @@ export default {
         window.addEventListener('message', this.handleSPKFileSelection);
         
         // Initialize video support for HLS playback
-        console.log('🎥 Initializing video observer...', {
+        if (DEBUG) console.log('🎥 Initializing video observer...', {
             hasMethodsCommon: !!methodsCommon,
             hasInitFunction: !!(methodsCommon && methodsCommon.initIpfsVideoSupport)
         });
         
         if (methodsCommon && methodsCommon.initIpfsVideoSupport) {
             this.videoObserver = methodsCommon.initIpfsVideoSupport();
-            console.log('🎥 Video observer initialized:', !!this.videoObserver);
+            if (DEBUG) console.log('🎥 Video observer initialized:', !!this.videoObserver);
             
             // Force check existing videos after a delay
             setTimeout(() => {
                 const videos = document.querySelectorAll('video');
-                console.log('🎥 Checking existing videos:', videos.length);
+                if (DEBUG) console.log('🎥 Checking existing videos:', videos.length);
                 
                 // Check what's in the TipTap document
                 if (this.bodyEditor) {
-                    console.log('🎥 Checking TipTap document for video nodes:');
+                    if (DEBUG) console.log('🎥 Checking TipTap document for video nodes:');
                     this.bodyEditor.state.doc.descendants((node, pos) => {
                         if (node.type.name === 'video') {
-                            console.log('🎥 Video node in editor:', {
+                            if (DEBUG) console.log('🎥 Video node in editor:', {
                                 attrs: node.attrs,
                                 pos: pos
                             });
@@ -7423,7 +7416,7 @@ export default {
                 }
                 
                 videos.forEach((video, index) => {
-                    console.log(`🎥 Video ${index + 1} on page:`, {
+                    if (DEBUG) console.log(`🎥 Video ${index + 1} on page:`, {
                         src: video.src,
                         type: video.getAttribute('type'),
                         dataType: video.getAttribute('data-type'),
@@ -7467,7 +7460,7 @@ export default {
                 // Skip if already loading from URL
                 if (this.isLoadingFromURL) return;
 
-                console.log('🔐 Authentication state changed to authenticated, checking for collaborative URL');
+                if (DEBUG) console.log('🔐 Authentication state changed to authenticated, checking for collaborative URL');
 
                 // Check for collaborative URL parameters
                 const urlParams = new URLSearchParams(window.location.search);
@@ -7475,7 +7468,7 @@ export default {
                 const collabPermlink = urlParams.get('collab_permlink');
 
                 if (collabOwner && collabPermlink && !this.isLoadingFromURL) {
-                    console.log('🔐 Authentication complete, loading collaborative document:', {
+                    if (DEBUG) console.log('🔐 Authentication complete, loading collaborative document:', {
                         owner: collabOwner,
                         permlink: collabPermlink
                     });
@@ -7520,7 +7513,7 @@ export default {
         isReadOnlyMode: {
             handler(newReadOnlyMode, oldReadOnlyMode) {
                 if (newReadOnlyMode !== oldReadOnlyMode) {
-                    console.log('🔄 TipTap: Readonly mode changed', {
+                    if (DEBUG) console.log('🔄 TipTap: Readonly mode changed', {
                         from: oldReadOnlyMode,
                         to: newReadOnlyMode,
                         document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
@@ -7548,7 +7541,7 @@ export default {
                 if (newProvider && newProvider.awareness) {
                     // ✅ TIPTAP BEST PRACTICE: Awareness user info is set in onConnect callback
                     // This ensures the provider is fully initialized before setting user data
-                    console.log('✅ Provider awareness ready - user info will be set in onConnect');
+                    if (DEBUG) console.log('✅ Provider awareness ready - user info will be set in onConnect');
 
                     // Listen for awareness changes
                     newProvider.awareness.on('change', this.updateConnectedUsers);
@@ -7563,7 +7556,7 @@ export default {
 
         authHeaders: {
             handler(newHeaders, oldHeaders) {
-                console.log('📡 authHeaders watcher triggered:', {
+                if (DEBUG) console.log('📡 authHeaders watcher triggered:', {
                     hasNewHeaders: !!newHeaders,
                     account: newHeaders?.['x-account'],
                     hasReceivedInitialAuthHeaders: this.hasReceivedInitialAuthHeaders,
@@ -7578,7 +7571,7 @@ export default {
                     // Process any deferred connections now that auth is ready
                     if (this.deferredCollabConnection) {
                         const { owner, permlink } = this.deferredCollabConnection;
-                        console.log('🔄 Processing deferred collaborative connection after auth headers:', {
+                        if (DEBUG) console.log('🔄 Processing deferred collaborative connection after auth headers:', {
                             owner,
                             permlink,
                             isAuthenticated: this.isAuthenticated,
@@ -7602,7 +7595,7 @@ export default {
 
                     if (this.deferredLocalConnection) {
                         const { owner, permlink } = this.deferredLocalConnection;
-                        console.log('🔄 Processing deferred local connection after auth headers:', { owner, permlink });
+                        if (DEBUG) console.log('🔄 Processing deferred local connection after auth headers:', { owner, permlink });
                         this.deferredLocalConnection = null;
                         this.$nextTick(() => {
                             this.autoConnectToLocalDocument(owner, permlink).catch(error => {
@@ -7625,7 +7618,7 @@ export default {
                     
                     // If document has an owner and current user doesn't match, deny access
                     if (documentOwner && documentOwner !== currentAuthUser) {
-                        console.log('🚫 User does not own this local document', {
+                        if (DEBUG) console.log('🚫 User does not own this local document', {
                             documentOwner,
                             currentUser: currentAuthUser
                         });
@@ -7647,7 +7640,7 @@ export default {
                     const oldUser = oldHeaders ? oldHeaders['x-account'] : null;
                     
                     if (oldUser && newUser && oldUser !== newUser) {
-                        console.log('🚨 USER SWITCH: User authentication changed', {
+                        if (DEBUG) console.log('🚨 USER SWITCH: User authentication changed', {
                             from: oldUser,
                             to: newUser,
                             currentDocument: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
@@ -7734,7 +7727,7 @@ export default {
 
                         // ✅ CRITICAL: Load permissions for current collaborative document when auth becomes ready
                         if (this.currentFile && this.currentFile.type === 'collaborative') {
-                            console.log('🔐 AUTH READY: Loading permissions for current collaborative document', {
+                            if (DEBUG) console.log('🔐 AUTH READY: Loading permissions for current collaborative document', {
                                 document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                                 user: this.username,
                                 context: 'auth-ready'
@@ -7750,7 +7743,7 @@ export default {
                                             this.cachePermissionForFile(this.currentFile, permissionResult.level);
                                             this.currentFile.permissionLevel = permissionResult.level;
 
-                                            console.log('✅ AUTH READY: Permissions loaded after authentication', {
+                                            if (DEBUG) console.log('✅ AUTH READY: Permissions loaded after authentication', {
                                                 document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                                                 permission: permissionResult.level,
                                                 source: permissionResult.source
@@ -7763,7 +7756,7 @@ export default {
                                         console.warn('⚠️ Background permission loading failed after auth ready:', error.message);
                                     });
                                 } else {
-                                    console.log('⏳ AUTH: Authentication no longer valid, skipping permission load', {
+                                    if (DEBUG) console.log('⏳ AUTH: Authentication no longer valid, skipping permission load', {
                                         isAuthenticated: this.isAuthenticated,
                                         isAuthExpired: this.isAuthExpired
                                     });
@@ -7842,7 +7835,7 @@ export default {
                                 if (!this.isAuthExpired) {
                                     permission = await this.getMasterPermissionForDocument(this.currentFile, true);
                                 } else {
-                                    console.log('⏳ AUTH: Skipping permission check - authentication expired', {
+                                    if (DEBUG) console.log('⏳ AUTH: Skipping permission check - authentication expired', {
                                         document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                                         isAuthExpired: this.isAuthExpired
                                     });
@@ -7915,7 +7908,7 @@ export default {
         // ✅ AUTHENTICATION STATE: Watch for auth state changes
         authenticationState: {
             handler(newState, oldState) {
-                console.log('🔐 Authentication state changed:', { from: oldState, to: newState });
+                if (DEBUG) console.log('🔐 Authentication state changed:', { from: oldState, to: newState });
 
                 // Handle auth loading completion
                 if (oldState === 'loading' && newState !== 'loading') {
@@ -7935,7 +7928,7 @@ export default {
         // ✅ CURRENT DOCUMENT PERMISSION: Watch for permission changes
         currentDocumentPermission: {
             handler(newPermission, oldPermission) {
-                console.log('🔑 Document permission changed:', { from: oldPermission, to: newPermission });
+                if (DEBUG) console.log('🔑 Document permission changed:', { from: oldPermission, to: newPermission });
 
                 if (this.bodyEditor && newPermission !== oldPermission) {
                     const shouldBeReadOnly = ['readonly', 'no-access', null].includes(newPermission);
@@ -7943,7 +7936,7 @@ export default {
 
                     if (shouldBeReadOnly !== currentlyReadOnly) {
                         this.bodyEditor.setEditable(!shouldBeReadOnly);
-                        console.log('📝 Editor mode updated based on permission:', {
+                        if (DEBUG) console.log('📝 Editor mode updated based on permission:', {
                             permission: newPermission,
                             isEditable: !shouldBeReadOnly
                         });
@@ -7958,7 +7951,7 @@ export default {
             handler() {
                 // Force re-evaluation of computed properties
                 this.collaborativeDataVersion++;
-                console.log('🔄 Permission store updated, forcing reactivity');
+                if (DEBUG) console.log('🔄 Permission store updated, forcing reactivity');
             }
         },
 
@@ -7966,7 +7959,7 @@ export default {
         'reactiveCommentOptions.allowVotes': {
             handler(newValue, oldValue) {
                 if (newValue !== oldValue && this.ydoc) {
-                    console.log('📝 Comment option changed: allowVotes', newValue);
+                    if (DEBUG) console.log('📝 Comment option changed: allowVotes', newValue);
 
                     // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
                     this.ydoc.transact(() => {
@@ -7996,7 +7989,7 @@ export default {
         'reactiveCommentOptions.allowCurationRewards': {
             handler(newValue, oldValue) {
                 if (newValue !== oldValue && this.ydoc) {
-                    console.log('📝 Comment option changed: allowCurationRewards', newValue);
+                    if (DEBUG) console.log('📝 Comment option changed: allowCurationRewards', newValue);
 
                     // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
                     this.ydoc.transact(() => {
@@ -8026,7 +8019,7 @@ export default {
         'reactiveCommentOptions.maxAcceptedPayout': {
             handler(newValue, oldValue) {
                 if (newValue !== oldValue && this.ydoc) {
-                    console.log('📝 Comment option changed: maxAcceptedPayout', newValue);
+                    if (DEBUG) console.log('📝 Comment option changed: maxAcceptedPayout', newValue);
 
                     // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
                     this.ydoc.transact(() => {
@@ -8056,7 +8049,7 @@ export default {
         'reactiveCommentOptions.percentHbd': {
             handler(newValue, oldValue) {
                 if (newValue !== oldValue && this.ydoc) {
-                    console.log('📝 Comment option changed: percentHbd', newValue);
+                    if (DEBUG) console.log('📝 Comment option changed: percentHbd', newValue);
 
                     // ✅ TipTap v3 Best Practice: Use Y.js transactions with origin tags
                     this.ydoc.transact(() => {
@@ -8146,7 +8139,7 @@ export default {
         // ✅ TIPTAP COMPLIANCE: Stop memory monitoring if active
         if (this.memoryMonitorInterval) {
             this.stopMemoryMonitoring();
-            console.log('📊 Stopped memory monitoring on unmount');
+            if (DEBUG) console.log('📊 Stopped memory monitoring on unmount');
         }
 
         // ✅ TIPTAP SECURITY: Clear permission validation timeouts
@@ -8261,7 +8254,7 @@ export default {
         logCustomJsonPerformance() {
             const metrics = this.getCustomJsonMetrics();
             
-            console.log('📊 Custom JSON Performance Metrics:', {
+            if (DEBUG) console.log('📊 Custom JSON Performance Metrics:', {
                 size: `${metrics.customJsonSizeKB}KB`,
                 keys: metrics.customJsonKeys,
                 warning: metrics.sizeWarning ? 'Size exceeds 50KB' : 'OK',
@@ -8286,7 +8279,7 @@ export default {
 
         // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
         handleAuthenticationReady(authState) {
-            console.log('🔐 Authentication ready, processing pending operations:', {
+            if (DEBUG) console.log('🔐 Authentication ready, processing pending operations:', {
                 authState,
                 hasPendingAutoConnect: !!this.pendingAutoConnect,
                 currentFile: this.currentFile?.id
@@ -8332,7 +8325,7 @@ export default {
 
             // Check if already loading
             if (this.permissionLoadingStates[type]?.[key]) {
-                console.log('🔄 Permission already loading for:', key);
+                if (DEBUG) console.log('🔄 Permission already loading for:', key);
                 return;
             }
 
@@ -8341,7 +8334,7 @@ export default {
             this.loadingStates.permissions = true;
 
             try {
-                console.log('🔑 Loading permissions for document:', {
+                if (DEBUG) console.log('🔑 Loading permissions for document:', {
                     key,
                     type,
                     owner: document.owner,
@@ -8359,7 +8352,7 @@ export default {
                         source: permission.source
                     });
 
-                    console.log('✅ Permission loaded and stored reactively:', {
+                    if (DEBUG) console.log('✅ Permission loaded and stored reactively:', {
                         key,
                         level: permission.level,
                         source: permission.source
@@ -8419,7 +8412,7 @@ export default {
         // ✅ SHOW LOADING STATE: Display loading message
         showLoadingState(message) {
             this.showLoadingMessage = message;
-            console.log('⏳ Loading:', message);
+            if (DEBUG) console.log('⏳ Loading:', message);
         },
 
         // ===== TITLE CONTENT UTILITIES =====
@@ -8534,7 +8527,7 @@ export default {
             }
 
             // Show appropriate message based on state
-            console.log('🔍 updateSaveStatus showing message:', status.message, 'persistent:', status.persistent);
+            if (DEBUG) console.log('🔍 updateSaveStatus showing message:', status.message, 'persistent:', status.persistent);
             this.showSaveMessage(status.message, status.persistent);
         },
 
@@ -8542,7 +8535,7 @@ export default {
 
         // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
         handleAuthenticationReady(authState) {
-            console.log('🔐 Authentication ready, processing pending operations:', {
+            if (DEBUG) console.log('🔐 Authentication ready, processing pending operations:', {
                 authState,
                 hasPendingAutoConnect: !!this.pendingAutoConnect,
                 currentFile: this.currentFile?.id
@@ -8622,7 +8615,7 @@ export default {
                     // ✅ TIPTAP v3 COMPLIANCE: Trust TipTap to manage Y.js fragments
                     // Fragment existence is handled internally by TipTap Collaboration extension
                     const field = collaborationExt.options.field || 'default';
-                    console.log(`✅ Collaboration extension configured with field: ${field}`);
+                    if (DEBUG) console.log(`✅ Collaboration extension configured with field: ${field}`);
                 }
 
                 this.stateValidationErrors = errors;
@@ -8644,7 +8637,7 @@ export default {
         dumpEditorState() {
             // ✅ DEBUG COMMAND: Dump current state for debugging
             if (!this.bodyEditor) {
-                console.log('🔴 No editor available');
+                if (DEBUG) console.log('🔴 No editor available');
                 return;
             }
 
@@ -8654,7 +8647,7 @@ export default {
             console.group('📋 Editor State Dump');
 
             // ProseMirror state
-            console.log('📦 ProseMirror State:', {
+            if (DEBUG) console.log('📦 ProseMirror State:', {
                 docSize: state.doc.content.size,
                 docType: state.doc.type.name,
                 selection: {
@@ -8671,7 +8664,7 @@ export default {
 
             // Y.js state
             if (this.ydoc) {
-                console.log('📦 Y.js State:', {
+                if (DEBUG) console.log('📦 Y.js State:', {
                     clientID: this.ydoc.clientID,
                     gc: this.ydoc.gc,
                     mapKeys: Array.from(this.ydoc.getMap('config').keys()),
@@ -8682,7 +8675,7 @@ export default {
 
             // Extension state
             const extensions = editor.extensionManager.extensions;
-            console.log('📦 Extensions:', extensions.map(ext => ({
+            if (DEBUG) console.log('📦 Extensions:', extensions.map(ext => ({
                 name: ext.name,
                 type: ext.type,
                 options: ext.options
@@ -8690,7 +8683,7 @@ export default {
 
             // Validation results
             const validation = this.validateEditorState();
-            console.log('📦 Validation:', validation);
+            if (DEBUG) console.log('📦 Validation:', validation);
 
             console.groupEnd();
         },
@@ -8698,12 +8691,12 @@ export default {
         toggleStateMonitoring() {
             // ✅ DEBUG COMMAND: Toggle state monitoring on/off
             this.enableStateMonitoring = !this.enableStateMonitoring;
-            console.log(`🔍 State monitoring ${this.enableStateMonitoring ? 'ENABLED' : 'DISABLED'}`);
+            if (DEBUG) console.log(`🔍 State monitoring ${this.enableStateMonitoring ? 'ENABLED' : 'DISABLED'}`);
 
             if (this.enableStateMonitoring) {
                 // Run initial validation
                 this.validateEditorState();
-                console.log('📦 Initial state validation:', this.stateValidationErrors);
+                if (DEBUG) console.log('📦 Initial state validation:', this.stateValidationErrors);
             }
         },
 
@@ -8716,53 +8709,55 @@ export default {
                         case 'D':
                             // Dump editor state
                             event.preventDefault();
-                            console.log('🎆 Debug shortcut: Dump state');
+                            if (DEBUG) console.log('🎆 Debug shortcut: Dump state');
                             this.dumpEditorState();
                             break;
 
                         case 'M':
                             // Toggle monitoring
                             event.preventDefault();
-                            console.log('🎆 Debug shortcut: Toggle monitoring');
+                            if (DEBUG) console.log('🎆 Debug shortcut: Toggle monitoring');
                             this.toggleStateMonitoring();
                             break;
 
                         case 'V':
                             // Validate state
                             event.preventDefault();
-                            console.log('🎆 Debug shortcut: Validate state');
+                            if (DEBUG) console.log('🎆 Debug shortcut: Validate state');
                             const validation = this.validateEditorState();
-                            console.log('📦 Validation result:', validation);
+                            if (DEBUG) console.log('📦 Validation result:', validation);
                             break;
 
                         case 'Y':
                             // Dump Y.js specific info
                             event.preventDefault();
-                            console.log('🎆 Debug shortcut: Y.js info');
+                            if (DEBUG) console.log('🎆 Debug shortcut: Y.js info');
                             if (this.ydoc) {
                                 console.group('📦 Y.js Debug Info');
-                                console.log('Document:', {
+                                if (DEBUG) console.log('Document:', {
                                     clientID: this.ydoc.clientID,
                                     gc: this.ydoc.gc,
                                     isDestroyed: this.ydoc.isDestroyed
                                 });
-                                console.log('Y.js Maps:', Array.from(this.ydoc.getMap('config').keys()));
-                                console.log('Config:', Object.fromEntries(this.ydoc.getMap('config')));
-                                console.log('Metadata:', Object.fromEntries(this.ydoc.getMap('metadata')));
+                                if (DEBUG) console.log('Y.js Maps:', Array.from(this.ydoc.getMap('config').keys()));
+                                if (DEBUG) console.log('Config:', Object.fromEntries(this.ydoc.getMap('config')));
+                                if (DEBUG) console.log('Metadata:', Object.fromEntries(this.ydoc.getMap('metadata')));
                                 console.groupEnd();
                             } else {
-                                console.log('🔴 No Y.js document available');
+                                if (DEBUG) console.log('🔴 No Y.js document available');
                             }
                             break;
                     }
                 }
             });
 
-            console.log('🎆 Debug keyboard shortcuts enabled:');
-            console.log('  Alt + Shift + D: Dump editor state');
-            console.log('  Alt + Shift + M: Toggle state monitoring');
-            console.log('  Alt + Shift + V: Validate state');
-            console.log('  Alt + Shift + Y: Y.js debug info');
+            if (DEBUG) {
+                if (DEBUG) console.log('🎆 Debug keyboard shortcuts enabled:');
+                if (DEBUG) console.log('  Alt + Shift + D: Dump editor state');
+                if (DEBUG) console.log('  Alt + Shift + M: Toggle state monitoring');
+                if (DEBUG) console.log('  Alt + Shift + V: Validate state');
+                if (DEBUG) console.log('  Alt + Shift + Y: Y.js debug info');
+            }
 
             // Also add console commands for easy access
             window.dluxDebug = {
@@ -8770,32 +8765,32 @@ export default {
                 dumpState: () => this.dumpEditorState(),
                 validate: () => {
                     const result = this.validateEditorState();
-                    console.log('📦 Validation result:', result);
+                    if (DEBUG) console.log('📦 Validation result:', result);
                     return result;
                 },
                 yjsInfo: () => {
                     if (this.ydoc) {
                         console.group('📦 Y.js Debug Info');
-                        console.log('Document:', {
+                        if (DEBUG) console.log('Document:', {
                             clientID: this.ydoc.clientID,
                             gc: this.ydoc.gc,
                             isDestroyed: this.ydoc.isDestroyed
                         });
-                        console.log('Y.js Maps:', Array.from(this.ydoc.getMap('config').keys()));
-                        console.log('Config:', Object.fromEntries(this.ydoc.getMap('config')));
-                        console.log('Metadata:', Object.fromEntries(this.ydoc.getMap('metadata')));
+                        if (DEBUG) console.log('Y.js Maps:', Array.from(this.ydoc.getMap('config').keys()));
+                        if (DEBUG) console.log('Config:', Object.fromEntries(this.ydoc.getMap('config')));
+                        if (DEBUG) console.log('Metadata:', Object.fromEntries(this.ydoc.getMap('metadata')));
                         console.groupEnd();
                     } else {
-                        console.log('🔴 No Y.js document available');
+                        if (DEBUG) console.log('🔴 No Y.js document available');
                     }
                 }
             };
 
-            console.log('🎆 Console commands also available:');
-            console.log('  dluxDebug.toggleMonitoring() - Toggle state monitoring');
-            console.log('  dluxDebug.dumpState() - Dump editor state');
-            console.log('  dluxDebug.validate() - Validate state');
-            console.log('  dluxDebug.yjsInfo() - Y.js debug info');
+            if (DEBUG) console.log('🎆 Console commands also available:');
+            if (DEBUG) console.log('  dluxDebug.toggleMonitoring() - Toggle state monitoring');
+            if (DEBUG) console.log('  dluxDebug.dumpState() - Dump editor state');
+            if (DEBUG) console.log('  dluxDebug.validate() - Validate state');
+            if (DEBUG) console.log('  dluxDebug.yjsInfo() - Y.js debug info');
         },
 
         // ===== WEBGL EMERGENCY CLEANUP =====
@@ -8863,7 +8858,7 @@ export default {
                     // ✅ CRITICAL: Clear IndexedDB data before destroy to prevent document contamination
                     if (this.indexeddbProvider.clearData && typeof this.indexeddbProvider.clearData === 'function') {
                         await this.indexeddbProvider.clearData();
-                        console.log('✅ IndexedDB data cleared - preventing document contamination');
+                        if (DEBUG) console.log('✅ IndexedDB data cleared - preventing document contamination');
                     }
                     this.indexeddbProvider.destroy();
                     this.indexeddbProvider = null;
@@ -8954,7 +8949,7 @@ export default {
             try {
                 // ✅ AUTHENTICATION STATE CHECK: Wait for auth to load
                 if (this.authenticationState === 'loading') {
-                    console.log('⏳ AUTH: Authentication still loading, deferring local document load', {
+                    if (DEBUG) console.log('⏳ AUTH: Authentication still loading, deferring local document load', {
                         document: `${owner}/${permlink}`,
                         authState: this.authenticationState,
                         hasReceivedInitialAuthHeaders: this.hasReceivedInitialAuthHeaders
@@ -9035,7 +9030,7 @@ export default {
                         });
 
                         if (similarDoc) {
-                            console.log('✅ Found similar document by timestamp:', similarDoc.id);
+                            if (DEBUG) console.log('✅ Found similar document by timestamp:', similarDoc.id);
                             // Load the similar document instead
                             await this.documentManager.loadDocument(similarDoc);
                             // Update URL with the correct ID
@@ -9109,7 +9104,7 @@ export default {
 
                 // ✅ STEP 3: Load document directly using DocumentManager (cache-first)
                 // This loads from IndexedDB immediately without checking permissions first
-                console.log('📄 Loading local document from cache:', {
+                if (DEBUG) console.log('📄 Loading local document from cache:', {
                     documentId,
                     documentName,
                     reason: 'following cache-first offline pattern'
@@ -9128,7 +9123,7 @@ export default {
                         // Handle permission denial after document is already loaded
                         this.handleDocumentAccessDenied();
                     } else {
-                        console.log('✅ Permissions verified for loaded document');
+                        if (DEBUG) console.log('✅ Permissions verified for loaded document');
                     }
                 }).catch(error => {
                     console.warn('⚠️ Background permission check failed:', error);
@@ -9141,7 +9136,7 @@ export default {
                 // Reset document loading flag with a small delay to allow Y.js sync to complete
                 setTimeout(() => {
                     this.isLoadingDocument = false;
-                    console.log('📄 Document loading complete - user interactions will now be tracked');
+                    if (DEBUG) console.log('📄 Document loading complete - user interactions will now be tracked');
                 }, 1000);
 
             } catch (error) {
@@ -9156,7 +9151,7 @@ export default {
             // Set loading flag to prevent user intent detection during load
             this.isLoadingDocument = true;
             
-            console.log('🚦 autoConnectToCollaborativeDocument called:', {
+            if (DEBUG) console.log('🚦 autoConnectToCollaborativeDocument called:', {
                 owner,
                 permlink,
                 isAuthenticated: this.isAuthenticated,
@@ -9170,7 +9165,7 @@ export default {
 
             // ✅ AUTHENTICATION STATE CHECK: Wait for auth to load
             if (this.authenticationState === 'loading') {
-                console.log('⏳ AUTH: Authentication still loading, deferring collaborative document load', {
+                if (DEBUG) console.log('⏳ AUTH: Authentication still loading, deferring collaborative document load', {
                     document: `${owner}/${permlink}`,
                     authState: this.authenticationState
                 });
@@ -9214,11 +9209,11 @@ export default {
                 const documentId = `${owner}/${permlink}`;
                 const documentKey = `${owner}/${permlink}`;
 
-                console.log('📍 Step 1: Starting document load process');
+                if (DEBUG) console.log('📍 Step 1: Starting document load process');
 
                 // ✅ PERFORMANCE: Load cached metadata synchronously for instant document name
                 await this.preloadDocumentMetadata(owner, permlink);
-                console.log('📍 Step 2: Metadata preloaded');
+                if (DEBUG) console.log('📍 Step 2: Metadata preloaded');
                 const cachedMetadata = this.documentMetadataCache?.[documentKey];
 
                 // ✅ FLASH FIX: Try to get real document name from collaborative docs API before creating document
@@ -9256,7 +9251,7 @@ export default {
                 }
 
                 // ✅ TIPTAP COMPLIANT: Create proper document object
-                console.log('📄 Creating document object for loading:', {
+                if (DEBUG) console.log('📄 Creating document object for loading:', {
                     documentId,
                     owner,
                     permlink,
@@ -9271,7 +9266,7 @@ export default {
 
                     if (!isStale) {
                         cachedPermission = reactiveState.permissionLevel;
-                        console.log('✅ PERMISSION: Using cached permission from reactive state', {
+                        if (DEBUG) console.log('✅ PERMISSION: Using cached permission from reactive state', {
                             document: documentKey,
                             permission: cachedPermission,
                             isReadOnly: reactiveState.isReadOnly,
@@ -9308,7 +9303,7 @@ export default {
                             this.cachePermissionForFile(localDocumentFile, permissionResult.level);
                             localDocumentFile.permissionLevel = permissionResult.level;
 
-                            console.log('✅ URL REFRESH: Permission loaded in background', {
+                            if (DEBUG) console.log('✅ URL REFRESH: Permission loaded in background', {
                                 document: `${owner}/${permlink}`,
                                 permission: permissionResult.level,
                                 source: permissionResult.source
@@ -9319,7 +9314,7 @@ export default {
                         // Continue with document loading - permissions will be loaded later
                     });
                 } else {
-                    console.log('⏳ AUTH: Deferring permission loading until authentication is valid', {
+                    if (DEBUG) console.log('⏳ AUTH: Deferring permission loading until authentication is valid', {
                         document: `${owner}/${permlink}`,
                         isAuthenticated: this.isAuthenticated,
                         isAuthExpired: this.isAuthExpired,
@@ -9330,7 +9325,7 @@ export default {
                     // ✅ REMOVED AUTO-AUTH: No longer automatically request authentication
                     // Users must manually authenticate when needed
                     if (this.authHeaders && this.isAuthExpired) {
-                        console.log('🔐 AUTH: Detected expired auth headers, user must manually authenticate', {
+                        if (DEBUG) console.log('🔐 AUTH: Detected expired auth headers, user must manually authenticate', {
                             document: `${owner}/${permlink}`,
                             hasHeaders: !!this.authHeaders,
                             account: this.authHeaders?.['x-account']
@@ -9339,8 +9334,8 @@ export default {
                 }
 
                 // ✅ TIPTAP BEST PRACTICE: Load document through proper DocumentManager
-                console.log('📍 Step 3: About to call loadDocument');
-                console.log('📄 Loading collaborative document through DocumentManager:', {
+                if (DEBUG) console.log('📍 Step 3: About to call loadDocument');
+                if (DEBUG) console.log('📄 Loading collaborative document through DocumentManager:', {
                     file: localDocumentFile,
                     hasOwner: !!localDocumentFile.owner,
                     hasPermlink: !!localDocumentFile.permlink,
@@ -9355,13 +9350,13 @@ export default {
                 }
 
                 await this.documentManager.loadDocument(localDocumentFile);
-                console.log('📍 Step 4: loadDocument completed');
+                if (DEBUG) console.log('📍 Step 4: loadDocument completed');
 
                 // ✅ PHASE 2: BACKGROUND AUTHENTICATION (non-blocking)
                 let isAuthenticated = this.isAuthenticated && !this.isAuthExpired;
 
                 if (!isAuthenticated) {
-                    console.log('⏳ AUTH: Authentication not ready, deferring to auth watcher', {
+                    if (DEBUG) console.log('⏳ AUTH: Authentication not ready, deferring to auth watcher', {
                         document: `${owner}/${permlink}`,
                         isAuthenticated: this.isAuthenticated,
                         isAuthExpired: this.isAuthExpired,
@@ -9373,7 +9368,7 @@ export default {
                     // Let the natural authentication system handle it when user interacts
                     // The authHeaders watcher will handle permission loading when auth becomes ready
                 } else {
-                    console.log('✅ AUTH: Authentication ready, permissions will be loaded via auth watcher', {
+                    if (DEBUG) console.log('✅ AUTH: Authentication ready, permissions will be loaded via auth watcher', {
                         document: `${owner}/${permlink}`,
                         user: this.username
                     });
@@ -9399,7 +9394,7 @@ export default {
                 // Reset document loading flag with a small delay to allow Y.js sync to complete
                 setTimeout(() => {
                     this.isLoadingDocument = false;
-                    console.log('📄 Collaborative document loading complete - user interactions will now be tracked');
+                    if (DEBUG) console.log('📄 Collaborative document loading complete - user interactions will now be tracked');
                 }, 1000);
 
             } catch (error) {
@@ -9426,7 +9421,7 @@ export default {
                     this.clearCollabURLParams();
                 } else {
                     // Keep URL for temporary errors - user can refresh to retry
-                    console.log('🔗 Keeping URL parameters - temporary error, user can refresh to retry');
+                    if (DEBUG) console.log('🔗 Keeping URL parameters - temporary error, user can refresh to retry');
                 }
 
                 throw error;
@@ -9448,7 +9443,7 @@ export default {
 
                     // ✅ OFFLINE-FIRST: Extract and cache permission from document metadata if available
                     if (documentData && documentData.accessType && this.currentFile) {
-                        console.log('🔐 METADATA: Found permission in document metadata', {
+                        if (DEBUG) console.log('🔐 METADATA: Found permission in document metadata', {
                             document: `${owner}/${permlink}`,
                             accessType: documentData.accessType,
                             source: 'document-metadata-api'
@@ -9469,7 +9464,7 @@ export default {
                                 const shouldBeEditable = documentData.accessType !== 'readonly';
                                 if (this.bodyEditor.isEditable !== shouldBeEditable) {
                                     this.bodyEditor.setEditable(shouldBeEditable);
-                                    console.log('🔐 Updated editor editable state based on permission:', {
+                                    if (DEBUG) console.log('🔐 Updated editor editable state based on permission:', {
                                         document: documentKey,
                                         editable: shouldBeEditable,
                                         accessType: documentData.accessType
@@ -9527,7 +9522,7 @@ export default {
 
                         // Update component state immediately
                         if (this.currentFile) {
-                            console.log('📝 Updating file object with server metadata:', {
+                            if (DEBUG) console.log('📝 Updating file object with server metadata:', {
                                 oldName: this.currentFile.name,
                                 newName: serverDocumentName,
                                 source: 'server-metadata'
@@ -9543,7 +9538,7 @@ export default {
                             // ✅ FORCE REACTIVITY: Ensure Vue detects the changes
                             this.$forceUpdate();
 
-                            console.log('✅ DOCUMENT NAME: Updated from server metadata successfully', {
+                            if (DEBUG) console.log('✅ DOCUMENT NAME: Updated from server metadata successfully', {
                                 document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                                 newName: serverDocumentName,
                                 cached: true
@@ -9561,7 +9556,7 @@ export default {
                             skipReason = 'preserving-user-set-name';
                         }
                         
-                        console.log('⏭️ DOCUMENT NAME: Skipping server metadata update', {
+                        if (DEBUG) console.log('⏭️ DOCUMENT NAME: Skipping server metadata update', {
                             currentName,
                             serverDocumentName,
                             reason: skipReason,
@@ -10059,7 +10054,7 @@ export default {
         debouncedUpdateContent() {
             // ✅ FIX: Prevent updates during initialization or document loading
             if (!this.editorInitialized || this.isLoadingDocument) {
-                console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
+                if (DEBUG) console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
                     editorInitialized: this.editorInitialized,
                     isLoadingDocument: this.isLoadingDocument
                 });
@@ -10074,7 +10069,7 @@ export default {
         // ✅ NEW: Debounced title sync for single editor solution
         // ✅ NEW: Handle title input with both config sync AND auto-save triggers
         onTitleInput() {
-            console.log('🔍 onTitleInput triggered:', {
+            if (DEBUG) console.log('🔍 onTitleInput triggered:', {
                 titleInput: this.titleInput,
                 isReadOnlyMode: this.isReadOnlyMode,
                 isTemporaryDocument: this.isTemporaryDocument,
@@ -10087,7 +10082,7 @@ export default {
 
             // Then, trigger the same auto-save logic as body editor
             if (!this.isReadOnlyMode) {
-                console.log('🔍 Setting hasUnsavedChanges = true from title input');
+                if (DEBUG) console.log('🔍 Setting hasUnsavedChanges = true from title input');
                 this.hasUnsavedChanges = true;
                 this.hasUserIntent = true;
                 // Call updateSaveStatus directly to ensure message shows
@@ -10211,7 +10206,7 @@ export default {
         autoSave() {
             // ✅ FIX: Prevent auto-save during initialization or document loading
             if (!this.editorInitialized || this.isLoadingDocument) {
-                console.log('🔍 Skipping autoSave - editor not ready:', {
+                if (DEBUG) console.log('🔍 Skipping autoSave - editor not ready:', {
                     editorInitialized: this.editorInitialized,
                     isLoadingDocument: this.isLoadingDocument
                 });
@@ -10246,7 +10241,7 @@ export default {
 
             // Only log save eligibility in debug mode or when there's an issue
             if (!shouldSave && (hasContent || hasMetadata)) {
-                console.log('📝 Save eligibility check failed:', {
+                if (DEBUG) console.log('📝 Save eligibility check failed:', {
                     hasContent,
                     hasMetadata,
                     hasUnsavedChanges: this.hasUnsavedChanges,
@@ -10256,13 +10251,13 @@ export default {
             }
 
             if (!shouldSave) {
-                console.log('📝 No content or metadata to save');
+                if (DEBUG) console.log('📝 No content or metadata to save');
                 return;
             }
 
             // ✅ FIX: Prevent concurrent saves
             if (this.saving) {
-                console.log('⏳ Save already in progress');
+                if (DEBUG) console.log('⏳ Save already in progress');
                 return;
             }
 
@@ -10448,7 +10443,7 @@ export default {
                     const isCorrectUser = cacheData.username === this.username;
 
                     if (!isStale && isCorrectUser && cacheData.documents) {
-                        console.log('✅ Loaded collaborative docs from cache on startup:', {
+                        if (DEBUG) console.log('✅ Loaded collaborative docs from cache on startup:', {
                             count: cacheData.documents.length,
                             age: Math.round((Date.now() - cacheData.timestamp) / 1000) + 's'
                         });
@@ -10469,7 +10464,7 @@ export default {
 
         async loadCollaborativeDocs() {
             if (!this.showCollaborativeFeatures) {
-                console.log('Not authenticated for collaborative features');
+                if (DEBUG) console.log('Not authenticated for collaborative features');
                 this.collaborativeDocs = [];
                 return;
             }
@@ -10483,7 +10478,7 @@ export default {
                     const isCorrectUser = cacheData.username === this.username;
 
                     if (!isStale && isCorrectUser && cacheData.documents) {
-                        console.log('✅ Loading collaborative docs from cache:', {
+                        if (DEBUG) console.log('✅ Loading collaborative docs from cache:', {
                             count: cacheData.documents.length,
                             age: Math.round((Date.now() - cacheData.timestamp) / 1000) + 's'
                         });
@@ -10555,7 +10550,7 @@ export default {
 
                     // 🚨 DETAILED LOGGING: Individual document analysis
                     if (data.documents && Array.isArray(data.documents)) {
-                        console.log('🔍 COLLABORATIVE DOCUMENTS: Individual document analysis', {
+                        if (DEBUG) console.log('🔍 COLLABORATIVE DOCUMENTS: Individual document analysis', {
                             totalDocuments: data.documents.length,
                             documentsData: data.documents.map((doc, index) => ({
                                 index: index,
@@ -10584,7 +10579,7 @@ export default {
                             etag: response.headers.get('etag') || null
                         };
                         localStorage.setItem('dlux_collaborative_docs_cache', JSON.stringify(cacheData));
-                        console.log('💾 Cached collaborative documents:', {
+                        if (DEBUG) console.log('💾 Cached collaborative documents:', {
                             count: this.collaborativeDocs.length,
                             username: this.username
                         });
@@ -10604,7 +10599,7 @@ export default {
 
                         // ✅ CRITICAL FIX: Extract accessType from collaborative documents API response
                         if (doc.accessType) {
-                            console.log(`🔍 COLLAB DOCS: Found accessType for ${doc.documentName}`, {
+                            if (DEBUG) console.log(`🔍 COLLAB DOCS: Found accessType for ${doc.documentName}`, {
                                 document: `${doc.owner}/${doc.permlink}`,
                                 accessType: doc.accessType,
                                 cachingPermission: doc.accessType
@@ -10628,7 +10623,7 @@ export default {
                                 this.currentFile.permissionLevel = doc.accessType;
 
                                 // ✅ DOCUMENT NAME UPDATE: Update document name from collaborative docs API
-                                console.log('🔍 COLLAB DOCS: Checking document name update condition', {
+                                if (DEBUG) console.log('🔍 COLLAB DOCS: Checking document name update condition', {
                                     document: `${doc.owner}/${doc.permlink}`,
                                     hasDocumentName: !!doc.documentName,
                                     serverDocumentName: doc.documentName,
@@ -10662,7 +10657,7 @@ export default {
                                     (!isServerNameGeneric || !hasUserSetName);
 
                                 if (shouldUpdate) {
-                                    console.log('📝 COLLAB DOCS: Updating document name from collaborative docs API', {
+                                    if (DEBUG) console.log('📝 COLLAB DOCS: Updating document name from collaborative docs API', {
                                         document: `${doc.owner}/${doc.permlink}`,
                                         oldNames: currentNames,
                                         newName: doc.documentName,
@@ -10681,7 +10676,7 @@ export default {
                                         reason = 'preserving-user-set-name';
                                     }
                                     
-                                    console.log('⏭️ COLLAB DOCS: Skipping document name update', {
+                                    if (DEBUG) console.log('⏭️ COLLAB DOCS: Skipping document name update', {
                                         document: `${doc.owner}/${doc.permlink}`,
                                         reason: reason,
                                         serverName: doc.documentName,
@@ -10700,7 +10695,7 @@ export default {
                                     // Force editor to update its editable state if needed
                                     if (this.bodyEditor) {
                                         const shouldBeEditable = doc.accessType !== 'readonly';
-                                        console.log('🔐 Updating editor mode from collab docs sync:', {
+                                        if (DEBUG) console.log('🔐 Updating editor mode from collab docs sync:', {
                                             document: documentKey,
                                             accessType: doc.accessType,
                                             shouldBeEditable,
@@ -10735,7 +10730,7 @@ export default {
 
                         // ✅ UPDATED LOGIC: Only mark for individual check if no permission data at all
                         if (!hasPermissions && !isOwner && !doc.accessType && !permissionLevel) {
-                            console.log(`⚠️ COLLAB DOCS: No permission data found for ${doc.documentName}`, {
+                            if (DEBUG) console.log(`⚠️ COLLAB DOCS: No permission data found for ${doc.documentName}`, {
                                 document: `${doc.owner}/${doc.permlink}`,
                                 hasPermissions,
                                 isOwner,
@@ -10746,7 +10741,7 @@ export default {
                             // Mark document as needing individual permission check when opened
                             doc._needsPermissionCheck = true;
                         } else {
-                            console.log(`✅ COLLAB DOCS: Permission data available for ${doc.documentName}`, {
+                            if (DEBUG) console.log(`✅ COLLAB DOCS: Permission data available for ${doc.documentName}`, {
                                 document: `${doc.owner}/${doc.permlink}`,
                                 accessType: doc.accessType,
                                 permissionLevel: doc.permissionLevel,
@@ -10780,7 +10775,7 @@ export default {
             } catch (error) {
                 // ✅ PERFORMANCE: Handle request cancellation gracefully
                 if (error.name === 'AbortError') {
-                    console.log('✅ PERFORMANCE: loadCollaborativeDocs request cancelled');
+                    if (DEBUG) console.log('✅ PERFORMANCE: loadCollaborativeDocs request cancelled');
                     return; // Don't set error states for cancelled requests
                 }
 
@@ -10863,7 +10858,7 @@ export default {
 
             // Check if we have a temporary document that needs persistence
             if (this.isTemporaryDocument && !this.indexeddbProvider && this.ydoc) {
-                console.log('📝 Creating persistence for temp document before cloud conversion');
+                if (DEBUG) console.log('📝 Creating persistence for temp document before cloud conversion');
 
                 // Ensure document has a name
                 const config = this.ydoc.getMap('config');
@@ -10937,7 +10932,7 @@ export default {
                 const title = this.titleInput || documentName;
                 const description = 'Document created with DLUX TipTap Editor';
 
-                console.log('🔄 Converting to collaborative with:', {
+                if (DEBUG) console.log('🔄 Converting to collaborative with:', {
                     documentName: documentName,
                     title: title,
                     hasYjsConfig: !!this.ydoc,
@@ -11077,7 +11072,7 @@ export default {
                 // ✅ TIPTAP BEST PRACTICE: Use onSynced callback properly
                 await new Promise((resolve) => {
                     this.indexeddbProvider.once('synced', () => {
-                        console.log('✅ IndexedDB synced with cloud ID');
+                        if (DEBUG) console.log('✅ IndexedDB synced with cloud ID');
                         resolve();
                     });
                 });
@@ -11103,16 +11098,16 @@ export default {
                     this.provider = webSocketProvider;
                     this.connectionStatus = 'connected';
                     // ✅ DUPLICATE PREVENTION: onConnect callback will handle upgrade to Tier 2 editors
-                    console.log('🔌 WebSocket connected - onConnect callback will upgrade editors automatically');
+                    if (DEBUG) console.log('🔌 WebSocket connected - onConnect callback will upgrade editors automatically');
 
-                    console.log('🔗 PROVIDER: WebSocket provider assigned', {
+                    if (DEBUG) console.log('🔗 PROVIDER: WebSocket provider assigned', {
                         hasProvider: !!this.provider,
                         connectionStatus: this.connectionStatus,
                         currentDocument: this.currentFile?.name || 'none'
                     });
                 } else {
                     this.connectionStatus = 'offline';
-                    console.log('❌ PROVIDER: No WebSocket provider available');
+                    if (DEBUG) console.log('❌ PROVIDER: No WebSocket provider available');
                 }
 
                 // ✅ TIPTAP COMPLIANCE: No manual content sync waiting
@@ -11264,7 +11259,7 @@ export default {
         // ✅ TIPTAP COMPLIANCE: Clean up old local document after successful conversion
         async cleanupOldLocalDocumentAfterConversion(localId) {
             try {
-                console.log('🧹 Cleaning up old local document after conversion:', localId);
+                if (DEBUG) console.log('🧹 Cleaning up old local document after conversion:', localId);
 
                 // ✅ CORRECT: Use smart access pattern like other methods
                 const tiptapBundle = window.TiptapCollaboration?.Editor
@@ -11285,13 +11280,13 @@ export default {
                 // ✅ TIPTAP BEST PRACTICE: Use onSynced to ensure provider is ready
                 await new Promise((resolve) => {
                     const timeout = setTimeout(() => {
-                        console.log('⏱️ Cleanup timeout - proceeding anyway');
+                        if (DEBUG) console.log('⏱️ Cleanup timeout - proceeding anyway');
                         resolve();
                     }, 2000);
 
                     tempProvider.once('synced', () => {
                         clearTimeout(timeout);
-                        console.log('✅ Cleanup provider synced');
+                        if (DEBUG) console.log('✅ Cleanup provider synced');
                         resolve();
                     });
                 });
@@ -11299,7 +11294,7 @@ export default {
                 // ✅ CRITICAL: Clear the old document's IndexedDB data
                 if (tempProvider.clearData && typeof tempProvider.clearData === 'function') {
                     await tempProvider.clearData();
-                    console.log('✅ Old local document IndexedDB data cleared');
+                    if (DEBUG) console.log('✅ Old local document IndexedDB data cleared');
 
                     // ✅ TIPTAP COMPLIANCE: Use nextTick to ensure cleanup completes
                     await this.$nextTick();
@@ -11309,7 +11304,7 @@ export default {
                 tempProvider.destroy();
                 tempDoc.destroy();
 
-                console.log('✅ Old local document cleanup completed');
+                if (DEBUG) console.log('✅ Old local document cleanup completed');
 
             } catch (error) {
                 console.error('❌ Failed to clean up old local document:', error);
@@ -11492,7 +11487,7 @@ export default {
 
                 // For file browser operations, use cache if fresh
                 if (cacheAge < 300000) {
-                    console.log('🚀 CACHE-FIRST: Using fresh cached permissions for file browser', {
+                    if (DEBUG) console.log('🚀 CACHE-FIRST: Using fresh cached permissions for file browser', {
                         document: documentKey,
                         cachedLevel: typeof cachedPermission === 'string' ? cachedPermission : cachedPermission.level,
                         cacheAge: Math.round(cacheAge / 1000) + 's',
@@ -11517,7 +11512,7 @@ export default {
                 const cachedLevel = typeof cachedPermission === 'string' ? cachedPermission : cachedPermission.level;
                 const cacheTimestamp = typeof cachedPermission === 'object' ? cachedPermission.timestamp : Date.now();
 
-                console.log('📄 DOCUMENT ACCESS: Using cached permissions for fast display, refreshing in background', {
+                if (DEBUG) console.log('📄 DOCUMENT ACCESS: Using cached permissions for fast display, refreshing in background', {
                     document: documentKey,
                     cachedLevel,
                     cacheAge: Math.round((Date.now() - cacheTimestamp) / 1000) + 's',
@@ -11559,7 +11554,7 @@ export default {
                 // ✅ OWNER-BASED API STRATEGY: Only owners can access permissions endpoint
                 const isOwner = this.currentFile.owner === this.username;
 
-                console.log('📤 PERMISSION LOAD: Fetching unified cloud file permissions', {
+                if (DEBUG) console.log('📤 PERMISSION LOAD: Fetching unified cloud file permissions', {
                     infoUrl,
                     permissionsUrl: isOwner ? permissionsUrl : 'SKIPPED (non-owner)',
                     authHeaders: Object.keys(this.authHeaders || {}),
@@ -11596,7 +11591,7 @@ export default {
                 let documentInfo = null;
                 if (infoResult.status === 'fulfilled') {
                     documentInfo = this.collaborationInfo; // Use the cached result
-                    console.log('📋 INFO ENDPOINT JSON Response:', {
+                    if (DEBUG) console.log('📋 INFO ENDPOINT JSON Response:', {
                         endpoint: 'collaboration/info',
                         url: infoUrl,
                         response: documentInfo,
@@ -11630,7 +11625,7 @@ export default {
                         permissionsData = null;
                     }
 
-                    console.log('📋 PERMISSIONS ENDPOINT JSON Response:', {
+                    if (DEBUG) console.log('📋 PERMISSIONS ENDPOINT JSON Response:', {
                         endpoint: 'collaboration/permissions',
                         url: permissionsUrl,
                         response: permissionsData,
@@ -11649,7 +11644,7 @@ export default {
                             permission.account !== this.currentFile.owner
                         );
 
-                        console.log('📤 PERMISSION LOAD: Shared users populated from API', {
+                        if (DEBUG) console.log('📤 PERMISSION LOAD: Shared users populated from API', {
                             document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                             sharedUsers: this.sharedUsers.map(u => `${u.account}:${u.permissionType}`),
                             totalPermissions: permissionsData.permissions.length
@@ -11703,7 +11698,7 @@ export default {
                     if (collaborativeDocToUpdate) {
                         // Update the cached accessType with fresh server data
                         collaborativeDocToUpdate.accessType = documentInfo.accessType;
-                        console.log('📂 CACHE UPDATE: Updated collaborative docs with fresh accessType', {
+                        if (DEBUG) console.log('📂 CACHE UPDATE: Updated collaborative docs with fresh accessType', {
                             document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                             oldAccessType: collaborativeDocToUpdate.accessType,
                             newAccessType: documentInfo.accessType,
@@ -11741,7 +11736,7 @@ export default {
 
                     // ✅ REACTIVE UPDATE: If permission changed, update UI and editor state
                     if (hasPermissionChanged && isDocumentAccess) {
-                        console.log('🔄 PERMISSION CHANGE DETECTED: Updating UI reactively', {
+                        if (DEBUG) console.log('🔄 PERMISSION CHANGE DETECTED: Updating UI reactively', {
                             document: documentKey,
                             oldPermission: currentPermission,
                             newPermission: newPermission,
@@ -11763,7 +11758,7 @@ export default {
                             this.triggerPermissionReactivity();
 
                             // Log permission transition for debugging
-                            console.log('✅ PERMISSION TRANSITION: UI updated', {
+                            if (DEBUG) console.log('✅ PERMISSION TRANSITION: UI updated', {
                                 document: documentKey,
                                 newPermissionLevel: this.currentPermissionLevel,
                                 isOwner: this.isOwner,
@@ -11788,7 +11783,7 @@ export default {
 
                 // ✅ ENHANCED FALLBACK: Handle authentication errors gracefully
                 if (error.message && error.message.includes('Keychain not available')) {
-                    console.log('🔑 KEYCHAIN: Authentication system not ready, using offline-first fallback', {
+                    if (DEBUG) console.log('🔑 KEYCHAIN: Authentication system not ready, using offline-first fallback', {
                         document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                         error: error.message
                     });
@@ -11817,7 +11812,7 @@ export default {
                 }
             } finally {
                 this.loadingPermissions = false;
-                console.log('🏁 UNIFIED PERMISSION LOAD: Completed', {
+                if (DEBUG) console.log('🏁 UNIFIED PERMISSION LOAD: Completed', {
                     finalPermissionCount: this.documentPermissions.length,
                     context: context
                 });
@@ -11828,7 +11823,7 @@ export default {
         resolveUnifiedPermission(documentInfo, permissionsData, permissionError, context) {
             const document = `${this.currentFile.owner}/${this.currentFile.permlink}`;
 
-            console.log('🔍 UNIFIED PERMISSION RESOLUTION:', {
+            if (DEBUG) console.log('🔍 UNIFIED PERMISSION RESOLUTION:', {
                 document,
                 hasDocumentInfo: !!documentInfo,
                 infoAccessType: documentInfo?.accessType,
@@ -11852,7 +11847,7 @@ export default {
             if (documentInfo && documentInfo.accessType) {
                 const accessType = documentInfo.accessType.toLowerCase();
 
-                console.log('🏆 PRIMARY: Using fresh info endpoint accessType', {
+                if (DEBUG) console.log('🏆 PRIMARY: Using fresh info endpoint accessType', {
                     document,
                     accessType: documentInfo.accessType,
                     source: 'info-endpoint-fresh',
@@ -11911,7 +11906,7 @@ export default {
                 if (collaborativeDocFallback && collaborativeDocFallback.accessType) {
                     const accessType = collaborativeDocFallback.accessType.toLowerCase();
 
-                    console.log('📂 FALLBACK: Using cached collaborative docs accessType', {
+                    if (DEBUG) console.log('📂 FALLBACK: Using cached collaborative docs accessType', {
                         document,
                         accessType: collaborativeDocFallback.accessType,
                         source: 'collaborative-docs-cache',
@@ -12074,7 +12069,7 @@ export default {
                 doc.owner === this.currentFile.owner && doc.permlink === this.currentFile.permlink);
 
             if (collaborativeDoc) {
-                console.log('🔍 COLLABORATIVE DOC ANALYSIS: Found document in collaborative list', {
+                if (DEBUG) console.log('🔍 COLLABORATIVE DOC ANALYSIS: Found document in collaborative list', {
                     document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                     collaborativeDocKeys: Object.keys(collaborativeDoc),
                     collaborativeDocData: collaborativeDoc
@@ -12168,7 +12163,7 @@ export default {
                     this.currentFile.owner :
                     'unknown';
 
-                console.log('🚫 TipTap Security: Document access denied', {
+                if (DEBUG) console.log('🚫 TipTap Security: Document access denied', {
                     document: deniedDocument,
                     documentOwner: deniedUser,
                     currentUser: this.username,
@@ -12312,7 +12307,7 @@ export default {
                                             // Remove from localStorage
                                             const updatedLocalFiles = localFiles.filter(f => f.id !== convertedFile.id);
                                             localStorage.setItem('dlux_tiptap_files', JSON.stringify(updatedLocalFiles));
-                                            console.log('🧹 Removed converted local file from localStorage:', convertedFile.id);
+                                            if (DEBUG) console.log('🧹 Removed converted local file from localStorage:', convertedFile.id);
                                         }
                                     }
                                 } catch (scanError) {
@@ -12328,7 +12323,7 @@ export default {
                                     const deleteReq = indexedDB.deleteDatabase(indexedDBKey);
                                     await new Promise((resolve) => {
                                         deleteReq.onsuccess = () => {
-                                            console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
+                                            if (DEBUG) console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
                                             resolve();
                                         };
                                         deleteReq.onerror = () => {
@@ -12372,7 +12367,7 @@ export default {
                                         const deleteReq = indexedDB.deleteDatabase(db.name);
                                         await new Promise((resolve) => {
                                             deleteReq.onsuccess = () => {
-                                                console.log('🧹 Final sweep deleted:', db.name);
+                                                if (DEBUG) console.log('🧹 Final sweep deleted:', db.name);
                                                 additionalDeleted++;
                                                 resolve();
                                             };
@@ -12387,7 +12382,7 @@ export default {
                         }
 
                         if (additionalDeleted > 0) {
-                            console.log(`✅ Final sweep removed ${additionalDeleted} additional databases`);
+                            if (DEBUG) console.log(`✅ Final sweep removed ${additionalDeleted} additional databases`);
                         }
                     } catch (sweepError) {
                         console.warn('⚠️ Final sweep encountered error:', sweepError);
@@ -12458,7 +12453,7 @@ export default {
                             const deleteReq = indexedDB.deleteDatabase(indexedDBKey);
                             await new Promise((resolve) => {
                                 deleteReq.onsuccess = () => {
-                                    console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
+                                    if (DEBUG) console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
                                     resolve();
                                 };
                                 deleteReq.onerror = () => {
@@ -12517,7 +12512,7 @@ export default {
             }
             
             try {
-                console.log('📝 Sending document name update to server:', {
+                if (DEBUG) console.log('📝 Sending document name update to server:', {
                     document: `${owner}/${permlink}`,
                     newName: newDocumentName
                 });
@@ -12538,7 +12533,7 @@ export default {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('✅ Document name updated on server:', data);
+                    if (DEBUG) console.log('✅ Document name updated on server:', data);
                     
                     // Update save status
                     this.updateSaveStatus('saved', 'Document name synced to server');
@@ -12576,7 +12571,7 @@ export default {
                                         
                                         // Save back to localStorage
                                         localStorage.setItem('dlux_collaborative_docs_cache', JSON.stringify(cacheData));
-                                        console.log('💾 Updated collaborative docs cache with new document name:', {
+                                        if (DEBUG) console.log('💾 Updated collaborative docs cache with new document name:', {
                                             document: `${owner}/${permlink}`,
                                             newName: data.document.documentName || newDocumentName
                                         });
@@ -12606,10 +12601,10 @@ export default {
         },
 
         async shareWithUser() {
-            console.log('🟢 SHARE BUTTON CLICKED - METHOD CALLED');
+            if (DEBUG) console.log('🟢 SHARE BUTTON CLICKED - METHOD CALLED');
 
             if (!this.shareForm?.username || !this.shareForm?.permission) {
-                console.log('❌ SHARE DEBUG: Missing username or permission', {
+                if (DEBUG) console.log('❌ SHARE DEBUG: Missing username or permission', {
                     username: this.shareForm?.username,
                     permission: this.shareForm?.permission
                 });
@@ -12618,7 +12613,7 @@ export default {
             }
 
             if (!this.currentFile || this.currentFile.type !== 'collaborative') {
-                console.log('❌ SHARE DEBUG: Invalid currentFile', {
+                if (DEBUG) console.log('❌ SHARE DEBUG: Invalid currentFile', {
                     currentFile: this.currentFile,
                     type: this.currentFile?.type
                 });
@@ -12627,7 +12622,7 @@ export default {
             }
 
             if (!this.isAuthenticated) {
-                console.log('❌ SHARE DEBUG: Not authenticated', {
+                if (DEBUG) console.log('❌ SHARE DEBUG: Not authenticated', {
                     isAuthenticated: this.isAuthenticated,
                     authHeaders: this.authHeaders
                 });
@@ -12635,7 +12630,7 @@ export default {
                 return;
             }
 
-            console.log('✅ SHARE DEBUG: All validation passed, proceeding with API call');
+            if (DEBUG) console.log('✅ SHARE DEBUG: All validation passed, proceeding with API call');
 
             const username = this.shareForm.username.trim();
 
@@ -12645,7 +12640,7 @@ export default {
                     permissionType: this.shareForm.permission
                 };
 
-                console.log('📋 FULL DEBUG: Making share permission API call (main editor)', {
+                if (DEBUG) console.log('📋 FULL DEBUG: Making share permission API call (main editor)', {
                     url: `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`,
                     method: 'POST',
                     headers: {
@@ -12664,7 +12659,7 @@ export default {
                     body: JSON.stringify(requestPayload)
                 });
 
-                console.log('📋 FULL DEBUG: Share permission API response received (main editor)', {
+                if (DEBUG) console.log('📋 FULL DEBUG: Share permission API response received (main editor)', {
                     status: response.status,
                     statusText: response.statusText,
                     ok: response.ok,
@@ -12674,14 +12669,14 @@ export default {
                 if (response.ok) {
                     // Get the raw response text to see what we're actually getting
                     const responseText = await response.text();
-                    console.log('📋 FULL DEBUG: Share permission success response text (first 1000 chars):', responseText.substring(0, 1000));
+                    if (DEBUG) console.log('📋 FULL DEBUG: Share permission success response text (first 1000 chars):', responseText.substring(0, 1000));
 
                     // Try to parse as JSON if there's content
                     let responseData = {};
                     if (responseText.trim()) {
                         try {
                             responseData = JSON.parse(responseText);
-                            console.log('📋 FULL DEBUG: Share permission parsed JSON:', responseData);
+                            if (DEBUG) console.log('📋 FULL DEBUG: Share permission parsed JSON:', responseData);
                         } catch (jsonError) {
                             console.error('❌ FULL DEBUG: Share permission JSON parse error (main editor):', {
                                 error: jsonError.message,
@@ -12692,7 +12687,7 @@ export default {
 
                     alert(`Successfully shared with ${username}!`);
 
-                    console.log('🔄 SHARE DEBUG: API call successful, updating modal', {
+                    if (DEBUG) console.log('🔄 SHARE DEBUG: API call successful, updating modal', {
                         realtimePermissionUpdates: this.realtimePermissionUpdates,
                         currentSharedUsers: this.sharedUsers?.length || 0,
                         willRefreshSharedUsers: true
@@ -12707,16 +12702,16 @@ export default {
                         });
 
                         // ✅ CRITICAL FIX: Refresh shared users list to show the new user
-                        console.log('🔄 SHARE DEBUG: About to call loadSharedUsers()');
+                        if (DEBUG) console.log('🔄 SHARE DEBUG: About to call loadSharedUsers()');
                         await this.loadSharedUsers();
-                        console.log('🔄 SHARE DEBUG: loadSharedUsers() completed', {
+                        if (DEBUG) console.log('🔄 SHARE DEBUG: loadSharedUsers() completed', {
                             newSharedUsersCount: this.sharedUsers?.length || 0,
                             users: this.sharedUsers?.map(u => `${u.account}:${u.permission_type}`) || []
                         });
 
                         // ✅ FORCE REACTIVITY: Ensure Vue detects the sharedUsers change
                         this.$nextTick(() => {
-                            console.log('🔄 SHARE DEBUG: Vue nextTick - modal should be updated', {
+                            if (DEBUG) console.log('🔄 SHARE DEBUG: Vue nextTick - modal should be updated', {
                                 sharedUsersInTemplate: this.sharedUsers?.length || 0
                             });
                         });
@@ -12729,16 +12724,16 @@ export default {
                         // ✅ TRIGGER: Force permission refresh timestamp update
                         this.lastPermissionRefresh = Date.now();
                     } else {
-                        console.log('🔄 SHARE DEBUG: Real-time updates disabled, manually calling loadSharedUsers()');
+                        if (DEBUG) console.log('🔄 SHARE DEBUG: Real-time updates disabled, manually calling loadSharedUsers()');
                         await this.loadSharedUsers();
-                        console.log('🔄 SHARE DEBUG: Manual loadSharedUsers() completed', {
+                        if (DEBUG) console.log('🔄 SHARE DEBUG: Manual loadSharedUsers() completed', {
                             newSharedUsersCount: this.sharedUsers?.length || 0,
                             users: this.sharedUsers?.map(u => `${u.account}:${u.permission_type}`) || []
                         });
 
                         // ✅ FORCE REACTIVITY: Ensure Vue detects the sharedUsers change
                         this.$nextTick(() => {
-                            console.log('🔄 SHARE DEBUG: Vue nextTick - modal should be updated', {
+                            if (DEBUG) console.log('🔄 SHARE DEBUG: Vue nextTick - modal should be updated', {
                                 sharedUsersInTemplate: this.sharedUsers?.length || 0
                             });
                         });
@@ -12827,19 +12822,19 @@ export default {
             if (violations.length === 0) {
 
             } else {
-                violations.forEach(v => console.log(v));
+                if (DEBUG) violations.forEach(v => console.log(v));
             }
 
             if (warnings.length > 0) {
-                warnings.forEach(w => console.log(w));
+                if (DEBUG) warnings.forEach(w => console.log(w));
             }
 
             // Show allowed patterns reminder
-            console.log('- Use editor.getText() ONLY in export methods');
-            console.log('- Use onUpdate ONLY for flags (hasUnsavedChanges, etc.)');
-            console.log('- Use Y.js ONLY for metadata (config, tags, customJson)');
-            console.log('- Let TipTap Collaboration handle ALL content sync');
-            console.log('- Use computed properties for template display');
+            if (DEBUG) console.log('- Use editor.getText() ONLY in export methods');
+            if (DEBUG) console.log('- Use onUpdate ONLY for flags (hasUnsavedChanges, etc.)');
+            if (DEBUG) console.log('- Use Y.js ONLY for metadata (config, tags, customJson)');
+            if (DEBUG) console.log('- Let TipTap Collaboration handle ALL content sync');
+            if (DEBUG) console.log('- Use computed properties for template display');
 
             return {
                 violations,
@@ -12864,7 +12859,7 @@ export default {
 
             Object.entries(patterns).forEach(([name, pattern]) => {
                 // This would typically scan source code, but in runtime we can only check method strings
-                console.log(`Checking for ${name} pattern...`);
+                if (DEBUG) console.log(`Checking for ${name} pattern...`);
             });
 
         },
@@ -13029,8 +13024,8 @@ export default {
                 }
 
                 // Log command attempt
-                console.log(`🎯 Executing command: ${commandName}`);
-                console.log('🔍 [COMMAND] Pre-execution state:', {
+                if (DEBUG) console.log(`🎯 Executing command: ${commandName}`);
+                if (DEBUG) console.log('🔍 [COMMAND] Pre-execution state:', {
                     isCreatingPersistence: this.isCreatingPersistence,
                     timeSinceLastUpdate: timeSinceLastUpdate,
                     isYjsSyncing: this.isYjsSyncing,
@@ -13041,7 +13036,7 @@ export default {
                 const result = commandFn();
 
                 // Log success
-                console.log(`✅ Command ${commandName} completed in ${Date.now() - startTime}ms`);
+                if (DEBUG) console.log(`✅ Command ${commandName} completed in ${Date.now() - startTime}ms`);
 
                 // Validate state after command
                 if (this.enableStateMonitoring) {
@@ -13239,7 +13234,7 @@ export default {
 
                 // Log if document is large
                 if (profile.content.bodyLength > 50000) {
-                    console.log('📊 Memory Profile (Large Document):', profile);
+                    if (DEBUG) console.log('📊 Memory Profile (Large Document):', profile);
                 }
 
                 // Warn if memory usage is high
@@ -13262,7 +13257,7 @@ export default {
 
         // ✅ PHASE 2: Title input handler with Y.js transactions and temp document conversion
         onTitleInput() {
-            console.log('🔍 Title input changed:', {
+            if (DEBUG) console.log('🔍 Title input changed:', {
                 titleInput: this.titleInput,
                 isTemporaryDocument: this.isTemporaryDocument,
                 hasIndexeddbProvider: !!this.indexeddbProvider
@@ -13286,7 +13281,7 @@ export default {
 
             // ✅ USER INTENT DETECTION: Title input triggers temp document conversion
             if (this.isTemporaryDocument && !this.indexeddbProvider && !this.isCreatingPersistence) {
-                console.log('🔍 Title input detected - converting temp document to persistent');
+                if (DEBUG) console.log('🔍 Title input detected - converting temp document to persistent');
                 this.debouncedCreateIndexedDBForTempDocument();
             }
 
@@ -13296,7 +13291,7 @@ export default {
                 // ✅ FIX: Apply same pattern as body editor for immediate save indicator
                 if (!this.isTemporaryDocument || this.indexeddbProvider) {
                     // For persistent documents, always track changes and show indicator
-                    console.log('🔍 Setting hasUnsavedChanges = true from title input');
+                    if (DEBUG) console.log('🔍 Setting hasUnsavedChanges = true from title input');
                     this.hasUnsavedChanges = true;
                     this.hasUserIntent = true;
                     // Call updateSaveStatus directly to ensure message shows
@@ -13364,7 +13359,7 @@ export default {
 
         // Tags change handler
         onTagsChange(newTags) {
-            console.log('🔍 Tags changed:', { newTags, isTemporaryDocument: this.isTemporaryDocument });
+            if (DEBUG) console.log('🔍 Tags changed:', { newTags, isTemporaryDocument: this.isTemporaryDocument });
 
             // ✅ Y.js TRANSACTION: Individual transaction for tags (per best practices)
             if (this.ydoc) {
@@ -13380,7 +13375,7 @@ export default {
 
         // Beneficiaries change handler
         onBeneficiariesChange(newBeneficiaries) {
-            console.log('🔍 Beneficiaries changed:', { newBeneficiaries, isTemporaryDocument: this.isTemporaryDocument });
+            if (DEBUG) console.log('🔍 Beneficiaries changed:', { newBeneficiaries, isTemporaryDocument: this.isTemporaryDocument });
 
             // ✅ Y.js TRANSACTION: Individual transaction for beneficiaries
             if (this.ydoc) {
@@ -13396,7 +13391,7 @@ export default {
 
         // Custom JSON change handler
         onCustomJsonChange(newCustomJson) {
-            console.log('🔍 Custom JSON changed:', { newCustomJson, isTemporaryDocument: this.isTemporaryDocument });
+            if (DEBUG) console.log('🔍 Custom JSON changed:', { newCustomJson, isTemporaryDocument: this.isTemporaryDocument });
 
             // ✅ Y.js TRANSACTION: Individual transaction for custom JSON
             if (this.ydoc) {
@@ -13412,7 +13407,7 @@ export default {
 
         // Comment options change handler
         onCommentOptionsChange(newCommentOptions) {
-            console.log('🔍 Comment options changed:', { newCommentOptions, isTemporaryDocument: this.isTemporaryDocument });
+            if (DEBUG) console.log('🔍 Comment options changed:', { newCommentOptions, isTemporaryDocument: this.isTemporaryDocument });
 
             // ✅ Y.js TRANSACTION: Individual transaction for comment options
             if (this.ydoc) {
@@ -13430,7 +13425,7 @@ export default {
 
         // ✅ UNIFIED USER INTENT DETECTION: Common handler for all metadata changes
         triggerUserIntentDetection(changeType) {
-            console.log('🔍 User intent detected:', {
+            if (DEBUG) console.log('🔍 User intent detected:', {
                 changeType,
                 isTemporaryDocument: this.isTemporaryDocument,
                 hasIndexeddbProvider: !!this.indexeddbProvider
@@ -13438,7 +13433,7 @@ export default {
 
             // ✅ TEMP DOCUMENT CONVERSION: Any metadata change triggers conversion
             if (this.isTemporaryDocument && !this.indexeddbProvider && !this.isCreatingPersistence) {
-                console.log(`🔍 ${changeType} detected - converting temp document to persistent`);
+                if (DEBUG) console.log(`🔍 ${changeType} detected - converting temp document to persistent`);
                 this.debouncedCreateIndexedDBForTempDocument();
             }
 
@@ -13508,6 +13503,8 @@ export default {
                     SpkVideo,
                     Mention,
                     TableKit,
+                    CustomTableCell,
+                    CustomDropcursor,
                     DragHandle,
                     Gapcursor
                 } = tiptapBundle;
@@ -13542,12 +13539,16 @@ export default {
                     SpkVideo,
                     Mention,
                     TableKit && TableKit.configure({
+                        tableCell: false,  // Using CustomTableCell instead
+                        // tableHeader uses the default from TableKit
                         table: {
                             resizable: false,
                             handleWidth: 0,
                             allowTableNodeSelection: false
                         }
                     }),
+                    CustomTableCell,
+                    CustomDropcursor,
                     DragHandle,
                     Gapcursor
                 ].filter(ext => ext !== undefined && ext !== null);
@@ -13993,15 +13994,15 @@ export default {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
             try {
-                console.log('Setting text alignment to:', alignment);
+                if (DEBUG) console.log('Setting text alignment to:', alignment);
                 const success = this.bodyEditor.chain().focus().setTextAlign(alignment).run();
-                console.log('Text alignment command result:', success);
+                if (DEBUG) console.log('Text alignment command result:', success);
                 
                 // Log the current selection's JSON to verify the attribute was set
                 setTimeout(() => {
                     const { from, to } = this.bodyEditor.state.selection;
                     const selectedNode = this.bodyEditor.state.doc.nodeAt(from);
-                    console.log('After alignment - selected node:', {
+                    if (DEBUG) console.log('After alignment - selected node:', {
                         node: selectedNode,
                         attrs: selectedNode?.attrs,
                         textAlign: selectedNode?.attrs?.textAlign
@@ -14086,7 +14087,7 @@ export default {
             // ✅ NESTED TABLE PREVENTION: Check if cursor is currently inside a table
             // This is now handled by disabling the button, but keep as safety check
             if (this.bodyEditor.isActive('table')) {
-                console.log('🚫 Cannot insert table inside another table - button should be disabled');
+                if (DEBUG) console.log('🚫 Cannot insert table inside another table - button should be disabled');
                 return;
             }
             
@@ -14191,7 +14192,7 @@ export default {
             toolbar.style.left = `${tableRect.left}px`;
             toolbar.style.top = `${tableRect.top - 50}px`; // 50px above the table
             
-            console.log('📐 Table toolbar positioned:', {
+            if (DEBUG) console.log('📐 Table toolbar positioned:', {
                 left: tableRect.left,
                 top: tableRect.top - 50
             });
@@ -14274,11 +14275,11 @@ export default {
             
             // First check SPK metadata if available
             if (metadata) {
-                console.log('🎬 Using SPK metadata for type detection:', metadata);
+                if (DEBUG) console.log('🎬 Using SPK metadata for type detection:', metadata);
                 if (metadata.type === 'm3u8' || metadata.meta?.type === 'm3u8') {
                     videoType = 'application/x-mpegURL';
                     dataType = 'm3u8';
-                    console.log('🎬 Detected m3u8 from SPK metadata');
+                    if (DEBUG) console.log('🎬 Detected m3u8 from SPK metadata');
                 }
             }
             
@@ -14303,7 +14304,7 @@ export default {
                 .setVideo(videoAttrs)
                 .run();
                 
-            console.log('🎬 Video inserted with attributes:', videoAttrs);
+            if (DEBUG) console.log('🎬 Video inserted with attributes:', videoAttrs);
                 
             // Mark document as having unsaved changes
             this.hasUnsavedChanges = true;
@@ -14457,7 +14458,7 @@ export default {
         startEditingDocumentName() {
             // ✅ SECURITY: Prevent editing for read-only users
             if (this.isReadOnlyMode) {
-                console.log('🚫 Cannot edit document name in read-only mode');
+                if (DEBUG) console.log('🚫 Cannot edit document name in read-only mode');
                 return;
             }
 
@@ -14491,7 +14492,7 @@ export default {
             // ✅ FIX: Only save if name actually changed
             const currentName = this.getDocumentNameFromConfig || this.currentFile?.name || '';
             if (newDocumentName === currentName) {
-                console.log('🔍 Document name unchanged, skipping save');
+                if (DEBUG) console.log('🔍 Document name unchanged, skipping save');
                 this.isEditingDocumentName = false;
                 return;
             }
@@ -14526,7 +14527,7 @@ export default {
                             // ✅ OFFLINE-FIRST: Update URL when user explicitly saves with name
                             // This shows user intent to persist the document
                             this.updateURLWithLocalParams(this.username || 'anonymous', this.currentFile.id);
-                            console.log('📝 URL updated after explicit save:', {
+                            if (DEBUG) console.log('📝 URL updated after explicit save:', {
                                 documentId: this.currentFile.id,
                                 documentName: newDocumentName,
                                 reason: 'user explicitly saved document with name'
@@ -14535,7 +14536,7 @@ export default {
                         
                         // ✅ COLLABORATIVE SYNC: Update server metadata for collaborative documents
                         if (this.currentFile.type === 'collaborative' && this.currentFile.owner && this.currentFile.permlink) {
-                            console.log('📝 Updating collaborative document name on server:', {
+                            if (DEBUG) console.log('📝 Updating collaborative document name on server:', {
                                 document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                                 newName: newDocumentName
                             });
@@ -14626,7 +14627,7 @@ export default {
 
             // Only save if actually changed
             if (newPermlink === this.originalPermlinkValue) {
-                console.log('🔍 Permlink unchanged, skipping save');
+                if (DEBUG) console.log('🔍 Permlink unchanged, skipping save');
                 this.showPermlinkEditor = false;
                 return;
             }
@@ -14635,7 +14636,7 @@ export default {
             // This ensures debouncedSetPermlinkInMetadata() reads the new value
             this.permlinkInput = newPermlink;
 
-            console.log('💾 Saving permlink change:', { from: this.originalPermlinkValue, to: newPermlink });
+            if (DEBUG) console.log('💾 Saving permlink change:', { from: this.originalPermlinkValue, to: newPermlink });
 
             // Save to Y.js metadata
             this.debouncedSetPermlinkInMetadata();
@@ -14661,7 +14662,7 @@ export default {
             this.permlinkInputTemp = this.originalPermlinkValue;
             this.showPermlinkEditor = false;
 
-            console.log('🔄 Canceled permlink edit, restored to:', this.originalPermlinkValue);
+            if (DEBUG) console.log('🔄 Canceled permlink edit, restored to:', this.originalPermlinkValue);
         },
 
         handlePermlinkKeydown(event) {
@@ -14694,7 +14695,7 @@ export default {
                     this.permlinkInputTemp = this.generatedPermlink;
                 }
 
-                console.log('🔗 Using generated permlink:', this.generatedPermlink);
+                if (DEBUG) console.log('🔗 Using generated permlink:', this.generatedPermlink);
             }
         },
 
@@ -14762,7 +14763,7 @@ export default {
             const account = this.beneficiaryInput.account.trim().replace('@', '');
             const percent = parseFloat(this.beneficiaryInput.percent);
 
-            console.log('🎯 Adding beneficiary:', { account, percent });
+            if (DEBUG) console.log('🎯 Adding beneficiary:', { account, percent });
 
             if (account && percent > 0 && percent <= 100 && this.ydoc) {
                 const weight = Math.round(percent * 100);
@@ -14802,7 +14803,7 @@ export default {
 
                     // ✅ TIPTAP USER INTENT: Beneficiary management shows intent to create document
                     if (this.isTemporaryDocument && !this.indexeddbProvider && !this.isCreatingPersistence) {
-                        console.log('📝 Triggering document creation from beneficiary add');
+                        if (DEBUG) console.log('📝 Triggering document creation from beneficiary add');
                         // Beneficiaries show user intent - create persistence immediately without content check
                         this.debouncedCreateIndexedDBForTempDocument();
                     } else if (!this.isTemporaryDocument && this.hasIndexedDBPersistence) {
@@ -14990,7 +14991,7 @@ export default {
         },
 
         async openShareModal() {
-            console.log('📤 SHARE MODAL: Opening share modal', {
+            if (DEBUG) console.log('📤 SHARE MODAL: Opening share modal', {
                 document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
                 documentName: this.currentFile?.name || this.currentFile?.documentName,
                 currentUser: this.username,
@@ -15039,20 +15040,20 @@ export default {
 
             // Only owners can see the full permissions list
             if (this.currentFile.owner !== this.username) {
-                console.log('📤 SHARE MODAL: Non-owner cannot view shared users list');
+                if (DEBUG) console.log('📤 SHARE MODAL: Non-owner cannot view shared users list');
                 this.sharedUsers = [];
                 return;
             }
 
             // ✅ DEBUG: Always fetch fresh permissions for share modal to ensure accuracy
-            console.log('📤 SHARE MODAL: Loading fresh permissions (not using cache)', {
+            if (DEBUG) console.log('📤 SHARE MODAL: Loading fresh permissions (not using cache)', {
                 document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                 existingPermissions: this.documentPermissions?.length || 0,
                 reason: 'ensure-accuracy'
             });
 
             try {
-                console.log('📤 SHARE MODAL: Loading shared users from API', {
+                if (DEBUG) console.log('📤 SHARE MODAL: Loading shared users from API', {
                     document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                     currentUser: this.username
                 });
@@ -15072,10 +15073,10 @@ export default {
                     response.headers.get('x-hocuspocus-version') ||
                     response.headers.get('hocuspocus-version');
                 if (serverVersion) {
-                    console.log('🔍 PERMISSIONS API SERVER VERSION:', serverVersion);
+                    if (DEBUG) console.log('🔍 PERMISSIONS API SERVER VERSION:', serverVersion);
                 }
 
-                console.log('📤 PERMISSIONS API: Response headers', {
+                if (DEBUG) console.log('📤 PERMISSIONS API: Response headers', {
                     status: response.status,
                     headers: Object.fromEntries(response.headers.entries())
                 });
@@ -15083,7 +15084,7 @@ export default {
                 if (response.ok) {
                     try {
                         const permissionsData = await response.json();
-                        console.log('📤 SHARE MODAL: Shared users loaded from API', {
+                        if (DEBUG) console.log('📤 SHARE MODAL: Shared users loaded from API', {
                             permissions: permissionsData.permissions || [],
                             count: permissionsData.permissions?.length || 0
                         });
@@ -15094,7 +15095,7 @@ export default {
                             .filter(permission => permission.account !== this.currentFile.owner)
                             .sort((a, b) => a.account.localeCompare(b.account));
 
-                        console.log('📤 SHARE MODAL: sharedUsers updated', {
+                        if (DEBUG) console.log('📤 SHARE MODAL: sharedUsers updated', {
                             count: this.sharedUsers.length,
                             users: this.sharedUsers.map(u => `${u.account}:${u.permission_type}`)
                         });
@@ -15137,7 +15138,7 @@ export default {
             }
 
             try {
-                console.log('📤 SHARE MODAL: Updating user permission', {
+                if (DEBUG) console.log('📤 SHARE MODAL: Updating user permission', {
                     document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                     username: username,
                     oldPermission: currentUser.permissionType,
@@ -15158,7 +15159,7 @@ export default {
                     body: JSON.stringify(requestPayload)
                 });
 
-                console.log('🔍 UPDATE PERMISSION: Response received', {
+                if (DEBUG) console.log('🔍 UPDATE PERMISSION: Response received', {
                     status: response.status,
                     statusText: response.statusText,
                     ok: response.ok,
@@ -15166,14 +15167,14 @@ export default {
                 });
 
                 if (response.ok) {
-                    console.log('✅ SHARE MODAL: User permission updated successfully');
+                    if (DEBUG) console.log('✅ SHARE MODAL: User permission updated successfully');
 
                     // ✅ CLEAR CACHES FIRST: Clear permission caches before reloading fresh data
                     this.clearAllPermissionCaches();
 
                     // ✅ RELOAD FRESH DATA: Get updated permissions from API
                     await this.loadSharedUsers();
-                    console.log('🔄 MODAL REFRESHED: Reloaded shared users from API');
+                    if (DEBUG) console.log('🔄 MODAL REFRESHED: Reloaded shared users from API');
 
                     // ✅ OFFLINE-FIRST: Real-time permission updates
                     if (this.realtimePermissionUpdates) {
@@ -15242,7 +15243,7 @@ export default {
             }
 
             try {
-                console.log('📤 SHARE MODAL: Removing user access', {
+                if (DEBUG) console.log('📤 SHARE MODAL: Removing user access', {
                     document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
                     removingUser: username
                 });
@@ -15256,7 +15257,7 @@ export default {
                 });
 
                 if (response.ok) {
-                    console.log('✅ SHARE MODAL: User access removed successfully');
+                    if (DEBUG) console.log('✅ SHARE MODAL: User access removed successfully');
 
                     // Remove from local list immediately
                     this.sharedUsers = this.sharedUsers.filter(user => user.account !== username);
@@ -15316,7 +15317,7 @@ export default {
                 this.sortDirection = 'desc';
             }
             
-            console.log(`📊 Sorting table by ${column} (${this.sortDirection})`);
+            if (DEBUG) console.log(`📊 Sorting table by ${column} (${this.sortDirection})`);
         },
 
         // ===== MAIN ACTION DELEGATION =====
@@ -15339,7 +15340,7 @@ export default {
                 const originalName = documentData.documentName || 'Untitled';
                 const copyName = `${originalName} - Copy`;
                 
-                console.log('🔄 Duplicating document:', {
+                if (DEBUG) console.log('🔄 Duplicating document:', {
                     originalName,
                     copyName,
                     type: this.currentFile.type,
@@ -15368,12 +15369,12 @@ export default {
             
             // Debug: Check if video attributes are being saved
             if (bodyHtml.includes('<video')) {
-                console.log('💾 Saving document with video content');
+                if (DEBUG) console.log('💾 Saving document with video content');
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = bodyHtml;
                 const videos = tempDiv.querySelectorAll('video');
                 videos.forEach(video => {
-                    console.log('💾 Video attributes in saved HTML:', {
+                    if (DEBUG) console.log('💾 Video attributes in saved HTML:', {
                         src: video.getAttribute('src'),
                         type: video.getAttribute('type'),
                         'data-type': video.getAttribute('data-type'),
@@ -15402,7 +15403,7 @@ export default {
                 permlink: this.ydoc?.getMap('metadata').get('permlink') || ''
             };
 
-            console.log('📋 Extracted document data:', data);
+            if (DEBUG) console.log('📋 Extracted document data:', data);
             return data;
         },
 
@@ -15500,7 +15501,7 @@ export default {
                 // Use nextTick to ensure editor is ready
                 await this.$nextTick();
                 if (!this.bodyEditor.isDestroyed) {
-                    console.log('📄 Loading content into editor, checking for video elements...');
+                    if (DEBUG) console.log('📄 Loading content into editor, checking for video elements...');
                     
                     // Debug: Check if video attributes are present in the HTML
                     if (data.body.includes('<video')) {
@@ -15508,7 +15509,7 @@ export default {
                         tempDiv.innerHTML = data.body;
                         const videos = tempDiv.querySelectorAll('video');
                         videos.forEach(video => {
-                            console.log('📄 Video in saved HTML:', {
+                            if (DEBUG) console.log('📄 Video in saved HTML:', {
                                 src: video.getAttribute('src'),
                                 type: video.getAttribute('type'),
                                 'data-type': video.getAttribute('data-type'),
@@ -15524,14 +15525,14 @@ export default {
                     setTimeout(() => {
                         this.bodyEditor.state.doc.descendants((node) => {
                             if (node.type.name === 'video') {
-                                console.log('📄 Video node after loading:', node.attrs);
+                                if (DEBUG) console.log('📄 Video node after loading:', node.attrs);
                             }
                         });
                     }, 100);
                 }
             }
 
-            console.log('✅ Document data populated successfully');
+            if (DEBUG) console.log('✅ Document data populated successfully');
         },
 
         // ===== ENHANCED DELETE DOCUMENT =====
@@ -15742,7 +15743,7 @@ export default {
 
         // ✅ TIPTAP PERFECT COMPLIANCE: Debounced content check outside onUpdate
         debouncedCheckUserIntentAndCreatePersistence() {
-            console.log('🔍 debouncedCheckUserIntentAndCreatePersistence called:', {
+            if (DEBUG) console.log('🔍 debouncedCheckUserIntentAndCreatePersistence called:', {
                 isCreatingPersistence: this.isCreatingPersistence,
                 isTemporaryDocument: this.isTemporaryDocument,
                 hasIndexeddbProvider: !!this.indexeddbProvider,
@@ -15751,20 +15752,20 @@ export default {
 
             // ✅ REACTIVE PATTERN: Check intent immediately, no artificial delays
             if (this.isCreatingPersistence || !this.isTemporaryDocument || this.indexeddbProvider) {
-                console.log('🔍 Skipping persistence creation (already created or in progress)');
+                if (DEBUG) console.log('🔍 Skipping persistence creation (already created or in progress)');
                 return;
             }
 
             // ✅ FIX: Don't create persistence if editor was JUST created
             const editorAge = Date.now() - (this.editorCreatedAt || 0);
             if (editorAge < 1000) { // Wait at least 1 second after editor creation
-                console.log('🔍 Editor too young, skipping persistence check:', editorAge);
+                if (DEBUG) console.log('🔍 Editor too young, skipping persistence check:', editorAge);
                 return;
             }
 
             // ✅ FIX: Don't create persistence during initialization or document loading
             if (!this.editorInitialized || this.isLoadingDocument) {
-                console.log('🔍 Skipping persistence - editor not fully initialized or document loading:', {
+                if (DEBUG) console.log('🔍 Skipping persistence - editor not fully initialized or document loading:', {
                     editorInitialized: this.editorInitialized,
                     isLoadingDocument: this.isLoadingDocument
                 });
@@ -15772,7 +15773,7 @@ export default {
             }
 
             // ✅ FIX: Any user interaction shows intent - create persistence immediately
-            console.log('🔍 User intent detected - creating persistence immediately');
+            if (DEBUG) console.log('🔍 User intent detected - creating persistence immediately');
             this.createIndexedDBForTempDocument();
         },
 
@@ -15788,7 +15789,7 @@ export default {
 
         // Open JSON preview modal
         openJsonPreview() {
-            console.log('🔍 Opening JSON preview modal');
+            if (DEBUG) console.log('🔍 Opening JSON preview modal');
 
             // Update the preview data
             this.updateJsonPreview();
@@ -15895,7 +15896,7 @@ export default {
         copyJsonToClipboard(jsonData) {
             const jsonString = JSON.stringify(jsonData, null, 2);
             navigator.clipboard.writeText(jsonString).then(() => {
-                console.log('✅ JSON copied to clipboard');
+                if (DEBUG) console.log('✅ JSON copied to clipboard');
                 // You might want to show a toast notification here
             }).catch(err => {
                 console.error('❌ Failed to copy JSON:', err);
@@ -15922,7 +15923,7 @@ export default {
             }
 
             // Console log the complete operation for debugging
-            console.log('🚀 Publishing to Hive:', {
+            if (DEBUG) console.log('🚀 Publishing to Hive:', {
                 operations: operations,
                 operationsCount: operations.length,
                 hasCommentOptions: !!this.commentOptionsOperation,
@@ -15937,7 +15938,7 @@ export default {
                 callbacks: [], //get new replies for a/p
                 txid: `posting...`,
               }
-            console.log('signOperation', signOperation)
+            if (DEBUG) console.log('signOperation', signOperation)
 
             // Call sendIt with the properly formatted operation
             this.sendIt(signOperation);
@@ -15950,7 +15951,7 @@ export default {
         debouncedUpdateContent() {
             // ✅ FIX: Prevent auto-save during initialization or document loading
             if (!this.editorInitialized || this.isLoadingDocument) {
-                console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
+                if (DEBUG) console.log('🔍 Skipping debouncedUpdateContent - editor not ready:', {
                     editorInitialized: this.editorInitialized,
                     isLoadingDocument: this.isLoadingDocument
                 });
@@ -15959,11 +15960,11 @@ export default {
 
             // ✅ READ-ONLY PROTECTION: Block auto-save for read-only users
             if (this.isReadOnlyMode) {
-                console.log('🔒 Auto-save blocked for read-only user - content updates are receive-only');
+                if (DEBUG) console.log('🔒 Auto-save blocked for read-only user - content updates are receive-only');
                 return;
             }
 
-            console.log('🔍 debouncedUpdateContent called - starting auto-save process');
+            if (DEBUG) console.log('🔍 debouncedUpdateContent called - starting auto-save process');
 
             // Clear any existing content update timer
             if (this.contentUpdateTimeout) {
@@ -15972,7 +15973,7 @@ export default {
 
             // ✅ TIPTAP BEST PRACTICE: Debounced auto-save for content changes
             this.contentUpdateTimeout = setTimeout(() => {
-                console.log('🔍 Content auto-save executing:', {
+                if (DEBUG) console.log('🔍 Content auto-save executing:', {
                     hasIndexedDBPersistence: this.hasIndexedDBPersistence,
                     isTemporaryDocument: this.isTemporaryDocument,
                     connectionStatus: this.connectionStatus
@@ -15981,7 +15982,7 @@ export default {
                 // ✅ AUTO-SAVE COMPLETION: Clear unsaved flag when auto-save completes
                 // For persistent documents (IndexedDB or WebSocket), auto-save is automatic via Y.js
                 if (this.hasIndexedDBPersistence || this.connectionStatus === 'connected') {
-                    console.log('🔍 Auto-save completed - clearing unsaved flag');
+                    if (DEBUG) console.log('🔍 Auto-save completed - clearing unsaved flag');
                     this.hasUnsavedChanges = false;
 
                     // Show save completed message
@@ -15991,12 +15992,12 @@ export default {
                         this.showSaveMessage('Saved locally', false);
                     }
                 } else {
-                    console.log('🔍 No persistence available - checking for temp document conversion');
+                    if (DEBUG) console.log('🔍 No persistence available - checking for temp document conversion');
 
                     // ✅ TEMP DOCUMENT CONVERSION: Trigger persistence creation if needed
                     if (this.isTemporaryDocument && !this.indexeddbProvider && !this.isCreatingPersistence) {
                         // ✅ FIX: User interaction detected - convert temp document to persistent
-                        console.log('🔍 User interaction detected - converting temp document to persistent');
+                        if (DEBUG) console.log('🔍 User interaction detected - converting temp document to persistent');
                         this.debouncedCreateIndexedDBForTempDocument();
                     }
                 }
@@ -16014,7 +16015,7 @@ export default {
             this.titleAutoSaveTimer = setTimeout(() => {
                 // ✅ IndexedDB sync is automatic via Y.js - just clear UI flag
                 if (this.hasIndexedDBPersistence || this.connectionStatus === 'connected') {
-                    console.log('🔍 Title auto-save completed - clearing unsaved flag');
+                    if (DEBUG) console.log('🔍 Title auto-save completed - clearing unsaved flag');
                     this.hasUnsavedChanges = false;
                 }
             }, 1500); // 1.5 second delay for user feedback
@@ -16025,7 +16026,7 @@ export default {
             // ✅ FIX: Extra safety check - don't even start the timer for young editors
             const editorAge = Date.now() - (this.editorCreatedAt || 0);
             if (editorAge < 2000) {
-                console.log('🔍 Editor too young for persistence timer:', editorAge);
+                if (DEBUG) console.log('🔍 Editor too young for persistence timer:', editorAge);
                 return;
             }
 
@@ -16035,16 +16036,16 @@ export default {
             }
 
             this.createPersistenceDebounceTimer = setTimeout(() => {
-                console.log('🔍 Debounced persistence triggered from metadata change');
+                if (DEBUG) console.log('🔍 Debounced persistence triggered from metadata change');
 
                 // ✅ FIX: Metadata changes ARE user intent - create persistence immediately
-                console.log('🔍 User intent detected via metadata - creating persistence');
+                if (DEBUG) console.log('🔍 User intent detected via metadata - creating persistence');
                 this.createIndexedDBForTempDocument();
             }, 300); // 300ms debounce for metadata changes
         },
 
         async createIndexedDBForTempDocument() {
-            console.log('🔍 createIndexedDBForTempDocument called:', {
+            if (DEBUG) console.log('🔍 createIndexedDBForTempDocument called:', {
                 isTemporaryDocument: this.isTemporaryDocument,
                 hasIndexeddbProvider: !!this.indexeddbProvider,
                 isCreatingPersistence: this.isCreatingPersistence,
@@ -16052,19 +16053,19 @@ export default {
             });
 
             if (!this.isTemporaryDocument || this.indexeddbProvider || this.isCreatingPersistence || !this.ydoc) {
-                console.log('🔍 Skipping IndexedDB creation - conditions not met');
+                if (DEBUG) console.log('🔍 Skipping IndexedDB creation - conditions not met');
                 return;
             }
 
             try {
                 this.isCreatingPersistence = true;
-                console.log('🔍 Setting isCreatingPersistence = true');
+                if (DEBUG) console.log('🔍 Setting isCreatingPersistence = true');
 
-                console.log('🎯 Creating IndexedDB persistence for temp document');
+                if (DEBUG) console.log('🎯 Creating IndexedDB persistence for temp document');
 
                 // Generate a real local document ID
                 const documentId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-                console.log('📝 Converting temp document to local document:', {
+                if (DEBUG) console.log('📝 Converting temp document to local document:', {
                     oldId: this.tempDocumentId,
                     newId: documentId,
                     currentURL: window.location.href
@@ -16076,7 +16077,7 @@ export default {
                     : window.TiptapCollaboration?.default;
                 const IndexeddbPersistence = tiptapBundle?.IndexeddbPersistence;
 
-                console.log('🔍 IndexedDB Persistence Debug (temp document):', {
+                if (DEBUG) console.log('🔍 IndexedDB Persistence Debug (temp document):', {
                     bundleExists: !!tiptapBundle,
                     bundleKeys: tiptapBundle ? Object.keys(tiptapBundle) : 'no-bundle',
                     indexeddbPersistenceExists: !!IndexeddbPersistence,
@@ -16091,7 +16092,7 @@ export default {
                 }
 
                 // ✅ DEBUG: Check Y.js state before IndexedDB creation
-                console.log('🔍 Y.js state BEFORE IndexedDB creation:', {
+                if (DEBUG) console.log('🔍 Y.js state BEFORE IndexedDB creation:', {
                     shareSize: Object.keys(this.ydoc?.share || {}).length,
                     shareKeys: Object.keys(this.ydoc?.share || {}),
                     hasBodyFragment: this.ydoc?.share?.has('body') || false,
@@ -16103,7 +16104,7 @@ export default {
                 this.lastIndexedDBCreation = Date.now(); // Track creation time
 
                 // ✅ DEBUG: Check Y.js state immediately after IndexedDB creation
-                console.log('🔍 Y.js state IMMEDIATELY after IndexedDB creation:', {
+                if (DEBUG) console.log('🔍 Y.js state IMMEDIATELY after IndexedDB creation:', {
                     shareSize: Object.keys(this.ydoc?.share || {}).length,
                     shareKeys: Object.keys(this.ydoc?.share || {}),
                     hasBodyFragment: this.ydoc?.share?.has('body') || false,
@@ -16112,7 +16113,7 @@ export default {
 
                 // ✅ ENHANCED: Monitor Y.js updates during sync
                 const yjsUpdateHandler = (update, origin) => {
-                    console.log('🔄 Y.js update during IndexedDB sync:', {
+                    if (DEBUG) console.log('🔄 Y.js update during IndexedDB sync:', {
                         updateSize: update.length,
                         origin: origin ? origin.constructor.name : 'unknown',
                         isFromIndexedDB: origin === this.indexeddbProvider,
@@ -16128,7 +16129,7 @@ export default {
                 await new Promise((resolve, reject) => {
                     // Check if already synced
                     if (this.indexeddbProvider.synced) {
-                        console.log('✅ IndexedDB already synced for temp document');
+                        if (DEBUG) console.log('✅ IndexedDB already synced for temp document');
                         resolve();
                         return;
                     }
@@ -16149,27 +16150,27 @@ export default {
                     // Wait for sync event
                     this.indexeddbProvider.once('synced', () => {
                         clearTimeout(safetyTimeout);
-                        console.log('✅ IndexedDB synced for temp document');
+                        if (DEBUG) console.log('✅ IndexedDB synced for temp document');
 
                         // ✅ CLEANUP: Remove Y.js update monitoring after sync
                         this.ydoc.off('update', yjsUpdateHandler);
 
                         // ✅ STABILIZATION: Track Y.js sync completion for command timing
                         this.lastContentChange = Date.now();
-                        console.log('🔍 Y.js sync completed - updating lastContentChange for stabilization');
+                        if (DEBUG) console.log('🔍 Y.js sync completed - updating lastContentChange for stabilization');
 
                         // ✅ CRITICAL FIX: Add micro-task delay to ensure Y.js state is fully settled
                         // This helps prevent "mismatched transaction" errors that occur when
                         // ProseMirror state hasn't fully synchronized with Y.js after IndexedDB load
                         Promise.resolve().then(() => {
-                            console.log('🔄 Y.js state settlement complete');
+                            if (DEBUG) console.log('🔄 Y.js state settlement complete');
                             this.isCreatingPersistence = false; // Clear the flag when sync is complete
                             resolve();
                         });
                     });
 
                     // ✅ DEBUG: Log provider state for troubleshooting
-                    console.log('🔍 IndexedDB provider state:', {
+                    if (DEBUG) console.log('🔍 IndexedDB provider state:', {
                         synced: this.indexeddbProvider.synced,
                         name: this.indexeddbProvider.name,
                         db: !!this.indexeddbProvider.db
@@ -16225,7 +16226,7 @@ export default {
                 // Local documents (with user intent) should have URLs for shareability
                 this.updateURLWithLocalParams(this.username || 'anonymous', documentId);
 
-                console.log('📝 Temp document converted to local with URL:', {
+                if (DEBUG) console.log('📝 Temp document converted to local with URL:', {
                     documentId,
                     username: this.username || 'anonymous',
                     urlPattern: `?local_owner=${this.username || 'anonymous'}&local_id=${documentId}`
@@ -16241,13 +16242,13 @@ export default {
                 // ✅ TIPTAP COMPLIANCE: Use nextTick for Vue reactivity
                 await this.$nextTick();
 
-                console.log('✅ Temp document promoted to draft:', documentId);
+                if (DEBUG) console.log('✅ Temp document promoted to draft:', documentId);
 
             } catch (error) {
                 console.error('❌ Failed to create IndexedDB persistence:', error);
 
                 // ✅ FALLBACK: Even if IndexedDB fails, promote temp document for in-memory persistence
-                console.log('⚠️ Promoting temp document without IndexedDB persistence');
+                if (DEBUG) console.log('⚠️ Promoting temp document without IndexedDB persistence');
                 this.isTemporaryDocument = false;
                 this.hasIndexedDBPersistence = false; // Indicate no IndexedDB but document is promoted
                 this.hasUnsavedChanges = false; // Clear saving state
@@ -16275,7 +16276,7 @@ export default {
                     this.currentFile = fileEntry;
                     this.fileType = 'local';
 
-                    console.log('✅ Temp document promoted to in-memory draft without IndexedDB');
+                    if (DEBUG) console.log('✅ Temp document promoted to in-memory draft without IndexedDB');
                 } catch (fallbackError) {
                     console.error('❌ Fallback document promotion also failed:', fallbackError);
                 }
@@ -16665,7 +16666,7 @@ export default {
             if (permlink && permlink !== this.generatedPermlink) {
                 // This is a custom permlink - populate input field for editing
                 this.permlinkInput = permlink;
-                console.log('📝 Loaded custom permlink into input field:', permlink);
+                if (DEBUG) console.log('📝 Loaded custom permlink into input field:', permlink);
             } else {
                 // This is either empty or matches generated permlink - keep input empty
                 // so actualPermlink() will show the generated version
@@ -16685,7 +16686,7 @@ export default {
                 this.reactiveDocumentName = documentName;
             }
 
-            console.log('✅ Metadata loaded from Y.js:', {
+            if (DEBUG) console.log('✅ Metadata loaded from Y.js:', {
                 title,
                 tags,
                 beneficiaries,
@@ -16741,7 +16742,7 @@ export default {
             }, 'metadata-sync'); // Origin tag to identify this transaction
 
             // Only log metadata sync in debug mode
-            // console.log('✅ Metadata synchronized to Y.js');
+            // if (DEBUG) console.log('✅ Metadata synchronized to Y.js');
         },
 
         // ✅ TIPTAP v3 COMPLIANT: Validate document structure before persistence
@@ -16993,7 +16994,7 @@ export default {
                 }
 
                 this.provider.awareness.setLocalState(updatedState);
-                console.log('🎨 User color updated:', color);
+                if (DEBUG) console.log('🎨 User color updated:', color);
             }
 
             // Store in localStorage for persistence
@@ -17001,7 +17002,7 @@ export default {
                 localStorage.setItem(`dlux_user_color_${this.username}`, color);
             }
 
-            console.log('🎨 User color updated:', color);
+            if (DEBUG) console.log('🎨 User color updated:', color);
         },
 
         getRandomColor() {
@@ -17055,7 +17056,7 @@ export default {
                 if (state.permissionUpdate && state.permissionUpdate.timestamp > this.lastPermissionCheck) {
                     // ✅ RATE LIMITING: Prevent broadcast spam (minimum 1-second interval)
                     if (Date.now() - this.lastBroadcastProcessed < 1000) {
-                        console.log('🚦 Rate limiting permission broadcast - too frequent');
+                        if (DEBUG) console.log('🚦 Rate limiting permission broadcast - too frequent');
                         return;
                     }
 
@@ -17065,7 +17066,7 @@ export default {
                         return;
                     }
 
-                    console.log('🔔 Received permission broadcast:', state.permissionUpdate);
+                    if (DEBUG) console.log('🔔 Received permission broadcast:', state.permissionUpdate);
                     this.handlePermissionBroadcast(state.permissionUpdate);
                     this.lastBroadcastProcessed = Date.now();
                 }
@@ -17086,7 +17087,7 @@ export default {
         updateReactiveDocumentName(newDocumentName) {
             // Only log name changes when they actually change
             if (this.reactiveDocumentName !== newDocumentName) {
-                console.log('🔄 Document name changed:', newDocumentName);
+                if (DEBUG) console.log('🔄 Document name changed:', newDocumentName);
             }
 
             // ✅ BEST PRACTICE: Use Vue reactivity directly - no $forceUpdate needed
@@ -17108,7 +17109,7 @@ export default {
                 timestamp: Date.now()
             });
 
-            console.log('🔐 Updated reactive permission state:', {
+            if (DEBUG) console.log('🔐 Updated reactive permission state:', {
                 documentKey,
                 isReadOnly,
                 permissionLevel,
@@ -17170,7 +17171,7 @@ export default {
                 }
                 this.localDocumentMetadataCache[documentId] = metadataCache;
 
-                console.log('💾 Cached local document metadata:', {
+                if (DEBUG) console.log('💾 Cached local document metadata:', {
                     documentId,
                     documentName,
                     cacheKey
@@ -17194,7 +17195,7 @@ export default {
                     const metadata = JSON.parse(cached);
                     const isStale = (Date.now() - metadata.timestamp) > 3600000; // 1 hour TTL
                     if (!isStale) {
-                        console.log('✅ Using cached collaborative metadata:', {
+                        if (DEBUG) console.log('✅ Using cached collaborative metadata:', {
                             documentKey,
                             documentName: metadata.documentName,
                             age: Math.round((Date.now() - metadata.timestamp) / 1000) + 's'
@@ -17219,7 +17220,7 @@ export default {
 
                 // Use cached data if less than 1 hour old
                 if (age < 3600000) {
-                    console.log('✅ Using cached local document metadata from memory:', {
+                    if (DEBUG) console.log('✅ Using cached local document metadata from memory:', {
                         documentId,
                         documentName: cached.documentName,
                         age: Math.round(age / 1000) + 's'
@@ -17238,7 +17239,7 @@ export default {
 
                     // Use cached data if less than 24 hours old
                     if (age < 86400000) {
-                        console.log('✅ Using cached local document metadata from localStorage:', {
+                        if (DEBUG) console.log('✅ Using cached local document metadata from localStorage:', {
                             documentId,
                             documentName: metadata.documentName,
                             age: Math.round(age / 1000) + 's'
@@ -17338,7 +17339,7 @@ export default {
                             expected: this.expectedServerVersion
                         });
                     } else {
-                        console.log('✅ Server version check passed:', this.serverVersion);
+                        if (DEBUG) console.log('✅ Server version check passed:', this.serverVersion);
                     }
 
                     // Store in localStorage for offline access
@@ -17355,7 +17356,7 @@ export default {
                 } else {
                     // Version endpoint might not be implemented yet
                     if (response.status === 404) {
-                        console.log('ℹ️ Server version endpoint not available (404)');
+                        if (DEBUG) console.log('ℹ️ Server version endpoint not available (404)');
                     } else {
                         console.warn('⚠️ Server version check failed:', response.status, response.statusText);
                     }
@@ -17363,7 +17364,7 @@ export default {
             } catch (error) {
                 // Don't log as error - version check is optional
                 if (error.message.includes('Failed to fetch') || error.message.includes('ERR_FAILED')) {
-                    console.log('ℹ️ Server version check skipped - network or CORS issue');
+                    if (DEBUG) console.log('ℹ️ Server version check skipped - network or CORS issue');
                 } else {
                     console.warn('⚠️ Failed to check server version:', error.message);
                 }
@@ -17376,7 +17377,7 @@ export default {
                         // Use cached version even if older than 1 hour in case of network issues
                         this.serverVersion = version;
                         this.serverVersionCheckTime = checkTime;
-                        console.log('💾 Using cached server version:', version);
+                        if (DEBUG) console.log('💾 Using cached server version:', version);
                         return version;
                     }
                 } catch (e) {
@@ -17441,7 +17442,7 @@ export default {
                 // Consider document "recent" if created within last 10 minutes
                 const isRecent = documentAge < (10 * 60 * 1000);
 
-                console.log('🕒 Recent document check:', {
+                if (DEBUG) console.log('🕒 Recent document check:', {
                     documentId,
                     timestamp,
                     currentTime,
@@ -17571,7 +17572,7 @@ export default {
                 const fileOwner = config.get('owner');
                 const documentName = config.get('documentName');
 
-                console.log('📊 Document metadata from Y.js config:', {
+                if (DEBUG) console.log('📊 Document metadata from Y.js config:', {
                     documentId,
                     isLocal,
                     fileOwner,
@@ -17589,7 +17590,7 @@ export default {
                     // Local file: STRICT owner matching with enhanced security
                     const currentUser = this.username || 'anonymous';
 
-                    console.log('🔐 TipTap Security: Checking local file ownership', {
+                    if (DEBUG) console.log('🔐 TipTap Security: Checking local file ownership', {
                         documentId,
                         fileOwner,
                         currentUser,
@@ -17625,7 +17626,7 @@ export default {
                     // Collaborative file: check permissions map
                     const userPermissions = permissions.get(this.username);
 
-                    console.log('🔍 User permissions from Y.js map:', {
+                    if (DEBUG) console.log('🔍 User permissions from Y.js map:', {
                         user: this.username,
                         permissions: userPermissions
                     });
@@ -17770,7 +17771,7 @@ export default {
                 return;
             }
             
-            console.log('🔐 Validating permissions after auth change for:', { owner, permlink });
+            if (DEBUG) console.log('🔐 Validating permissions after auth change for:', { owner, permlink });
             
             try {
                 // Clear cache for this specific document to force fresh check
@@ -17787,7 +17788,7 @@ export default {
                 
                 // Check authentication first - unauthenticated users have no access
                 if (!this.isAuthenticated || !this.username) {
-                    console.log('🚫 User is not authenticated - denying access');
+                    if (DEBUG) console.log('🚫 User is not authenticated - denying access');
                     // Force no-access for unauthenticated users
                     permissionLevel = 'no-access';
                     
@@ -17825,11 +17826,11 @@ export default {
                     }
                 }
                 
-                console.log('🔐 Current permission level:', permissionLevel);
+                if (DEBUG) console.log('🔐 Current permission level:', permissionLevel);
                 
                 // If user has no access, close the document
                 if (permissionLevel === 'no-access') {
-                    console.log('🚫 Access denied after auth change - closing document');
+                    if (DEBUG) console.log('🚫 Access denied after auth change - closing document');
                     
                     // Show error message
                     this.showError('Access denied. You no longer have permission to view this document.');
@@ -17847,7 +17848,7 @@ export default {
                 }
                 // If permission level changed, update editor state and reconnect
                 else if (this.currentPermissionLevel !== permissionLevel) {
-                    console.log('🔄 Permission level changed - updating editor state', {
+                    if (DEBUG) console.log('🔄 Permission level changed - updating editor state', {
                         from: this.currentPermissionLevel,
                         to: permissionLevel,
                         canEditBefore: ['editable', 'postable', 'owner'].includes(this.currentPermissionLevel),
@@ -17876,7 +17877,7 @@ export default {
                     // Update editor editable state based on new permission
                     const canEdit = ['editable', 'postable', 'owner'].includes(permissionLevel);
                     if (this.bodyEditor && !this.bodyEditor.isDestroyed) {
-                        console.log('🔒 Updating editor editable state:', canEdit);
+                        if (DEBUG) console.log('🔒 Updating editor editable state:', canEdit);
                         this.bodyEditor.setEditable(canEdit);
                     }
                     
@@ -17938,7 +17939,7 @@ export default {
 
         async loadCollaborationInfo(forceRefresh = false) {
             if (!this.currentFile || this.currentFile.type !== 'collaborative') {
-                console.log('❌ INFO: Early return - no collaborative file');
+                if (DEBUG) console.log('❌ INFO: Early return - no collaborative file');
                 return;
             }
 
@@ -17964,7 +17965,7 @@ export default {
             try {
                 const infoUrl = `https://data.dlux.io/api/collaboration/info/${this.currentFile.owner}/${this.currentFile.permlink}`;
 
-                console.log('📡 INFO: Loading document info', {
+                if (DEBUG) console.log('📡 INFO: Loading document info', {
                     document: documentKey,
                     url: infoUrl,
                     isAuthenticated: this.isAuthenticated,
@@ -17984,7 +17985,7 @@ export default {
 
                     this.collaborationInfo = data.document || data;
 
-                    console.log('✅ INFO: Document info loaded successfully', {
+                    if (DEBUG) console.log('✅ INFO: Document info loaded successfully', {
                         document: documentKey,
                         hasAccessType: !!this.collaborationInfo?.accessType,
                         accessType: this.collaborationInfo?.accessType,
@@ -17992,7 +17993,7 @@ export default {
                     });
 
                     // 🚨 CRITICAL: Show the complete JSON structure
-                    console.log('📋 FULL JSON RESPONSE - /collaboration/info endpoint:', JSON.stringify(this.collaborationInfo, null, 2));
+                    if (DEBUG) console.log('📋 FULL JSON RESPONSE - /collaboration/info endpoint:', JSON.stringify(this.collaborationInfo, null, 2));
 
                     // ✅ OFFLINE-FIRST: Cache the result
                     this.analyticsCaches[cacheKey] = this.collaborationInfo;
@@ -18050,7 +18051,7 @@ export default {
 
             // ✅ OFFLINE-FIRST: Check cache first (2 minute TTL for stats)
             if (this.analyticsCaches[cacheKey] && this.analyticsCaches[cacheTimeKey] && (now - this.analyticsCaches[cacheTimeKey]) < 2 * 60 * 1000) {
-                console.log('🚀 STATS: Using cached collaboration stats (within 2 minutes)', {
+                if (DEBUG) console.log('🚀 STATS: Using cached collaboration stats (within 2 minutes)', {
                     document: documentKey,
                     cacheAge: (now - this.analyticsCaches[cacheTimeKey]) / 1000,
                     cachedData: this.analyticsCaches[cacheKey]
@@ -18078,7 +18079,7 @@ export default {
                     this.collaborationStats = data.stats || data;
 
                     // 🚨 CRITICAL: Show the complete JSON structure
-                    console.log('📋 FULL JSON RESPONSE - /collaboration/stats endpoint:', JSON.stringify(this.collaborationStats, null, 2));
+                    if (DEBUG) console.log('📋 FULL JSON RESPONSE - /collaboration/stats endpoint:', JSON.stringify(this.collaborationStats, null, 2));
 
                     // ✅ OFFLINE-FIRST: Cache the result
                     this.analyticsCaches[cacheKey] = this.collaborationStats;
@@ -18262,7 +18263,7 @@ export default {
             const currentRefreshRate = this.isActivelyCollaborating ?
                 this.fastPermissionRefreshRate : this.permissionRefreshRate;
 
-            console.log('🔄 PERMISSION REFRESH: Starting with rate', {
+            if (DEBUG) console.log('🔄 PERMISSION REFRESH: Starting with rate', {
                 rate: currentRefreshRate,
                 isActivelyCollaborating: this.isActivelyCollaborating,
                 fastRate: this.fastPermissionRefreshRate,
@@ -18297,7 +18298,7 @@ export default {
          * 🔔 WEBSOCKET PERMISSION BROADCAST: Handle real-time permission updates from server
          */
         async handlePermissionBroadcast(updateData) {
-            console.log('🔔 Processing permission broadcast:', updateData);
+            if (DEBUG) console.log('🔔 Processing permission broadcast:', updateData);
 
             try {
                 // Store previous permission level for comparison
@@ -18321,7 +18322,7 @@ export default {
 
                         // Exponential backoff: wait 1s, 2s, then 4s
                         const delay = 1000 * Math.pow(2, attempt - 1);
-                        console.log(`🔄 Retrying permission load in ${delay}ms...`);
+                        if (DEBUG) console.log(`🔄 Retrying permission load in ${delay}ms...`);
                         await new Promise(resolve => setTimeout(resolve, delay));
                         attempt++;
                     }
@@ -18335,7 +18336,7 @@ export default {
 
                 // Log permission change if detected
                 if (this.currentPermissionLevel !== previousPermissionLevel) {
-                    console.log('✅ Permission level changed via broadcast:', {
+                    if (DEBUG) console.log('✅ Permission level changed via broadcast:', {
                         from: previousPermissionLevel,
                         to: this.currentPermissionLevel,
                         document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'unknown',
@@ -18551,7 +18552,7 @@ export default {
                 existing.permissionLevel === permissionLevel &&
                 existing.username === this.username) {
                 // Permission hasn't changed - skip redundant update (unless it's a broadcast)
-                console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
+                if (DEBUG) console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
                     document: documentKey,
                     permissionLevel,
                     isReadOnly,
@@ -18561,7 +18562,7 @@ export default {
             }
 
             if (isBroadcast) {
-                console.log('📡 BROADCAST: Processing permission update from broadcast', {
+                if (DEBUG) console.log('📡 BROADCAST: Processing permission update from broadcast', {
                     document: documentKey,
                     permissionLevel,
                     isReadOnly,
@@ -18632,7 +18633,7 @@ export default {
                             } else {
                                 // ✅ SECURITY: Wrong user - clear cache
                                 localStorage.removeItem(cacheKey);
-                                console.log('🚫 SECURITY: Cleared cache for wrong user', {
+                                if (DEBUG) console.log('🚫 SECURITY: Cleared cache for wrong user', {
                                     document: documentKey,
                                     currentUser: this.username,
                                     cachedUser: cacheData.username
@@ -18647,7 +18648,7 @@ export default {
                                 originalCacheKey: cacheKey // For cleanup if validation fails
                             };
 
-                            console.log('⏳ STAGED LOAD: Permission state pre-loaded (pending user validation)', {
+                            if (DEBUG) console.log('⏳ STAGED LOAD: Permission state pre-loaded (pending user validation)', {
                                 document: documentKey,
                                 permissionLevel: cacheData.permissionLevel,
                                 isReadOnly: cacheData.isReadOnly,
@@ -18673,7 +18674,7 @@ export default {
                     } else {
                         // Clean up stale cache
                         localStorage.removeItem(cacheKey);
-                        console.log('🧹 EARLY LOAD: Cleaned up stale permission cache:', {
+                        if (DEBUG) console.log('🧹 EARLY LOAD: Cleaned up stale permission cache:', {
                             document: documentKey,
                             reason: isStale ? 'expired' : 'wrong user',
                             currentUser: this.username || 'not-loaded-yet',
@@ -18716,7 +18717,7 @@ export default {
                     } else if (isStale) {
                         // Clean up stale metadata cache
                         localStorage.removeItem(cacheKey);
-                        console.log('🧹 Cleaned up stale document metadata cache:', {
+                        if (DEBUG) console.log('🧹 Cleaned up stale document metadata cache:', {
                             document: documentKey,
                             reason: 'expired'
                         });
@@ -18772,7 +18773,7 @@ export default {
                         currentUser: this.username
                     });
 
-                    console.log('🚫 SECURITY: Cleared invalid cache for wrong user', {
+                    if (DEBUG) console.log('🚫 SECURITY: Cleared invalid cache for wrong user', {
                         document: documentKey,
                         cachedUser: cacheData.username,
                         currentUser: this.username
@@ -18794,7 +18795,7 @@ export default {
                 if (this.currentFile && this.currentFile.type === 'collaborative') {
                     const currentDocKey = `${this.currentFile.owner}/${this.currentFile.permlink}`;
                     if (invalidItems.some(item => item.document === currentDocKey)) {
-                        console.log('🔄 SECURITY: Reloading permissions for current document after cache invalidation');
+                        if (DEBUG) console.log('🔄 SECURITY: Reloading permissions for current document after cache invalidation');
                         this.loadDocumentPermissions('security-cache-invalidation').catch(error => {
                             console.warn('⚠️ Failed to reload permissions after security invalidation:', error);
                         });
@@ -18820,7 +18821,7 @@ export default {
                     if (!isStale && isCorrectUser) {
                         // ✅ OFFLINE-FIRST: Restore permission state immediately
                         this.reactivePermissionState[documentKey] = cacheData;
-                        console.log('🔄 OFFLINE-FIRST: Permission state restored from localStorage', {
+                        if (DEBUG) console.log('🔄 OFFLINE-FIRST: Permission state restored from localStorage', {
                             document: documentKey,
                             permissionLevel: cacheData.permissionLevel,
                             isReadOnly: cacheData.isReadOnly,
@@ -18834,7 +18835,7 @@ export default {
                     } else {
                         // Clean up stale cache
                         localStorage.removeItem(cacheKey);
-                        console.log('🧹 Cleaned up stale permission cache:', {
+                        if (DEBUG) console.log('🧹 Cleaned up stale permission cache:', {
                             document: documentKey,
                             reason: isStale ? 'expired' : 'wrong user'
                         });
@@ -18898,7 +18899,7 @@ export default {
                     const wasReadOnly = !this.bodyEditor.isEditable;
                     const willBeEditable = shouldBeEditable;
 
-                    console.log('🔧 TipTap Editor Mode Update:', {
+                    if (DEBUG) console.log('🔧 TipTap Editor Mode Update:', {
                         from: this.bodyEditor.isEditable ? 'editable' : 'readonly',
                         to: shouldBeEditable ? 'editable' : 'readonly',
                         document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
@@ -18915,7 +18916,7 @@ export default {
                         (wasReadOnly !== !shouldBeEditable); // Any readonly/editable transition
 
                     if (needsWebSocketReconnect) {
-                        console.log('🚀 PERMISSION TRANSITION: User permission changed - reconnecting WebSocket with new permissions', {
+                        if (DEBUG) console.log('🚀 PERMISSION TRANSITION: User permission changed - reconnecting WebSocket with new permissions', {
                             from: wasReadOnly ? 'readonly' : 'editable',
                             to: shouldBeEditable ? 'editable' : 'readonly',
                             permissionLevel: currentPermission,
@@ -18948,7 +18949,7 @@ export default {
                     // ✅ TIPTAP BEST PRACTICE: Avoid focus() during mode transitions to prevent transaction errors
                     // Focus can cause "Applying a mismatched transaction" errors during editor state changes
 
-                    console.log('✅ TipTap: Editor mode updated successfully', {
+                    if (DEBUG) console.log('✅ TipTap: Editor mode updated successfully', {
                         bodyEditable: this.bodyEditor.isEditable,
                         permissionLevel: currentPermissionLevel
                     });
@@ -18956,7 +18957,7 @@ export default {
                     // ✅ PERFORMANCE: Skip redundant permission updates but log for debugging
                     const timeSinceLastSkip = Date.now() - (this.lastSkippedPermissionUpdate || 0);
                     if (timeSinceLastSkip > 10000) { // Log once every 10 seconds max
-                        console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
+                        if (DEBUG) console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
                             document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
                             permissionLevel: currentPermissionLevel,
                             isReadOnly: this.isReadOnlyMode,
@@ -18991,11 +18992,11 @@ export default {
             const payloadDocKey = `${payload.owner || this.currentFile.owner}/${payload.permlink || this.currentFile.permlink}`;
 
             if (documentKey !== payloadDocKey) {
-                console.log('ℹ️ Permission update for different document:', payloadDocKey);
+                if (DEBUG) console.log('ℹ️ Permission update for different document:', payloadDocKey);
                 return;
             }
 
-            console.log('🔐 Processing remote permission update:', {
+            if (DEBUG) console.log('🔐 Processing remote permission update:', {
                 previousPermission: this.getUserPermissionLevel(this.currentFile),
                 newPermission: permissionType,
                 grantedBy: grantedBy || revokedBy,
@@ -19048,7 +19049,7 @@ export default {
             const message = permissionMessages[permissionType] || `Permission changed to ${permissionType}`;
 
             // Show notification to user
-            console.log('📢 Permission Update:', message);
+            if (DEBUG) console.log('📢 Permission Update:', message);
 
             // For significant permission changes, show an alert
             if (permissionType === 'no-access' ||
@@ -19095,11 +19096,11 @@ export default {
 
             // Additional context for current document
             if (targetFile === this.currentFile) {
-                console.log('- documentPermissions array:', this.documentPermissions?.length || 0, 'entries');
-                console.log('- Y.js document available:', !!this.ydoc);
-                console.log('- WebSocket provider:', !!this.provider);
-                console.log('- Connection status:', this.connectionStatus);
-                console.log('- isReadOnlyMode computed:', this.isReadOnlyMode);
+                if (DEBUG) console.log('- documentPermissions array:', this.documentPermissions?.length || 0, 'entries');
+                if (DEBUG) console.log('- Y.js document available:', !!this.ydoc);
+                if (DEBUG) console.log('- WebSocket provider:', !!this.provider);
+                if (DEBUG) console.log('- Connection status:', this.connectionStatus);
+                if (DEBUG) console.log('- isReadOnlyMode computed:', this.isReadOnlyMode);
             }
 
             return result;
@@ -19177,7 +19178,7 @@ export default {
             // ✅ PERFORMANCE: Request deduplication - return pending request if exists
             const requestKey = `${file.owner || 'local'}/${file.permlink || file.id}_${this.username}_${forceRefresh}`;
             if (this.pendingPermissionRequests.has(requestKey)) {
-                console.log('✅ PERFORMANCE: Deduplicating permission request', {
+                if (DEBUG) console.log('✅ PERFORMANCE: Deduplicating permission request', {
                     key: requestKey,
                     context: context
                 });
@@ -19250,7 +19251,7 @@ export default {
             if (isCollaborativeFile) {
                 // Check 1: Authentication required for collaborative documents
                 if (!this.isAuthenticated || this.isAuthExpired) {
-                    console.log('🔐 Authentication check failed at permission time:', {
+                    if (DEBUG) console.log('🔐 Authentication check failed at permission time:', {
                         hasAuthHeaders: !!this.authHeaders,
                         authHeaderKeys: this.authHeaders ? Object.keys(this.authHeaders) : [],
                         serverAuthFailed: this.serverAuthFailed,
@@ -19364,7 +19365,7 @@ export default {
                         };
                     } else {
                         // ✅ FORCE REFRESH: Only bypass cache when explicitly requested
-                        console.log('🔄 FORCE REFRESH: Bypassing stale cache due to forceRefresh=true', {
+                        if (DEBUG) console.log('🔄 FORCE REFRESH: Bypassing stale cache due to forceRefresh=true', {
                             document: `${file.owner}/${file.permlink}`,
                             cacheAge: Math.round(cacheAge / 1000) + 's',
                             context
@@ -19384,7 +19385,7 @@ export default {
                     !hasPermissionsForThisDocument ||
                     (!isCurrentDocument && (!file.cachedPermissions || !file.cachedPermissions[this.username]));
 
-                console.log('🔍 PERMISSION CHECK: Evaluating whether to load server permissions', {
+                if (DEBUG) console.log('🔍 PERMISSION CHECK: Evaluating whether to load server permissions', {
                     document: `${file.owner}/${file.permlink}`,
                     isCurrentDocument,
                     isBeingLoaded,
@@ -19402,7 +19403,7 @@ export default {
 
                     // ✅ CRITICAL: Check if authentication is fully ready before making API calls
                     if (this.isAuthExpired) {
-                        console.log('⏳ AUTH: Authentication expired, skipping API calls', {
+                        if (DEBUG) console.log('⏳ AUTH: Authentication expired, skipping API calls', {
                             document: `${file.owner}/${file.permlink}`,
                             context,
                             isAuthExpired: this.isAuthExpired,
@@ -19557,7 +19558,7 @@ export default {
                     debugInfo.checks.push({ step: 'stale-cached-permissions', level: cachedLevel, cacheAge });
 
                     // ✅ OFFLINE-FIRST: Even stale cache is better than no access for UX
-                    console.log('🕐 Using stale cached permission for offline-first UX:', {
+                    if (DEBUG) console.log('🕐 Using stale cached permission for offline-first UX:', {
                         document: `${file.owner}/${file.permlink}`,
                         cachedLevel,
                         cacheAge: Math.round(cacheAge / 1000) + 's'

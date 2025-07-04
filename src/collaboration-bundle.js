@@ -1,6 +1,9 @@
 // TipTap v3 Collaboration Bundle
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
 
+// Debug flag - set to true for development debugging
+const DEBUG = false;
+
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { WebrtcProvider } from 'y-webrtc';
 import * as Y from 'yjs';
@@ -29,7 +32,6 @@ import suggestion from '@tiptap/suggestion';
 // Table extensions for markdown-compatible tables
 import { TableKit } from '@tiptap/extension-table/kit';
 import TableCell from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table/header';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { DecorationSet } from '@tiptap/pm/view';
 
@@ -78,6 +80,38 @@ import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
+
+// ✅ MODULAR BLOCK LIST SYSTEM: Registry for node block lists
+const nodeBlockLists = {
+  tableCell: ['table'],
+  tableHeader: ['table']
+};
+
+// ✅ MODULAR BLOCK LIST SYSTEM: Utility function to check if content is blocked
+// This allows any node to declare what content it blocks
+function isContentBlockedAt(state, pos, contentType) {
+  const $pos = state.doc.resolve(pos);
+  
+  // Check each ancestor node for block lists
+  for (let d = $pos.depth; d > 0; d--) {
+    const node = $pos.node(d);
+    const nodeType = node.type;
+    
+    // Get blocked content from the registry
+    const blockedContent = nodeBlockLists[nodeType.name] || [];
+    
+    if (blockedContent.includes(contentType)) {
+      return {
+        blocked: true,
+        byNode: nodeType.name,
+        atDepth: d,
+        blockedContent: blockedContent
+      };
+    }
+  }
+  
+  return { blocked: false };
+}
 
 // Create custom SpkVideo extension by extending Youtube
 const SpkVideo = Youtube.extend({
@@ -230,12 +264,12 @@ const SpkVideo = Youtube.extend({
 // ✅ TIPTAP BEST PRACTICE: Extend existing TableCell following official pattern
 // https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 const CustomTableCell = TableCell.extend({
+  // Block list is now defined in nodeBlockLists registry above
+
   addProseMirrorPlugins() {
     return [
       new Plugin({
-        key: new PluginKey('preventNestedTables'),
-        
-        // Removed filterTransaction - handleDrop handles everything now
+        key: new PluginKey('customTableCell'),
         
         props: {
           handleDragOver(view, event) {
@@ -288,7 +322,6 @@ const CustomTableCell = TableCell.extend({
           },
           
           handleDrop(view, event, slice, moved) {
-            // Enhanced: Get precise drop position
             const dropPos = view.posAtCoords({
               left: event.clientX,
               top: event.clientY
@@ -296,40 +329,30 @@ const CustomTableCell = TableCell.extend({
             
             if (!dropPos) return false;
             
-            // Check if we're dropping a table
-            let droppingTable = false;
-            let tableNode = null;
+            // Collect all content types being dropped
+            const droppedTypes = new Set();
             
             if (slice && slice.content) {
               slice.content.descendants((node) => {
-                if (node.type.name === 'table') {
-                  droppingTable = true;
-                  tableNode = node;
-                  return false;
-                }
+                droppedTypes.add(node.type.name);
               });
             }
             
-            if (!droppingTable) return false; // Let default handle non-tables
-            
-            // Enhanced: More accurate position resolution
-            const $pos = view.state.doc.resolve(dropPos.pos);
-            
-            // Check if dropping into a table cell
-            for (let d = $pos.depth; d > 0; d--) {
-              const node = $pos.node(d);
-              if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
-                console.log('🚫 Prevented table drop into cell at depth:', d);
+            // Check each dropped type against block lists
+            for (const nodeType of droppedTypes) {
+              const blockInfo = isContentBlockedAt(view.state, dropPos.pos, nodeType);
+              
+              if (blockInfo.blocked) {
                 event.preventDefault();
                 return true; // Block the drop
               }
             }
             
-            // Enhanced: Handle the drop ourselves for better control when moving tables
-            if (moved && tableNode) {
-              console.log('🎯 Enhanced handleDrop for moved table');
-              
-              // Get the current selection (where the table is being moved from)
+            // Nothing is blocked, continue with special handling for moved content
+            
+            // Enhanced: Handle the drop ourselves for better control when moving content
+            if (moved && slice) {
+              // Get the current selection (where the content is being moved from)
               const { from, to } = view.state.selection;
               
               // Create a new transaction
@@ -342,23 +365,17 @@ const CustomTableCell = TableCell.extend({
               if (targetPos > from) {
                 // Adjust target position by the size of content being removed
                 targetPos = targetPos - (to - from);
-                console.log('📍 Adjusted target position for downward drag:', {
-                  original: dropPos.pos,
-                  adjusted: targetPos,
-                  contentSize: to - from
-                });
               }
               
               // Delete from old position
               tr.delete(from, to);
               
               // Insert at new position (already adjusted if needed)
-              tr.insert(targetPos, tableNode);
+              tr.insert(targetPos, slice.content);
               
               // Dispatch the transaction
               view.dispatch(tr);
               
-              console.log('✅ Table moved successfully');
               return true; // We handled it
             }
             
@@ -371,10 +388,7 @@ const CustomTableCell = TableCell.extend({
   }
 });
 
-// ✅ TIPTAP BEST PRACTICE: Also extend TableHeader to prevent dropcursor
-const CustomTableHeader = TableHeader.extend({
-  // Keep as minimal extension for now
-});
+// Note: We don't need to extend TableHeader since the registry handles both tableCell and tableHeader
 
 
 // ✅ CUSTOM DROPCURSOR: Modular solution that hides dropcursor when dragging blocked content over cells
@@ -387,12 +401,8 @@ const CustomDropcursor = Dropcursor.extend({
       console.warn('⚠️ CustomDropcursor: No parent dropcursor plugin found');
       return [];
     }
-    console.log('🔧 CustomDropcursor: Initializing');
     
-    // Modular block list - easily expandable in the future
-    const BLOCKED_NODE_TYPES = ['table']; // Add more types here as needed
-    
-    // Plugin that tracks dragging and hides dropcursor for blocked content over cells
+    // Plugin reads block lists dynamically from registry
     const controlPlugin = new Plugin({
       key: new PluginKey('tableDragControl'),
       
@@ -422,7 +432,6 @@ const CustomDropcursor = Dropcursor.extend({
             }
           `;
           document.head.appendChild(styleElement);
-          console.log('💉 Injected hide-dropcursor CSS');
           
           // Also use MutationObserver to catch dynamically created dropcursors
           const observer = new MutationObserver((mutations) => {
@@ -436,7 +445,6 @@ const CustomDropcursor = Dropcursor.extend({
                   node.style.display = 'none';
                   node.style.visibility = 'hidden';
                   node.style.opacity = '0';
-                  console.log('🎯 Force-hid dropcursor element via MutationObserver');
                 }
               });
             });
@@ -460,7 +468,6 @@ const CustomDropcursor = Dropcursor.extend({
             }
             styleElement.remove();
             styleElement = null;
-            console.log('🗑️ Removed hide-dropcursor CSS and observer');
           }
         };
         
@@ -472,7 +479,6 @@ const CustomDropcursor = Dropcursor.extend({
             
             if (hoveredNode) {
               draggingNodeType = hoveredNode.type.name;
-              console.log('🎯 Started dragging:', draggingNodeType);
             } else {
               // Fallback to selection-based detection
               const { state } = editorView;
@@ -489,17 +495,13 @@ const CustomDropcursor = Dropcursor.extend({
                 }
               }
               
-              if (draggingNodeType) {
-                console.log('🎯 Started dragging (via selection):', draggingNodeType);
-              }
             }
           }
         };
         
         const handleDragOver = (event) => {
-          // Only hide dropcursor if dragging a blocked node type
-          if (!draggingNodeType || !BLOCKED_NODE_TYPES.includes(draggingNodeType)) {
-            // Not dragging a blocked type - ensure dropcursor is visible
+          if (!draggingNodeType) {
+            // Not dragging anything we track
             if (styleElement) {
               removeStyleElement();
               editorView.dom.classList.remove('table-drag-over-cell');
@@ -507,42 +509,30 @@ const CustomDropcursor = Dropcursor.extend({
             return;
           }
           
-          // Check if over a table cell using the actual position
+          // Check position using coordinates
           const pos = editorView.posAtCoords({ left: event.clientX, top: event.clientY });
+          if (!pos) return;
           
-          if (pos) {
-            const $pos = editorView.state.doc.resolve(pos.pos);
-            let isOverTableCell = false;
-            
-            for (let d = $pos.depth; d > 0; d--) {
-              const node = $pos.node(d);
-              if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
-                isOverTableCell = true;
-                break;
-              }
+          // Use the utility function to check if content is blocked
+          const blockInfo = isContentBlockedAt(editorView.state, pos.pos, draggingNodeType);
+          
+          if (blockInfo.blocked) {
+            if (!styleElement) {
+              createStyleElement();
             }
-            
-            if (isOverTableCell) {
-              if (!styleElement) {
-                console.log(`🚫 Hiding dropcursor - dragging ${draggingNodeType} over table cell`);
-                createStyleElement();
-              }
-              // Add class to change cursor
-              editorView.dom.classList.add('table-drag-over-cell');
-            } else {
-              if (styleElement) {
-                console.log(`✅ Showing dropcursor - dragging ${draggingNodeType} outside table cell`);
-                removeStyleElement();
-              }
-              // Remove class to restore normal cursor
-              editorView.dom.classList.remove('table-drag-over-cell');
+            // Add class to change cursor
+            editorView.dom.classList.add('table-drag-over-cell');
+          } else {
+            if (styleElement) {
+              removeStyleElement();
             }
+            // Remove class to restore normal cursor
+            editorView.dom.classList.remove('table-drag-over-cell');
           }
         };
         
         const handleDragEnd = () => {
           if (draggingNodeType) {
-            console.log('🧹 Drag ended for:', draggingNodeType);
             draggingNodeType = null;
             removeStyleElement();
             // Clean up cursor class
@@ -650,7 +640,6 @@ const TiptapCollaboration = {
   // Table extensions
   TableKit,
   CustomTableCell,
-  CustomTableHeader,
   
   // ProseMirror utilities
   Plugin,
@@ -674,18 +663,7 @@ if (typeof window !== 'undefined') {
   window.HocuspocusProvider = HocuspocusProvider;
   window.Y = Y;
   
-  // Debug logging
-  console.log('📦 TiptapCollaboration bundle loaded with extensions:', {
-    hasHocuspocusProvider: !!TiptapCollaboration.HocuspocusProvider,
-    hasY: !!TiptapCollaboration.Y,
-    hasIndexeddbPersistence: !!TiptapCollaboration.IndexeddbPersistence,
-    hasEditor: !!TiptapCollaboration.Editor,
-    hasStarterKit: !!TiptapCollaboration.StarterKit,
-    hasCollaboration: !!TiptapCollaboration.Collaboration,
-    hasCollaborationCaret: !!TiptapCollaboration.CollaborationCaret,
-    hasBubbleMenu: !!TiptapCollaboration.BubbleMenu,
-    extensionCount: Object.keys(TiptapCollaboration).length
-  });
+  // Bundle loaded successfully
 }
 
 export default TiptapCollaboration; 

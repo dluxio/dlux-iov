@@ -1860,29 +1860,13 @@
     <script>
         // Verify that the TipTap collaboration bundle is loaded
         setTimeout(() => {
-            console.log('TiptapCollaboration bundle available:', !!window.TiptapCollaboration);
-
             if (window.TiptapCollaboration) {
                 const bundle = window.TiptapCollaboration.default || window.TiptapCollaboration;
-                console.log('TipTap bundle contents:', Object.keys(bundle || {}));
-                console.log('Editor available:', typeof bundle?.Editor);
-                console.log('StarterKit available:', typeof bundle?.StarterKit);
-                console.log('Y.js available:', typeof bundle?.Y);
-                console.log('HocuspocusProvider available:', typeof bundle?.HocuspocusProvider);
-                console.log('Collaboration extension available:', typeof bundle?.Collaboration);
-                console.log('CollaborationCaret available:', typeof bundle?.CollaborationCaret);
-                console.log('Bold extension available:', typeof bundle?.Bold);
-                console.log('Italic extension available:', typeof bundle?.Italic);
-                console.log('TaskList extension available:', typeof bundle?.TaskList);
-                console.log('TaskItem extension available:', typeof bundle?.TaskItem);
 
                 // Make Y.js globally available for compatibility
                 if (bundle?.Y && !window.Y) {
                     window.Y = bundle.Y;
-                    console.log('✅ Y.js made available globally from TipTap bundle');
                 }
-
-                console.log('✅ TipTap collaboration bundle loaded successfully');
             } else {
                 console.error('❌ TiptapCollaboration bundle not loaded - collaboration will not work');
                 console.error('Available globals:', Object.keys(window).filter(k => k.includes('Tip') || k.includes('Y') || k.includes('Collab')));
