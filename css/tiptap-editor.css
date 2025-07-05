@@ -690,3 +690,23 @@
   padding: 0;
 }
 
+/* Image styles for TipTap editor */
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  /* Allow dragging everywhere - CustomImage extension prevents duplication */
+  cursor: move;
+}
+
+/* Visual feedback when dragging images */
+.ProseMirror img:active {
+  opacity: 0.7;
+}
+
+.ProseMirror img.content-image {
+  border-radius: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+

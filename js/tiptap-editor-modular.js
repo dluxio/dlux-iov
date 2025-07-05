@@ -1858,6 +1858,7 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const Image = tiptapBundle.Image;
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
@@ -1945,6 +1946,13 @@ class EditorFactory {
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
             SpkVideo,
+            Image.configure({
+                inline: false,  // Block-level images for proper markdown
+                HTMLAttributes: {
+                    class: 'content-image'
+                    // Removed draggable: false to allow dragging in table cells
+                }
+            }),
             Mention.configure({
                 HTMLAttributes: {
                     class: 'mention',
@@ -2351,6 +2359,7 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const Image = tiptapBundle.Image;
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
@@ -2390,6 +2399,13 @@ class EditorFactory {
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
             SpkVideo,
+            Image.configure({
+                inline: false,  // Block-level images for proper markdown
+                HTMLAttributes: {
+                    class: 'content-image'
+                    // Removed draggable: false to allow dragging in table cells
+                }
+            }),
             Mention.configure({
                 HTMLAttributes: {
                     class: 'mention',
@@ -14075,10 +14091,54 @@ export default {
         },
 
         insertImage() {
-            // ✅ TIPTAP v3: Image extension not included in StarterKit
-            console.warn('Image insertion not available - Image extension not loaded');
-            alert('Image insertion is not available in this editor configuration.');
-            return;
+            // Create a simple dialog for image URL input
+            const dialog = document.createElement('div');
+            dialog.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#212529;border:1px solid #495057;padding:20px;border-radius:8px;z-index:10000;';
+            dialog.innerHTML = `
+                <h5 style="color:#fff;margin:0 0 15px 0;">Insert Image</h5>
+                <input type="text" id="imageUrl" placeholder="Enter image URL" style="width:400px;padding:8px;margin-bottom:10px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
+                <div style="margin-bottom:10px;">
+                    <small style="color:#adb5bd;">Test with: https://via.placeholder.com/300x200</small>
+                </div>
+                <div style="text-align:right;">
+                    <button id="cancelBtn" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
+                    <button id="insertBtn" style="padding:6px 12px;background:#0d6efd;border:none;color:#fff;border-radius:4px;cursor:pointer;">Insert</button>
+                </div>
+            `;
+            
+            const backdrop = document.createElement('div');
+            backdrop.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;';
+            backdrop.onclick = () => {
+                dialog.remove();
+                backdrop.remove();
+            };
+            
+            document.body.appendChild(backdrop);
+            document.body.appendChild(dialog);
+            
+            const urlInput = dialog.querySelector('#imageUrl');
+            const insertBtn = dialog.querySelector('#insertBtn');
+            const cancelBtn = dialog.querySelector('#cancelBtn');
+            
+            urlInput.focus();
+            
+            const handleInsert = () => {
+                const url = urlInput.value.trim();
+                if (url) {
+                    this.insertImageEmbed(url);
+                    dialog.remove();
+                    backdrop.remove();
+                }
+            };
+            
+            insertBtn.onclick = handleInsert;
+            cancelBtn.onclick = () => {
+                dialog.remove();
+                backdrop.remove();
+            };
+            urlInput.onkeypress = (e) => {
+                if (e.key === 'Enter') handleInsert();
+            };
         },
 
         insertTable() {
@@ -14309,6 +14369,49 @@ export default {
             // Mark document as having unsaved changes
             this.hasUnsavedChanges = true;
             this.hasUserIntent = true;
+        },
+
+        insertImageEmbed(url) {
+            if (!this.bodyEditor || !url) {
+                return;
+            }
+            
+            // Ensure URL has protocol
+            let imageUrl = url.trim();
+            if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+                // Add https:// if no protocol is specified
+                imageUrl = 'https://' + imageUrl;
+            }
+            
+            // Handle IPFS URLs - add filename parameter for proper MIME type detection
+            if (imageUrl.includes('ipfs.dlux.io/ipfs/')) {
+                // Extract CID by splitting on /ipfs/ and taking the second part
+                const parts = imageUrl.split('/ipfs/');
+                if (parts.length > 1 && !imageUrl.includes('?filename=')) {
+                    const cid = parts[1].split('?')[0]; // Remove any existing query params
+                    // Add a generic filename parameter to help IPFS gateway
+                    imageUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=image.jpg`;
+                }
+            }
+            
+            try {
+                // Use the Image extension's setImage command
+                this.bodyEditor.chain()
+                    .focus()
+                    .setImage({ 
+                        src: imageUrl,
+                        alt: '',
+                        title: ''
+                    })
+                    .run();
+                
+                // Mark document as having unsaved changes
+                this.hasUnsavedChanges = true;
+                this.hasUserIntent = true;
+                
+            } catch (error) {
+                if (DEBUG) console.error('Error inserting image:', error);
+            }
         },
 
         // ===== TEMPLATE UTILITY METHODS =====

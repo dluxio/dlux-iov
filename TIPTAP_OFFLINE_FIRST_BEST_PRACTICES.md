@@ -1,6 +1,3 @@
-import methodsCommon from './methods-common.js';
-import { markRaw } from '/js/vue.esm-browser.js';
-
 # TipTap v3 Offline-First Collaboration: Best Practices & Implementation Guide
 
 ⚠️ **WARNING: This document contains CRITICAL patterns that MUST be followed to avoid data loss, corruption, and synchronization failures.**

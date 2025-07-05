@@ -81,6 +81,118 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 
+// ✅ CUSTOM IMAGE EXTENSION: Handle drag behavior to prevent duplication
+const CustomImage = Image.extend({
+  name: 'image', // Keep the same name to replace default Image
+  
+  addProseMirrorPlugins() {
+    const plugins = this.parent?.() || [];
+    
+    return [
+      ...plugins,
+      new Plugin({
+        key: new PluginKey('customImageDrag'),
+        props: {
+          handleDOMEvents: {
+            dragstart(view, event) {
+              // Only handle image drag events
+              if (event.target.tagName !== 'IMG') return false;
+              
+              // Force move operation instead of copy
+              event.dataTransfer.effectAllowed = 'move';
+              
+              // Find the position of the image being dragged
+              const pos = view.posAtDOM(event.target, 0);
+              if (pos >= 0) {
+                // Store position data for later
+                window.dluxEditor = window.dluxEditor || {};
+                window.dluxEditor.draggingImagePos = pos;
+                
+                // Add visual feedback
+                event.target.style.opacity = '0.5';
+              }
+              
+              return false; // Let ProseMirror continue handling
+            },
+            
+            dragover(view, event) {
+              // Force move cursor feedback
+              if (event.dataTransfer && event.dataTransfer.types.includes('text/html')) {
+                event.dataTransfer.dropEffect = 'move';
+              }
+              return false;
+            },
+            
+            dragend(view, event) {
+              // Reset opacity
+              if (event.target.tagName === 'IMG') {
+                event.target.style.opacity = '';
+              }
+              
+              // Clean up stored position
+              if (window.dluxEditor) {
+                delete window.dluxEditor.draggingImagePos;
+              }
+              
+              return false;
+            },
+            
+            drop(view, event) {
+              // Check if we're dropping an image that was dragged from within the editor
+              if (window.dluxEditor?.draggingImagePos !== undefined) {
+                const pos = window.dluxEditor.draggingImagePos;
+                
+                // Get drop position
+                const dropPos = view.posAtCoords({
+                  left: event.clientX,
+                  top: event.clientY
+                });
+                
+                if (dropPos && dropPos.pos !== pos) {
+                  // We're moving an image within the editor
+                  event.preventDefault();
+                  
+                  // Get the image node
+                  const $pos = view.state.doc.resolve(pos);
+                  const node = view.state.doc.nodeAt(pos);
+                  
+                  if (node && node.type.name === 'image') {
+                    // Create transaction to move the image
+                    const tr = view.state.tr;
+                    
+                    // Calculate adjusted positions
+                    let targetPos = dropPos.pos;
+                    if (targetPos > pos) {
+                      // Adjust for the node being removed
+                      targetPos = targetPos - node.nodeSize;
+                    }
+                    
+                    // Delete from old position
+                    tr.delete(pos, pos + node.nodeSize);
+                    
+                    // Insert at new position
+                    tr.insert(targetPos, node);
+                    
+                    // Dispatch the transaction
+                    view.dispatch(tr);
+                    
+                    // Clean up
+                    delete window.dluxEditor.draggingImagePos;
+                    
+                    return true; // We handled it
+                  }
+                }
+              }
+              
+              return false; // Let default handling continue
+            }
+          }
+        }
+      })
+    ];
+  }
+});
+
 // ✅ MODULAR BLOCK LIST SYSTEM: Registry for node block lists
 const nodeBlockLists = {
   tableCell: ['table'],
@@ -616,7 +728,7 @@ const TiptapCollaboration = {
   // Additional extensions
   // History, // Removed - not compatible with Collaboration extension
   Link,
-  Image,
+  Image: CustomImage, // Use CustomImage instead of default Image
   CodeBlock,
   Dropcursor,
   CustomDropcursor,

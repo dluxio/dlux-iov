@@ -272,6 +272,7 @@ const nodeBlockLists = {
 - **TipTap Drag Handle Vue Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle-vue
 - **TipTap Drag Bubble Menu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/bubble-menu
 - **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
+- **TipTap Image Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/image
 
 When extending always import standalone extension, do not import from kits like starter kit or table kit
 - **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
