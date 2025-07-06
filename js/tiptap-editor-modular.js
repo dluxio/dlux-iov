@@ -2519,6 +2519,25 @@ class EditorFactory {
             console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
         }
 
+        // ✅ FLOATING MENU: Add extension with element configuration
+        if (FloatingMenu && this.component.$refs.floatingMenu) {
+            bodyExtensions.push(FloatingMenu.configure({
+                element: this.component.$refs.floatingMenu,
+                tippyOptions: {
+                    placement: 'top-start',
+                    duration: 100,
+                },
+                shouldShow: ({ editor, view, state, oldState }) => {
+                    // Only show on empty paragraphs
+                    const { $from } = state.selection;
+                    const node = $from.parent;
+                    
+                    // Check if it's an empty paragraph
+                    return node.type.name === 'paragraph' && node.content.size === 0;
+                }
+            }));
+            if (DEBUG) console.log('✅ FloatingMenu extension added with element ref');
+        }
 
         // ✅ TIPTAP BEST PRACTICE: Add CollaborationCaret for all users (server will handle read-only awareness)
         if (webSocketProvider && CollaborationCaret) {
@@ -20474,7 +20493,7 @@ export default {
             </div>
 
             <!-- Floating Menu for empty lines -->
-            <div ref="floatingMenu" class="floating-menu" v-show="false">
+            <div ref="floatingMenu" class="floating-menu">
               <button type="button" 
                       class="btn btn-sm btn-secondary"
                       @click="insertImage()"

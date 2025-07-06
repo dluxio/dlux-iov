@@ -739,9 +739,14 @@
   border: 1px solid var(--bs-gray-700);
   border-radius: 0.375rem;
   padding: 0.25rem;
-  display: flex;
   gap: 0.25rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+}
+
+/* Hide floating menu until it has positioning */
+.floating-menu:not([style*="visibility: visible"]) {
+  display: none;
 }
 
 .floating-menu .btn {
