@@ -1544,7 +1544,7 @@ class PersistenceManager {
             const tier = TierDecisionManager.TierType.LOCAL; // Read-only uses Tier 1
             const editors = await this.component.documentManager.editorFactory.createEditors(yjsDoc, tier, null);
 
-            this.component.bodyEditor = editors.bodyEditor;
+            this.component.bodyEditor = markRaw(editors.bodyEditor);
 
             // Re-setup sync listeners
             this.component.syncManager.setupSyncListeners(editors, yjsDoc);
@@ -2103,6 +2103,7 @@ class EditorFactory {
             if (DEBUG) console.log('📦 Extension names:', validExtensions.map(ext => ext.name || 'unnamed'));
             
             bodyEditor = new Editor({
+                element: this.component.$refs.bodyEditor,
                 extensions: validExtensions,
                 editable: isEditable,
                 // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
@@ -2555,6 +2556,7 @@ class EditorFactory {
         if (DEBUG) console.log('📦 Tier2 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
         
         const bodyEditor = new Editor({
+            element: this.component.$refs.bodyEditor,
             extensions: validExtensions,
             editable: isEditable,
             // ✅ REMOVED: content parameter - let Y.js handle content via Collaboration extension
@@ -4061,7 +4063,7 @@ class DocumentManager {
         // ✅ OFFLINE-FIRST: Create editors immediately with whatever content is available
         // IndexedDB has already synced (if content exists), WebSocket will sync in background
         const editors = await this.editorFactory.createEditors(yjsDoc, tier, webSocketProvider);
-        this.component.bodyEditor = editors.bodyEditor;
+        this.component.bodyEditor = markRaw(editors.bodyEditor);
 
         // ✅ REACTIVE PATTERN: Use editor's onUpdate event for content verification
         // Set up one-time content check when editor first updates with content
@@ -4314,7 +4316,7 @@ class DocumentManager {
 
         // STEP 4: Create Tier 1 editors
         const editors = await this.editorFactory.createEditors(yjsDoc, tier);
-        this.component.bodyEditor = editors.bodyEditor;
+        this.component.bodyEditor = markRaw(editors.bodyEditor);
 
         // STEP 5: NO INITIAL CONTENT SETTING - TipTap Collaboration handles content automatically
         if (initialContent) {
@@ -4973,12 +4975,6 @@ class ContentStateManager {
 
 export default {
     name: 'TipTapEditorModular',
-
-    components: {
-        // Register TipTap components from the bundle
-        // Using conditional chaining to safely access from window
-        EditorContent: window.TiptapCollaboration?.EditorContent
-    },
 
     emits: [
         'content-changed',
@@ -20507,8 +20503,7 @@ export default {
             
             <!-- Body Editor -->
             <div class="editor-field-body bg-dark border border-secondary border-top-0 rounded-bottom">
-              <EditorContent :editor="bodyEditor" v-if="bodyEditor" class="tiptap-editor-content" />
-              <div v-else class="tiptap-editor-content p-3 text-muted">Loading editor...</div>
+              <div ref="bodyEditor" class="tiptap-editor-content"></div>
             </div>
             
             <!-- Bubble Menu (floating toolbar) - Always in DOM for TipTap reference -->
