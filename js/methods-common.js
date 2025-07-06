@@ -693,24 +693,12 @@ export default {
           console.log('IPFS Loader handling blob URL for preview:', url);
           ipfsUrl = url; // Use blob URL directly
         } else if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
-          const cidWithPath = url.split('/ipfs/')[1].split('?')[0];
+          // Use IPFS URLs as-is without modifying them
+          // The URLs should already be properly formatted from the source
+          ipfsUrl = url;
           
-          // Check if URL already has an extension
-          if (cidWithPath.includes('.')) {
-            // URL already has extension, use as-is
-            ipfsUrl = `${this.gatewayUrl}/ipfs/${cidWithPath}`;
-          } else {
-            // No extension, add filename parameter for IPFS gateway
-            let filename = 'file';
-
-            if (context.type === 'manifest' || context.type === 'level') {
-              filename = 'playlist.m3u8';
-            } else if (context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-              filename = 'segment.ts';
-            }
-
-            ipfsUrl = `${this.gatewayUrl}/ipfs/${cidWithPath}?filename=${filename}`;
-          }
+          // Log the URL being used for debugging
+          console.log('IPFS Loader using URL as-is:', ipfsUrl);
         }
 
         console.log('IPFS Loader fetching:', ipfsUrl);

@@ -3,11 +3,14 @@ const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
-  entry: './src/collaboration-bundle.js',
+  entry: {
+    collaboration: './src/collaboration-bundle.js',
+    videoPlayer: './src/video-player-bundle.js'
+  },
   output: {
-    filename: 'tiptap-collaboration.bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'js'),
-    library: 'TiptapCollaboration',
+    library: '[name]Bundle',
     libraryTarget: 'umd',
     globalObject: 'this'
   },

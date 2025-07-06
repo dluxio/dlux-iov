@@ -44,6 +44,8 @@
     <link href="/css/tiptap-editor.css" rel="stylesheet" />
     <!-- Mobile-First Editor Styles -->
     <link href="/css/mobile-first-editor.css" rel="stylesheet" />
+    <!-- DLUX Video Player Styles -->
+    <link href="/css/dlux-video-player.css" rel="stylesheet" />
     <script src="/reg-sw.js"></script>
     <script src="/js/diff.js"></script>
     <script>
@@ -1855,8 +1857,10 @@
             }
         };
     </script>
+    <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
+    <script src="/js/videoPlayer.bundle.js"></script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
-    <script src="/js/tiptap-collaboration.bundle.js?v=20250703-CustomDropcursor"></script>
+    <script src="/js/collaboration.bundle.js?v=20250703-VideoPlayerSeparation"></script>
     <script>
         // Verify that the TipTap collaboration bundle is loaded
         setTimeout(() => {

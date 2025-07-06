@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
-import { Editor, Extension } from '@tiptap/core';
+import { Editor, Extension, Node } from '@tiptap/core';
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -37,6 +37,7 @@ import { DecorationSet } from '@tiptap/pm/view';
 
 // UI extensions for floating toolbars
 import BubbleMenu from '@tiptap/extension-bubble-menu';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 
 // Drag handle extensions for node reordering
 import DragHandle from '@tiptap/extension-drag-handle';
@@ -84,6 +85,90 @@ import Youtube from '@tiptap/extension-youtube';
 // ✅ CUSTOM IMAGE EXTENSION: Handle drag behavior to prevent duplication
 const CustomImage = Image.extend({
   name: 'image', // Keep the same name to replace default Image
+  
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      onImageClick: null, // Callback passed from Vue component
+    }
+  },
+  
+  addCommands() {
+    return {
+      ...this.parent?.(),
+      editImage: (pos, attrs) => ({ editor }) => {
+        // Call the configured callback if available
+        if (this.options.onImageClick) {
+          this.options.onImageClick(pos, attrs);
+        }
+        return true;
+      },
+    }
+  },
+  
+  addNodeView() {
+    const extension = this;
+    
+    return ({ node, getPos, editor }) => {
+      // Use a mutable reference to track the current node
+      let currentNode = node;
+      
+      // Create wrapper div
+      const dom = document.createElement('div');
+      dom.style.display = 'inline-block';
+      dom.style.position = 'relative';
+      dom.style.maxWidth = '100%';
+      
+      // Create the image element
+      const img = document.createElement('img');
+      img.src = node.attrs.src;
+      img.alt = node.attrs.alt || '';
+      img.title = node.attrs.title || '';
+      img.className = node.attrs.class || 'content-image';
+      img.style.cursor = 'pointer'; // Show it's clickable
+      img.style.maxWidth = '100%';
+      img.style.height = 'auto';
+      
+      // Define click handler for proper cleanup
+      const handleClick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Get the position
+        if (typeof getPos === 'function') {
+          const pos = getPos();
+          // Use TipTap command system with current node's attributes
+          editor.commands.editImage(pos, currentNode.attrs);
+        }
+      };
+      
+      // Add click handler
+      img.addEventListener('click', handleClick);
+      
+      dom.appendChild(img);
+      
+      return {
+        dom,
+        update(updatedNode) {
+          // Update image when node changes
+          if (updatedNode.type !== node.type) {
+            return false;
+          }
+          // Update the current node reference
+          currentNode = updatedNode;
+          // Update DOM
+          img.src = updatedNode.attrs.src;
+          img.alt = updatedNode.attrs.alt || '';
+          img.title = updatedNode.attrs.title || '';
+          return true;
+        },
+        destroy() {
+          // Clean up event listener to prevent memory leaks
+          img.removeEventListener('click', handleClick);
+        }
+      };
+    };
+  },
   
   addProseMirrorPlugins() {
     const plugins = this.parent?.() || [];
@@ -225,9 +310,245 @@ function isContentBlockedAt(state, pos, contentType) {
   return { blocked: false };
 }
 
+// ✅ CUSTOM VIDEO EXTENSION: DluxVideo for native video elements with Video.js support
+const DluxVideo = Node.create({
+  name: 'dluxvideo',
+  group: 'block',
+  atom: true,
+  draggable: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+        parseHTML: element => element.getAttribute('src'),
+        renderHTML: attributes => {
+          if (!attributes.src) return {};
+          return { src: attributes.src };
+        }
+      },
+      poster: {
+        default: null,
+        parseHTML: element => element.getAttribute('poster'),
+        renderHTML: attributes => {
+          if (!attributes.poster) return {};
+          return { poster: attributes.poster };
+        }
+      },
+      width: {
+        default: '100%',
+        parseHTML: element => element.getAttribute('width') || '100%',
+        renderHTML: attributes => ({ width: attributes.width || '100%' })
+      },
+      height: {
+        default: 'auto',
+        parseHTML: element => element.getAttribute('height') || 'auto',
+        renderHTML: attributes => ({ height: attributes.height || 'auto' })
+      },
+      controls: {
+        default: true,
+        parseHTML: element => element.hasAttribute('controls'),
+        renderHTML: attributes => {
+          if (attributes.controls) {
+            return { controls: 'controls' };
+          }
+          return {};
+        }
+      },
+      autoplay: {
+        default: false,
+        parseHTML: element => element.hasAttribute('autoplay'),
+        renderHTML: attributes => {
+          if (attributes.autoplay) {
+            return { autoplay: 'autoplay' };
+          }
+          return {};
+        }
+      },
+      loop: {
+        default: false,
+        parseHTML: element => element.hasAttribute('loop'),
+        renderHTML: attributes => {
+          if (attributes.loop) {
+            return { loop: 'loop' };
+          }
+          return {};
+        }
+      },
+      muted: {
+        default: false,
+        parseHTML: element => element.hasAttribute('muted'),
+        renderHTML: attributes => {
+          if (attributes.muted) {
+            return { muted: 'muted' };
+          }
+          return {};
+        }
+      },
+      type: {
+        default: null,
+        parseHTML: element => element.getAttribute('type'),
+        renderHTML: attributes => {
+          if (!attributes.type) return {};
+          return { type: attributes.type };
+        }
+      },
+      'data-type': {
+        default: null,
+        parseHTML: element => element.getAttribute('data-type'),
+        renderHTML: attributes => {
+          if (!attributes['data-type']) return {};
+          return { 'data-type': attributes['data-type'] };
+        }
+      },
+      'data-mime-type': {
+        default: null,
+        parseHTML: element => element.getAttribute('data-mime-type'),
+        renderHTML: attributes => {
+          if (!attributes['data-mime-type']) return {};
+          return { 'data-mime-type': attributes['data-mime-type'] };
+        }
+      },
+      crossorigin: {
+        default: 'anonymous',
+        parseHTML: element => element.getAttribute('crossorigin') || 'anonymous',
+        renderHTML: attributes => {
+          if (attributes.crossorigin) {
+            return { crossorigin: attributes.crossorigin };
+          }
+          return {};
+        }
+      }
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'video[src]',
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    // Clean up attributes
+    const attrs = { ...HTMLAttributes };
+    
+    // Ensure controls attribute is properly formatted
+    if (attrs.controls === true || attrs.controls === 'true') {
+      attrs.controls = 'controls';
+    } else if (attrs.controls === false || attrs.controls === 'false') {
+      delete attrs.controls;
+    }
+    
+    // Apply defaults if not explicitly set
+    if (!attrs.width) attrs.width = '100%';
+    if (!attrs.height) attrs.height = 'auto';
+    if (!attrs.crossorigin && attrs.src && attrs.src.includes('ipfs')) {
+      attrs.crossorigin = 'anonymous';
+    }
+    
+    return ['video', attrs];
+  },
+
+  addCommands() {
+    return {
+      setDluxVideo: (options) => ({ commands }) => {
+        return commands.insertContent({
+          type: this.name,
+          attrs: options,
+        });
+      },
+    };
+  },
+
+  addNodeView() {
+    return ({ node, editor }) => {
+      // Create wrapper container
+      const wrapper = document.createElement('div');
+      wrapper.className = 'dlux-video-container';
+      wrapper.style.position = 'relative';
+      wrapper.style.marginBottom = '1rem';
+      wrapper.style.width = '100%';
+      
+      // Create video element for Video.js
+      const video = document.createElement('video');
+      video.className = 'video-js vjs-default-skin vjs-big-play-centered vjs-fluid';
+      
+      wrapper.appendChild(video);
+      
+      // Initialize player after a short delay to ensure DOM is ready
+      let player = null;
+      
+      const initializePlayer = () => {
+        // Check if DluxVideoPlayer is available
+        if (!window.DluxVideoPlayer) {
+          console.error('DluxVideoPlayer not available. Make sure video-player-bundle.js is loaded.');
+          return;
+        }
+        
+        // Initialize using the global DluxVideoPlayer service
+        player = window.DluxVideoPlayer.initializePlayer(video, {
+          src: node.attrs.src,
+          type: node.attrs.type || (node.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'),
+          poster: node.attrs.poster,
+          autoplay: node.attrs.autoplay,
+          loop: node.attrs.loop,
+          muted: node.attrs.muted
+        });
+        
+        // Store player reference on wrapper for cleanup
+        wrapper._dluxVideoPlayer = player;
+      };
+      
+      // Use setTimeout to ensure DOM is ready and DluxVideoPlayer is loaded
+      setTimeout(initializePlayer, 100);
+      
+      return {
+        dom: wrapper,
+        contentDOM: null,
+        
+        update(updatedNode) {
+          // Check if it's still a video node
+          if (updatedNode.type !== node.type) {
+            return false;
+          }
+          
+          // Update source if changed
+          if (player && updatedNode.attrs.src !== node.attrs.src) {
+            const sourceType = updatedNode.attrs.type || (updatedNode.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4');
+            player.src({
+              src: updatedNode.attrs.src,
+              type: sourceType
+            });
+          }
+          
+          node = updatedNode;
+          return true;
+        },
+        
+        destroy() {
+          // Clean up using DluxVideoPlayer service
+          if (wrapper._dluxVideoPlayer && window.DluxVideoPlayer) {
+            window.DluxVideoPlayer.destroyPlayer(video);
+            wrapper._dluxVideoPlayer = null;
+          }
+        }
+      };
+    };
+  }
+});
+
 // Create custom SpkVideo extension by extending Youtube
 const SpkVideo = Youtube.extend({
-  name: 'video',
+  name: 'spkvideo',
+  
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      onVideoClick: null, // Callback passed from Vue component
+    }
+  },
   
   addAttributes() {
     return {
@@ -367,10 +688,16 @@ const SpkVideo = Youtube.extend({
           attrs: options,
         })
       },
+      editVideo: (pos, attrs) => ({ editor }) => {
+        // Call the configured callback if available
+        if (this.options.onVideoClick) {
+          this.options.onVideoClick(pos, attrs);
+        }
+        return true;
+      },
     }
-  },
+  }
 });
-
 
 
 // ✅ TIPTAP BEST PRACTICE: Extend existing TableCell following official pattern
@@ -699,6 +1026,7 @@ const TiptapCollaboration = {
   
   // UI extensions
   BubbleMenu,
+  FloatingMenu,
   
   // Drag handle extensions
   DragHandle,
@@ -748,6 +1076,7 @@ const TiptapCollaboration = {
   // Media extensions
   Youtube,
   SpkVideo,
+  DluxVideo,
   
   // Table extensions
   TableKit,

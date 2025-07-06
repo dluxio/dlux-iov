@@ -10,7 +10,7 @@ export default {
 <button @click="insertAtCursor('[Alt Text](https://goto.link)')">Insert Link</button>
 <button @click="edit()">Comment</button>
 </div>
-<div class="behavemark" v-html="compiledMarkdown"></div>
+<div ref="markdownContent" class="behavemark" v-html="compiledMarkdown"></div>
   </div>`,
   props: ["md", "author", "permlink", "toedit"],
   emits: ["settext"],
@@ -18,6 +18,11 @@ export default {
     if (this.toedit) {
       this.text = this.toedit;
     }
+    this.enhanceVideos();
+  },
+  updated() {
+    // Re-enhance videos when content changes
+    this.enhanceVideos();
   },
   methods: {
     edit(){
@@ -44,6 +49,26 @@ export default {
       } else {
         this.$refs.editor.value += toInsert;
       }
+    },
+    enhanceVideos() {
+      // Wait for DOM to update
+      this.$nextTick(() => {
+        if (!this.$refs.markdownContent || !window.DluxVideoPlayer) {
+          return;
+        }
+        
+        // Find all video elements in the rendered content
+        const videos = this.$refs.markdownContent.querySelectorAll('video:not([data-dlux-enhanced])');
+        
+        videos.forEach(video => {
+          try {
+            // Enhance the video with DLUX Video Player
+            window.DluxVideoPlayer.enhanceVideoElement(video);
+          } catch (error) {
+            console.error('Failed to enhance video:', error);
+          }
+        });
+      });
     },
   },
   computed: {
@@ -117,7 +142,8 @@ export default {
           ALLOWED_ATTR: [
             'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
             'target', 'rel', 'type', 'datetime', 'cite', 'start', 'reversed',
-            'controls', 'autoplay', 'loop', 'muted', 'poster', 'preload',
+            'controls', 'autoplay', 'loop', 'muted', 'poster', 'preload', 'crossorigin',
+            'data-type', 'data-mime-type', 'data-original-src',
             // KaTeX and math-specific attributes
             'aria-hidden', 'role', 'data-lexical-text', 'mathvariant', 'mathcolor',
             'mathbackground', 'mathsize', 'dir', 'fontfamily', 'fontweight',

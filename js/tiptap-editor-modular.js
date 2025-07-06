@@ -1,9 +1,10 @@
 import methodsCommon from './methods-common.js';
 import { markRaw } from '/js/vue.esm-browser.js';
 import { createMentionSuggestion } from '/js/services/mention-suggestion.js';
+import URLProcessor from '/js/utils/url-processor.js';
 
 // Debug flag to control logging - set to true to enable verbose logging
-const DEBUG = false;
+const DEBUG = true;
 
 /**
  * ⚠️ CRITICAL: TipTap Editor Modular Architecture - Following Official Best Practices
@@ -1543,7 +1544,7 @@ class PersistenceManager {
             const tier = TierDecisionManager.TierType.LOCAL; // Read-only uses Tier 1
             const editors = await this.component.documentManager.editorFactory.createEditors(yjsDoc, tier, null);
 
-            this.component.bodyEditor = markRaw(editors.bodyEditor);
+            this.component.bodyEditor = editors.bodyEditor;
 
             // Re-setup sync listeners
             this.component.syncManager.setupSyncListeners(editors, yjsDoc);
@@ -1856,8 +1857,10 @@ class EditorFactory {
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
+        const FloatingMenu = tiptapBundle.FloatingMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const DluxVideo = tiptapBundle.DluxVideo;
         const Image = tiptapBundle.Image;
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
@@ -1878,6 +1881,7 @@ class EditorFactory {
             BubbleMenu: !!BubbleMenu,
             TextAlign: !!TextAlign,
             SpkVideo: !!SpkVideo,
+            DluxVideo: !!DluxVideo,
             CustomDropcursor: !!CustomDropcursor,
             Extension: !!Extension,
             Plugin: !!window.TiptapCollaboration?.Plugin,
@@ -1899,16 +1903,8 @@ class EditorFactory {
             throw new Error('Required TipTap components missing from bundle and window');
         }
 
-        // ✅ BEST PRACTICE: Ensure DOM is ready before creating editors
-        if (!this.component.$refs || !this.component.$refs.bodyEditor) {
-            // Wait for next tick for DOM to be ready
-            await this.component.$nextTick();
-
-            // Check again after nextTick
-            if (!this.component.$refs || !this.component.$refs.bodyEditor) {
-                throw new Error('DOM refs not available - cannot create editors');
-            }
-        }
+        // ✅ BEST PRACTICE: Wait for Vue components to be ready
+        await this.component.$nextTick();
 
         // ✅ DEBUG: Log Y.js document state before creating editors
         if (DEBUG) console.log('🔨 Creating Tier 1 editors with Y.js document state:', {
@@ -1945,12 +1941,22 @@ class EditorFactory {
                 types: ['heading', 'paragraph'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
-            SpkVideo,
+            SpkVideo.configure({
+                onVideoClick: (pos, attrs) => {
+                    // TipTap best practice: Use callback passed to extension
+                    this.component.editVideo(pos, attrs);
+                }
+            }),
+            DluxVideo,
             Image.configure({
                 inline: false,  // Block-level images for proper markdown
                 HTMLAttributes: {
                     class: 'content-image'
                     // Removed draggable: false to allow dragging in table cells
+                },
+                onImageClick: (pos, attrs) => {
+                    // TipTap best practice: Use callback passed to extension
+                    this.component.editImage(pos, attrs);
                 }
             }),
             Mention.configure({
@@ -2001,7 +2007,9 @@ class EditorFactory {
                 tippyOptions: {
                     duration: 0,
                     placement: 'left',
+                    offset: [0, -10], // Negative distance moves handle further left from content
                     hideOnClick: false,
+                    theme: 'drag-handle'
                 }
             }),
         ];
@@ -2036,6 +2044,25 @@ class EditorFactory {
             console.warn('⚠️ BubbleMenu DOM ref not available, skipping bubble menu');
         }
 
+        // ✅ FLOATING MENU: Add extension with element configuration
+        if (FloatingMenu && this.component.$refs.floatingMenu) {
+            bodyExtensions.push(FloatingMenu.configure({
+                element: this.component.$refs.floatingMenu,
+                tippyOptions: {
+                    placement: 'top-start',
+                    duration: 100,
+                },
+                shouldShow: ({ editor, view, state, oldState }) => {
+                    // Only show on empty paragraphs
+                    const { $from } = state.selection;
+                    const node = $from.parent;
+                    
+                    // Check if it's an empty paragraph
+                    return node.type.name === 'paragraph' && node.content.size === 0;
+                }
+            }));
+            if (DEBUG) console.log('✅ FloatingMenu extension added with element ref');
+        }
 
         // ✅ DEBUG: Log Y.js document state before creating editor
         if (DEBUG) console.log('🔍 Y.js document state before editor creation:', {
@@ -2064,14 +2091,9 @@ class EditorFactory {
             });
         }
 
-        // ✅ CRITICAL: Wait for DOM element to be ready
-        // ✅ COMPLIANCE: Use proper Vue lifecycle - DOM should be ready
+        // ✅ CRITICAL: Wait for Vue components to be ready
+        // ✅ COMPLIANCE: Use proper Vue lifecycle
         await this.component.$nextTick();
-
-        if (!this.component.$refs.bodyEditor) {
-            console.error('❌ bodyEditor DOM element not found - check template refs!');
-            throw new Error('bodyEditor DOM element not ready');
-        }
 
         let bodyEditor;
         try {
@@ -2081,7 +2103,6 @@ class EditorFactory {
             if (DEBUG) console.log('📦 Extension names:', validExtensions.map(ext => ext.name || 'unnamed'));
             
             bodyEditor = new Editor({
-                element: this.component.$refs.bodyEditor,
                 extensions: validExtensions,
                 editable: isEditable,
                 // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
@@ -2357,8 +2378,10 @@ class EditorFactory {
         const CollaborationCaret = tiptapBundle.CollaborationCaret;
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
+        const FloatingMenu = tiptapBundle.FloatingMenu;
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
+        const DluxVideo = tiptapBundle.DluxVideo;
         const Image = tiptapBundle.Image;
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
@@ -2372,13 +2395,7 @@ class EditorFactory {
             throw new Error('Required TipTap components missing from bundle and window');
         }
 
-        // ✅ CRITICAL: Check if DOM refs are available before creating editors
-        if (!this.component.$refs || !this.component.$refs.bodyEditor) {
-            console.error('❌ DOM refs not available for editor creation');
-            throw new Error('DOM refs not available - cannot create editors');
-        }
-
-        // ✅ BUBBLE MENU: Wait for DOM to be ready since bubbleMenu depends on bodyEditor existing
+        // ✅ CRITICAL: Wait for Vue components to be ready
         await this.component.$nextTick();
 
         // Build body extensions array - single editor only (like Tier 1)
@@ -2398,12 +2415,22 @@ class EditorFactory {
                 types: ['heading', 'paragraph'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
-            SpkVideo,
+            SpkVideo.configure({
+                onVideoClick: (pos, attrs) => {
+                    // TipTap best practice: Use callback passed to extension
+                    this.component.editVideo(pos, attrs);
+                }
+            }),
+            DluxVideo,
             Image.configure({
                 inline: false,  // Block-level images for proper markdown
                 HTMLAttributes: {
                     class: 'content-image'
                     // Removed draggable: false to allow dragging in table cells
+                },
+                onImageClick: (pos, attrs) => {
+                    // TipTap best practice: Use callback passed to extension
+                    this.component.editImage(pos, attrs);
                 }
             }),
             Mention.configure({
@@ -2454,7 +2481,9 @@ class EditorFactory {
                 tippyOptions: {
                     duration: 0,
                     placement: 'left',
+                    offset: [0, -10], // Negative distance moves handle further left from content
                     hideOnClick: false,
+                    theme: 'drag-handle'
                 }
             }),
         ];
@@ -2520,17 +2549,12 @@ class EditorFactory {
         // ✅ COMPLIANCE: Use proper Vue lifecycle - DOM should be ready  
         await this.component.$nextTick();
 
-        if (!this.component.$refs.bodyEditor) {
-            console.error('❌ bodyEditor DOM element not found (Tier 2) - check template refs!');
-            throw new Error('bodyEditor DOM element not ready');
-        }
 
         // Filter out any null/undefined extensions
         const validExtensions = bodyExtensions.filter(ext => ext != null);
         if (DEBUG) console.log('📦 Tier2 Valid extensions count:', validExtensions.length, 'out of', bodyExtensions.length);
         
         const bodyEditor = new Editor({
-            element: this.component.$refs.bodyEditor,
             extensions: validExtensions,
             editable: isEditable,
             // ✅ REMOVED: content parameter - let Y.js handle content via Collaboration extension
@@ -4037,7 +4061,7 @@ class DocumentManager {
         // ✅ OFFLINE-FIRST: Create editors immediately with whatever content is available
         // IndexedDB has already synced (if content exists), WebSocket will sync in background
         const editors = await this.editorFactory.createEditors(yjsDoc, tier, webSocketProvider);
-        this.component.bodyEditor = markRaw(editors.bodyEditor);
+        this.component.bodyEditor = editors.bodyEditor;
 
         // ✅ REACTIVE PATTERN: Use editor's onUpdate event for content verification
         // Set up one-time content check when editor first updates with content
@@ -4290,7 +4314,7 @@ class DocumentManager {
 
         // STEP 4: Create Tier 1 editors
         const editors = await this.editorFactory.createEditors(yjsDoc, tier);
-        this.component.bodyEditor = markRaw(editors.bodyEditor);
+        this.component.bodyEditor = editors.bodyEditor;
 
         // STEP 5: NO INITIAL CONTENT SETTING - TipTap Collaboration handles content automatically
         if (initialContent) {
@@ -4950,6 +4974,12 @@ class ContentStateManager {
 export default {
     name: 'TipTapEditorModular',
 
+    components: {
+        // Register TipTap components from the bundle
+        // Using conditional chaining to safely access from window
+        EditorContent: window.TiptapCollaboration?.EditorContent
+    },
+
     emits: [
         'content-changed',
         'content-available',
@@ -5053,6 +5083,29 @@ export default {
             showPublishModal: false,
             showAdvancedOptions: false,
             showStatusDetails: false,
+            showImageEditModal: false,
+            imageEditData: {
+                pos: null,
+                src: '',
+                alt: '',
+                title: ''
+            },
+            // Modular media edit system
+            showMediaEditModal: false,
+            mediaEditData: {
+                pos: null,
+                type: 'image', // 'image', 'video', 'audio', etc.
+                src: '',
+                alt: '',
+                title: '',
+                // Additional fields for different media types
+                width: '',
+                height: '',
+                controls: true,
+                autoplay: false,
+                loop: false,
+                muted: false
+            },
 
             // ===== DOCUMENT NAME EDITING =====
             isEditingDocumentName: false,
@@ -7174,6 +7227,14 @@ export default {
         // ✅ API LOGGING: All collaboration endpoints have JSON response logging enabled
 
         // ✅ COMPLIANCE: Debug collaboration endpoints code removed
+        
+        // Make methodsCommon available globally for SpkVideo nodeView
+        window.methodsCommon = methodsCommon;
+        
+        // ✅ Log TipTap component availability
+        if (DEBUG && window.TiptapCollaboration) {
+            console.log('✅ TipTap collaboration bundle loaded');
+        }
 
         // Set a timeout to mark auth as loaded if no headers arrive
         setTimeout(() => {
@@ -14281,7 +14342,7 @@ export default {
                         This is an HLS/streaming video (m3u8)
                     </label>
                     <div style="text-align:right;">
-                        <button onclick="this.closest('div').remove()" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
+                        <button id="cancelBtn" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
                         <button id="insertBtn" style="padding:6px 12px;background:#0d6efd;border:none;color:#fff;border-radius:4px;cursor:pointer;">Insert</button>
                     </div>
                 `;
@@ -14299,6 +14360,7 @@ export default {
                 const urlInput = dialog.querySelector('#videoUrl');
                 const hlsCheckbox = dialog.querySelector('#isHls');
                 const insertBtn = dialog.querySelector('#insertBtn');
+                const cancelBtn = dialog.querySelector('#cancelBtn');
                 
                 urlInput.focus();
                 
@@ -14313,6 +14375,10 @@ export default {
                 };
                 
                 insertBtn.onclick = handleInsert;
+                cancelBtn.onclick = () => {
+                    dialog.remove();
+                    backdrop.remove();
+                };
                 urlInput.onkeypress = (e) => {
                     if (e.key === 'Enter') handleInsert();
                 };
@@ -14322,46 +14388,28 @@ export default {
         insertVideoEmbed(url, metadata = null) {
             if (!this.bodyEditor || !url) return;
             
-            // Ensure URL has protocol
-            let videoUrl = url.trim();
-            if (!videoUrl.startsWith('http://') && !videoUrl.startsWith('https://')) {
-                // Add https:// if no protocol is specified
-                videoUrl = 'https://' + videoUrl;
-            }
+            // Use the modular URL processor
+            const { url: processedUrl, fileType } = URLProcessor.processUrl(url, metadata);
             
-            // Detect if it's an HLS video
-            let videoType = null;
-            let dataType = null;
-            
-            // First check SPK metadata if available
-            if (metadata) {
-                if (DEBUG) console.log('🎬 Using SPK metadata for type detection:', metadata);
-                if (metadata.type === 'm3u8' || metadata.meta?.type === 'm3u8') {
-                    videoType = 'application/x-mpegURL';
-                    dataType = 'm3u8';
-                    if (DEBUG) console.log('🎬 Detected m3u8 from SPK metadata');
-                }
-            }
-            
-            
-            // Use the SpkVideo extension's setVideo command
+            // Use the DluxVideo extension's setDluxVideo command
             const videoAttrs = {
-                src: videoUrl,
+                src: processedUrl,
                 controls: true,
                 width: '100%',
                 height: 'auto',
                 crossorigin: 'anonymous'
             };
             
-            if (videoType) {
-                videoAttrs.type = videoType;
-                videoAttrs['data-type'] = dataType;
-                videoAttrs['data-mime-type'] = videoType;
+            // Add type attributes for m3u8
+            if (fileType === 'm3u8') {
+                videoAttrs.type = 'application/x-mpegURL';
+                videoAttrs['data-type'] = 'm3u8';
+                videoAttrs['data-mime-type'] = 'application/x-mpegURL';
             }
             
             this.bodyEditor.chain()
                 .focus()
-                .setVideo(videoAttrs)
+                .setDluxVideo(videoAttrs)
                 .run();
                 
             if (DEBUG) console.log('🎬 Video inserted with attributes:', videoAttrs);
@@ -14376,30 +14424,15 @@ export default {
                 return;
             }
             
-            // Ensure URL has protocol
-            let imageUrl = url.trim();
-            if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-                // Add https:// if no protocol is specified
-                imageUrl = 'https://' + imageUrl;
-            }
-            
-            // Handle IPFS URLs - add filename parameter for proper MIME type detection
-            if (imageUrl.includes('ipfs.dlux.io/ipfs/')) {
-                // Extract CID by splitting on /ipfs/ and taking the second part
-                const parts = imageUrl.split('/ipfs/');
-                if (parts.length > 1 && !imageUrl.includes('?filename=')) {
-                    const cid = parts[1].split('?')[0]; // Remove any existing query params
-                    // Add a generic filename parameter to help IPFS gateway
-                    imageUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=image.jpg`;
-                }
-            }
+            // Use the modular URL processor
+            const { url: processedUrl } = URLProcessor.processUrl(url, { type: 'image' });
             
             try {
                 // Use the Image extension's setImage command
                 this.bodyEditor.chain()
                     .focus()
                     .setImage({ 
-                        src: imageUrl,
+                        src: processedUrl,
                         alt: '',
                         title: ''
                     })
@@ -14412,6 +14445,126 @@ export default {
             } catch (error) {
                 if (DEBUG) console.error('Error inserting image:', error);
             }
+        },
+
+        editImage(pos, attrs) {
+            console.log('editImage called with:', { pos, attrs });
+            
+            // Store the component reference if not already done
+            if (!window.dluxEditor) {
+                window.dluxEditor = {};
+            }
+            window.dluxEditor.component = this;
+            
+            // Use the new modular media edit system
+            this.editMedia(pos, attrs, 'image');
+        },
+
+        saveImageEdit() {
+            // Redirect to the modular save method
+            this.saveMediaEdit();
+        },
+
+        closeImageEditModal() {
+            // Redirect to the modular close method
+            this.closeMediaEditModal();
+        },
+
+        // ===== MODULAR MEDIA EDIT METHODS =====
+        // Generic edit method that works for any media type
+        editMedia(pos, attrs, type) {
+            if (DEBUG) console.log('editMedia called with:', { pos, attrs, type });
+            
+            this.mediaEditData = {
+                pos: pos,
+                type: type,
+                src: attrs.src || '',
+                alt: attrs.alt || '',
+                title: attrs.title || '',
+                width: attrs.width || '',
+                height: attrs.height || '',
+                controls: attrs.controls !== false,
+                autoplay: attrs.autoplay || false,
+                loop: attrs.loop || false,
+                muted: attrs.muted || false
+            };
+            
+            this.showMediaEditModal = true;
+            
+            this.$nextTick(() => {
+                // Focus on first editable field based on media type
+                let selector = '#mediaEditAlt, #mediaEditTitle';
+                if (type === 'video') {
+                    selector = '#mediaEditTitle, #videoControls';
+                }
+                const firstInput = document.querySelector(selector);
+                if (firstInput) {
+                    firstInput.focus();
+                    if (firstInput.type === 'text') {
+                        firstInput.select();
+                    }
+                }
+            });
+        },
+
+        // Add editVideo for videos
+        editVideo(pos, attrs) {
+            this.editMedia(pos, attrs, 'video');
+        },
+
+        // Generic save method for all media types
+        saveMediaEdit() {
+            if (this.mediaEditData.pos !== null && this.bodyEditor && !this.bodyEditor.isDestroyed) {
+                const { pos, type, ...attrs } = this.mediaEditData;
+                
+                // Clean up attributes based on type
+                const cleanAttrs = {};
+                
+                if (type === 'image') {
+                    cleanAttrs.src = attrs.src;
+                    cleanAttrs.alt = attrs.alt.trim();
+                    cleanAttrs.title = attrs.title.trim();
+                } else if (type === 'video') {
+                    cleanAttrs.src = attrs.src;
+                    cleanAttrs.controls = attrs.controls;
+                    cleanAttrs.autoplay = attrs.autoplay;
+                    cleanAttrs.loop = attrs.loop;
+                    cleanAttrs.muted = attrs.muted;
+                    if (attrs.width) cleanAttrs.width = attrs.width;
+                    if (attrs.height) cleanAttrs.height = attrs.height;
+                }
+                
+                try {
+                    const tr = this.bodyEditor.state.tr;
+                    tr.setNodeMarkup(pos, null, cleanAttrs);
+                    this.bodyEditor.view.dispatch(tr);
+                    
+                    this.hasUnsavedChanges = true;
+                    this.hasUserIntent = true;
+                    
+                    this.closeMediaEditModal();
+                } catch (error) {
+                    console.error('Error updating media:', error);
+                    alert('Failed to update media. Please try again.');
+                }
+            }
+        },
+
+        closeMediaEditModal() {
+            this.showMediaEditModal = false;
+            this.mediaEditData = {
+                pos: null,
+                type: 'image',
+                src: '',
+                alt: '',
+                title: '',
+                width: '',
+                height: '',
+                controls: true,
+                autoplay: false,
+                loop: false,
+                muted: false
+            };
         },
 
         // ===== TEMPLATE UTILITY METHODS =====
@@ -20324,9 +20477,38 @@ export default {
               </div>
             </div>
 
-            <!-- Body Editor Container -->
+            <!-- Floating Menu for empty lines -->
+            <div ref="floatingMenu" class="floating-menu" v-show="false">
+              <button type="button" 
+                      class="btn btn-sm btn-secondary"
+                      @click="insertImage()"
+                      @mousedown.prevent
+                      title="Insert Image"
+                      :disabled="isReadOnlyMode">
+                <i class="fas fa-image"></i>
+              </button>
+              <button type="button" 
+                      class="btn btn-sm btn-secondary"
+                      @click="insertVideo()"
+                      @mousedown.prevent
+                      title="Insert Video"
+                      :disabled="isReadOnlyMode">
+                <i class="fas fa-video"></i>
+              </button>
+              <button type="button" 
+                      class="btn btn-sm btn-secondary"
+                      @click="insertTable()"
+                      @mousedown.prevent
+                      title="Insert Table"
+                      :disabled="isReadOnlyMode || isInTable">
+                <i class="fas fa-table"></i>
+              </button>
+            </div>
+            
+            <!-- Body Editor -->
             <div class="editor-field-body bg-dark border border-secondary border-top-0 rounded-bottom">
-              <div ref="bodyEditor" class="body-editor"></div>
+              <EditorContent :editor="bodyEditor" v-if="bodyEditor" class="tiptap-editor-content" />
+              <div v-else class="tiptap-editor-content p-3 text-muted">Loading editor...</div>
             </div>
             
             <!-- Bubble Menu (floating toolbar) - Always in DOM for TipTap reference -->
@@ -20763,6 +20945,95 @@ export default {
             </div>
           </div>
 
+          <!-- Media Edit Modal (Modular System) -->
+          <div v-if="showMediaEditModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)" @click.self="closeMediaEditModal">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-secondary">
+                  <h5 class="modal-title">
+                    Edit {{ mediaEditData.type.charAt(0).toUpperCase() + mediaEditData.type.slice(1) }}
+                  </h5>
+                  <button type="button" class="btn-close btn-close-white" @click="closeMediaEditModal"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- URL field (always read-only) -->
+                  <div class="mb-3">
+                    <label for="mediaEditSrc" class="form-label">
+                      {{ mediaEditData.type.charAt(0).toUpperCase() + mediaEditData.type.slice(1) }} URL 
+                      <i class="fas fa-lock ms-1 text-muted" title="URL cannot be edited"></i>
+                    </label>
+                    <input 
+                      id="mediaEditSrc"
+                      v-model="mediaEditData.src" 
+                      type="text" 
+                      class="form-control bg-dark text-white border-secondary"
+                      readonly
+                    >
+                    <small class="text-muted">To change the URL, delete this {{ mediaEditData.type }} and insert a new one</small>
+                  </div>
+                  
+                  <!-- Alt text for images -->
+                  <div v-if="mediaEditData.type === 'image'" class="mb-3">
+                    <label for="mediaEditAlt" class="form-label">Caption (Alt Text)</label>
+                    <input 
+                      id="mediaEditAlt"
+                      v-model="mediaEditData.alt" 
+                      type="text" 
+                      class="form-control bg-dark text-white border-secondary"
+                      placeholder="Describe the image"
+                      @keyup.enter="saveMediaEdit"
+                    >
+                    <small class="text-muted">This appears in markdown as ![caption](url)</small>
+                  </div>
+                  
+                  <!-- Video-specific controls -->
+                  <div v-if="mediaEditData.type === 'video'">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" v-model="mediaEditData.controls" id="videoControls">
+                        <label class="form-check-label" for="videoControls">Show Controls</label>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" v-model="mediaEditData.autoplay" id="videoAutoplay">
+                        <label class="form-check-label" for="videoAutoplay">Autoplay</label>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" v-model="mediaEditData.loop" id="videoLoop">
+                        <label class="form-check-label" for="videoLoop">Loop</label>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" v-model="mediaEditData.muted" id="videoMuted">
+                        <label class="form-check-label" for="videoMuted">Muted</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Title field (for all media types) -->
+                  <div class="mb-3">
+                    <label for="mediaEditTitle" class="form-label">Title (optional)</label>
+                    <input 
+                      id="mediaEditTitle"
+                      v-model="mediaEditData.title" 
+                      type="text" 
+                      class="form-control bg-dark text-white border-secondary"
+                      placeholder="Optional title attribute"
+                      @keyup.enter="saveMediaEdit"
+                    >
+                  </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                  <button type="button" class="btn btn-secondary" @click="closeMediaEditModal">Cancel</button>
+                  <button type="button" class="btn btn-primary" @click="saveMediaEdit">Save Changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Share Modal -->
           <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
