@@ -1,23 +1,45 @@
 // DLUX Video Player Bundle - Site-wide video player solution
 // Provides Video.js with HLS quality selector for use across entire DLUX platform
 
-// Video.js and plugins
+// Video.js core
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
-import qualityLevels from 'videojs-contrib-quality-levels';
-import hlsQualitySelector from 'videojs-hls-quality-selector';
 
-// Register plugins globally only if not already registered
-if (!videojs.getPlugin('qualityLevels')) {
-  videojs.registerPlugin('qualityLevels', qualityLevels);
-}
-if (!videojs.getPlugin('hlsQualitySelector')) {
-  videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
+// Lazy load and register plugins only if not already registered
+let qualityLevelsPlugin = null;
+let hlsQualitySelectorPlugin = null;
+
+// Function to ensure plugins are loaded and registered
+async function ensurePluginsLoaded() {
+  if (!videojs.getPlugin('qualityLevels')) {
+    if (!qualityLevelsPlugin) {
+      const module = await import('videojs-contrib-quality-levels');
+      qualityLevelsPlugin = module.default || module;
+    }
+    // Only register if still not registered (in case of race conditions)
+    if (!videojs.getPlugin('qualityLevels')) {
+      videojs.registerPlugin('qualityLevels', qualityLevelsPlugin);
+    }
+  }
+  
+  if (!videojs.getPlugin('hlsQualitySelector')) {
+    if (!hlsQualitySelectorPlugin) {
+      const module = await import('videojs-hls-quality-selector');
+      hlsQualitySelectorPlugin = module.default || module;
+    }
+    // Only register if still not registered (in case of race conditions)
+    if (!videojs.getPlugin('hlsQualitySelector')) {
+      videojs.registerPlugin('hlsQualitySelector', hlsQualitySelectorPlugin);
+    }
+  }
 }
 
 // DLUX Video Player Service
 class DluxVideoPlayer {
-  static initializePlayer(element, options = {}) {
+  static async initializePlayer(element, options = {}) {
+    // Ensure plugins are loaded
+    await ensurePluginsLoaded();
+    
     // Ensure element has an ID for Video.js
     if (!element.id) {
       element.id = `dlux-video-${Math.random().toString(36).substr(2, 9)}`;
@@ -151,9 +173,7 @@ class DluxVideoPlayer {
 // Export everything
 const VideoPlayerBundle = {
   videojs,
-  DluxVideoPlayer,
-  qualityLevels,
-  hlsQualitySelector
+  DluxVideoPlayer
 };
 
 // Make globally available

@@ -14102,7 +14102,6 @@ export default {
                     Link,
                     CustomImage, // Use CustomImage for consistency
                     CodeBlock,
-                    Underline,
                     SpkVideo,
                     DluxVideo,
                     Mention,

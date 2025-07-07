@@ -78,7 +78,6 @@ import Highlight from '@tiptap/extension-highlight';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
-import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 
@@ -1539,7 +1538,6 @@ const TiptapCollaboration = {
   Subscript,
   Superscript,
   TextStyle,
-  Underline,
   TextAlign,
   
   // Media extensions
