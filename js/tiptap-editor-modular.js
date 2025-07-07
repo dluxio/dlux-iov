@@ -2521,6 +2521,7 @@ class EditorFactory {
         const CustomTableCell = tiptapBundle.CustomTableCell;
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
+        const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
 
@@ -14548,7 +14549,6 @@ export default {
                 <h5 style="color:#fff;margin:0 0 15px 0;">Insert Image</h5>
                 <input type="text" id="imageUrl" placeholder="Enter image URL" style="width:400px;padding:8px;margin-bottom:10px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
                 <div style="margin-bottom:10px;">
-                    <small style="color:#adb5bd;">Test with: https://via.placeholder.com/300x200</small>
                 </div>
                 <div style="text-align:right;">
                     <button id="cancelBtn" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
