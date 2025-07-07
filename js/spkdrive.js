@@ -1719,6 +1719,9 @@ export default {
         },
     },
     mounted() {
+        // Register component globally for SPK Drive drop handler in TipTap editor
+        window.spkDriveComponent = this;
+        
         this.getSpkStats()
         this.getIPFSproviders()
         this.contracts = []
@@ -1755,5 +1758,11 @@ export default {
         window.addEventListener('hashchange', () => {
             this.deepLink(location.hash);
         });
+    },
+    unmounted() {
+        // Clean up global reference
+        if (window.spkDriveComponent === this) {
+            window.spkDriveComponent = null;
+        }
     },
 };

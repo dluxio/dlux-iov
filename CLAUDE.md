@@ -280,6 +280,8 @@ When extending always import standalone extension, do not import from kits like 
 - **TipTap Horizontal Rule Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/horizontal-rule
 - **TipTap Image Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/image
 - **TipTap Blockquote Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/blockquote
+
+DEPRECIATED - SpkVideo Extends YouTube and is superceeded by DluxVideo
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 
 ### Server Implementation

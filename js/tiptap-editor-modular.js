@@ -1874,6 +1874,8 @@ class EditorFactory {
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
+        const Plugin = tiptapBundle.Plugin;
+        const PluginKey = tiptapBundle.PluginKey;
 
         if (DEBUG) console.log('✅ FINAL COMPONENT CHECK:', {
             usingDefaultExport: tiptapBundle === window.TiptapCollaboration.default,
@@ -2108,6 +2110,18 @@ class EditorFactory {
                 isReadOnlyMode: this.component.isReadOnlyMode,
                 username: this.component.username
             });
+        }
+
+        // ✅ SPK DRIVE DROP HANDLER: Add extension for drag and drop from SPK Drive
+        if (Extension) {
+            const editorFactory = this;
+            bodyExtensions.push(Extension.create({
+                name: 'spkDriveDrop',
+                addProseMirrorPlugins() {
+                    return [editorFactory.createSpkDriveDropPlugin(this.editor)];
+                }
+            }));
+            if (DEBUG) console.log('✅ SPK Drive drop handler extension added');
         }
 
         // ✅ CRITICAL: Wait for Vue components to be ready
@@ -2716,6 +2730,18 @@ class EditorFactory {
             });
         }
 
+        // ✅ SPK DRIVE DROP HANDLER: Add extension for drag and drop from SPK Drive
+        if (Extension) {
+            const editorFactory = this;
+            bodyExtensions.push(Extension.create({
+                name: 'spkDriveDrop',
+                addProseMirrorPlugins() {
+                    return [editorFactory.createSpkDriveDropPlugin(this.editor)];
+                }
+            }));
+            if (DEBUG) console.log('✅ [Tier 2] SPK Drive drop handler extension added');
+        }
+
         // ✅ CRITICAL FIX: Calculate editable state based on current permissions
         const isEditable = !this.component.isReadOnlyMode;
         if (DEBUG) console.log('🔧 Creating Tier 2 bodyEditor (single editor) with editable state:', {
@@ -2930,6 +2956,182 @@ class EditorFactory {
         // No need to check for fragment existence - trust TipTap to handle this
 
         return { bodyEditor };
+    }
+
+    /**
+     * Create SPK Drive drop handler plugin
+     * Handles drag and drop of files from SPK Drive into the editor
+     */
+    createSpkDriveDropPlugin(editor) {
+        const Plugin = window.TiptapCollaboration?.Plugin || window.TiptapCollaboration?.default?.Plugin;
+        const PluginKey = window.TiptapCollaboration?.PluginKey || window.TiptapCollaboration?.default?.PluginKey;
+        
+        if (!Plugin || !PluginKey) {
+            console.warn('⚠️ Plugin or PluginKey not available from TipTap bundle');
+            return null;
+        }
+
+        return new Plugin({
+            key: new PluginKey('spkDriveDrop'),
+            props: {
+                handleDrop: (view, event) => {
+                    // Check if this is an SPK Drive file drop
+                    const contractId = event.dataTransfer.getData("contractid");
+                    if (!contractId) return false;
+                    
+                    // Check for single file (backward compatibility)
+                    const singleFileId = event.dataTransfer.getData("fileid");
+                    
+                    // Check for multiple files
+                    const itemIdsJson = event.dataTransfer.getData("itemids");
+                    
+                    if (!singleFileId && !itemIdsJson) return false;
+                    
+                    event.preventDefault();
+                    
+                    // Get drop position
+                    const coords = { left: event.clientX, top: event.clientY };
+                    const pos = view.posAtCoords(coords);
+                    if (!pos) return false;
+                    
+                    // Handle single file drop
+                    if (singleFileId) {
+                        this.handleSpkFileInsert(editor, pos.pos, singleFileId, contractId);
+                        return true;
+                    }
+                    
+                    // Handle multiple files drop
+                    if (itemIdsJson) {
+                        try {
+                            const itemIds = JSON.parse(itemIdsJson);
+                            // Filter out folders (items starting with "folder-")
+                            const fileIds = itemIds.filter(id => !id.startsWith('folder-'));
+                            
+                            if (fileIds.length === 0) return false;
+                            
+                            // Insert files at drop position
+                            let currentPos = pos.pos;
+                            fileIds.forEach((fileId) => {
+                                this.handleSpkFileInsert(editor, currentPos, fileId, contractId);
+                                // For subsequent files, append at the end
+                                currentPos = editor.state.doc.content.size;
+                            });
+                            
+                            return true;
+                        } catch (error) {
+                            console.error('Error parsing itemids:', error);
+                            return false;
+                        }
+                    }
+                    
+                    return false;
+                }
+            }
+        });
+    }
+
+    /**
+     * Handle SPK file insertion at drop position
+     */
+    handleSpkFileInsert(editor, pos, fileId, contractId) {
+        try {
+            // Get SPK Drive component reference
+            const spkDrive = window.spkDriveComponent;
+            if (!spkDrive || !spkDrive.newMeta) {
+                console.warn('⚠️ SPK Drive component not available');
+                return;
+            }
+            
+            // Get file metadata
+            const fileData = spkDrive.newMeta[contractId]?.[fileId];
+            if (!fileData) {
+                console.warn('⚠️ File metadata not found:', { contractId, fileId });
+                return;
+            }
+            
+            const fileName = fileData.name || fileId;
+            const fileType = fileData.type || '';
+            const url = `https://ipfs.dlux.io/ipfs/${fileId}`;
+            
+            // SPK Drive appends folder depth (.0 for root, .1 for subfolder, etc.)
+            // Extract the actual file type without the folder depth suffix
+            const cleanFileType = fileType.split('.')[0];
+            
+            if (DEBUG) console.log('🎯 SPK Drive file drop:', {
+                fileId,
+                contractId,
+                fileName,
+                fileType,
+                cleanFileType,
+                url,
+                fileData,
+                hasThumb: !!fileData.thumb,
+                thumbData: fileData.thumb_data
+            });
+            
+            // Determine if it's a video or image
+            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8)$/i) || 
+                          fileType.match(/^video\//i) || 
+                          cleanFileType === 'm3u8' ||
+                          ['mp4', 'webm', 'ogg', 'm3u8'].includes(cleanFileType);
+            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
+                          fileType.match(/^image\//i) ||
+                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(cleanFileType);
+            
+            if (isVideo) {
+                // Determine video type
+                let mimeType = 'video/mp4'; // default
+                let dataType = null;
+                
+                if (fileName.endsWith('.m3u8') || cleanFileType === 'm3u8') {
+                    mimeType = 'application/x-mpegURL';
+                    dataType = 'm3u8';
+                } else if (fileName.endsWith('.webm') || cleanFileType === 'webm') {
+                    mimeType = 'video/webm';
+                } else if (fileName.endsWith('.ogg') || cleanFileType === 'ogg') {
+                    mimeType = 'video/ogg';
+                }
+                
+                // Insert video at drop position
+                editor.chain()
+                    .focus()
+                    .insertContentAt(pos, {
+                        type: 'dluxvideo',
+                        attrs: {
+                            src: url,
+                            type: mimeType,
+                            'data-type': dataType,
+                            'data-mime-type': mimeType,
+                            controls: true,
+                            width: '100%',
+                            height: 'auto',
+                            crossorigin: 'anonymous'
+                        }
+                    })
+                    .run();
+                    
+                if (DEBUG) console.log('✅ Inserted video from SPK Drive:', url);
+            } else if (isImage) {
+                // Insert image
+                editor.chain()
+                    .focus()
+                    .insertContentAt(pos, {
+                        type: 'image',
+                        attrs: {
+                            src: url,
+                            alt: fileName,
+                            title: fileName
+                        }
+                    })
+                    .run();
+                    
+                if (DEBUG) console.log('✅ Inserted image from SPK Drive:', url);
+            } else {
+                console.warn('⚠️ Unsupported file type for drop:', fileName);
+            }
+        } catch (error) {
+            console.error('❌ Error handling SPK file drop:', error);
+        }
     }
 }
 
@@ -3551,6 +3753,7 @@ class SyncManager {
         // Emit changes to parent component (for external integrations)
         this.component.debouncedUpdateContent(); // Emit reactive content to parent
     }
+
 }
 
 /**
@@ -14334,20 +14537,32 @@ export default {
                         return rowOutput;
                     },
                     
-                    // Table cell - just return the content
+                    // Table cell - join children without commas
                     tableCell({ children }) {
-                        // If children is a function (getter), call it
+                        // Handle different types of children
                         if (typeof children === 'function') {
-                            return String(children());
+                            const result = children();
+                            if (Array.isArray(result)) {
+                                return result.join(''); // Join without commas
+                            }
+                            return String(result || '');
+                        } else if (Array.isArray(children)) {
+                            return children.join(''); // Join without commas
                         }
                         return String(children || '');
                     },
                     
-                    // Table header - just return the content
+                    // Table header - join children without commas
                     tableHeader({ children }) {
-                        // If children is a function (getter), call it
+                        // Handle different types of children
                         if (typeof children === 'function') {
-                            return String(children());
+                            const result = children();
+                            if (Array.isArray(result)) {
+                                return result.join(''); // Join without commas
+                            }
+                            return String(result || '');
+                        } else if (Array.isArray(children)) {
+                            return children.join(''); // Join without commas
                         }
                         return String(children || '');
                     },
