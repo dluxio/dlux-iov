@@ -1861,7 +1861,7 @@ class EditorFactory {
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
-        const Image = tiptapBundle.Image;
+        const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
@@ -1869,6 +1869,7 @@ class EditorFactory {
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Link = tiptapBundle.Link;
         const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
@@ -1885,6 +1886,7 @@ class EditorFactory {
             TextAlign: !!TextAlign,
             SpkVideo: !!SpkVideo,
             DluxVideo: !!DluxVideo,
+            CustomImage: !!CustomImage,
             CustomDropcursor: !!CustomDropcursor,
             CustomHorizontalRule: !!CustomHorizontalRule,
             Extension: !!Extension,
@@ -1954,7 +1956,7 @@ class EditorFactory {
                 }
             }),
             DluxVideo,
-            Image.configure({
+            CustomImage.configure({
                 inline: false,  // Block-level images for proper markdown
                 HTMLAttributes: {
                     class: 'content-image'
@@ -2522,7 +2524,7 @@ class EditorFactory {
         const TextAlign = tiptapBundle.TextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
-        const Image = tiptapBundle.Image;
+        const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
         const Mention = tiptapBundle.Mention;
         const TableKit = tiptapBundle.TableKit;
         const CustomTableCell = tiptapBundle.CustomTableCell;
@@ -2530,6 +2532,7 @@ class EditorFactory {
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Link = tiptapBundle.Link;
         const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
@@ -2567,7 +2570,7 @@ class EditorFactory {
                 }
             }),
             DluxVideo,
-            Image.configure({
+            CustomImage.configure({
                 inline: false,  // Block-level images for proper markdown
                 HTMLAttributes: {
                     class: 'content-image'
@@ -13408,10 +13411,124 @@ export default {
         // NOTE: undo() and redo() methods removed - requires TipTap Pro extension
 
         insertLink() {
-            const url = prompt('Enter URL:');
-            if (url) {
-                this.bodyEditor?.chain().focus().setLink({ href: url }).run();
-            }
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+            
+            // Check if text is selected
+            const { from, to } = this.bodyEditor.state.selection;
+            const selectedText = this.bodyEditor.state.selection.empty 
+                ? '' 
+                : this.bodyEditor.state.doc.textBetween(from, to, ' ');
+            
+            // Create modal dialog
+            const dialog = document.createElement('div');
+            dialog.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#212529;border:1px solid #495057;padding:20px;border-radius:8px;z-index:10000;min-width:450px;';
+            dialog.innerHTML = `
+                <h5 style="color:#fff;margin:0 0 15px 0;">Insert Link</h5>
+                <div style="margin-bottom:15px;">
+                    <label style="color:#adb5bd;display:block;margin-bottom:5px;">URL <span style="color:#dc3545;">*</span></label>
+                    <input type="text" id="linkUrl" placeholder="https://example.com" 
+                           style="width:100%;padding:8px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="color:#adb5bd;display:block;margin-bottom:5px;">
+                        Display Text ${selectedText ? '<span style="color:#6c757d;">(optional)</span>' : '<span style="color:#dc3545;">*</span>'}
+                    </label>
+                    <input type="text" id="linkText" placeholder="${selectedText ? 'Leave empty to use selected text' : 'Enter link text'}" 
+                           value="${selectedText}"
+                           style="width:100%;padding:8px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
+                </div>
+                <div style="text-align:right;">
+                    <button id="cancelBtn" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
+                    <button id="insertBtn" style="padding:6px 12px;background:#0d6efd;border:none;color:#fff;border-radius:4px;cursor:pointer;">Insert</button>
+                </div>
+            `;
+            
+            const backdrop = document.createElement('div');
+            backdrop.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;';
+            backdrop.onclick = () => {
+                dialog.remove();
+                backdrop.remove();
+            };
+            
+            document.body.appendChild(backdrop);
+            document.body.appendChild(dialog);
+            
+            const urlInput = dialog.querySelector('#linkUrl');
+            const textInput = dialog.querySelector('#linkText');
+            const insertBtn = dialog.querySelector('#insertBtn');
+            const cancelBtn = dialog.querySelector('#cancelBtn');
+            
+            urlInput.focus();
+            
+            const handleInsert = () => {
+                const url = urlInput.value.trim();
+                const displayText = textInput.value.trim();
+                
+                // Validate inputs
+                if (!url) {
+                    urlInput.style.borderColor = '#dc3545';
+                    urlInput.focus();
+                    return;
+                }
+                
+                // If no selected text and no display text provided, show error
+                if (!selectedText && !displayText) {
+                    textInput.style.borderColor = '#dc3545';
+                    textInput.focus();
+                    return;
+                }
+                
+                // Insert the link
+                if (selectedText && !displayText) {
+                    // Use existing selection
+                    this.bodyEditor.chain().focus().setLink({ href: url }).run();
+                } else {
+                    // Insert new text with link
+                    const linkText = displayText || selectedText;
+                    if (selectedText) {
+                        // Replace selection with new text and apply link
+                        this.bodyEditor.chain()
+                            .focus()
+                            .deleteRange({ from, to })
+                            .insertContent(linkText)
+                            .setTextSelection({ from, to: from + linkText.length })
+                            .setLink({ href: url })
+                            .run();
+                    } else {
+                        // Insert at cursor position
+                        const currentPos = this.bodyEditor.state.selection.from;
+                        this.bodyEditor.chain()
+                            .focus()
+                            .insertContent(linkText)
+                            .setTextSelection({ from: currentPos, to: currentPos + linkText.length })
+                            .setLink({ href: url })
+                            .run();
+                    }
+                }
+                
+                dialog.remove();
+                backdrop.remove();
+            };
+            
+            insertBtn.onclick = handleInsert;
+            cancelBtn.onclick = () => {
+                dialog.remove();
+                backdrop.remove();
+            };
+            
+            // Handle keyboard shortcuts
+            const handleKeypress = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleInsert();
+                } else if (e.key === 'Escape') {
+                    dialog.remove();
+                    backdrop.remove();
+                }
+            };
+            
+            urlInput.addEventListener('keydown', handleKeypress);
+            textInput.addEventListener('keydown', handleKeypress);
         },
 
         executeEditorCommand(commandName, commandFn) {
@@ -13939,7 +14056,7 @@ export default {
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
-                    Image,
+                    CustomImage,
                     CodeBlock,
                     TextAlign,
                     SpkVideo,
@@ -13950,6 +14067,7 @@ export default {
                     CustomDropcursor,
                     DragHandle,
                     Gapcursor,
+                    Placeholder,
                     Collaboration,
                     CollaborationCaret,
                     BubbleMenu,
@@ -13982,8 +14100,9 @@ export default {
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
-                    Image,
+                    CustomImage, // Use CustomImage for consistency
                     CodeBlock,
+                    Underline,
                     SpkVideo,
                     DluxVideo,
                     Mention,
@@ -14000,6 +14119,9 @@ export default {
                     CustomDropcursor,
                     DragHandle,
                     Gapcursor,
+                    Placeholder && Placeholder.configure({
+                        placeholder: 'Start writing your content...'
+                    }),
                     // Add collaboration extensions for schema compatibility
                     Collaboration && Collaboration.configure({
                         document: null,  // Not needed for static rendering
@@ -14053,43 +14175,6 @@ export default {
                 };
                 
                 /**
-                 * Applies TipTap marks (bold, italic, etc.) to text content.
-                 * Handles nested marks in the correct order for proper markdown rendering.
-                 * 
-                 * @param {string} text - The plain text content
-                 * @param {Array} marks - Array of TipTap mark objects
-                 * @returns {string} Text with markdown formatting applied
-                 */
-                const applyMarks = (text, marks) => {
-                    if (!marks || marks.length === 0) return text;
-                    
-                    let result = text;
-                    marks.forEach(mark => {
-                        switch (mark.type) {
-                            case 'bold':
-                                result = `**${result}**`;
-                                break;
-                            case 'italic':
-                                result = `*${result}*`;
-                                break;
-                            case 'strike':
-                                result = `~~${result}~~`;
-                                break;
-                            case 'underline':
-                                result = `<u>${result}</u>`;
-                                break;
-                            case 'code':
-                                result = `\`${result}\``;
-                                break;
-                            case 'link':
-                                result = `[${result}](${mark.attrs?.href || ''})`;
-                                break;
-                        }
-                    });
-                    return result;
-                };
-                
-                /**
                  * Complete node mapping configuration for TipTap static renderer.
                  * Each mapping function receives:
                  * - node: The current TipTap node to render
@@ -14104,8 +14189,8 @@ export default {
                 const nodeMapping = {
                     // Text node
                     text({ node }) {
-                        const text = node.text || '';
-                        return applyMarks(text, node.marks);
+                        // Let the static renderer handle marks automatically
+                        return node.text || '';
                     },
                     
                     // Paragraph with center support
@@ -14306,14 +14391,39 @@ export default {
                     }
                 };
                 
+                // Define custom mark mappings for proper markdown rendering
+                const markMapping = {
+                    link({ mark, children }) {
+                        const href = mark.attrs?.href || '';
+                        return `[${children}](${href})`;
+                    },
+                    bold({ children }) {
+                        return `**${children}**`;
+                    },
+                    italic({ children }) {
+                        return `*${children}*`;
+                    },
+                    strike({ children }) {
+                        return `~~${children}~~`;
+                    },
+                    underline({ children }) {
+                        return `<u>${children}</u>`;
+                    },
+                    code({ children }) {
+                        return `\`${children}\``;
+                    }
+                };
+                
                 const finalMarkdown = renderToMarkdown({
                     extensions,
                     content: doc,
                     options: {
-                        nodeMapping
+                        nodeMapping,
+                        markMapping
                     }
                 });
 
+                console.log('Final markdown from static renderer:', finalMarkdown);
                 return finalMarkdown;
             } catch (error) {
                 console.error('Error generating markdown with static renderer:', error);

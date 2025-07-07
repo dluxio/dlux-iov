@@ -440,9 +440,6 @@ function transformContentForTableCell(slice, schema) {
         });
         break;
         
-      case 'horizontalRule':
-        // Skip horizontal rules entirely
-        break;
         
       case 'paragraph':
       case 'text':
@@ -1150,7 +1147,7 @@ const CustomTableCell = TableCell.extend({
               // Check if slice contains any complex nodes that need transformation
               let needsTransformation = false;
               slice.content.forEach(node => {
-                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule'].includes(node.type.name)) {
+                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'].includes(node.type.name)) {
                   needsTransformation = true;
                 }
               });
@@ -1395,6 +1392,7 @@ const CustomDropcursor = Dropcursor.extend({
   }
 });
 
+
 // ✅ CUSTOM BLOCKQUOTE: Restrict to text content with marks (like CodeBlock)
 const CustomBlockquote = Blockquote.extend({
   name: 'blockquote', // Keep same name to replace default
@@ -1430,7 +1428,7 @@ const CustomBlockquote = Blockquote.extend({
               // Check if slice contains any complex nodes that need transformation
               let needsTransformation = false;
               slice.content.forEach(node => {
-                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule', 'table'].includes(node.type.name)) {
+                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'].includes(node.type.name)) {
                   needsTransformation = true;
                 }
               });
@@ -1527,7 +1525,7 @@ const TiptapCollaboration = {
   // Additional extensions
   // History, // Removed - not compatible with Collaboration extension
   Link,
-  Image: CustomImage, // Use CustomImage instead of default Image
+  CustomImage, // Export as CustomImage
   CodeBlock,
   // Dropcursor, // Don't export default - we use CustomDropcursor
   CustomDropcursor,

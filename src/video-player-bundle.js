@@ -7,9 +7,13 @@ import 'video.js/dist/video-js.css';
 import qualityLevels from 'videojs-contrib-quality-levels';
 import hlsQualitySelector from 'videojs-hls-quality-selector';
 
-// Register plugins globally
-videojs.registerPlugin('qualityLevels', qualityLevels);
-videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
+// Register plugins globally only if not already registered
+if (!videojs.getPlugin('qualityLevels')) {
+  videojs.registerPlugin('qualityLevels', qualityLevels);
+}
+if (!videojs.getPlugin('hlsQualitySelector')) {
+  videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
+}
 
 // DLUX Video Player Service
 class DluxVideoPlayer {
