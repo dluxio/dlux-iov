@@ -846,11 +846,19 @@ export default {
                         Remove File from Storage
                     </a>
                 </li>
-                <!-- Add to Post option - only show when postComponentAvailable prop is true -->
-                <li v-if="contextMenu.type === 'file' && postComponentAvailable" class="dropdown-divider"></li>
-                <li v-if="contextMenu.type === 'file' && postComponentAvailable">
-                    <a class="dropdown-item py-1" href="#" @click="addToPost(contextMenu.item); hideContextMenu();">
-                        <i class="fa-solid fa-plus fa-fw me-2"></i>{{ getAddToPostText() }}
+                <!-- Add to dApp option - only show when dApp is available -->
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable && dappAvailable" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable && dappAvailable">
+                    <a class="dropdown-item py-1" href="#" @click="addToDapp(contextMenu.item); hideContextMenu();">
+                        <i class="fa-solid fa-puzzle-piece fa-fw me-2"></i>Add to dApp
+                    </a>
+                </li>
+                
+                <!-- Add to Post option - only show when editor is available -->
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable && editorAvailable" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable && editorAvailable">
+                    <a class="dropdown-item py-1" href="#" @click="addToEditor(contextMenu.item); hideContextMenu();">
+                        <i class="fa-solid fa-plus fa-fw me-2"></i>Add to Post
                     </a>
                 </li>
                 
@@ -1236,6 +1244,14 @@ export default {
             type: Boolean,
             default: false,
         },
+        dappAvailable: {
+            type: Boolean,
+            default: false,
+        },
+        editorAvailable: {
+            type: Boolean,
+            default: false,
+        },
         fileSlots: {
             type: Object,
             default: function () {
@@ -1392,7 +1408,7 @@ export default {
             processedVideoFiles: [], // Completed video files ready for upload
         };
     },
-    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped', 'refresh-drive'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
+    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'add-to-dapp', 'add-to-editor', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped', 'refresh-drive'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
     methods: {
         ...common,
         ...spk,
@@ -5285,8 +5301,7 @@ export default {
                 debugLogger.debug('Drag left component/window, cleared all highlights');
             }
         },
-        addToPost(file) {
-
+        addToDapp(file) {
             // Get file metadata
             const meta = this.newMeta[file.i][file.f];
             const fileName = meta.name || file.f;
@@ -5343,13 +5358,44 @@ export default {
                 formattedContent = `[${fileName}](https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid})`;
             }
 
-            // Emit the formatted content and contract info to parent
+            // Emit the formatted content and contract info to parent (for backwards compatibility)
             this.$emit('add-to-post', {
                 content: formattedContent,
                 contractId: contractId,
                 cid: cid,
                 fileName: fileName,
                 fileType: fileType
+            });
+            
+            // Also emit the specific dapp event
+            this.$emit('add-to-dapp', {
+                content: formattedContent,
+                contractId: contractId,
+                cid: cid,
+                fileName: fileName,
+                fileType: fileType
+            });
+        },
+        
+        addToEditor(file) {
+            // Get file metadata
+            const meta = this.newMeta[file.i][file.f];
+            const fileName = meta.name || file.f;
+            const fileType = meta.type || '';
+            // Strip folder depth suffix from file type (e.g., 'png.0' -> 'png')
+            const cleanFileType = fileType.split('.')[0];
+            const cid = file.f;
+            const contractId = file.i;
+            
+            // Emit the file data for the editor to handle directly
+            this.$emit('add-to-editor', {
+                cid: cid,
+                contractId: contractId,
+                fileName: fileName,
+                fileType: fileType,
+                cleanFileType: cleanFileType,
+                url: `https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}`,
+                meta: meta
             });
         },
         

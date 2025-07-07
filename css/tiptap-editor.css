@@ -1063,6 +1063,7 @@
   height: auto;
   display: block;
   cursor: move;
+  margin: 0 auto;
 }
 
 /* Visual feedback when dragging images */
@@ -1097,7 +1098,7 @@
   max-width: 100%;
   height: auto;
   background-color: #000; /* Black background while loading */
-  margin: 1rem 0;
+  margin: 0 auto;
   border-radius: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }

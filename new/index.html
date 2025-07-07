@@ -323,7 +323,7 @@
                         <!-- Left Column: All Content (Blog Editor, dApp Builders) -->
                         <div class="col-lg-8 d-flex flex-column">
                             <!-- DLUX Enhancement Hub -->
-                            <div class="d-none dlux-enhancement-hub p-0 mb-2">
+                            <div class="dlux-enhancement-hub p-0 mb-2">
                                 <!-- Carousel View (shown when no builder active) -->
                                 <div v-if="!showDappBuilder && !showRemixBuilder && !currentRemixApp" class="carousel-view">
                                       <!-- Bootstrap Carousel -->
@@ -807,7 +807,9 @@
                                             :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                             :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                             @done="getSapi" :postpage="true" :post-type="'blog'" class="vfs-scroll-pass"
+                                            :dapp-available="hasActiveIframe" :editor-available="hasActiveEditor"
                                             @add-to-post="handleSPKFileForAssets($event)"
+                                            @add-to-editor="handleSPKFileForEditor($event)"
                                             :update-url="false"></contract-vue>
                                     </div>
                                 </div>
@@ -859,7 +861,9 @@
                                 :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                 :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                 @done="getSapi" :postpage="true" :post-type="'blog'"
+                                :dapp-available="hasActiveIframe" :editor-available="hasActiveEditor"
                                 @add-to-post="handleSPKFileForAssets($event)"
+                                @add-to-editor="handleSPKFileForEditor($event)"
                                 :update-url="false"></contract-vue>
                         </div>
 

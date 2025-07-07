@@ -171,6 +171,10 @@ createApp({
       detectedFileType: null,
       detectedFileName: null,
       showTranscodeOptions: false,
+      
+      // SPK Drive Integration State
+      editorAvailable: false,
+      iframeAvailable: false,
       debounceScroll: 0,
       rcCost: {
         time: 0,
@@ -1212,6 +1216,36 @@ PORT=3000
       } else if (appType === 'poll') {
         // Add poll app
       }
+    },
+    
+    // SPK Drive Integration Methods
+    checkIframeAvailability() {
+      // Check if any iframe is available
+      const iframes = document.querySelectorAll('iframe');
+      this.iframeAvailable = iframes.length > 0;
+      
+      // Set up mutation observer to detect iframe changes
+      if (!this.iframeObserver) {
+        this.iframeObserver = new MutationObserver(() => {
+          const newIframes = document.querySelectorAll('iframe');
+          this.iframeAvailable = newIframes.length > 0;
+        });
+        
+        this.iframeObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      }
+    },
+    
+    handleEditorReady() {
+      console.log('TipTap editor ready event received');
+      this.editorAvailable = true;
+    },
+    
+    handleEditorDestroyed() {
+      console.log('TipTap editor destroyed event received');
+      this.editorAvailable = false;
     },
     
     loadFFmpeg() {
@@ -6960,6 +6994,18 @@ function buyNFT(setname, uid, price, type, callback){
         console.warn('📁 No suitable iframe found for file:', fileData);
       }
     },
+    
+    // Handle file selection from SPK Drive for the TipTap editor
+    handleSPKFileForEditor(fileData) {
+      console.log('📝 Sending SPK file to TipTap editor:', fileData);
+      
+      // Check if we have the TipTap editor component
+      if (this.$refs.tiptapEditor && this.$refs.tiptapEditor.handleSpkAddToEditor) {
+        this.$refs.tiptapEditor.handleSpkAddToEditor(fileData);
+      } else {
+        console.warn('⚠️ TipTap editor not available for file insertion');
+      }
+    },
 
     // Generic iframe file drop handler
     handleIframeDrop(event) {
@@ -7888,6 +7934,13 @@ function buyNFT(setname, uid, price, type, callback){
     this.getProtocol();
     this.rcCosts();
     
+    // Check for iframe availability on mount
+    this.checkIframeAvailability();
+    
+    // Listen for TipTap editor ready/destroyed events
+    window.addEventListener('tiptap-editor-ready', this.handleEditorReady);
+    window.addEventListener('tiptap-editor-destroyed', this.handleEditorDestroyed);
+    
     // Start observing for video elements to setup HLS
     this.videoObserver = this.initIpfsVideoSupport();
     
@@ -7945,6 +7998,16 @@ function buyNFT(setname, uid, price, type, callback){
   unmounted() {
     // Remove resize handler
     window.removeEventListener('resize', this.handleResize);
+    
+    // Remove TipTap editor event listeners
+    window.removeEventListener('tiptap-editor-ready', this.handleEditorReady);
+    window.removeEventListener('tiptap-editor-destroyed', this.handleEditorDestroyed);
+    
+    // Clean up iframe observer
+    if (this.iframeObserver) {
+      this.iframeObserver.disconnect();
+      this.iframeObserver = null;
+    }
     
     // Remove all scroll handlers
     document.body.removeEventListener('scroll', this.boundScrollHandler);
@@ -8076,6 +8139,22 @@ function buyNFT(setname, uid, price, type, callback){
     },
   },
   computed: {
+    // Check if there's an active iframe/dApp available
+    hasActiveIframe: {
+      get() {
+        // Use reactive state instead of checking $refs
+        return this.iframeAvailable;
+      }
+    },
+    
+    // Check if the TipTap editor is available
+    hasActiveEditor: {
+      get() {
+        // Use reactive state instead of checking $refs
+        return this.editorAvailable;
+      }
+    },
+    
     canClaim: {
       get() {
         return this.rcinfo.current > this.rcCost["claim_account_operation"] ? true : false

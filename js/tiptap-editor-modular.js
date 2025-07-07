@@ -2277,6 +2277,9 @@ class EditorFactory {
                     setTimeout(() => {
                         this.component.editorInitialized = true;
                         if (DEBUG) console.log('✅ Editor fully initialized - ready for user interaction');
+                        
+                        // ✅ Emit event to notify that TipTap editor is ready
+                        window.dispatchEvent(new CustomEvent('tiptap-editor-ready'));
                     }, 1500); // 1.5 second delay to allow all initialization to complete
 
                     // ✅ STATE MONITORING: Track ProseMirror state for debugging
@@ -2784,6 +2787,15 @@ class EditorFactory {
                 // ✅ DRAG HANDLE: Now handled via CSS :hover rules in tiptap-editor.css
                 // The drag handle is hidden by default and shown on editor hover
                 if (DEBUG) console.log('✅ [Tier 2] Drag handle visibility managed via CSS hover');
+                
+                // ✅ FIX: Set editorInitialized flag after a delay to prevent false triggers
+                setTimeout(() => {
+                    this.component.editorInitialized = true;
+                    if (DEBUG) console.log('✅ Tier 2 Editor fully initialized - ready for user interaction');
+                    
+                    // ✅ Emit event to notify that TipTap editor is ready
+                    window.dispatchEvent(new CustomEvent('tiptap-editor-ready'));
+                }, 1500); // 1.5 second delay to allow all initialization to complete
                 
                 /* Removed complex JavaScript management - using CSS instead
                 const setupDragHandleVisibility = () => {
@@ -4162,6 +4174,11 @@ class LifecycleManager {
                     // ✅ VERIFICATION: Confirm destruction succeeded
                     if (instance.isDestroyed) {
                         if (DEBUG) console.log(`✅ Editor ${name} destroyed successfully`);
+                        
+                        // ✅ Emit event when body editor is destroyed
+                        if (name === 'bodyEditor') {
+                            window.dispatchEvent(new CustomEvent('tiptap-editor-destroyed'));
+                        }
                     } else {
                         console.warn(`⚠️ Editor ${name} destroy() called but not confirmed destroyed`);
                         // ✅ TIPTAP COMPLIANCE: Wait for destroy confirmation with proper timeout
@@ -15190,6 +15207,58 @@ export default {
                 
             } catch (error) {
                 if (DEBUG) console.error('Error inserting image:', error);
+            }
+        },
+        
+        /**
+         * Handle SPK Drive add-to-editor event
+         * Inserts the file into the editor based on its type
+         */
+        handleSpkAddToEditor(fileData) {
+            if (!this.bodyEditor || this.bodyEditor.isDestroyed) {
+                console.warn('⚠️ Editor not available for SPK file insertion');
+                return;
+            }
+            
+            const { cid, fileName, fileType, cleanFileType, url } = fileData;
+            
+            if (DEBUG) console.log('📁 Handling SPK file for editor:', {
+                cid,
+                fileName,
+                fileType,
+                cleanFileType,
+                url
+            });
+            
+            // Determine if it's a video or image
+            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8)$/i) || 
+                          cleanFileType === 'm3u8' ||
+                          ['mp4', 'webm', 'ogg', 'm3u8'].includes(cleanFileType);
+                          
+            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
+                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(cleanFileType);
+            
+            if (isVideo) {
+                // Insert as video
+                this.insertVideoEmbed(url, { type: cleanFileType });
+                if (DEBUG) console.log('✅ Inserted video from SPK Drive:', url);
+            } else if (isImage) {
+                // Insert as image  
+                this.insertImageEmbed(url);
+                if (DEBUG) console.log('✅ Inserted image from SPK Drive:', url);
+            } else {
+                // Insert as link for other file types
+                const linkText = fileName || cid;
+                this.bodyEditor.chain()
+                    .focus()
+                    .insertContent(`<a href="${url}">${linkText}</a>`)
+                    .run();
+                    
+                if (DEBUG) console.log('✅ Inserted link from SPK Drive:', url);
+                
+                // Mark document as having unsaved changes
+                this.hasUnsavedChanges = true;
+                this.hasUserIntent = true;
             }
         },
 

@@ -202,7 +202,10 @@ export default {
                     :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
                     @update-contract="handleUpdateContract($event)" @tosign="sendIt($event)" :signedtx="signedtx"
-                    :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"
+                    :post-component-available="postpage" :post-type="postType" 
+                    :dapp-available="dappAvailable" :editor-available="editorAvailable"
+                    @add-to-post="handleAddToPost($event)" @add-to-dapp="handleAddToDapp($event)" 
+                    @add-to-editor="handleAddToEditor($event)"
                     :file-slots="fileSlots" @set-logo="handleFileSlot('logo', $event)"
                     @set-featured="handleFileSlot('featured', $event)" @set-banner="handleFileSlot('banner', $event)"
                     @set-wrapped="handleFileSlot('wrapped', $event)" :update-url="updateUrl"></files-vue>
@@ -313,6 +316,16 @@ export default {
         updateUrl: {
             type: Boolean,
             default: true,
+            required: false
+        },
+        dappAvailable: {
+            type: Boolean,
+            default: false,
+            required: false
+        },
+        editorAvailable: {
+            type: Boolean,
+            default: false,
             required: false
         }
     },
@@ -1628,6 +1641,16 @@ export default {
         handleAddToPost(fileData) {
             // Emit the file data to the parent so it can be passed to the post component
             this.$emit('add-to-post', fileData);
+        },
+        
+        handleAddToDapp(fileData) {
+            // Handle add to dApp - same as original add-to-post for backwards compatibility
+            this.$emit('add-to-post', fileData);
+        },
+        
+        handleAddToEditor(fileData) {
+            // Emit the file data specifically for the editor
+            this.$emit('add-to-editor', fileData);
         },
         
         handleFileSlot(slotType, fileData) {
