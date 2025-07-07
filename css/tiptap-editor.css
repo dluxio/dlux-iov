@@ -1075,6 +1075,21 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Image figures and captions */
+.ProseMirror figure.image-figure {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.ProseMirror figcaption.image-caption {
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+  padding: 0 1rem;
+  line-height: 1.4;
+}
+
 
 /* Ensure videos are responsive and visible */
 .ProseMirror video {

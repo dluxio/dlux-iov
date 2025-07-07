@@ -113,11 +113,13 @@ const CustomImage = Image.extend({
       // Use a mutable reference to track the current node
       let currentNode = node;
       
-      // Create wrapper div
-      const dom = document.createElement('div');
-      dom.style.display = 'inline-block';
+      // Create wrapper figure
+      const dom = document.createElement('figure');
+      dom.className = 'image-figure';
+      dom.style.display = 'block';
       dom.style.position = 'relative';
-      dom.style.maxWidth = '100%';
+      dom.style.margin = '1rem 0';
+      dom.style.textAlign = 'center';
       
       // Create the image element
       const img = document.createElement('img');
@@ -128,6 +130,12 @@ const CustomImage = Image.extend({
       img.style.cursor = 'pointer'; // Show it's clickable
       img.style.maxWidth = '100%';
       img.style.height = 'auto';
+      
+      // Create caption element
+      const figcaption = document.createElement('figcaption');
+      figcaption.className = 'image-caption';
+      figcaption.textContent = node.attrs.alt || '';
+      figcaption.style.display = node.attrs.alt ? 'block' : 'none';
       
       // Define click handler for proper cleanup
       const handleClick = (e) => {
@@ -146,6 +154,7 @@ const CustomImage = Image.extend({
       img.addEventListener('click', handleClick);
       
       dom.appendChild(img);
+      dom.appendChild(figcaption);
       
       return {
         dom,
@@ -160,6 +169,9 @@ const CustomImage = Image.extend({
           img.src = updatedNode.attrs.src;
           img.alt = updatedNode.attrs.alt || '';
           img.title = updatedNode.attrs.title || '';
+          // Update caption
+          figcaption.textContent = updatedNode.attrs.alt || '';
+          figcaption.style.display = updatedNode.attrs.alt ? 'block' : 'none';
           return true;
         },
         destroy() {
