@@ -2125,6 +2125,7 @@ class EditorFactory {
                 element: this.component.$refs.bodyEditor,
                 extensions: validExtensions,
                 editable: isEditable,
+                autofocus: false, // Prevent TextSelection warning on initialization
                 // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
                 // ✅ v3 PERFORMANCE: Enable shouldRerenderOnTransaction for better collaborative performance
                 shouldRerenderOnTransaction: false,
@@ -2737,6 +2738,7 @@ class EditorFactory {
             element: this.component.$refs.bodyEditor,
             extensions: validExtensions,
             editable: isEditable,
+            autofocus: false, // Prevent TextSelection warning on initialization
             // ✅ REMOVED: content parameter - let Y.js handle content via Collaboration extension
             // ✅ v3 REMOVED: immediatelyRender is not a valid TipTap v3 option
             // ✅ v3 PERFORMANCE: Enable shouldRerenderOnTransaction for better collaborative performance
@@ -15052,7 +15054,6 @@ export default {
                 if (type === 'image') {
                     cleanAttrs.src = attrs.src;
                     cleanAttrs.alt = attrs.alt.trim();
-                    cleanAttrs.title = attrs.title.trim();
                 } else if (type === 'video') {
                     cleanAttrs.src = attrs.src;
                     cleanAttrs.controls = attrs.controls;
@@ -15094,6 +15095,35 @@ export default {
                 loop: false,
                 muted: false
             };
+        },
+
+
+        // Delete the media node from the document
+        deleteMediaNode() {
+            if (this.mediaEditData.pos !== null && this.bodyEditor && !this.bodyEditor.isDestroyed) {
+                try {
+                    // Create transaction to delete the node
+                    const tr = this.bodyEditor.state.tr;
+                    
+                    // Delete the node at the stored position
+                    // We need to delete from pos to pos + node.nodeSize
+                    const node = this.bodyEditor.state.doc.nodeAt(this.mediaEditData.pos);
+                    if (node) {
+                        tr.delete(this.mediaEditData.pos, this.mediaEditData.pos + node.nodeSize);
+                        this.bodyEditor.view.dispatch(tr);
+                        
+                        // Mark as unsaved
+                        this.hasUnsavedChanges = true;
+                        this.hasUserIntent = true;
+                        
+                        // Close the modal
+                        this.closeMediaEditModal();
+                    }
+                } catch (error) {
+                    console.error('Error deleting media:', error);
+                    alert('Failed to delete media. Please try again.');
+                }
+            }
         },
 
         // ===== TEMPLATE UTILITY METHODS =====
@@ -21660,23 +21690,15 @@ export default {
                       </div>
                     </div>
                   </div>
-                  
-                  <!-- Title field (for all media types) -->
-                  <div class="mb-3">
-                    <label for="mediaEditTitle" class="form-label">Title (optional)</label>
-                    <input 
-                      id="mediaEditTitle"
-                      v-model="mediaEditData.title" 
-                      type="text" 
-                      class="form-control bg-dark text-white border-secondary"
-                      placeholder="Optional title attribute"
-                      @keyup.enter="saveMediaEdit"
-                    >
-                  </div>
                 </div>
-                <div class="modal-footer border-secondary">
-                  <button type="button" class="btn btn-secondary" @click="closeMediaEditModal">Cancel</button>
-                  <button type="button" class="btn btn-primary" @click="saveMediaEdit">Save Changes</button>
+                <div class="modal-footer border-secondary d-flex justify-content-between">
+                  <button type="button" class="btn btn-outline-danger" @click="deleteMediaNode" title="Delete from document">
+                    <i class="fas fa-trash me-1"></i>Delete
+                  </button>
+                  <div>
+                    <button type="button" class="btn btn-secondary me-2" @click="closeMediaEditModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @click="saveMediaEdit">Save Changes</button>
+                  </div>
                 </div>
               </div>
             </div>
