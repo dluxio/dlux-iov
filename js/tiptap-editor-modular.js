@@ -3082,26 +3082,29 @@ class EditorFactory {
             });
             
             // Determine if it's a video or image
-            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8)$/i) || 
+            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8|mov|avi|mkv|m4v|3gp|3g2)$/i) || 
                           fileType.match(/^video\//i) || 
                           cleanFileType === 'm3u8' ||
-                          ['mp4', 'webm', 'ogg', 'm3u8'].includes(cleanFileType);
-            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
+                          ['mp4', 'webm', 'ogg', 'm3u8', 'mov', 'avi', 'mkv', 'm4v', '3gp', '3g2'].includes(cleanFileType);
+            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|tiff|tif|avif|jfif|heic|heif)$/i) || 
                           fileType.match(/^image\//i) ||
-                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(cleanFileType);
+                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif', 'jfif', 'heic', 'heif'].includes(cleanFileType);
             
             if (isVideo) {
-                // Determine video type
-                let mimeType = 'video/mp4'; // default
-                let dataType = null;
+                // Build video attributes
+                const videoAttrs = {
+                    src: url,
+                    controls: true,
+                    width: '100%',
+                    height: 'auto',
+                    crossorigin: 'anonymous'
+                };
                 
+                // Only set type attributes for m3u8 which requires it
                 if (fileName.endsWith('.m3u8') || cleanFileType === 'm3u8') {
-                    mimeType = 'application/x-mpegURL';
-                    dataType = 'm3u8';
-                } else if (fileName.endsWith('.webm') || cleanFileType === 'webm') {
-                    mimeType = 'video/webm';
-                } else if (fileName.endsWith('.ogg') || cleanFileType === 'ogg') {
-                    mimeType = 'video/ogg';
+                    videoAttrs.type = 'application/x-mpegURL';
+                    videoAttrs['data-type'] = 'm3u8';
+                    videoAttrs['data-mime-type'] = 'application/x-mpegURL';
                 }
                 
                 // Insert video at drop position
@@ -3109,16 +3112,7 @@ class EditorFactory {
                     .focus()
                     .insertContentAt(pos, {
                         type: 'dluxvideo',
-                        attrs: {
-                            src: url,
-                            type: mimeType,
-                            'data-type': dataType,
-                            'data-mime-type': mimeType,
-                            controls: true,
-                            width: '100%',
-                            height: 'auto',
-                            crossorigin: 'anonymous'
-                        }
+                        attrs: videoAttrs
                     })
                     .run();
                     
@@ -15163,12 +15157,13 @@ export default {
                 crossorigin: 'anonymous'
             };
             
-            // Add type attributes for m3u8
+            // Only set type attributes for m3u8 which requires it
             if (fileType === 'm3u8') {
                 videoAttrs.type = 'application/x-mpegURL';
                 videoAttrs['data-type'] = 'm3u8';
                 videoAttrs['data-mime-type'] = 'application/x-mpegURL';
             }
+            // For all other formats, let the browser auto-detect
             
             this.bodyEditor.chain()
                 .focus()
@@ -15182,7 +15177,7 @@ export default {
             this.hasUserIntent = true;
         },
 
-        insertImageEmbed(url) {
+        insertImageEmbed(url, altText = '') {
             if (!this.bodyEditor || !url) {
                 return;
             }
@@ -15190,14 +15185,20 @@ export default {
             // Use the modular URL processor
             const { url: processedUrl } = URLProcessor.processUrl(url, { type: 'image' });
             
+            // If no alt text provided, try to extract filename from URL
+            if (!altText) {
+                const urlParts = url.split('/');
+                altText = urlParts[urlParts.length - 1] || '';
+            }
+            
             try {
                 // Use the Image extension's setImage command
                 this.bodyEditor.chain()
                     .focus()
                     .setImage({ 
                         src: processedUrl,
-                        alt: '',
-                        title: ''
+                        alt: altText,
+                        title: altText
                     })
                     .run();
                 
@@ -15231,20 +15232,22 @@ export default {
             });
             
             // Determine if it's a video or image
-            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8)$/i) || 
+            const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8|mov|avi|mkv|m4v|3gp|3g2)$/i) || 
+                          fileType.match(/^video\//i) ||
                           cleanFileType === 'm3u8' ||
-                          ['mp4', 'webm', 'ogg', 'm3u8'].includes(cleanFileType);
+                          ['mp4', 'webm', 'ogg', 'm3u8', 'mov', 'avi', 'mkv', 'm4v', '3gp', '3g2'].includes(cleanFileType);
                           
-            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || 
-                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(cleanFileType);
+            const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|tiff|tif|avif|jfif|heic|heif)$/i) || 
+                          fileType.match(/^image\//i) ||
+                          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif', 'jfif', 'heic', 'heif'].includes(cleanFileType);
             
             if (isVideo) {
                 // Insert as video
                 this.insertVideoEmbed(url, { type: cleanFileType });
                 if (DEBUG) console.log('✅ Inserted video from SPK Drive:', url);
             } else if (isImage) {
-                // Insert as image  
-                this.insertImageEmbed(url);
+                // Insert as image with filename as caption
+                this.insertImageEmbed(url, fileName);
                 if (DEBUG) console.log('✅ Inserted image from SPK Drive:', url);
             } else {
                 // Insert as link for other file types

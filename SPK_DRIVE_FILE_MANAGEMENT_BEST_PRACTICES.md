@@ -2472,4 +2472,88 @@ testCases.forEach(name => {
 
 ---
 
+## TipTap Editor Integration
+
+### Overview
+The SPK Drive system integrates seamlessly with the TipTap editor, allowing users to drag and drop files directly from SPK Drive into their posts or use the "Add to Post" button from the context menu.
+
+### Drag and Drop Functionality
+
+#### Implementation
+Files can be dragged from SPK Drive directly into the TipTap editor. The system:
+1. Detects SPK Drive drops via dataTransfer metadata (contractId, fileId)
+2. Automatically determines file type (image, video, or other)
+3. Inserts appropriate content based on file type
+
+#### Supported Drop Operations
+- **Single file drops**: Individual files via `fileid` data
+- **Multiple file drops**: Multiple selections via `itemids` JSON array
+- **Automatic type detection**: No user input required for media insertion
+
+### Add to Post Button
+
+#### Context Menu Integration
+The SPK Drive context menu provides two buttons when appropriate:
+- **Add to dApp**: For inserting files into iframe-based applications
+- **Add to Post**: For inserting files into the TipTap editor
+
+#### Button Visibility
+Buttons are shown/hidden based on reactive state:
+- Uses Vue 3 event-driven architecture
+- TipTap editor emits `tiptap-editor-ready` and `tiptap-editor-destroyed` events
+- SPK Drive components react to editor availability
+
+### Supported Media Formats
+
+#### Video Formats
+- **Standard formats**: mp4, webm, ogg
+- **Streaming**: m3u8 (HLS)
+- **Additional formats**: mov, avi, mkv, m4v, 3gp, 3g2
+- **MIME type handling**: Only m3u8 requires explicit type (`application/x-mpegURL`)
+- **Browser compatibility**: Other formats use browser auto-detection
+
+#### Image Formats
+- **Web formats**: jpg, jpeg, png, gif, webp, svg
+- **Additional formats**: bmp, ico, tiff, tif, avif, jfif, heic, heif
+- **Caption support**: Images display filename as caption via CustomImage extension
+
+### File Type Detection
+
+The system uses comprehensive detection for both drag-and-drop and button insertion:
+
+```javascript
+// Video detection
+const isVideo = fileName.match(/\.(mp4|webm|ogg|m3u8|mov|avi|mkv|m4v|3gp|3g2)$/i) || 
+                fileType.match(/^video\//i) ||
+                cleanFileType === 'm3u8' ||
+                ['mp4', 'webm', 'ogg', 'm3u8', 'mov', 'avi', 'mkv', 'm4v', '3gp', '3g2'].includes(cleanFileType);
+
+// Image detection
+const isImage = fileName.match(/\.(jpg|jpeg|png|gif|webp|svg|bmp|ico|tiff|tif|avif|jfif|heic|heif)$/i) || 
+                fileType.match(/^image\//i) ||
+                ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif', 'jfif', 'heic', 'heif'].includes(cleanFileType);
+```
+
+### Integration Points
+
+#### SPK Drive Component
+- Registers globally as `window.spkDriveComponent`
+- Provides file metadata via `newMeta` property
+- Handles file selection events
+
+#### TipTap Editor
+- Implements `handleSpkFileInsert` for drag-and-drop
+- Implements `handleSpkAddToEditor` for button insertion
+- Uses ProseMirror plugin for drop handling
+
+### Best Practices
+
+1. **File Type Stripping**: SPK Drive appends folder depth (.0 for root), which must be stripped
+2. **URL Construction**: Use `https://ipfs.dlux.io/ipfs/{CID}` for IPFS files
+3. **Caption Handling**: Pass filename to image insertion for automatic caption display
+4. **MIME Types**: Only set explicit MIME types for formats that require them (m3u8)
+5. **Event Architecture**: Use reactive state and events for component communication
+
+---
+
 *This documentation reflects the SPK Network file upload system as implemented in the DLUX IOV project. For the latest updates and API changes, refer to the official SPK Network documentation and the project's GitHub repository.*
