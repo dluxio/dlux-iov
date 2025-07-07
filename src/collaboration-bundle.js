@@ -58,6 +58,7 @@ import Text from '@tiptap/extension-text';
 import Bold from '@tiptap/extension-bold';
 import Italic from '@tiptap/extension-italic';
 import Strike from '@tiptap/extension-strike';
+import Underline from '@tiptap/extension-underline';
 import Code from '@tiptap/extension-code';
 import Heading from '@tiptap/extension-heading';
 import BulletList from '@tiptap/extension-bullet-list';
@@ -1392,10 +1393,10 @@ const CustomDropcursor = Dropcursor.extend({
 });
 
 
-// ✅ CUSTOM BLOCKQUOTE: Restrict to text content with marks (like CodeBlock)
+// ✅ CUSTOM BLOCKQUOTE: Allow paragraphs for proper markdown compatibility
 const CustomBlockquote = Blockquote.extend({
   name: 'blockquote', // Keep same name to replace default
-  content: 'text*', // Only allow text with marks (no block elements)
+  content: 'paragraph*', // Allow multiple paragraphs for multi-line blockquotes
   
   
   addProseMirrorPlugins() {
@@ -1510,6 +1511,7 @@ const TiptapCollaboration = {
   Bold,
   Italic,
   Strike,
+  Underline,
   Code,
   Heading,
   BulletList,

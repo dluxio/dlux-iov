@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Blockquote</title>
+    <script>
+        // Simple test to check if CustomBlockquote is available
+        setTimeout(() => {
+            if (window.TiptapCollaboration) {
+                console.log('TiptapCollaboration loaded:', !!window.TiptapCollaboration);
+                console.log('CustomBlockquote available:', !!window.TiptapCollaboration.CustomBlockquote);
+                
+                // Check in default export if not found
+                if (!window.TiptapCollaboration.CustomBlockquote && window.TiptapCollaboration.default) {
+                    console.log('CustomBlockquote in default:', !!window.TiptapCollaboration.default.CustomBlockquote);
+                }
+            } else {
+                console.log('TiptapCollaboration not loaded yet');
+            }
+        }, 2000);
+    </script>
+</head>
+<body>
+    <h1>Blockquote Test</h1>
+    <p>Check console for CustomBlockquote availability</p>
+    <script src="js/collaboration.bundle.js"></script>
+</body>
+</html>

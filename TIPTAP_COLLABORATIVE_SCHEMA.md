@@ -848,6 +848,181 @@ this.updateVideoTranscoding(videoId, {
 });
 ```
 
+## 🗂️ **SPK Drive Integration**
+
+### **Overview**
+The TipTap editor seamlessly integrates with SPK Drive decentralized storage, enabling drag-and-drop media insertion and button-based file selection from the user's cloud storage.
+
+### **Integration Points**
+
+#### **1. Drag and Drop Handler**
+A custom ProseMirror plugin intercepts SPK Drive drag events:
+
+```javascript
+// In EditorFactory.createSpkDriveDropPlugin()
+new Plugin({
+    key: new PluginKey('spkDriveDrop'),
+    props: {
+        handleDrop: (view, event) => {
+            // Extract SPK Drive metadata
+            const contractId = event.dataTransfer.getData("contractid");
+            const singleFileId = event.dataTransfer.getData("fileid");
+            const itemIdsJson = event.dataTransfer.getData("itemids");
+            
+            if (!contractId || (!singleFileId && !itemIdsJson)) return false;
+            
+            // Parse file metadata
+            const newMeta = JSON.parse(event.dataTransfer.getData("newMeta"));
+            
+            // Process files
+            const fileIds = itemIdsJson ? JSON.parse(itemIdsJson) : [singleFileId];
+            
+            fileIds.forEach(fileId => {
+                const fileInfo = newMeta[fileId];
+                if (fileInfo && !fileInfo.is_thumb) {
+                    // Insert based on file type
+                    if (isImageFile(fileType)) {
+                        insertImageAtCursor(view, fileInfo);
+                    } else if (isVideoFile(fileType)) {
+                        insertVideoAtCursor(view, fileInfo);
+                    }
+                }
+            });
+            
+            return true; // Prevent default handling
+        }
+    }
+});
+```
+
+#### **2. Button-Based Insertion**
+SPK Drive provides dual context menu buttons:
+
+```javascript
+// SPK Drive context menu
+{
+    v-if="dappAvailable"
+    @click="addToDapp"
+    text: "Add to dApp"  // For iframe applications
+},
+{
+    v-if="editorAvailable"
+    @click="addToEditor"
+    text: "Add to Post"  // For TipTap editor
+}
+```
+
+#### **3. Event-Based Communication**
+Components communicate via custom events:
+
+```javascript
+// SPK Drive emits file selection
+addToEditor() {
+    window.dispatchEvent(new CustomEvent('spk-add-to-editor', {
+        detail: {
+            contractId: this.activeContract,
+            fileIds: this.selectedFiles,
+            fileType: this.getFileType(this.selectedFiles[0]),
+            newMeta: this.fileMetadata
+        }
+    }));
+}
+
+// TipTap editor handles the event
+window.addEventListener('spk-add-to-editor', (event) => {
+    const { contractId, fileIds, fileType, newMeta } = event.detail;
+    this.handleSpkAddToEditor(contractId, fileIds, fileType, newMeta);
+});
+```
+
+### **File Processing**
+
+#### **Type Detection**
+SPK Drive files include folder depth suffixes that must be stripped:
+
+```javascript
+// SPK Drive format: 'filename.ext.0' (root) or 'filename.ext.A' (subfolder)
+const cleanType = fileType.split('.')[0];  // Extract actual extension
+
+// Supported formats
+const imageFormats = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp', 'avif', 'heic', 'tiff', 'ico'];
+const videoFormats = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm3u8', 'wmv', 'flv', 'mpg', 'mpeg', '3gp', 'ogv'];
+```
+
+#### **Media Insertion**
+Different media types use specialized TipTap extensions:
+
+```javascript
+// Image insertion with CustomImage extension
+editor.commands.insertImageEmbed({
+    src: `https://ipfs.dlux.io/ipfs/${cid}`,
+    alt: fileName || 'Image',
+    title: fileName  // Provides caption
+});
+
+// Video insertion with DluxVideo extension
+const videoAttrs = {
+    src: `https://ipfs.dlux.io/ipfs/${cid}`,
+    title: fileName || 'Video'
+};
+
+// Only set MIME type for HLS streams
+if (fileType === 'm3u8') {
+    videoAttrs.type = 'application/x-mpegURL';
+}
+
+editor.commands.insertDluxVideo(videoAttrs);
+```
+
+### **State Management**
+
+#### **Availability Tracking**
+The system tracks editor and iframe availability:
+
+```javascript
+// v3-user.js reactive state
+data: {
+    editorAvailable: false,  // TipTap editor ready
+    iframeAvailable: false   // Compatible iframe detected
+}
+
+// Editor lifecycle events
+window.addEventListener('tiptap-editor-ready', () => {
+    this.editorAvailable = true;
+});
+
+window.addEventListener('tiptap-editor-destroyed', () => {
+    this.editorAvailable = false;
+});
+```
+
+#### **Props Flow**
+Availability states flow through the component hierarchy:
+
+```javascript
+// index.html
+<contract-vue 
+    :dapp-available="iframeAvailable"
+    :editor-available="editorAvailable">
+</contract-vue>
+
+// spkdrive.js
+props: ['dappAvailable', 'editorAvailable']
+
+// filesvue-dd.js
+<div v-if="dappAvailable || editorAvailable">
+    <!-- Show context menu buttons -->
+</div>
+```
+
+### **Best Practices**
+
+1. **Thumbnail Filtering**: Always check `is_thumb` flag to skip thumbnail files
+2. **MIME Type Handling**: Only set explicit MIME types for m3u8 streams
+3. **Caption Support**: Pass fileName for meaningful alt text and captions
+4. **Error Boundaries**: Check editor availability before insertion
+5. **Multi-File Support**: Process files individually at cursor position
+
 ### **Creating a 360° Post**
 ```javascript
 // Initialize as 360° post

@@ -597,6 +597,126 @@ The system classifies files into two categories:
 - Generated thumbnails (`_filename.jpg`)
 - Video segments (`.ts` files)
 - Poster images (`_baseName_poster.jpg`)
+
+## TipTap Editor Integration
+
+### Overview
+The SPK Drive file browser integrates seamlessly with the TipTap collaborative editor, allowing users to insert media directly from their decentralized storage into their posts. The integration supports both drag-and-drop and button-based insertion methods.
+
+### Integration Architecture
+
+#### 1. **Drag and Drop Support**
+The TipTap editor includes a custom ProseMirror plugin that handles SPK Drive drag events:
+
+```javascript
+// Drop handler in EditorFactory.createSpkDriveDropPlugin()
+handleDrop: (view, event) => {
+  const contractId = event.dataTransfer.getData("contractid");
+  const singleFileId = event.dataTransfer.getData("fileid");
+  const itemIdsJson = event.dataTransfer.getData("itemids");
+  
+  if (!contractId || (!singleFileId && !itemIdsJson)) return false;
+  
+  // Process dropped files and insert appropriate media
+}
+```
+
+#### 2. **Dual Button System**
+SPK Drive context menu provides two action buttons:
+- **"Add to dApp"**: Sends file data to iframe-based applications
+- **"Add to Post"**: Inserts media into TipTap editor
+
+Button visibility is controlled by reactive state:
+```javascript
+// In v3-user.js
+data: {
+  editorAvailable: false,  // Set when TipTap editor is ready
+  iframeAvailable: false   // Set when compatible iframe detected
+}
+```
+
+#### 3. **Event-Driven Communication**
+The system uses custom events for component communication:
+```javascript
+// SPK Drive emits file selection
+window.dispatchEvent(new CustomEvent('spk-add-to-editor', {
+  detail: { contractId, fileIds, fileType, newMeta }
+}));
+
+// TipTap editor listens and processes
+window.addEventListener('spk-add-to-editor', this.handleSPKFileForEditor);
+```
+
+### Media Type Support
+
+#### Supported Image Formats
+- **Standard**: jpg, jpeg, png, gif, bmp, svg
+- **Modern**: webp, avif, heic
+- **Professional**: tiff, ico
+
+#### Supported Video Formats
+- **Standard**: mp4, webm, mov, avi, mkv
+- **Modern**: m3u8 (HLS streaming)
+- **Legacy**: wmv, flv, mpg, mpeg, 3gp, ogv
+
+### File Type Detection
+The system strips SPK Drive folder depth suffixes for accurate type detection:
+```javascript
+// Files have types like 'm3u8.0' (root) or 'png.1' (subfolder)
+const cleanType = fileType.split('.')[0];  // Extract actual extension
+```
+
+### Media Insertion Logic
+
+#### Image Insertion
+Uses the CustomImage extension for figure/figcaption support:
+```javascript
+editor.commands.insertImageEmbed({
+  src: `https://ipfs.dlux.io/ipfs/${cid}`,
+  alt: fileName || 'Image',
+  title: fileName
+});
+```
+
+#### Video Insertion
+Uses the DluxVideo extension with type detection:
+```javascript
+// Only set MIME type for m3u8 files
+const attrs = {
+  src: `https://ipfs.dlux.io/ipfs/${cid}`,
+  title: fileName || 'Video'
+};
+
+if (fileType === 'm3u8') {
+  attrs.type = 'application/x-mpegURL';
+}
+
+editor.commands.insertDluxVideo(attrs);
+```
+
+### Best Practices
+
+1. **MIME Type Handling**: Only explicitly set MIME types for m3u8 files. Let the browser auto-detect types for other formats to ensure compatibility.
+
+2. **Caption Support**: Always pass fileName to media insertion commands to provide meaningful alt text and captions.
+
+3. **Multi-File Handling**: When processing multiple files:
+   - Skip thumbnail files (they're metadata, not content)
+   - Process each file independently
+   - Insert at cursor position in sequence
+
+4. **Error Handling**: Check for editor availability before insertion:
+   ```javascript
+   if (!this.bodyEditor || this.bodyEditor.isDestroyed) {
+     console.error('Editor not available');
+     return;
+   }
+   ```
+
+5. **State Management**: Use reactive patterns for button visibility:
+   - Listen for editor ready/destroyed events
+   - Update availability flags accordingly
+   - Pass flags as props to child components
 - Thumbnail playlists (`_thumb.m3u8`)
 - These have `is_thumb: true` for UI hiding
 - These have `flag: "2"` for VFS metadata

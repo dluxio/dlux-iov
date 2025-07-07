@@ -1891,6 +1891,7 @@ class EditorFactory {
             CustomImage: !!CustomImage,
             CustomDropcursor: !!CustomDropcursor,
             CustomHorizontalRule: !!CustomHorizontalRule,
+            CustomBlockquote: !!CustomBlockquote,
             Extension: !!Extension,
             Plugin: !!window.TiptapCollaboration?.Plugin,
             PluginKey: !!window.TiptapCollaboration?.PluginKey,
@@ -14408,24 +14409,34 @@ export default {
                         return node.text || '';
                     },
                     
-                    // Paragraph with center support
+                    // Paragraph with full text alignment support
                     paragraph({ node, children, options }) {
                         const content = renderChildren(children, options);
                         if (node.attrs?.textAlign === 'center') {
-                            return `<center>${content}</center>\n\n`;
+                            return `<div class="text-center">${content}</div>\n\n`;
+                        } else if (node.attrs?.textAlign === 'right') {
+                            return `<div class="text-right">${content}</div>\n\n`;
+                        } else if (node.attrs?.textAlign === 'justify') {
+                            return `<div class="text-justify">${content}</div>\n\n`;
                         }
+                        // 'left' is default, no special handling needed
                         return `${content}\n\n`;
                     },
                     
-                    // Heading with center support
+                    // Heading with full text alignment support
                     heading({ node, children, options }) {
                         const level = node.attrs?.level || 1;
                         const content = renderChildren(children, options);
                         const hashes = '#'.repeat(level);
                         
                         if (node.attrs?.textAlign === 'center') {
-                            return `<center>${hashes} ${content}</center>\n\n`;
+                            return `${hashes} <div class="text-center">${content}</div>\n\n`;
+                        } else if (node.attrs?.textAlign === 'right') {
+                            return `${hashes} <div class="text-right">${content}</div>\n\n`;
+                        } else if (node.attrs?.textAlign === 'justify') {
+                            return `${hashes} <div class="text-justify">${content}</div>\n\n`;
                         }
+                        // 'left' is default, no special handling needed
                         return `${hashes} ${content}\n\n`;
                     },
                     
@@ -14451,7 +14462,15 @@ export default {
                     // Blockquote
                     blockquote({ node, children, options }) {
                         const content = renderChildren(children, options);
-                        return content.split('\n').map(line => line ? `> ${line}` : '>').join('\n') + '\n\n';
+                        // Remove trailing newlines and split by double newlines (paragraph breaks)
+                        const paragraphs = content.trim().split('\n\n');
+                        // Join paragraphs with single newline and prefix each line with >
+                        const blockquoteContent = paragraphs
+                            .join('\n')
+                            .split('\n')
+                            .map(line => line ? `> ${line}` : '>')
+                            .join('\n');
+                        return blockquoteContent + '\n\n';
                     },
                     
                     // Horizontal rule
