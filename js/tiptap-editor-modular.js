@@ -1867,7 +1867,7 @@ class EditorFactory {
         const CustomTableCell = tiptapBundle.CustomTableCell;
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
-        const HorizontalRule = tiptapBundle.HorizontalRule;
+        const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
@@ -1884,7 +1884,7 @@ class EditorFactory {
             SpkVideo: !!SpkVideo,
             DluxVideo: !!DluxVideo,
             CustomDropcursor: !!CustomDropcursor,
-            HorizontalRule: !!HorizontalRule,
+            CustomHorizontalRule: !!CustomHorizontalRule,
             Extension: !!Extension,
             Plugin: !!window.TiptapCollaboration?.Plugin,
             PluginKey: !!window.TiptapCollaboration?.PluginKey,
@@ -1995,8 +1995,8 @@ class EditorFactory {
                 width: 2,
                 class: 'custom-dropcursor'
             }),
-            // ✅ Add HorizontalRule with draggable functionality
-            HorizontalRule && HorizontalRule,
+            // ✅ Add CustomHorizontalRule with draggable functionality
+            CustomHorizontalRule && CustomHorizontalRule,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2008,16 +2008,6 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
-                    
-                    // Find and update the drag handle element
-                    const dragHandle = document.querySelector('.ProseMirror-drag-handle');
-                    if (dragHandle) {
-                        if (node && node.type.name === 'horizontalRule') {
-                            dragHandle.setAttribute('data-hovering-hr', 'true');
-                        } else {
-                            dragHandle.removeAttribute('data-hovering-hr');
-                        }
-                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2610,8 +2600,8 @@ class EditorFactory {
                 width: 2,
                 class: 'custom-dropcursor'
             }),
-            // ✅ Add HorizontalRule with draggable functionality
-            HorizontalRule && HorizontalRule,
+            // ✅ Add CustomHorizontalRule with draggable functionality
+            CustomHorizontalRule && CustomHorizontalRule,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2623,16 +2613,6 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
-                    
-                    // Find and update the drag handle element
-                    const dragHandle = document.querySelector('.ProseMirror-drag-handle');
-                    if (dragHandle) {
-                        if (node && node.type.name === 'horizontalRule') {
-                            dragHandle.setAttribute('data-hovering-hr', 'true');
-                        } else {
-                            dragHandle.removeAttribute('data-hovering-hr');
-                        }
-                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -13940,19 +13920,24 @@ export default {
                     OrderedList,
                     ListItem,
                     Blockquote,
-                    HorizontalRule,
+                    CustomHorizontalRule,
                     HardBreak,
                     Link,
                     Image,
                     CodeBlock,
                     TextAlign,
                     SpkVideo,
+                    DluxVideo,
                     Mention,
                     TableKit,
                     CustomTableCell,
                     CustomDropcursor,
                     DragHandle,
-                    Gapcursor
+                    Gapcursor,
+                    Collaboration,
+                    CollaborationCaret,
+                    BubbleMenu,
+                    FloatingMenu
                 } = tiptapBundle;
                 
                 if (!renderToMarkdown) {
@@ -13977,12 +13962,13 @@ export default {
                     OrderedList,
                     ListItem,
                     Blockquote,
-                    HorizontalRule,
+                    CustomHorizontalRule,
                     HardBreak,
                     Link,
                     Image,
                     CodeBlock,
                     SpkVideo,
+                    DluxVideo,
                     Mention,
                     TableKit && TableKit.configure({
                         tableCell: false,  // Using CustomTableCell instead
@@ -13996,7 +13982,17 @@ export default {
                     CustomTableCell,
                     CustomDropcursor,
                     DragHandle,
-                    Gapcursor
+                    Gapcursor,
+                    // Add collaboration extensions for schema compatibility
+                    Collaboration && Collaboration.configure({
+                        document: null,  // Not needed for static rendering
+                        field: 'body'
+                    }),
+                    CollaborationCaret && CollaborationCaret.configure({
+                        provider: null  // Not needed for static rendering
+                    }),
+                    BubbleMenu,
+                    FloatingMenu
                 ].filter(ext => ext !== undefined && ext !== null);
                 
                 // Using TipTap static renderer with custom node mappings for Hive-compatible markdown
@@ -14252,6 +14248,20 @@ export default {
                     
                     // Video (custom)
                     video({ node }) {
+                        const attrs = node.attrs || {};
+                        let html = '<video';
+                        if (attrs.src) html += ` src="${attrs.src}"`;
+                        if (attrs.type) html += ` type="${attrs.type}"`;
+                        if (attrs['data-type']) html += ` data-type="${attrs['data-type']}"`;
+                        if (attrs['data-original-src']) html += ` data-original-src="${attrs['data-original-src']}"`;
+                        if (attrs.width) html += ` width="${attrs.width}"`;
+                        if (attrs.height) html += ` height="${attrs.height}"`;
+                        html += ' controls></video>';
+                        return html + '\n\n';
+                    },
+                    
+                    // DluxVideo (same as video)
+                    dluxVideo({ node }) {
                         const attrs = node.attrs || {};
                         let html = '<video';
                         if (attrs.src) html += ` src="${attrs.src}"`;

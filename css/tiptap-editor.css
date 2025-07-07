@@ -308,16 +308,25 @@
   padding: 0;
 }
 
+/* Horizontal Rule Wrapper */
+.ProseMirror .hr-wrapper,
+.tiptap-editor-content .ProseMirror .hr-wrapper {
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  cursor: move;
+}
+
 /* Horizontal Rule */
-.ProseMirror hr,
-.tiptap-editor-content .ProseMirror hr {
+.ProseMirror .hr-wrapper hr,
+.tiptap-editor-content .ProseMirror .hr-wrapper hr {
   border: none;
   border-top: 2px solid #495057;
-  margin: 2rem 0;
+  margin: 0;
+  width: 100%;
   display: block;
   box-sizing: content-box;
-  cursor: move;
-  min-height: 20px;
 }
 
 /* Text Formatting */
@@ -855,10 +864,19 @@
 /* Table styles for markdown compatibility */
 .ProseMirror table {
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   width: 100%;
   margin: 1rem 0;
   overflow: hidden;
+}
+
+/* Striped table rows */
+.ProseMirror tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.ProseMirror tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .ProseMirror td,
@@ -989,10 +1007,7 @@
   color: var(--bs-light);
 }
 
-/* Center drag handle vertically when hovering over HR elements */
-.ProseMirror-drag-handle[data-hovering-hr="true"] {
-  transform: translateX(-10px) translateY(-10px);
-}
+/* Drag handle horizontal positioning */
 
 /* Dragging state */
 .ProseMirror .dragging {
@@ -1047,8 +1062,6 @@
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 1rem auto;
-  /* Allow dragging everywhere - CustomImage extension prevents duplication */
   cursor: move;
 }
 

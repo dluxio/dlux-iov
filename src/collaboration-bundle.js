@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
-import { Editor, Extension, Node, mergeAttributes } from '@tiptap/core';
+import { Editor, Extension, Node } from '@tiptap/core';
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -186,6 +186,28 @@ const CustomImage = Image.extend({
               // Force move operation instead of copy
               event.dataTransfer.effectAllowed = 'move';
               
+              // Create thumbnail for drag preview
+              const img = event.target;
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              
+              // Set thumbnail size
+              const maxSize = 100;
+              const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+              canvas.width = img.width * scale;
+              canvas.height = img.height * scale;
+              
+              // Draw scaled image
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              
+              // Add border
+              ctx.strokeStyle = '#5C94FE';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(0, 0, canvas.width, canvas.height);
+              
+              // Set the drag image
+              event.dataTransfer.setDragImage(canvas, canvas.width / 2, canvas.height / 2);
+              
               // Find the position of the image being dragged
               const pos = view.posAtDOM(event.target, 0);
               if (pos >= 0) {
@@ -278,26 +300,34 @@ const CustomImage = Image.extend({
   }
 });
 
-// ✅ CUSTOM HORIZONTAL RULE: Make horizontal rules draggable
+// ✅ CUSTOM HORIZONTAL RULE: Make horizontal rules draggable with wrapper div
 const CustomHorizontalRule = HorizontalRule.extend({
   name: 'horizontalRule', // Keep same name to replace default
   atom: true,        // Mark as atomic node (no content inside)
   draggable: true,   // Make draggable
   selectable: true,  // Ensure it can be selected
   
-  // Override parseDOM to prevent contenteditable="false"
-  parseDOM() {
-    return [
-      {
-        tag: 'hr',
-        getAttrs: () => ({})  // Don't set any contenteditable attribute
-      }
+  // Render with wrapper div for better positioning
+  renderHTML({ HTMLAttributes }) {
+    return ['div', { class: 'hr-wrapper' }, 
+      ['hr', HTMLAttributes]
     ]
   },
   
-  // Ensure renderHTML doesn't add contenteditable
-  renderHTML({ HTMLAttributes }) {
-    return ['hr', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
+  // Handle both wrapped and unwrapped HR elements
+  parseDOM() {
+    return [
+      {
+        tag: 'div.hr-wrapper',
+        getContent: (node, schema) => {
+          // Return empty fragment since HR is an atom node
+          return schema.nodeFromJSON({ type: 'horizontalRule' }).content;
+        }
+      },
+      {
+        tag: 'hr'
+      }
+    ]
   }
 });
 
@@ -559,6 +589,187 @@ const DluxVideo = Node.create({
         }
       };
     };
+  },
+
+  addProseMirrorPlugins() {
+    const plugins = this.parent?.() || [];
+    
+    return [
+      ...plugins,
+      new Plugin({
+        key: new PluginKey('dluxVideoDrag'),
+        props: {
+          handleDOMEvents: {
+            dragstart(view, event) {
+              // Handle video drag events - check both VIDEO tag and wrapper div
+              let targetElement = event.target;
+              let videoElement = null;
+              
+              if (targetElement.tagName === 'VIDEO') {
+                videoElement = targetElement;
+              } else if (targetElement.classList.contains('dlux-video-container')) {
+                // Find video element inside wrapper
+                videoElement = targetElement.querySelector('video');
+              } else {
+                return false; // Not a video drag
+              }
+              
+              // Force move operation instead of copy
+              event.dataTransfer.effectAllowed = 'move';
+              
+              // Find the position and node
+              const pos = view.posAtDOM(targetElement, 0);
+              if (pos >= 0) {
+                // Get the node to access poster attribute
+                const node = view.state.doc.nodeAt(pos);
+                
+                // Create thumbnail for drag preview
+                let dragImage;
+                
+                if (node && node.attrs.poster) {
+                  // Use poster image
+                  dragImage = document.createElement('img');
+                  dragImage.src = node.attrs.poster;
+                  dragImage.style.width = '100px';
+                  dragImage.style.height = 'auto';
+                  dragImage.style.maxHeight = '100px';
+                  dragImage.style.objectFit = 'cover';
+                  dragImage.style.border = '2px solid #5C94FE';
+                  dragImage.style.borderRadius = '4px';
+                  dragImage.style.position = 'absolute';
+                  dragImage.style.top = '-1000px'; // Hide off-screen
+                  document.body.appendChild(dragImage);
+                  
+                  // Clean up after drag
+                  const cleanup = () => {
+                    dragImage.remove();
+                    document.removeEventListener('dragend', cleanup);
+                  };
+                  document.addEventListener('dragend', cleanup);
+                  
+                } else {
+                  // Fallback to simple video thumbnail
+                  dragImage = document.createElement('div');
+                  dragImage.style.width = '100px';
+                  dragImage.style.height = '75px';
+                  dragImage.style.backgroundColor = '#2a2a2a';
+                  dragImage.style.border = '2px solid #5C94FE';
+                  dragImage.style.borderRadius = '4px';
+                  dragImage.style.display = 'flex';
+                  dragImage.style.alignItems = 'center';
+                  dragImage.style.justifyContent = 'center';
+                  dragImage.style.position = 'absolute';
+                  dragImage.style.top = '-1000px'; // Hide off-screen
+                  dragImage.innerHTML = '<span style="color: #fff; font-size: 30px;">▶</span>';
+                  document.body.appendChild(dragImage);
+                  
+                  // Clean up after drag
+                  const cleanup = () => {
+                    dragImage.remove();
+                    document.removeEventListener('dragend', cleanup);
+                  };
+                  document.addEventListener('dragend', cleanup);
+                }
+                
+                // Set the drag image
+                event.dataTransfer.setDragImage(dragImage, 50, 37);
+                
+                // Store position data for later
+                window.dluxEditor = window.dluxEditor || {};
+                window.dluxEditor.draggingVideoPos = pos;
+                
+                // Add visual feedback to original element
+                if (targetElement.classList.contains('dlux-video-container')) {
+                  targetElement.style.opacity = '0.5';
+                } else if (videoElement) {
+                  videoElement.style.opacity = '0.5';
+                }
+              }
+              
+              return false; // Let ProseMirror continue handling
+            },
+            
+            dragover(view, event) {
+              // Force move cursor feedback
+              if (event.dataTransfer && event.dataTransfer.types.includes('text/html')) {
+                event.dataTransfer.dropEffect = 'move';
+              }
+              return false;
+            },
+            
+            dragend(view, event) {
+              // Reset opacity - handle both video and wrapper
+              if (event.target.tagName === 'VIDEO') {
+                event.target.style.opacity = '';
+              } else if (event.target.classList.contains('dlux-video-container')) {
+                event.target.style.opacity = '';
+                const video = event.target.querySelector('video');
+                if (video) {
+                  video.style.opacity = '';
+                }
+              }
+              
+              // Clean up stored position
+              if (window.dluxEditor) {
+                delete window.dluxEditor.draggingVideoPos;
+              }
+              
+              return false;
+            },
+            
+            drop(view, event) {
+              // Check if we're dropping a video that was dragged from within the editor
+              if (window.dluxEditor?.draggingVideoPos !== undefined) {
+                const pos = window.dluxEditor.draggingVideoPos;
+                
+                // Get drop position
+                const dropPos = view.posAtCoords({
+                  left: event.clientX,
+                  top: event.clientY
+                });
+                
+                if (dropPos && dropPos.pos !== pos) {
+                  // We're moving a video within the editor
+                  event.preventDefault();
+                  
+                  // Get the video node
+                  const $pos = view.state.doc.resolve(pos);
+                  const node = view.state.doc.nodeAt(pos);
+                  
+                  if (node && node.type.name === 'dluxvideo') {
+                    // Create transaction to move the video
+                    const tr = view.state.tr;
+                    
+                    // Calculate adjusted positions
+                    let targetPos = dropPos.pos;
+                    if (targetPos > pos) {
+                      // Adjust for the node being removed
+                      targetPos = targetPos - node.nodeSize;
+                    }
+                    
+                    // Delete from old position
+                    tr.delete(pos, pos + node.nodeSize);
+                    
+                    // Insert at new position
+                    tr.insert(targetPos, node);
+                    
+                    // Dispatch the transaction
+                    view.dispatch(tr);
+                    
+                    // Clean up
+                    delete window.dluxEditor.draggingVideoPos;
+                    
+                    return true; // We handled it
+                  }
+                }
+              }
+              
+              return false; // Let default handling continue
+            }
+          }
+        }
+      })
+    ];
   }
 });
 
@@ -1073,7 +1284,7 @@ const TiptapCollaboration = {
   TaskList,
   TaskItem,
   Blockquote,
-  HorizontalRule: CustomHorizontalRule, // Use custom draggable version
+  CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
   // Additional extensions
@@ -1081,7 +1292,7 @@ const TiptapCollaboration = {
   Link,
   Image: CustomImage, // Use CustomImage instead of default Image
   CodeBlock,
-  Dropcursor,
+  // Dropcursor, // Don't export default - we use CustomDropcursor
   CustomDropcursor,
   Gapcursor,
   CharacterCount,
