@@ -346,7 +346,8 @@ const CustomHorizontalRule = HorizontalRule.extend({
 // ✅ MODULAR BLOCK LIST SYSTEM: Registry for node block lists
 const nodeBlockLists = {
   tableCell: ['table', 'horizontalRule'], // Block tables and HRs
-  tableHeader: ['table', 'horizontalRule'] // Block tables and HRs
+  tableHeader: ['table', 'horizontalRule'], // Block tables and HRs
+  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList', 'blockquote'] // Only allow paragraphs
 };
 
 // ✅ MODULAR BLOCK LIST SYSTEM: Utility function to check if content is blocked
@@ -1394,6 +1395,80 @@ const CustomDropcursor = Dropcursor.extend({
   }
 });
 
+// ✅ CUSTOM BLOCKQUOTE: Restrict to text content with marks (like CodeBlock)
+const CustomBlockquote = Blockquote.extend({
+  name: 'blockquote', // Keep same name to replace default
+  content: 'text*', // Only allow text with marks (no block elements)
+  
+  
+  addProseMirrorPlugins() {
+    const plugins = this.parent?.() || [];
+    
+    return [
+      ...plugins,
+      new Plugin({
+        key: new PluginKey('customBlockquoteDrop'),
+        props: {
+          handleDrop(view, event, slice, moved) {
+            // Check if we're dropping into a blockquote
+            const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
+            if (!pos) return false;
+            
+            const $pos = view.state.doc.resolve(pos.pos);
+            let isInBlockquote = false;
+            
+            for (let d = $pos.depth; d > 0; d--) {
+              const node = $pos.node(d);
+              if (node.type.name === 'blockquote') {
+                isInBlockquote = true;
+                break;
+              }
+            }
+            
+            // Transform content if dropping into blockquote
+            if (isInBlockquote && slice) {
+              // Check if slice contains any complex nodes that need transformation
+              let needsTransformation = false;
+              slice.content.forEach(node => {
+                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule', 'table'].includes(node.type.name)) {
+                  needsTransformation = true;
+                }
+              });
+              
+              if (needsTransformation) {
+                // Transform the content (reuse table cell transformation)
+                const transformedSlice = transformContentForTableCell(slice, view.state.schema);
+                
+                // Handle the drop with transformed content
+                const tr = view.state.tr;
+                
+                if (moved) {
+                  // For moved content, delete from original position first
+                  const { from, to } = view.state.selection;
+                  let targetPos = pos.pos;
+                  if (targetPos > from) {
+                    targetPos = targetPos - (to - from);
+                  }
+                  tr.delete(from, to);
+                  tr.insert(targetPos, transformedSlice.content);
+                } else {
+                  // For copy/paste, just insert
+                  tr.insert(pos.pos, transformedSlice.content);
+                }
+                
+                view.dispatch(tr);
+                return true; // We handled it
+              }
+            }
+            
+            return false; // Let default handling continue
+          }
+        }
+      })
+    ];
+  }
+});
+
 // Create collaborative document helper
 function createCollaborativeDocument() {
   return new Y.Doc();
@@ -1445,7 +1520,7 @@ const TiptapCollaboration = {
   ListItem,
   TaskList,
   TaskItem,
-  Blockquote,
+  CustomBlockquote, // Use custom paragraph-only version
   CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   

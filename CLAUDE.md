@@ -270,7 +270,7 @@ const nodeBlockLists = {
 - **TipTap FloatingMenu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/floatingmenu
 - **TipTap Drag Handle Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle
 - **TipTap Drag Handle Vue Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle-vue
-- **TipTap Drag Bubble Menu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/bubble-menu
+- **TipTap Bubble Menu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/bubble-menu
 - **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
 
 When extending always import standalone extension, do not import from kits like starter kit or table kit
@@ -279,6 +279,7 @@ When extending always import standalone extension, do not import from kits like 
 - **TipTap Drop Cursor Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/dropcursor
 - **TipTap Horizontal Rule Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/horizontal-rule
 - **TipTap Image Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/image
+- **TipTap Blockquote Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/blockquote
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 
 ### Server Implementation

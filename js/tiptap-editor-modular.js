@@ -1868,6 +1868,8 @@ class EditorFactory {
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
+        const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
@@ -1931,7 +1933,8 @@ class EditorFactory {
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
-                horizontalRule: false // ✅ Disable built-in HR to use custom draggable version
+                horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
+                blockquote: false    // ✅ Disable built-in blockquote to use custom paragraph-only version
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -1997,6 +2000,10 @@ class EditorFactory {
             }),
             // ✅ Add CustomHorizontalRule with draggable functionality
             CustomHorizontalRule && CustomHorizontalRule,
+            // ✅ Add CustomBlockquote with text-only content
+            CustomBlockquote && CustomBlockquote,
+            // ✅ Add Underline formatting
+            Underline && Underline,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2522,6 +2529,8 @@ class EditorFactory {
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
+        const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
 
@@ -2537,7 +2546,8 @@ class EditorFactory {
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
-                horizontalRule: false // ✅ Disable built-in HR to use custom draggable version
+                horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
+                blockquote: false    // ✅ Disable built-in blockquote to use custom paragraph-only version
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2603,6 +2613,10 @@ class EditorFactory {
             }),
             // ✅ Add CustomHorizontalRule with draggable functionality
             CustomHorizontalRule && CustomHorizontalRule,
+            // ✅ Add CustomBlockquote with text-only content
+            CustomBlockquote && CustomBlockquote,
+            // ✅ Add Underline formatting
+            Underline && Underline,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -13916,11 +13930,12 @@ export default {
                     Bold,
                     Italic,
                     Strike,
+                    Underline,
                     Code,
                     BulletList,
                     OrderedList,
                     ListItem,
-                    Blockquote,
+                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -13958,11 +13973,12 @@ export default {
                     Bold,
                     Italic,
                     Strike,
+                    Underline,
                     Code,
                     BulletList,
                     OrderedList,
                     ListItem,
-                    Blockquote,
+                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14058,6 +14074,9 @@ export default {
                                 break;
                             case 'strike':
                                 result = `~~${result}~~`;
+                                break;
+                            case 'underline':
+                                result = `<u>${result}</u>`;
                                 break;
                             case 'code':
                                 result = `\`${result}\``;
@@ -14391,6 +14410,11 @@ export default {
             this.executeFormattingCommand('code');
         },
 
+        formatUnderline() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+            this.executeFormattingCommand('underline');
+        },
+
         // ✅ HELPER: Execute formatting commands following TipTap v3 best practices
         executeFormattingCommand(commandName) {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
@@ -14429,6 +14453,13 @@ export default {
                             return false;
                         }
                         return chain.toggleCode().run();
+
+                    case 'underline':
+                        if (!this.bodyEditor.can().chain().focus().toggleUnderline().run()) {
+                            console.warn('Underline command not available in current state');
+                            return false;
+                        }
+                        return chain.toggleUnderline().run();
 
                     default:
                         console.error(`Unknown formatting command: ${commandName}`);
@@ -20758,6 +20789,11 @@ export default {
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-strikethrough"></i>
                   </button>
+                  <button @click="formatUnderline()" @mousedown.prevent :class="{active: isActive('underline')}" 
+                          class="btn btn-sm btn-dark" title="Underline"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-underline"></i>
+                  </button>
                   <button @click="formatCode()" @mousedown.prevent :class="{active: isActive('code')}" 
                           class="btn btn-sm btn-dark" title="Inline Code"
                           :disabled="isReadOnlyMode">
@@ -21033,6 +21069,15 @@ export default {
                         :disabled="!bodyEditor"
                         title="Strikethrough">
                   <i class="fas fa-strikethrough"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('underline') }"
+                        @click="formatUnderline()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Underline">
+                  <i class="fas fa-underline"></i>
                 </button>
                 <button type="button" 
                         class="btn btn-sm btn-secondary"
