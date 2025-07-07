@@ -278,6 +278,7 @@ When extending always import standalone extension, do not import from kits like 
 - **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 - **TipTap Table Cell Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/table-cell
 - **TipTap Drop Cursor Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/dropcursor
+- **TipTap Horizontal Rule Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/horizontal-rule
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 
 ### Server Implementation

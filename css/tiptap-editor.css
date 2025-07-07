@@ -54,7 +54,7 @@
   font-size: 1rem;
   line-height: 1.5;
   color: inherit;
-  padding: 1rem 2.5rem 1rem 2.5rem; /* Extra left padding for drag handles */
+  padding: 1rem 1rem 1rem 2.5rem; /* Extra left padding for drag handles */
 }
 
 /* ==========================================================================
@@ -314,6 +314,10 @@
   border: none;
   border-top: 2px solid #495057;
   margin: 2rem 0;
+  display: block;
+  box-sizing: content-box;
+  cursor: move;
+  min-height: 20px;
 }
 
 /* Text Formatting */
@@ -985,6 +989,11 @@
   color: var(--bs-light);
 }
 
+/* Center drag handle vertically when hovering over HR elements */
+.ProseMirror-drag-handle[data-hovering-hr="true"] {
+  transform: translateX(-10px) translateY(-10px);
+}
+
 /* Dragging state */
 .ProseMirror .dragging {
   opacity: 0.5;
@@ -1001,16 +1010,28 @@
   transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-/* Tippy tooltip styling for drag handle */
-.tippy-box[data-theme~='drag-handle'] {
-  background: transparent;
-  padding: 0;
-  box-shadow: none;
+/* Drag handle visibility with CSS hover approach */
+/* Hide by default without !important so it can be overridden */
+.ProseMirror-drag-handle {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-/* Initially hide drag handle until first hover */
-.tippy-box[data-theme~='drag-handle']:not(.drag-handle-activated) {
-  display: none !important;
+/* Show on editor hover - multiple selectors for reliability */
+.ProseMirror:hover .ProseMirror-drag-handle,
+.tiptap-editor-content:hover .ProseMirror-drag-handle,
+.editor-field-body:hover .ProseMirror-drag-handle,
+.ProseMirror:focus-within .ProseMirror-drag-handle {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Also show parent wrapper on hover if it exists */
+.ProseMirror:hover div[style*="pointer-events: none"][style*="position: absolute"] > .ProseMirror-drag-handle,
+.tiptap-editor-content:hover div[style*="pointer-events: none"][style*="position: absolute"] > .ProseMirror-drag-handle {
+  opacity: 1;
+  visibility: visible;
 }
 
 .tippy-box[data-theme~='drag-handle'] .tippy-content {

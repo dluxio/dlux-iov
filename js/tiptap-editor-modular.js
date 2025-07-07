@@ -1867,6 +1867,7 @@ class EditorFactory {
         const CustomTableCell = tiptapBundle.CustomTableCell;
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
+        const HorizontalRule = tiptapBundle.HorizontalRule;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
@@ -1883,6 +1884,7 @@ class EditorFactory {
             SpkVideo: !!SpkVideo,
             DluxVideo: !!DluxVideo,
             CustomDropcursor: !!CustomDropcursor,
+            HorizontalRule: !!HorizontalRule,
             Extension: !!Extension,
             Plugin: !!window.TiptapCollaboration?.Plugin,
             PluginKey: !!window.TiptapCollaboration?.PluginKey,
@@ -1927,8 +1929,9 @@ class EditorFactory {
         // Build body extensions array - single editor only
         const bodyExtensions = [
             StarterKit.configure({
-                undoRedo: false,  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
-                dropcursor: false  // ✅ Disable default dropcursor to use CustomDropcursor
+                undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
+                horizontalRule: false // ✅ Disable built-in HR to use custom draggable version
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -1992,6 +1995,8 @@ class EditorFactory {
                 width: 2,
                 class: 'custom-dropcursor'
             }),
+            // ✅ Add HorizontalRule with draggable functionality
+            HorizontalRule && HorizontalRule,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2003,11 +2008,20 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
+                    
+                    // Find and update the drag handle element
+                    const dragHandle = document.querySelector('.ProseMirror-drag-handle');
+                    if (dragHandle) {
+                        if (node && node.type.name === 'horizontalRule') {
+                            dragHandle.setAttribute('data-hovering-hr', 'true');
+                        } else {
+                            dragHandle.removeAttribute('data-hovering-hr');
+                        }
+                    }
                 },
                 tippyOptions: {
                     duration: 0,
                     placement: 'left',
-                    offset: [0, -10], // Negative distance moves handle further left from content
                     hideOnClick: false,
                     theme: 'drag-handle'
                 }
@@ -2132,22 +2146,117 @@ class EditorFactory {
                         editorCreatedAt: this.component.editorCreatedAt
                     });
                     
-                    // ✅ DRAG HANDLE: One-time hover listener to activate drag handle visibility
-                    const handleFirstHover = () => {
-                        // Find all drag handle tippy boxes and activate them
-                        const dragHandleTippies = document.querySelectorAll('.tippy-box[data-theme~="drag-handle"]');
-                        dragHandleTippies.forEach(tippy => {
-                            tippy.classList.add('drag-handle-activated');
+                    // ✅ DRAG HANDLE: Now handled via CSS :hover rules in tiptap-editor.css
+                    // The drag handle is hidden by default and shown on editor hover
+                    if (DEBUG) console.log('✅ Drag handle visibility managed via CSS hover');
+                    
+                    /* Removed complex JavaScript management - using CSS instead
+                    const setupDragHandleVisibility = () => {
+                        if (DEBUG) console.log('🔍 Setting up drag handle visibility management');
+                        
+                        // Check for existing drag handles immediately
+                        const initialHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                        if (DEBUG) console.log('🔍 Initial drag handles found:', initialHandles.length);
+                        
+                        // Function to activate drag handles
+                        const activateDragHandles = () => {
+                            const dragHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                            if (DEBUG) console.log('🔍 Activating drag handles, found:', dragHandles.length);
+                            
+                            dragHandles.forEach((handle, index) => {
+                                // Add class to handle
+                                handle.classList.add('drag-handle-activated');
+                                
+                                // Also try setting inline styles as backup
+                                handle.style.opacity = '1';
+                                handle.style.visibility = 'visible';
+                                
+                                // Also add to parent element if it exists
+                                if (handle.parentElement) {
+                                    handle.parentElement.classList.add('drag-handle-activated');
+                                }
+                                
+                                if (DEBUG) console.log(`🔍 Activated drag handle ${index + 1}:`, {
+                                    classes: handle.className,
+                                    parentClasses: handle.parentElement?.className,
+                                    computedOpacity: window.getComputedStyle(handle).opacity,
+                                    computedVisibility: window.getComputedStyle(handle).visibility
+                                });
+                            });
+                            
+                            return dragHandles.length > 0;
+                        };
+                        
+                        // Hide handles immediately on initialization
+                        hideDragHandles();
+                        
+                        // Function to hide drag handles initially
+                        const hideDragHandles = () => {
+                            const dragHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                            dragHandles.forEach((handle) => {
+                                // Force hide with inline styles
+                                handle.style.opacity = '0';
+                                handle.style.visibility = 'hidden';
+                                // Remove activated class if present
+                                handle.classList.remove('drag-handle-activated');
+                                if (handle.parentElement) {
+                                    handle.parentElement.classList.remove('drag-handle-activated');
+                                }
+                            });
+                            return dragHandles.length;
+                        };
+                        
+                        // Set up MutationObserver to catch dynamically added drag handles
+                        const observer = new MutationObserver((mutations) => {
+                            for (const mutation of mutations) {
+                                for (const node of mutation.addedNodes) {
+                                    if (node.nodeType === 1 && 
+                                        (node.classList?.contains('ProseMirror-drag-handle') ||
+                                         node.querySelector?.('.ProseMirror-drag-handle'))) {
+                                        if (DEBUG) console.log('🔍 New drag handle detected via MutationObserver');
+                                        // Hide it immediately
+                                        setTimeout(() => {
+                                            const hidden = hideDragHandles();
+                                            if (DEBUG) console.log('🔍 Hid', hidden, 'drag handles on creation');
+                                        }, 0);
+                                        return;
+                                    }
+                                }
+                            }
                         });
                         
-                        if (DEBUG) console.log('✅ Drag handle activated on first hover');
+                        // Start observing
+                        observer.observe(editor.view.dom.parentElement || document.body, {
+                            childList: true,
+                            subtree: true
+                        });
                         
-                        // Remove listener after first hover
-                        editor.view.dom.removeEventListener('mouseenter', handleFirstHover);
+                        // Track if we've shown handles
+                        let handlesShown = false;
+                        
+                        // Set up hover listener
+                        const handleFirstHover = () => {
+                            if (DEBUG) console.log('🔍 Editor hover detected');
+                            if (!handlesShown) {
+                                const activated = activateDragHandles();
+                                if (activated) {
+                                    handlesShown = true;
+                                    if (DEBUG) console.log('🔍 Drag handles shown on first hover');
+                                }
+                            }
+                        };
+                        
+                        editor.view.dom.addEventListener('mouseenter', handleFirstHover);
+                        
+                        // Clean up observer on editor destroy
+                        editor.on('destroy', () => {
+                            observer.disconnect();
+                        });
                     };
                     
-                    // Add hover listener to editor DOM
-                    editor.view.dom.addEventListener('mouseenter', handleFirstHover);
+                    // Execute setup
+                    setupDragHandleVisibility();
+                    */
 
                     // ✅ FIX: Set editorInitialized flag after a delay to prevent false triggers
                     // This ensures that initialization-triggered updates don't cause persistence
@@ -2435,8 +2544,9 @@ class EditorFactory {
         // Build body extensions array - single editor only (like Tier 1)
         const bodyExtensions = [
             StarterKit.configure({
-                undoRedo: false,  // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
-                dropcursor: false  // ✅ Disable default dropcursor to use CustomDropcursor
+                undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
+                dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
+                horizontalRule: false // ✅ Disable built-in HR to use custom draggable version
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2500,6 +2610,8 @@ class EditorFactory {
                 width: 2,
                 class: 'custom-dropcursor'
             }),
+            // ✅ Add HorizontalRule with draggable functionality
+            HorizontalRule && HorizontalRule,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2511,6 +2623,16 @@ class EditorFactory {
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
                     this.component.dragHandleHoveredNode = node;
+                    
+                    // Find and update the drag handle element
+                    const dragHandle = document.querySelector('.ProseMirror-drag-handle');
+                    if (dragHandle) {
+                        if (node && node.type.name === 'horizontalRule') {
+                            dragHandle.setAttribute('data-hovering-hr', 'true');
+                        } else {
+                            dragHandle.removeAttribute('data-hovering-hr');
+                        }
+                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2633,22 +2755,117 @@ class EditorFactory {
                     editorCreatedAt: this.component.editorCreatedAt
                 });
 
-                // ✅ DRAG HANDLE: One-time hover listener to activate drag handle visibility
-                const handleFirstHover = () => {
-                    // Find all drag handle tippy boxes and activate them
-                    const dragHandleTippies = document.querySelectorAll('.tippy-box[data-theme~="drag-handle"]');
-                    dragHandleTippies.forEach(tippy => {
-                        tippy.classList.add('drag-handle-activated');
+                // ✅ DRAG HANDLE: Now handled via CSS :hover rules in tiptap-editor.css
+                // The drag handle is hidden by default and shown on editor hover
+                if (DEBUG) console.log('✅ [Tier 2] Drag handle visibility managed via CSS hover');
+                
+                /* Removed complex JavaScript management - using CSS instead
+                const setupDragHandleVisibility = () => {
+                    if (DEBUG) console.log('🔍 [Tier 2] Setting up drag handle visibility management');
+                    
+                    // Check for existing drag handles immediately
+                    const initialHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                    if (DEBUG) console.log('🔍 [Tier 2] Initial drag handles found:', initialHandles.length);
+                    
+                    // Function to hide drag handles initially
+                    const hideDragHandles = () => {
+                        const dragHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                        dragHandles.forEach((handle) => {
+                            // Force hide with inline styles
+                            handle.style.opacity = '0';
+                            handle.style.visibility = 'hidden';
+                            // Remove activated class if present
+                            handle.classList.remove('drag-handle-activated');
+                            if (handle.parentElement) {
+                                handle.parentElement.classList.remove('drag-handle-activated');
+                            }
+                        });
+                        return dragHandles.length;
+                    };
+                    
+                    // Function to activate drag handles
+                    const activateDragHandles = () => {
+                        const dragHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                        if (DEBUG) console.log('🔍 [Tier 2] Activating drag handles, found:', dragHandles.length);
+                        
+                        dragHandles.forEach((handle, index) => {
+                            // Add class to handle
+                            handle.classList.add('drag-handle-activated');
+                            
+                            // Also try setting inline styles as backup
+                            handle.style.opacity = '1';
+                            handle.style.visibility = 'visible';
+                            
+                            // Also add to parent element if it exists
+                            if (handle.parentElement) {
+                                handle.parentElement.classList.add('drag-handle-activated');
+                            }
+                            
+                            if (DEBUG) console.log(`🔍 [Tier 2] Activated drag handle ${index + 1}:`, {
+                                classes: handle.className,
+                                parentClasses: handle.parentElement?.className,
+                                computedOpacity: window.getComputedStyle(handle).opacity,
+                                computedVisibility: window.getComputedStyle(handle).visibility
+                            });
+                        });
+                        
+                        return dragHandles.length > 0;
+                    };
+                    
+                    // Hide handles immediately on initialization
+                    hideDragHandles();
+                    
+                    // Set up MutationObserver to catch dynamically added drag handles
+                    const observer = new MutationObserver((mutations) => {
+                        for (const mutation of mutations) {
+                            for (const node of mutation.addedNodes) {
+                                if (node.nodeType === 1 && 
+                                    (node.classList?.contains('ProseMirror-drag-handle') ||
+                                     node.querySelector?.('.ProseMirror-drag-handle'))) {
+                                    if (DEBUG) console.log('🔍 [Tier 2] New drag handle detected via MutationObserver');
+                                    // Hide it immediately
+                                    setTimeout(() => {
+                                        const hidden = hideDragHandles();
+                                        if (DEBUG) console.log('🔍 [Tier 2] Hid', hidden, 'drag handles on creation');
+                                    }, 0);
+                                    return;
+                                }
+                            }
+                        }
                     });
                     
-                    if (DEBUG) console.log('✅ Tier 2: Drag handle activated on first hover');
+                    // Start observing
+                    observer.observe(editor.view.dom.parentElement || document.body, {
+                        childList: true,
+                        subtree: true
+                    });
                     
-                    // Remove listener after first hover
-                    editor.view.dom.removeEventListener('mouseenter', handleFirstHover);
+                    // Track if we've shown handles
+                    let handlesShown = false;
+                    
+                    // Set up hover listener
+                    const handleFirstHover = () => {
+                        if (DEBUG) console.log('🔍 [Tier 2] Editor hover detected');
+                        if (!handlesShown) {
+                            const activated = activateDragHandles();
+                            if (activated) {
+                                handlesShown = true;
+                                if (DEBUG) console.log('🔍 [Tier 2] Drag handles shown on first hover');
+                            }
+                        }
+                    };
+                    
+                    editor.view.dom.addEventListener('mouseenter', handleFirstHover);
+                    
+                    // Clean up observer on editor destroy
+                    editor.on('destroy', () => {
+                        observer.disconnect();
+                    });
                 };
                 
-                // Add hover listener to editor DOM
-                editor.view.dom.addEventListener('mouseenter', handleFirstHover);
+                // Execute setup
+                setupDragHandleVisibility();
+                */
             },
             onFocus: ({ editor }) => {
                 // Track that editor has been focused
@@ -7508,6 +7725,45 @@ export default {
             // This won't trigger keychain because it only runs if auth is valid
             if (this.isAuthenticated && !this.isAuthExpired) {
                 this.startPermissionRefresh();
+            }
+            
+            // 🔍 DEBUG: Check drag handle status periodically
+            if (DEBUG) {
+                let checkCount = 0;
+                const checkInterval = setInterval(() => {
+                    checkCount++;
+                    const allHandles = document.querySelectorAll('.ProseMirror-drag-handle');
+                    const visibleHandles = Array.from(allHandles).filter(handle => {
+                        const style = window.getComputedStyle(handle);
+                        return style.opacity !== '0' && style.visibility !== 'hidden';
+                    });
+                    
+                    console.log(`🔍 [Drag Handle Check ${checkCount}]:`, {
+                        totalHandles: allHandles.length,
+                        visibleHandles: visibleHandles.length,
+                        handles: Array.from(allHandles).map((handle, i) => ({
+                            index: i,
+                            classes: handle.className,
+                            hasActivatedClass: handle.classList.contains('drag-handle-activated'),
+                            parentClasses: handle.parentElement?.className,
+                            computedStyle: {
+                                opacity: window.getComputedStyle(handle).opacity,
+                                visibility: window.getComputedStyle(handle).visibility,
+                                display: window.getComputedStyle(handle).display
+                            },
+                            inlineStyle: {
+                                opacity: handle.style.opacity,
+                                visibility: handle.style.visibility
+                            }
+                        }))
+                    });
+                    
+                    // Stop after 5 checks (5 seconds)
+                    if (checkCount >= 5) {
+                        clearInterval(checkInterval);
+                        console.log('🔍 Drag handle debugging completed');
+                    }
+                }, 1000);
             }
 
             // ✅ SERVER VERSION: Check server version on startup (non-blocking)
@@ -20497,6 +20753,36 @@ export default {
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-code"></i>
                   </button>
+                  <button @click="insertLink()" class="btn btn-sm btn-dark" title="Insert Link"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-link"></i>
+                  </button>
+                </div>
+
+                <div class="vr"></div>
+
+                <!-- Text Alignment -->
+                <div role="group">
+                  <button @click="setTextAlign('left')" @mousedown.prevent :class="{active: isActive({textAlign: 'left'})}" 
+                          class="btn btn-sm btn-dark" title="Align Left"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-left"></i>
+                  </button>
+                  <button @click="setTextAlign('center')" @mousedown.prevent :class="{active: isActive({textAlign: 'center'})}" 
+                          class="btn btn-sm btn-dark" title="Align Center"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-center"></i>
+                  </button>
+                  <button @click="setTextAlign('right')" @mousedown.prevent :class="{active: isActive({textAlign: 'right'})}" 
+                          class="btn btn-sm btn-dark" title="Align Right"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-right"></i>
+                  </button>
+                  <button @click="setTextAlign('justify')" @mousedown.prevent :class="{active: isActive({textAlign: 'justify'})}" 
+                          class="btn btn-sm btn-dark" title="Justify"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-align-justify"></i>
+                  </button>
                 </div>
 
                 <div class="vr"></div>
@@ -20559,32 +20845,6 @@ export default {
 
                 <div class="vr"></div>
 
-                <!-- Text Alignment -->
-                <div role="group">
-                  <button @click="setTextAlign('left')" @mousedown.prevent :class="{active: isActive({textAlign: 'left'})}" 
-                          class="btn btn-sm btn-dark" title="Align Left"
-                          :disabled="isReadOnlyMode">
-                    <i class="fas fa-align-left"></i>
-                  </button>
-                  <button @click="setTextAlign('center')" @mousedown.prevent :class="{active: isActive({textAlign: 'center'})}" 
-                          class="btn btn-sm btn-dark" title="Align Center"
-                          :disabled="isReadOnlyMode">
-                    <i class="fas fa-align-center"></i>
-                  </button>
-                  <button @click="setTextAlign('right')" @mousedown.prevent :class="{active: isActive({textAlign: 'right'})}" 
-                          class="btn btn-sm btn-dark" title="Align Right"
-                          :disabled="isReadOnlyMode">
-                    <i class="fas fa-align-right"></i>
-                  </button>
-                  <button @click="setTextAlign('justify')" @mousedown.prevent :class="{active: isActive({textAlign: 'justify'})}" 
-                          class="btn btn-sm btn-dark" title="Justify"
-                          :disabled="isReadOnlyMode">
-                    <i class="fas fa-align-justify"></i>
-                  </button>
-                </div>
-
-                <div class="vr"></div>
-
                 <!-- Block Elements -->
                 <div role="group">
                   <button @click="toggleBlockquote()" @mousedown.prevent :class="{active: isActive('blockquote')}" 
@@ -20611,9 +20871,6 @@ export default {
 
                 <!-- Insert Tools -->
                 <div role="group">
-                  <button @click="insertLink()" class="btn btn-sm btn-dark" title="Insert Link">
-                    <i class="fas fa-link"></i>
-                  </button>
                   <button @click="insertImage()" class="btn btn-sm btn-dark" title="Insert Image"
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-image"></i>

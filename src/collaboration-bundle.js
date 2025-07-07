@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
-import { Editor, Extension, Node } from '@tiptap/core';
+import { Editor, Extension, Node, mergeAttributes } from '@tiptap/core';
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -275,6 +275,29 @@ const CustomImage = Image.extend({
         }
       })
     ];
+  }
+});
+
+// ✅ CUSTOM HORIZONTAL RULE: Make horizontal rules draggable
+const CustomHorizontalRule = HorizontalRule.extend({
+  name: 'horizontalRule', // Keep same name to replace default
+  atom: true,        // Mark as atomic node (no content inside)
+  draggable: true,   // Make draggable
+  selectable: true,  // Ensure it can be selected
+  
+  // Override parseDOM to prevent contenteditable="false"
+  parseDOM() {
+    return [
+      {
+        tag: 'hr',
+        getAttrs: () => ({})  // Don't set any contenteditable attribute
+      }
+    ]
+  },
+  
+  // Ensure renderHTML doesn't add contenteditable
+  renderHTML({ HTMLAttributes }) {
+    return ['hr', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes)]
   }
 });
 
@@ -1050,7 +1073,7 @@ const TiptapCollaboration = {
   TaskList,
   TaskItem,
   Blockquote,
-  HorizontalRule,
+  HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
   // Additional extensions
