@@ -2053,6 +2053,12 @@ class EditorFactory {
                     duration: 100,
                 },
                 shouldShow: ({ editor, view, state, oldState }) => {
+                    // Don't show until editor has been focused at least once
+                    if (!this.component.editorHasBeenFocused) return false;
+                    
+                    // Don't show in readonly mode
+                    if (this.component.isReadOnlyMode) return false;
+                    
                     // Only show on empty paragraphs
                     const { $from } = state.selection;
                     const node = $from.parent;
@@ -2126,7 +2132,22 @@ class EditorFactory {
                         editorCreatedAt: this.component.editorCreatedAt
                     });
                     
-
+                    // ✅ DRAG HANDLE: One-time hover listener to activate drag handle visibility
+                    const handleFirstHover = () => {
+                        // Find all drag handle tippy boxes and activate them
+                        const dragHandleTippies = document.querySelectorAll('.tippy-box[data-theme~="drag-handle"]');
+                        dragHandleTippies.forEach(tippy => {
+                            tippy.classList.add('drag-handle-activated');
+                        });
+                        
+                        if (DEBUG) console.log('✅ Drag handle activated on first hover');
+                        
+                        // Remove listener after first hover
+                        editor.view.dom.removeEventListener('mouseenter', handleFirstHover);
+                    };
+                    
+                    // Add hover listener to editor DOM
+                    editor.view.dom.addEventListener('mouseenter', handleFirstHover);
 
                     // ✅ FIX: Set editorInitialized flag after a delay to prevent false triggers
                     // This ensures that initialization-triggered updates don't cause persistence
@@ -2266,6 +2287,15 @@ class EditorFactory {
 
                     // ✅ TEMP DOCUMENTS: No debounce needed (not yet persistent)
                 },
+                onFocus: ({ editor }) => {
+                    // Track that editor has been focused
+                    if (!this.component.editorHasBeenFocused) {
+                        this.component.editorHasBeenFocused = true;
+                        this.component.editorInteractionCount++;
+                        
+                        if (DEBUG) console.log('✅ Editor received first focus - floating menu now enabled');
+                    }
+                },
                 onBeforeCreate: ({ editor }) => {
                     // ✅ STATE MONITORING: Track editor lifecycle
                     if (this.component.enableStateMonitoring) {
@@ -2276,6 +2306,9 @@ class EditorFactory {
                     // ✅ TABLE STATE TRACKING: Update reactive property for CSS-based toolbar
                     const wasInTable = this.component.isInTable;
                     this.component.isInTable = editor.isActive('table');
+                    
+                    // Increment counter to trigger computed property updates
+                    this.component.selectionUpdateCounter++;
                     
                     // Update toolbar position when entering a table or navigating within tables
                     if (this.component.isInTable) {
@@ -2528,6 +2561,12 @@ class EditorFactory {
                     duration: 100,
                 },
                 shouldShow: ({ editor, view, state, oldState }) => {
+                    // Don't show until editor has been focused at least once
+                    if (!this.component.editorHasBeenFocused) return false;
+                    
+                    // Don't show in readonly mode
+                    if (this.component.isReadOnlyMode) return false;
+                    
                     // Only show on empty paragraphs
                     const { $from } = state.selection;
                     const node = $from.parent;
@@ -2594,6 +2633,31 @@ class EditorFactory {
                     editorCreatedAt: this.component.editorCreatedAt
                 });
 
+                // ✅ DRAG HANDLE: One-time hover listener to activate drag handle visibility
+                const handleFirstHover = () => {
+                    // Find all drag handle tippy boxes and activate them
+                    const dragHandleTippies = document.querySelectorAll('.tippy-box[data-theme~="drag-handle"]');
+                    dragHandleTippies.forEach(tippy => {
+                        tippy.classList.add('drag-handle-activated');
+                    });
+                    
+                    if (DEBUG) console.log('✅ Tier 2: Drag handle activated on first hover');
+                    
+                    // Remove listener after first hover
+                    editor.view.dom.removeEventListener('mouseenter', handleFirstHover);
+                };
+                
+                // Add hover listener to editor DOM
+                editor.view.dom.addEventListener('mouseenter', handleFirstHover);
+            },
+            onFocus: ({ editor }) => {
+                // Track that editor has been focused
+                if (!this.component.editorHasBeenFocused) {
+                    this.component.editorHasBeenFocused = true;
+                    this.component.editorInteractionCount++;
+                    
+                    if (DEBUG) console.log('✅ Tier 2 Editor received first focus - floating menu now enabled');
+                }
             },
             onUpdate: () => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
@@ -2618,6 +2682,9 @@ class EditorFactory {
                 // ✅ TABLE STATE TRACKING: Update reactive property for CSS-based toolbar
                 const wasInTable = this.component.isInTable;
                 this.component.isInTable = editor.isActive('table');
+                
+                // Increment counter to trigger computed property updates
+                this.component.selectionUpdateCounter++;
                 
                 // Update toolbar position whenever table state changes or we're in a table
                 if (this.component.isInTable && (!wasInTable || this.component.isInTable)) {
@@ -3915,6 +3982,10 @@ class LifecycleManager {
 
         // ✅ FIX: Reset editor creation timestamp to ensure proper initialization detection
         this.component.editorCreatedAt = null;
+        
+        // ✅ FIX: Reset editor focus state to hide UI elements for new documents
+        this.component.editorHasBeenFocused = false;
+        this.component.editorInteractionCount = 0;
 
         // ✅ SECURITY: Clear access denial and permission state
         this.component.handlingAccessDenial = false;
@@ -5418,12 +5489,39 @@ export default {
             // ===== TABLE TOOLBAR STATE =====
             // Track table state for CSS-based toolbar
             isInTable: false,
+            selectionUpdateCounter: 0,  // Triggers computed property updates on selection change
+
+            // ===== EDITOR INTERACTION TRACKING =====
+            // Track editor focus and interaction for UI elements
+            editorHasBeenFocused: false,  // Track if editor has received focus at least once
+            editorInteractionCount: 0,     // Track number of interactions
 
         };
     },
 
     computed: {
         
+        // Current text format for dropdown display
+        currentTextFormat() {
+            // Reference the counter to make Vue track selection changes
+            this.selectionUpdateCounter;
+            
+            if (!this.bodyEditor || this.bodyEditor.isDestroyed) return 'Format';
+            
+            // Check heading levels
+            if (this.isActive('heading', {level: 1})) return 'Heading 1';
+            if (this.isActive('heading', {level: 2})) return 'Heading 2';
+            if (this.isActive('heading', {level: 3})) return 'Heading 3';
+            if (this.isActive('heading', {level: 4})) return 'Heading 4';
+            if (this.isActive('heading', {level: 5})) return 'Heading 5';
+            if (this.isActive('heading', {level: 6})) return 'Heading 6';
+            
+            // Check paragraph
+            if (this.isActive('paragraph')) return 'Paragraph';
+            
+            // Default
+            return 'Format';
+        },
 
         // ✅ CONSOLIDATED USERNAME: Single source of truth for username with proper auth state handling
         username() {
@@ -14082,6 +14180,16 @@ export default {
             }
         },
 
+        setParagraph() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+
+            try {
+                this.bodyEditor.chain().focus().setParagraph().run();
+            } catch (error) {
+                console.error('Paragraph command failed:', error);
+            }
+        },
+
         setTextAlign(alignment) {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
@@ -20393,17 +20501,44 @@ export default {
 
                 <div class="vr"></div>
 
-                <!-- Headings -->
-                <div role="group">
-                  <button @click="setHeading(1)" @mousedown.prevent :class="{active: isActive('heading', {level: 1})}" 
-                          class="btn btn-sm btn-dark" title="Heading 1"
-                          :disabled="isReadOnlyMode">H1</button>
-                  <button @click="setHeading(2)" @mousedown.prevent :class="{active: isActive('heading', {level: 2})}" 
-                          class="btn btn-sm btn-dark" title="Heading 2"
-                          :disabled="isReadOnlyMode">H2</button>
-                  <button @click="setHeading(3)" @mousedown.prevent :class="{active: isActive('heading', {level: 3})}" 
-                          class="btn btn-sm btn-dark" title="Heading 3"
-                          :disabled="isReadOnlyMode">H3</button>
+                <!-- Text Format Dropdown -->
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-dark dropdown-toggle" 
+                          data-bs-toggle="dropdown" aria-expanded="false"
+                          :disabled="isReadOnlyMode">
+                    {{ currentTextFormat }}
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="#" @click.prevent="setParagraph()" @mousedown.prevent
+                           :class="{ active: isActive('paragraph') }">
+                      <i class="fas fa-paragraph me-2"></i>Paragraph
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(1)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 1}) }">
+                      <span class="fw-bold">H1</span> - Heading 1
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(2)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 2}) }">
+                      <span class="fw-bold">H2</span> - Heading 2
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(3)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 3}) }">
+                      <span class="fw-bold">H3</span> - Heading 3
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(4)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 4}) }">
+                      <span class="fw-bold">H4</span> - Heading 4
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(5)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 5}) }">
+                      <span class="fw-bold">H5</span> - Heading 5
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="setHeading(6)" @mousedown.prevent
+                           :class="{ active: isActive('heading', {level: 6}) }">
+                      <span class="fw-bold">H6</span> - Heading 6
+                    </a></li>
+                  </ul>
                 </div>
 
                 <div class="vr"></div>
@@ -20467,7 +20602,11 @@ export default {
                     <i class="fas fa-minus"></i>
                   </button>
                 </div>
-
+                <button @click="insertTable()" class="btn btn-sm btn-dark" 
+                          :title="isInTable ? 'Cannot insert table inside another table' : 'Insert Table'"
+                          :disabled="isReadOnlyMode || isInTable">
+                    <i class="fas fa-table"></i>
+                </button>
                 <div class="vr"></div>
 
                 <!-- Insert Tools -->
@@ -20483,41 +20622,114 @@ export default {
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-video"></i>
                   </button>
-                  <button @click="insertTable()" class="btn btn-sm btn-dark" 
-                          :title="isInTable ? 'Cannot insert table inside another table' : 'Insert Table'"
-                          :disabled="isReadOnlyMode || isInTable">
-                    <i class="fas fa-table"></i>
-                  </button>
+                 
                 </div>
               </div>
             </div>
 
             <!-- Floating Menu for empty lines -->
             <div ref="floatingMenu" class="floating-menu">
-              <button type="button" 
-                      class="btn btn-sm btn-secondary"
-                      @click="insertImage()"
-                      @mousedown.prevent
-                      title="Insert Image"
-                      :disabled="isReadOnlyMode">
-                <i class="fas fa-image"></i>
-              </button>
-              <button type="button" 
-                      class="btn btn-sm btn-secondary"
-                      @click="insertVideo()"
-                      @mousedown.prevent
-                      title="Insert Video"
-                      :disabled="isReadOnlyMode">
-                <i class="fas fa-video"></i>
-              </button>
-              <button type="button" 
-                      class="btn btn-sm btn-secondary"
-                      @click="insertTable()"
-                      @mousedown.prevent
-                      title="Insert Table"
-                      :disabled="isReadOnlyMode || isInTable">
-                <i class="fas fa-table"></i>
-              </button>
+              <div class="dropdown">
+                <button type="button" 
+                        class="btn btn-sm btn-secondary dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        :disabled="isReadOnlyMode">
+                  <i class="fas fa-plus fa-fw"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                  <!-- Text -->
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="fas fa-font me-2"></i>Text &raquo;
+                    </a>
+                    <div class="dropdown-submenu-horizontal">
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setParagraph()" @mousedown.prevent title="Paragraph">
+                          <i class="fas fa-paragraph"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(1)" @mousedown.prevent title="Heading 1">
+                          H1
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(2)" @mousedown.prevent title="Heading 2">
+                          H2
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(3)" @mousedown.prevent title="Heading 3">
+                          H3
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(4)" @mousedown.prevent title="Heading 4">
+                          H4
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(5)" @mousedown.prevent title="Heading 5">
+                          H5
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setHeading(6)" @mousedown.prevent title="Heading 6">
+                          H6
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                  
+                  <!-- Lists -->
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="fas fa-list me-2"></i>Lists &raquo;
+                    </a>
+                    <div class="dropdown-submenu-horizontal">
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleBulletList()" @mousedown.prevent title="Bullet List">
+                          <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleOrderedList()" @mousedown.prevent title="Numbered List">
+                          <i class="fas fa-list-ol"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                  
+                  <!-- Blocks -->
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="fas fa-th-large me-2"></i>Blocks &raquo;
+                    </a>
+                    <div class="dropdown-submenu-horizontal">
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleBlockquote()" @mousedown.prevent title="Blockquote">
+                          <i class="fas fa-quote-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleCodeBlock()" @mousedown.prevent title="Code Block">
+                          <i class="fas fa-code"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertHorizontalRule()" @mousedown.prevent title="Horizontal Rule">
+                          <i class="fas fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertTable()" @mousedown.prevent 
+                                title="Table" :disabled="isInTable">
+                          <i class="fas fa-table"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                  
+                  <!-- Media -->
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="fas fa-photo-video me-2"></i>Media &raquo;
+                    </a>
+                    <div class="dropdown-submenu-horizontal">
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertImage()" @mousedown.prevent title="Image">
+                          <i class="fas fa-image"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertVideo()" @mousedown.prevent title="Video">
+                          <i class="fas fa-video"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+                
+              </div>
             </div>
             
             <!-- Body Editor -->
