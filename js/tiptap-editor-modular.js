@@ -20801,7 +20801,7 @@ export default {
                 <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-dark dropdown-toggle" 
                           data-bs-toggle="dropdown" aria-expanded="false"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     {{ currentTextFormat }}
                   </button>
                   <ul class="dropdown-menu dropdown-menu-dark">
@@ -20843,12 +20843,12 @@ export default {
                 <div role="group">
                   <button @click="toggleBulletList()" @mousedown.prevent :class="{active: isActive('bulletList')}" 
                           class="btn btn-sm btn-dark" title="Bullet List"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-list-ul"></i>
                   </button>
                   <button @click="toggleOrderedList()" @mousedown.prevent :class="{active: isActive('orderedList')}" 
                           class="btn btn-sm btn-dark" title="Numbered List"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-list-ol"></i>
                   </button>
                 </div>
@@ -20859,16 +20859,16 @@ export default {
                 <div role="group">
                   <button @click="toggleBlockquote()" @mousedown.prevent :class="{active: isActive('blockquote')}" 
                           class="btn btn-sm btn-dark" title="Quote"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-quote-left"></i>
                   </button>
                   <button @click="toggleCodeBlock()" @mousedown.prevent :class="{active: isActive('codeBlock')}" 
                           class="btn btn-sm btn-dark" title="Code Block"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-terminal"></i>
                   </button>
                   <button @click="insertHorizontalRule()" @mousedown.prevent class="btn btn-sm btn-dark" title="Horizontal Rule"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-minus"></i>
                   </button>
                 </div>
@@ -20906,7 +20906,7 @@ export default {
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                   <!-- Text -->
-                  <li>
+                  <li v-if="!isInTable">
                     <a class="dropdown-item" href="#">
                       <i class="fas fa-font me-2"></i>Text &raquo;
                     </a>
@@ -20938,7 +20938,7 @@ export default {
                   </li>
                   
                   <!-- Lists -->
-                  <li>
+                  <li v-if="!isInTable">
                     <a class="dropdown-item" href="#">
                       <i class="fas fa-list me-2"></i>Lists &raquo;
                     </a>
@@ -20955,7 +20955,7 @@ export default {
                   </li>
                   
                   <!-- Blocks -->
-                  <li>
+                  <li v-if="!isInTable">
                     <a class="dropdown-item" href="#">
                       <i class="fas fa-th-large me-2"></i>Blocks &raquo;
                     </a>

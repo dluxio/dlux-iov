@@ -345,8 +345,8 @@ const CustomHorizontalRule = HorizontalRule.extend({
 
 // ✅ MODULAR BLOCK LIST SYSTEM: Registry for node block lists
 const nodeBlockLists = {
-  tableCell: ['table'],
-  tableHeader: ['table']
+  tableCell: ['table', 'horizontalRule'], // Block tables and HRs
+  tableHeader: ['table', 'horizontalRule'] // Block tables and HRs
 };
 
 // ✅ MODULAR BLOCK LIST SYSTEM: Utility function to check if content is blocked
@@ -373,6 +373,105 @@ function isContentBlockedAt(state, pos, contentType) {
   }
   
   return { blocked: false };
+}
+
+// ✅ CONTENT TRANSFORMATION: Convert complex nodes to paragraphs for table cells
+function transformContentForTableCell(slice, schema) {
+  const transformedContent = [];
+  
+  slice.content.forEach(node => {
+    switch (node.type.name) {
+      case 'heading':
+        // Convert heading to paragraph, preserving marks
+        transformedContent.push(
+          schema.nodes.paragraph.create(null, node.content)
+        );
+        break;
+        
+      case 'codeBlock':
+        // Convert code block to paragraph with code marks if possible
+        const codeContent = [];
+        node.content.forEach(child => {
+          if (child.isText) {
+            // Apply code mark to text
+            const marks = schema.marks.code ? [schema.marks.code.create()] : [];
+            codeContent.push(child.mark(marks));
+          }
+        });
+        transformedContent.push(
+          schema.nodes.paragraph.create(null, codeContent)
+        );
+        break;
+        
+      case 'blockquote':
+        // Extract paragraphs from blockquote
+        node.content.forEach(child => {
+          if (child.type.name === 'paragraph') {
+            transformedContent.push(child);
+          } else {
+            // Recursively transform nested content
+            const nestedSlice = slice.constructor.maxOpen(schema.nodeFromJSON({ 
+              type: 'doc', 
+              content: [child.toJSON()] 
+            }).content);
+            const transformed = transformContentForTableCell(nestedSlice, schema);
+            transformedContent.push(...transformed.content.content);
+          }
+        });
+        break;
+        
+      case 'bulletList':
+      case 'orderedList':
+        // Convert each list item to a paragraph
+        node.content.forEach(listItem => {
+          if (listItem.type.name === 'listItem') {
+            listItem.content.forEach(child => {
+              if (child.type.name === 'paragraph') {
+                transformedContent.push(child);
+              } else {
+                // Handle nested content
+                transformedContent.push(
+                  schema.nodes.paragraph.create(null, child.content)
+                );
+              }
+            });
+          }
+        });
+        break;
+        
+      case 'horizontalRule':
+        // Skip horizontal rules entirely
+        break;
+        
+      case 'paragraph':
+      case 'text':
+        // Keep paragraphs and text as-is
+        transformedContent.push(node);
+        break;
+        
+      default:
+        // For other nodes, try to extract text content into paragraphs
+        if (node.isBlock && node.content.size > 0) {
+          transformedContent.push(
+            schema.nodes.paragraph.create(null, node.content)
+          );
+        } else if (node.isInline || node.isText) {
+          // Wrap inline content in a paragraph
+          transformedContent.push(
+            schema.nodes.paragraph.create(null, [node])
+          );
+        }
+        // Skip nodes with no content
+    }
+  });
+  
+  // Create a new slice with the transformed content
+  const fragment = schema.nodeFromJSON({
+    type: 'doc',
+    content: transformedContent.map(n => n.toJSON())
+  }).content;
+  
+  return slice.constructor.maxOpen(fragment);
 }
 
 // ✅ CUSTOM VIDEO EXTENSION: DluxVideo for native video elements with Video.js support
@@ -1033,9 +1132,60 @@ const CustomTableCell = TableCell.extend({
               }
             }
             
-            // Nothing is blocked, continue with special handling for moved content
+            // Check if we're dropping into a table cell and need to transform content
+            const $dropPos = view.state.doc.resolve(dropPos.pos);
+            let isInTableCell = false;
             
-            // Enhanced: Handle the drop ourselves for better control when moving content
+            for (let d = $dropPos.depth; d > 0; d--) {
+              const node = $dropPos.node(d);
+              if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
+                isInTableCell = true;
+                break;
+              }
+            }
+            
+            // Transform content if dropping into table cell
+            if (isInTableCell && slice) {
+              // Check if slice contains any complex nodes that need transformation
+              let needsTransformation = false;
+              slice.content.forEach(node => {
+                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList', 'horizontalRule'].includes(node.type.name)) {
+                  needsTransformation = true;
+                }
+              });
+              
+              if (needsTransformation) {
+                // Transform the content
+                const transformedSlice = transformContentForTableCell(slice, view.state.schema);
+                
+                // Handle the drop with transformed content
+                if (moved) {
+                  // For moved content, handle the transaction ourselves
+                  const { from, to } = view.state.selection;
+                  const tr = view.state.tr;
+                  
+                  let targetPos = dropPos.pos;
+                  if (targetPos > from) {
+                    targetPos = targetPos - (to - from);
+                  }
+                  
+                  tr.delete(from, to);
+                  tr.insert(targetPos, transformedSlice.content);
+                  view.dispatch(tr);
+                  
+                  return true;
+                } else {
+                  // For copy/paste, insert the transformed content
+                  const tr = view.state.tr;
+                  tr.replaceRange(dropPos.pos, dropPos.pos, transformedSlice);
+                  view.dispatch(tr);
+                  
+                  return true;
+                }
+              }
+            }
+            
+            // Nothing needs transformation, continue with special handling for moved content
             if (moved && slice) {
               // Get the current selection (where the content is being moved from)
               const { from, to } = view.state.selection;
