@@ -14347,6 +14347,7 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
+                    Blockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14393,6 +14394,7 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
+                    Blockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14490,7 +14492,7 @@ export default {
                     
                     // Paragraph with full text alignment support
                     paragraph({ node, children, options }) {
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         if (node.attrs?.textAlign === 'center') {
                             return `<div class="text-center">${content}</div>\n\n`;
                         } else if (node.attrs?.textAlign === 'right') {
@@ -14504,7 +14506,7 @@ export default {
                     
                     // Restricted paragraph (no alignment support)
                     restrictedParagraph({ node, children, options }) {
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         // RestrictedParagraph doesn't support alignment, just return content
                         return `${content}\n\n`;
                     },
@@ -14512,7 +14514,7 @@ export default {
                     // Heading with full text alignment support
                     heading({ node, children, options }) {
                         const level = node.attrs?.level || 1;
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         const hashes = '#'.repeat(level);
                         
                         if (node.attrs?.textAlign === 'center') {
@@ -14528,26 +14530,62 @@ export default {
                     
                     // Lists
                     bulletList({ node, children, options }) {
-                        const items = renderChildren(children, options);
-                        return `${items}\n`;
+                        // Handle children parameter which can be function, array, or string
+                        let itemsArray = [];
+                        if (Array.isArray(children)) {
+                            itemsArray = children;
+                        } else if (typeof children === 'function') {
+                            const result = children();
+                            itemsArray = Array.isArray(result) ? result : [result];
+                        } else if (children) {
+                            itemsArray = [children];
+                        }
+                        
+                        // The children are already rendered list items, just add bullet prefix
+                        const items = itemsArray.map(item => {
+                            const content = String(item).trim();
+                            return content ? `- ${content}\n` : '';
+                        }).join('');
+                        
+                        return items ? `${items}\n` : '\n';
                     },
                     
                     orderedList({ node, children, options }) {
-                        const items = renderChildren(children, options);
-                        return `${items}\n`;
+                        // Handle children parameter which can be function, array, or string
+                        let itemsArray = [];
+                        if (Array.isArray(children)) {
+                            itemsArray = children;
+                        } else if (typeof children === 'function') {
+                            const result = children();
+                            itemsArray = Array.isArray(result) ? result : [result];
+                        } else if (children) {
+                            itemsArray = [children];
+                        }
+                        
+                        // The children are already rendered list items, add numbered prefix
+                        const items = itemsArray.map((item, index) => {
+                            const content = String(item).trim();
+                            return content ? `${index + 1}. ${content}\n` : '';
+                        }).join('');
+                        
+                        return items ? `${items}\n` : '\n';
                     },
                     
                     listItem({ node, children, options }) {
-                        const content = renderChildren(children, options);
-                        // Determine if parent is ordered or unordered
-                        const isOrdered = node.parent && node.parent.type === 'orderedList';
-                        const prefix = isOrdered ? '1. ' : '- ';
-                        return `${prefix}${content.trim()}\n`;
+                        // The static renderer processes list items
+                        // Just return the content without prefix (parent list will add it)
+                        if (typeof children === 'function') {
+                            children = children();
+                        }
+                        if (Array.isArray(children)) {
+                            children = children.join('');
+                        }
+                        return String(children).trim();
                     },
                     
                     // Blockquote
                     blockquote({ node, children, options }) {
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         // Remove trailing newlines and split by double newlines (paragraph breaks)
                         const paragraphs = content.trim().split('\n\n');
                         // Join paragraphs with single newline and prefix each line with >
@@ -14561,7 +14599,7 @@ export default {
                     
                     // CustomBlockquote (same as blockquote)
                     customBlockquote({ node, children, options }) {
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         // Remove trailing newlines and split by double newlines (paragraph breaks)
                         const paragraphs = content.trim().split('\n\n');
                         // Join paragraphs with single newline and prefix each line with >
@@ -14585,7 +14623,7 @@ export default {
                     
                     // Code block
                     codeBlock({ node, children, options }) {
-                        const content = renderChildren(children, options);
+                        const content = renderChildren(children, { ...options, nodeMapping });
                         const lang = node.attrs?.language || '';
                         return `\`\`\`${lang}\n${content}\n\`\`\`\n\n`;
                     },
@@ -14604,29 +14642,40 @@ export default {
                         return `@${username}`;
                     },
                     
-                    // Table - return the children (rows) with proper spacing
+                    // Table - process rows and add header separator after first row
                     table({ children }) {
-                        // Handle different types of children
+                        // Convert children to array
+                        let rowsArray = [];
                         if (typeof children === 'function') {
                             const result = children();
-                            if (Array.isArray(result)) {
-                                return result.join('') + '\n';
-                            }
-                            return result + '\n';
+                            rowsArray = Array.isArray(result) ? result : [result];
                         } else if (Array.isArray(children)) {
-                            return children.join('') + '\n';
+                            rowsArray = children;
+                        } else if (children) {
+                            rowsArray = [children];
                         }
-                        return (children || '') + '\n';
+                        
+                        // Process rows and add header separator after first row
+                        let output = '';
+                        rowsArray.forEach((row, index) => {
+                            output += row;
+                            
+                            // Add separator after first row (header)
+                            if (index === 0 && row.trim()) {
+                                // Count columns from the row
+                                const columnCount = (row.match(/\|/g) || []).length - 1;
+                                if (columnCount > 0) {
+                                    const separator = Array(columnCount).fill('---').join(' | ');
+                                    output += '| ' + separator + ' |\n';
+                                }
+                            }
+                        });
+                        
+                        return output + '\n';
                     },
                     
                     // Table row - format as markdown row
                     tableRow({ node, children }) {
-                        // Check if this is a header row
-                        const isHeaderRow = node.content && node.content.content && 
-                                          node.content.content.some(cell => cell.type === 'tableHeader');
-                        
-                        let rowOutput = '';
-                        
                         // Convert children to array if it's not already
                         let cellsArray = [];
                         if (Array.isArray(children)) {
@@ -14649,22 +14698,13 @@ export default {
                         });
                         
                         if (cells.length > 0) {
-                            rowOutput = '| ' + cells.join(' | ') + ' |\n';
+                            return '| ' + cells.join(' | ') + ' |\n';
                         } else {
                             // No cells - create empty cells based on node content
                             const cellCount = node.content ? node.content.content.length : 1;
                             const emptyCells = Array(cellCount).fill('');
-                            rowOutput = '| ' + emptyCells.join(' | ') + ' |\n';
+                            return '| ' + emptyCells.join(' | ') + ' |\n';
                         }
-                        
-                        if (isHeaderRow) {
-                            // Add separator row after header
-                            const cellCount = cells.length || (node.content ? node.content.content.length : 1);
-                            const separator = Array(cellCount).fill('---').join(' | ');
-                            rowOutput += '| ' + separator + ' |\n';
-                        }
-                        
-                        return rowOutput;
                     },
                     
                     // Table cell - join children without commas
