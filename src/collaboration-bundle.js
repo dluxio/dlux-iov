@@ -1380,6 +1380,7 @@ const CustomDropcursor = Dropcursor.extend({
             }
             // Remove class to restore normal cursor
             editorView.dom.classList.remove('table-drag-over-cell');
+            if (DEBUG && draggingNodeType === 'blockquote') console.log('✅ CustomDropcursor: Allowing blockquote at position', pos.pos);
           }
         };
         

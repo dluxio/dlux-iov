@@ -15147,13 +15147,13 @@ export default {
             try {
                 // Check if we're inside a blockquote
                 if (this.bodyEditor.isActive('blockquote')) {
-                    // Exit blockquote and insert HR after it (preserving the blockquote)
+                    // Complete the blockquote exit and HR insertion in one transaction
                     this.bodyEditor.chain()
                         .focus()
-                        .command(({ tr, dispatch }) => {
+                        .command(({ tr, dispatch, state }) => {
                             const { $from } = tr.selection;
                             
-                            // Find the blockquote depth
+                            // Find blockquote
                             let blockquoteDepth = -1;
                             for (let d = $from.depth; d >= 0; d--) {
                                 if ($from.node(d).type.name === 'blockquote') {
@@ -15162,25 +15162,31 @@ export default {
                                 }
                             }
                             
-                            if (blockquoteDepth >= 0 && dispatch) {
-                                // Get position after blockquote
+                            if (blockquoteDepth >= 0) {
                                 const blockquotePos = $from.before(blockquoteDepth);
                                 const blockquote = $from.node(blockquoteDepth);
                                 const afterPos = blockquotePos + blockquote.nodeSize;
                                 
-                                // Insert a paragraph after the blockquote
-                                const paragraph = tr.doc.type.schema.nodes.paragraph.create();
-                                tr.insert(afterPos, paragraph);
+                                // Only insert the HR, no extra paragraphs
+                                const hr = state.schema.nodes.horizontalRule.create();
+                                tr.insert(afterPos, hr);
                                 
-                                // Move cursor to the new paragraph
-                                const { TextSelection } = window.TiptapCollaboration;
-                                const newPos = tr.doc.resolve(afterPos + 1);
-                                tr.setSelection(TextSelection.near(newPos));
+                                // Position cursor after the HR
+                                const hrEndPos = afterPos + hr.nodeSize;
+                                try {
+                                    const $pos = tr.doc.resolve(hrEndPos);
+                                    const { TextSelection } = window.TiptapCollaboration;
+                                    tr.setSelection(TextSelection.near($pos));
+                                } catch (e) {
+                                    // Continue without setting selection
+                                    if (DEBUG) console.log('Selection positioning failed, continuing without:', e);
+                                }
+                                
+                                if (dispatch) dispatch(tr);
+                                return true;
                             }
-                            
-                            return true;
+                            return false;
                         })
-                        .setHorizontalRule()
                         .run();
                 } else {
                     // Normal insertion
@@ -21678,7 +21684,7 @@ export default {
                     <i class="fas fa-terminal"></i>
                   </button>
                   <button @click="insertHorizontalRule()" @mousedown.prevent class="btn btn-sm btn-dark" title="Horizontal Rule"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-minus"></i>
                   </button>
                 </div>
