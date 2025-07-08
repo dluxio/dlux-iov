@@ -6,25 +6,56 @@ This document details DLUX IOV's modular schema enforcement system that controls
 
 ## 🎯 **Core Architecture: Registry-Based Block Lists**
 
-### **The Central Registry**
+### **The Enhanced Registry**
 
 ```javascript
 // src/collaboration-bundle.js
 const nodeBlockLists = {
-  tableCell: ['table', 'horizontalRule'],    // Table cells block tables and HRs
-  tableHeader: ['table', 'horizontalRule'],  // Table headers have same restrictions
-  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']
+  tableCell: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+  },
+  tableHeader: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+  },
+  blockquote: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+  }
 };
 ```
 
-This single registry serves as the source of truth for all content restrictions throughout the system.
+This enhanced registry now distinguishes between:
+- **blocks**: Content that is completely prevented from being dropped
+- **transforms**: Content that is allowed but will be transformed to simpler forms
+
+### **Helper Functions**
+
+```javascript
+// Check if content should be blocked (backward compatible)
+function getBlockedContent(nodeType) {
+  const config = nodeBlockLists[nodeType];
+  if (!config) return [];
+  if (Array.isArray(config)) return config; // Old format
+  return [...(config.blocks || []), ...(config.transforms || [])];
+}
+
+// Check if content can be transformed
+function canTransformContent(nodeType, contentType) {
+  const config = nodeBlockLists[nodeType];
+  if (!config || Array.isArray(config)) return false;
+  return (config.transforms || []).includes(contentType);
+}
+```
 
 ### **Key Design Principles**
 
-1. **Single Source of Truth**: One registry controls all restrictions
+1. **Single Source of Truth**: One registry controls all restrictions and transformations
 2. **Automatic Coordination**: Dropcursor and drop handlers read from same source
-3. **Easy Extension**: Add new restrictions by updating the registry
-4. **Type-Safe**: Each node declares what it blocks explicitly
+3. **Smart Transformations**: Content is transformed rather than blocked when possible
+4. **Easy Extension**: Add new restrictions by updating the registry
+5. **Type-Safe**: Each node declares what it blocks and transforms explicitly
 
 ## 🔧 **Implementation Components**
 
@@ -63,9 +94,40 @@ function isContentBlockedAt(state, pos, contentType) {
 }
 ```
 
-This function traverses the document tree to determine if content is blocked at a given position.
+This function traverses the document tree to determine if content is blocked at a given position and whether it can be transformed.
 
-### **2. CustomDropcursor Extension**
+### **2. Unified Dropcursor Check: `shouldShowDropcursor`**
+
+```javascript
+function shouldShowDropcursor(state, pos, draggingType) {
+  if (!draggingType) return true; // Show dropcursor if unknown
+  
+  const blockInfo = isContentBlockedAt(state, pos, draggingType);
+  
+  if (!blockInfo.blocked) {
+    return true; // Not blocked at all
+  }
+  
+  if (blockInfo.canTransform) {
+    return true; // Will be transformed, show dropcursor
+  }
+  
+  // Check if it's a hard block
+  const config = nodeBlockLists[blockInfo.byNode];
+  if (config && config.blocks && config.blocks.includes(draggingType)) {
+    return false; // Completely blocked
+  }
+  
+  return false; // Default to hiding
+}
+```
+
+This function provides intelligent dropcursor behavior:
+- Shows dropcursor for allowed content
+- Shows dropcursor for content that will be transformed
+- Hides dropcursor only for completely blocked content
+
+### **3. CustomDropcursor Extension**
 
 Provides visual feedback when dragging blocked content:
 
@@ -184,12 +246,12 @@ const CustomTableCell = TableCell.extend({
 
 ## 📦 **Content Transformation System**
 
-When restricted content is dropped into table cells, it's transformed to allowed content:
+When restricted content is dropped into table cells or blockquotes, it's transformed to allowed content:
 
 ### **Transformation Rules**
 
 ```javascript
-function transformContentForTableCell(slice, schema) {
+function transformRestrictedContent(slice, schema) {
   const transformedContent = [];
   
   slice.content.forEach(node => {
@@ -435,20 +497,30 @@ const CustomHeading = Heading.extend({
 1. **Update the Registry**
    ```javascript
    const nodeBlockLists = {
-     tableCell: ['table', 'horizontalRule', 'image'], // Add 'image'
-     tableHeader: ['table', 'horizontalRule', 'image'],
-     myCustomNode: ['video', 'iframe']  // New node type
+     tableCell: {
+       blocks: ['table', 'horizontalRule', 'image'], // Add 'image' to blocks
+       transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList']
+     },
+     tableHeader: {
+       blocks: ['table', 'horizontalRule', 'image'],
+       transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList']
+     },
+     myCustomNode: {
+       blocks: ['video', 'iframe'],  // New node type with restrictions
+       transforms: ['heading', 'lists']
+     }
    };
    ```
 
 2. **That's It!** The system automatically:
-   - Updates dropcursor behavior
+   - Updates dropcursor behavior (shows for transforms, hides for blocks)
    - Enforces drop restrictions
+   - Applies transformations where configured
    - Applies to all relevant nodes
 
 ### **Adding New Transformations**
 
-1. **Update `transformContentForTableCell`**
+1. **Update `transformRestrictedContent`**
    ```javascript
    case 'myCustomNode':
      // Define transformation logic

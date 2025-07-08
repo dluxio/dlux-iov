@@ -2,7 +2,7 @@
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
 
 // Debug flag - set to true for development debugging
-const DEBUG = false;
+const DEBUG = true;
 
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { WebrtcProvider } from 'y-webrtc';
@@ -34,6 +34,7 @@ import { TableKit } from '@tiptap/extension-table/kit';
 import TableCell from '@tiptap/extension-table-cell';
 import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state';
 import { DecorationSet } from '@tiptap/pm/view';
+import { Slice } from '@tiptap/pm/model';
 
 // UI extensions for floating toolbars
 import BubbleMenu from '@tiptap/extension-bubble-menu';
@@ -348,12 +349,36 @@ const CustomHorizontalRule = HorizontalRule.extend({
   }
 });
 
-// ✅ MODULAR BLOCK LIST SYSTEM: Registry for node block lists
+// ✅ MODULAR BLOCK LIST SYSTEM: Registry for node restrictions and transformations
 const nodeBlockLists = {
-  tableCell: ['table', 'horizontalRule'], // Block tables and HRs
-  tableHeader: ['table', 'horizontalRule'], // Block tables and HRs
-  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList'] // Only allow paragraphs
+  tableCell: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+  },
+  tableHeader: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+  },
+  blockquote: {
+    blocks: ['table', 'horizontalRule'], // Completely blocked content
+    transforms: ['heading', 'codeBlock', 'bulletList', 'orderedList'] // Content that gets transformed
+  }
 };
+
+// Helper to check if content should be blocked (backward compatibility)
+function getBlockedContent(nodeType) {
+  const config = nodeBlockLists[nodeType];
+  if (!config) return [];
+  if (Array.isArray(config)) return config; // Old format
+  return [...(config.blocks || []), ...(config.transforms || [])]; // New format: both blocked and transformable
+}
+
+// Helper to check if content can be transformed
+function canTransformContent(nodeType, contentType) {
+  const config = nodeBlockLists[nodeType];
+  if (!config || Array.isArray(config)) return false; // Old format doesn't support transforms
+  return (config.transforms || []).includes(contentType);
+}
 
 // ✅ MODULAR BLOCK LIST SYSTEM: Utility function to check if content is blocked
 // This allows any node to declare what content it blocks
@@ -363,17 +388,18 @@ function isContentBlockedAt(state, pos, contentType) {
   // Check each ancestor node for block lists
   for (let d = $pos.depth; d > 0; d--) {
     const node = $pos.node(d);
-    const nodeType = node.type;
+    const nodeType = node.type.name;
     
-    // Get blocked content from the registry
-    const blockedContent = nodeBlockLists[nodeType.name] || [];
+    // Get blocked content from the registry using helper
+    const blockedContent = getBlockedContent(nodeType);
     
     if (blockedContent.includes(contentType)) {
       return {
         blocked: true,
-        byNode: nodeType.name,
+        byNode: nodeType,
         atDepth: d,
-        blockedContent: blockedContent
+        blockedContent: blockedContent,
+        canTransform: canTransformContent(nodeType, contentType)
       };
     }
   }
@@ -381,8 +407,8 @@ function isContentBlockedAt(state, pos, contentType) {
   return { blocked: false };
 }
 
-// ✅ CONTENT TRANSFORMATION: Convert complex nodes to paragraphs for table cells
-function transformContentForTableCell(slice, schema) {
+// ✅ CONTENT TRANSFORMATION: Convert complex nodes to paragraphs for restricted contexts
+function transformRestrictedContent(slice, schema) {
   const transformedContent = [];
   
   slice.content.forEach(node => {
@@ -420,7 +446,7 @@ function transformContentForTableCell(slice, schema) {
               type: 'doc', 
               content: [child.toJSON()] 
             }).content);
-            const transformed = transformContentForTableCell(nestedSlice, schema);
+            const transformed = transformRestrictedContent(nestedSlice, schema);
             transformedContent.push(...transformed.content.content);
           }
         });
@@ -475,6 +501,53 @@ function transformContentForTableCell(slice, schema) {
   }).content;
   
   return slice.constructor.maxOpen(fragment);
+}
+
+// ✅ Check if a position is inside a blockquote at any depth
+function isPositionInsideBlockquote(state, pos) {
+  try {
+    const $pos = state.doc.resolve(pos);
+    
+    // Check all ancestor nodes
+    for (let d = $pos.depth; d > 0; d--) {
+      const node = $pos.node(d);
+      if (node.type.name === 'blockquote') {
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
+// ✅ UNIFIED DROPCURSOR CHECK: Determine if dropcursor should be shown
+function shouldShowDropcursor(state, pos, draggingType) {
+  if (!draggingType) return true; // Show dropcursor if we don't know what's being dragged
+  
+  const blockInfo = isContentBlockedAt(state, pos, draggingType);
+  
+  if (!blockInfo.blocked) {
+    // Not blocked at all, show dropcursor
+    return true;
+  }
+  
+  // Content is blocked, but check if it can be transformed
+  if (blockInfo.canTransform) {
+    // Content will be transformed, show dropcursor
+    return true;
+  }
+  
+  // Content is completely blocked (like tables/HR in tables/blockquotes)
+  const config = nodeBlockLists[blockInfo.byNode];
+  if (config && config.blocks && config.blocks.includes(draggingType)) {
+    // This is a hard block, hide dropcursor
+    return false;
+  }
+  
+  // Default to hiding dropcursor for blocked content
+  return false;
 }
 
 // ✅ CUSTOM VIDEO EXTENSION: DluxVideo for native video elements with Video.js support
@@ -1159,7 +1232,7 @@ const CustomTableCell = TableCell.extend({
               
               if (needsTransformation) {
                 // Transform the content
-                const transformedSlice = transformContentForTableCell(slice, view.state.schema);
+                const transformedSlice = transformRestrictedContent(slice, view.state.schema);
                 
                 // Handle the drop with transformed content
                 if (moved) {
@@ -1364,23 +1437,23 @@ const CustomDropcursor = Dropcursor.extend({
           const pos = editorView.posAtCoords({ left: event.clientX, top: event.clientY });
           if (!pos) return;
           
-          // Use the utility function to check if content is blocked
-          const blockInfo = isContentBlockedAt(editorView.state, pos.pos, draggingNodeType);
+          // Use the unified check to determine if dropcursor should be shown
+          const showDropcursor = shouldShowDropcursor(editorView.state, pos.pos, draggingNodeType);
           
-          if (blockInfo.blocked) {
+          if (!showDropcursor) {
+            // Hide dropcursor and show not-allowed cursor
             if (!styleElement) {
               createStyleElement();
             }
-            // Add class to change cursor
             editorView.dom.classList.add('table-drag-over-cell');
-            if (DEBUG) console.log('🚫 CustomDropcursor: Blocking', draggingNodeType, 'at position', pos.pos, blockInfo);
+            if (DEBUG) console.log('🚫 CustomDropcursor: Hiding dropcursor for', draggingNodeType, 'at position', pos.pos);
           } else {
+            // Show dropcursor normally
             if (styleElement) {
               removeStyleElement();
             }
-            // Remove class to restore normal cursor
             editorView.dom.classList.remove('table-drag-over-cell');
-            if (DEBUG && draggingNodeType === 'blockquote') console.log('✅ CustomDropcursor: Allowing blockquote at position', pos.pos);
+            if (DEBUG && draggingNodeType === 'blockquote') console.log('✅ CustomDropcursor: Showing dropcursor for', draggingNodeType, 'at position', pos.pos);
           }
         };
         
@@ -1413,170 +1486,101 @@ const CustomDropcursor = Dropcursor.extend({
 });
 
 
-// Custom Blockquote that only allows paragraphs
-// This prevents headings, code blocks, lists from being created inside blockquotes
-const CustomBlockquote = Blockquote.extend({
-  name: 'blockquote',
-  content: 'paragraph+', // Only paragraphs allowed, no headings/lists/codeblocks
-  draggable: true, // Make blockquotes draggable so dropcursor works
+// Using standard Blockquote from TipTap
+
+// ✅ BLOCKQUOTE NESTING FILTER: Prevents nested blockquotes via transaction filtering
+const BlockquoteNestingFilter = Extension.create({
+  name: 'blockquoteNestingFilter',
   
   addProseMirrorPlugins() {
-    const parentPlugins = this.parent?.() || [];
     return [
-      ...parentPlugins,
       new Plugin({
-        key: new PluginKey('blockquoteNesting'),
-        props: {
-          handleDrop(view, event, slice, moved) {
-            // Get drop position
-            const dropPos = view.posAtCoords({ 
-              left: event.clientX, 
-              top: event.clientY 
-            });
-            if (!dropPos || dropPos.pos < 0) return false;
-            
-            // Check if the slice contains a blockquote
-            let containsBlockquote = false;
-            slice.content.descendants((node) => {
-              if (node.type.name === 'blockquote') {
-                containsBlockquote = true;
-                return false; // Stop iteration
-              }
-            });
-            
-            if (!containsBlockquote) {
-              return false; // Not dropping a blockquote
-            }
-            
-            // Check if dropping into a blockquote
-            try {
-              const $dropPos = view.state.doc.resolve(dropPos.pos);
+        key: new PluginKey('blockquoteNestingFilter'),
+        
+        filterTransaction(transaction, state) {
+          // Only check transactions that actually change the document
+          if (!transaction.docChanged) return true;
+          
+          let hasNestedBlockquote = false;
+          
+          transaction.steps.forEach((step) => {
+            // Check ReplaceStep and ReplaceAroundStep
+            if (step.constructor.name === 'ReplaceStep' || 
+                step.constructor.name === 'ReplaceAroundStep') {
               
-              for (let d = $dropPos.depth; d > 0; d--) {
-                if ($dropPos.node(d).type.name === 'blockquote') {
-                  // Prevent the drop
-                  if (DEBUG) console.log('🚫 Preventing blockquote drop into blockquote');
-                  return true; // Returning true prevents the drop
+              // Get the slice being inserted
+              const slice = step.slice;
+              if (!slice || !slice.content || slice.content.size === 0) return;
+              
+              // Check if we're inserting any blockquotes
+              let insertingBlockquote = false;
+              slice.content.forEach(node => {
+                if (node && node.type && node.type.name === 'blockquote') {
+                  insertingBlockquote = true;
                 }
+              });
+              
+              if (!insertingBlockquote) return;
+              
+              // Check where it's being inserted
+              try {
+                const fromPos = transaction.mapping.map(step.from);
+                const $from = transaction.doc.resolve(fromPos);
+                
+                // Check if we're inside a blockquote
+                for (let d = $from.depth; d > 0; d--) {
+                  if ($from.node(d).type.name === 'blockquote') {
+                    hasNestedBlockquote = true;
+                    if (DEBUG) console.log('🚫 BlockquoteNestingFilter: Blocking transaction that would create nested blockquote');
+                    break;
+                  }
+                }
+              } catch (e) {
+                if (DEBUG) console.error('BlockquoteNestingFilter: Error checking position:', e);
               }
-            } catch (e) {
-              // Position error - prevent drop
-              if (DEBUG) console.log('🚫 Preventing blockquote drop due to position error:', e);
-              return true;
             }
-            
-            return false;
-          }
+          });
+          
+          // Return false to block the transaction
+          return !hasNestedBlockquote;
+        },
+        
+        // Alternative: Post-process with appendTransaction
+        appendTransaction(transactions, oldState, newState) {
+          // Only process if document changed
+          const docChanged = transactions.some(tr => tr.docChanged);
+          if (!docChanged) return null;
+          
+          let tr = null;
+          
+          // Find and fix nested blockquotes
+          newState.doc.descendants((node, pos) => {
+            if (node.type.name === 'blockquote') {
+              // Check children for blockquotes
+              node.forEach((child, offset) => {
+                if (child.type.name === 'blockquote') {
+                  if (!tr) tr = newState.tr;
+                  
+                  // Calculate position of nested blockquote
+                  const nestedPos = pos + offset + 1;
+                  
+                  if (DEBUG) console.log('🔧 BlockquoteNestingFilter: Found nested blockquote, unwrapping...');
+                  
+                  // Extract content from nested blockquote
+                  const start = nestedPos;
+                  const end = nestedPos + child.nodeSize - 2; // -2 to exclude blockquote wrapper
+                  
+                  // Replace the nested blockquote with its content
+                  tr.replaceRangeWith(start - 1, start + child.nodeSize - 1, child.content);
+                }
+              });
+            }
+          });
+          
+          return tr;
         }
       })
     ];
-  },
-  
-  addKeyboardShortcuts() {
-    return {
-      ...this.parent?.(),
-      // Exit blockquote with Mod-Enter
-      'Mod-Enter': () => {
-        const { state, dispatch } = this.editor.view;
-        const { $from } = state.selection;
-        
-        // Check if we're inside a blockquote
-        let blockquotePos = null;
-        for (let d = $from.depth; d > 0; d--) {
-          if ($from.node(d).type.name === 'blockquote') {
-            blockquotePos = $from.before(d);
-            break;
-          }
-        }
-        
-        if (blockquotePos === null) {
-          return false; // Not in a blockquote
-        }
-        
-        // Create a transaction
-        const tr = state.tr;
-        
-        // Find the position after the blockquote
-        const resolvedPos = state.doc.resolve(blockquotePos);
-        const blockquoteNode = state.doc.nodeAt(blockquotePos);
-        if (!blockquoteNode) return false;
-        
-        const afterPos = blockquotePos + blockquoteNode.nodeSize;
-        
-        // Insert a paragraph after the blockquote
-        const paragraph = state.schema.nodes.paragraph.create();
-        tr.insert(afterPos, paragraph);
-        
-        // Move cursor to the new paragraph
-        const newPos = state.doc.resolve(afterPos + 1);
-        tr.setSelection(TextSelection.near(newPos));
-        
-        // Dispatch the transaction
-        if (dispatch) dispatch(tr);
-        
-        return true;
-      },
-      
-      // Also handle Enter at the end of a blockquote
-      'Enter': ({ editor }) => {
-        const { state } = editor;
-        const { $from, $to } = state.selection;
-        
-        // Check if we're at the end of a blockquote
-        if ($from.pos !== $to.pos) return false; // Not a collapsed selection
-        
-        // Check if we're inside a blockquote
-        let inBlockquote = false;
-        let blockquoteDepth = 0;
-        for (let d = $from.depth; d > 0; d--) {
-          if ($from.node(d).type.name === 'blockquote') {
-            inBlockquote = true;
-            blockquoteDepth = d;
-            break;
-          }
-        }
-        
-        if (!inBlockquote) return false;
-        
-        // Check if we're at the end of the blockquote
-        const blockquote = $from.node(blockquoteDepth);
-        const indexInParent = $from.index(blockquoteDepth);
-        const isLastParagraph = indexInParent === blockquote.childCount - 1;
-        const paragraph = $from.parent;
-        const isEmptyParagraph = paragraph.content.size === 0;
-        const isAtEndOfParagraph = $from.parentOffset === paragraph.content.size;
-        
-        // Exit if we're in the last paragraph and it's empty, or we're at the end of the last paragraph
-        if (isLastParagraph && (isEmptyParagraph || isAtEndOfParagraph)) {
-          // Exit the blockquote
-          return editor.chain()
-            .command(({ tr, dispatch }) => {
-              const blockquotePos = $from.before(blockquoteDepth);
-              const afterPos = blockquotePos + blockquote.nodeSize;
-              
-              // If paragraph is empty, remove it
-              if (isEmptyParagraph) {
-                const paragraphPos = $from.before();
-                tr.delete(paragraphPos, paragraphPos + paragraph.nodeSize);
-              }
-              
-              // Insert new paragraph after blockquote
-              const newParagraph = state.schema.nodes.paragraph.create();
-              tr.insert(afterPos, newParagraph);
-              
-              // Set selection in new paragraph
-              const resolvedPos = tr.doc.resolve(afterPos + 1);
-              tr.setSelection(TextSelection.near(resolvedPos));
-              
-              if (dispatch) dispatch(tr);
-              return true;
-            })
-            .run();
-        }
-        
-        return false; // Let default Enter behavior handle it
-      }
-    };
   }
 });
 
@@ -1671,7 +1675,7 @@ const TiptapCollaboration = {
   OrderedList, // Export standard
   TaskList,
   TaskItem,
-  CustomBlockquote, // Export custom with paragraph-only content
+  Blockquote, // Export standard blockquote
   HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
@@ -1704,11 +1708,15 @@ const TiptapCollaboration = {
   TableKit,
   CustomTableCell,
   
+  // Filtering extensions
+  BlockquoteNestingFilter,
+  
   // ProseMirror utilities
   Plugin,
   PluginKey,
   TextSelection,
   DecorationSet,
+  Slice,
   
   // Static renderer utilities
   renderToMarkdown,

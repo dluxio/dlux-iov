@@ -232,9 +232,14 @@ To add block lists for new node types:
 
 ```javascript
 const nodeBlockLists = {
-  tableCell: ['table'],
-  tableHeader: ['table'],
-  codeBlock: ['table', 'image']     // New node with its own block list
+  tableCell: {    // Enhanced format
+    blocks: ['table', 'horizontalRule'],
+    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList']
+  },
+  codeBlock: {    // New node with restrictions
+    blocks: ['table', 'image', 'video'],
+    transforms: []  // No transformations, just blocks
+  }
 };
 ```
 

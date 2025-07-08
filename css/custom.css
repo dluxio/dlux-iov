@@ -15264,24 +15264,6 @@ body[data-touch=false] .dropdown-extra:hover {
 }
 
 /* JSON Preview Modal Styles */
-.nav-tabs .nav-link {
-  background-color: #343a40;
-  border-color: #495057;
-  color: #adb5bd;
-}
-
-.nav-tabs .nav-link.active {
-  background-color: #495057;
-  border-color: #6c757d;
-  color: #fff;
-}
-
-.nav-tabs .nav-link:hover {
-  background-color: #495057;
-  border-color: #6c757d;
-  color: #fff;
-}
-
 /* JSON syntax highlighting for better readability */
 pre {
   font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
@@ -15682,25 +15664,6 @@ pre {
   z-index: 1000;
   margin-bottom: 0.25rem;
   pointer-events: none;
-}
-
-/* JSON Preview Modal Styles */
-.nav-tabs .nav-link {
-  background-color: #343a40;
-  border-color: #495057;
-  color: #adb5bd;
-}
-
-.nav-tabs .nav-link.active {
-  background-color: #495057;
-  border-color: #6c757d;
-  color: #fff;
-}
-
-.nav-tabs .nav-link:hover {
-  background-color: #495057;
-  border-color: #6c757d;
-  color: #fff;
 }
 
 /* JSON syntax highlighting for better readability */

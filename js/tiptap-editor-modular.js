@@ -1870,6 +1870,7 @@ class EditorFactory {
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
         const Blockquote = tiptapBundle.Blockquote;
+        const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
         const BulletList = tiptapBundle.BulletList;
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
@@ -1942,6 +1943,8 @@ class EditorFactory {
 
         // Build body extensions array - single editor only
         const bodyExtensions = [
+            // Filtering extension - must be early to catch transactions
+            BlockquoteNestingFilter,
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
@@ -2573,6 +2576,7 @@ class EditorFactory {
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
         const Blockquote = tiptapBundle.Blockquote;
+        const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
         const BulletList = tiptapBundle.BulletList;
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
@@ -2590,6 +2594,8 @@ class EditorFactory {
 
         // Build body extensions array - single editor only (like Tier 1)
         const bodyExtensions = [
+            // Filtering extension - must be early to catch transactions
+            BlockquoteNestingFilter,
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
@@ -14341,7 +14347,6 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
-                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14360,7 +14365,8 @@ export default {
                     Collaboration,
                     CollaborationCaret,
                     BubbleMenu,
-                    FloatingMenu
+                    FloatingMenu,
+                    BlockquoteNestingFilter
                 } = tiptapBundle;
                 
                 if (!renderToMarkdown) {
@@ -14369,6 +14375,8 @@ export default {
                 
                 // Build extensions array
                 const extensions = [
+                    // Filtering extension - must be early to catch transactions
+                    BlockquoteNestingFilter,
                     Document,
                     Text,
                     TextAlign && TextAlign.configure({
@@ -14385,7 +14393,6 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
-                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
