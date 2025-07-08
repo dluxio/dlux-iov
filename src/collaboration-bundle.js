@@ -1202,7 +1202,8 @@ const CustomTableCell = TableCell.extend({
             for (const nodeType of droppedTypes) {
               const blockInfo = isContentBlockedAt(view.state, dropPos.pos, nodeType);
               
-              if (blockInfo.blocked) {
+              // Only block if content is blocked AND cannot be transformed
+              if (blockInfo.blocked && !blockInfo.canTransform) {
                 event.preventDefault();
                 return true; // Block the drop
               }
