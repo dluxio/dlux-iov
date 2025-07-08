@@ -6,8 +6,10 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 ## Quick Reference
 - **Main implementation**: `js/tiptap-editor-modular.js`
 - **Architecture guide**: `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` (comprehensive implementation details)
-- **Shema guide**; `TIPTAP_COLLABORATIVE_SCHEMA.MD`
-- **API Documentation**; `Collaboration_editor.md`
+- **Schema guide**: `TIPTAP_COLLABORATIVE_SCHEMA.md` (aspirational design) / `TIPTAP_YIJS_SCHEMA_ACTUAL.md` (actual implementation)
+- **Schema enforcement**: `TIPTAP_SCHEMA_ENFORCEMENT.md` (content restriction system)
+- **Markdown export**: `TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md` (export pipeline)
+- **API Documentation**: `Collaboration_editor.md`
 - **Testing commands**: `npm run lint && npm run typecheck`
 
 ## Core Technologies
@@ -28,6 +30,8 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
    - Requires authentication and WebSocket connection
 
 ## Y.js Document Structure
+
+> **Note**: This shows the actual implemented structure. For the full aspirational design, see `TIPTAP_COLLABORATIVE_SCHEMA.md`.
 
 ```javascript
 // 1. CONFIG MAP - Document metadata (handled by config observer)
@@ -187,8 +191,9 @@ The editor implements a modular block list system that controls what content can
 1. **Registry-Based Block Lists** (`src/collaboration-bundle.js`):
 ```javascript
 const nodeBlockLists = {
-  tableCell: ['table'],    // tableCell blocks tables only
-  tableHeader: ['table']   // tableHeader blocks tables only
+  tableCell: ['table', 'horizontalRule'],    // Table cells block tables and HRs
+  tableHeader: ['table', 'horizontalRule'],  // Table headers have same restrictions
+  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']  // Blockquotes only allow paragraphs
 };
 ```
 
@@ -217,8 +222,9 @@ To block additional content types from being dropped into table cells:
 ```javascript
 // In src/collaboration-bundle.js
 const nodeBlockLists = {
-  tableCell: ['table', 'image'],    // Example: Add 'image' to also block images
-  tableHeader: ['table', 'image']   // Keep consistent
+  tableCell: ['table', 'horizontalRule', 'image'],    // Example: Add 'image' to also block images
+  tableHeader: ['table', 'horizontalRule', 'image'],   // Keep consistent
+  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']
 };
 ```
 
@@ -301,6 +307,33 @@ https://next.tiptap.dev/docs/editor/api/utilities
 https://next.tiptap.dev/docs/editor/api/node-positions
 https://next.tiptap.dev/docs/editor/api/events
 
+
+## Key Architectural Patterns
+
+### Modular Block List System
+The editor uses a registry-based system for content restrictions:
+```javascript
+const nodeBlockLists = {
+  tableCell: ['table', 'horizontalRule'],
+  tableHeader: ['table', 'horizontalRule'],
+  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']
+};
+```
+See `TIPTAP_SCHEMA_ENFORCEMENT.md` for full documentation.
+
+### Markdown Export Architecture
+- **All extensions must be synchronized** between editor and export
+- **Custom node mappings** for Hive blockchain compatibility
+- **Children type handling** for different renderer outputs
+See `TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md` for details.
+
+### Simple Y.js Schema
+The actual implementation uses just 3 maps + 1 fragment:
+- **config map**: Document metadata
+- **metadata map**: Publishing data
+- **permissions map**: Server-managed
+- **body fragment**: TipTap-managed content
+See `TIPTAP_COLLABORATIVE_SCHEMA.md` for the real structure.
 
 ## Common Issues & Solutions
 

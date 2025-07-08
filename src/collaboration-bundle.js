@@ -352,7 +352,7 @@ const CustomHorizontalRule = HorizontalRule.extend({
 const nodeBlockLists = {
   tableCell: ['table', 'horizontalRule'], // Block tables and HRs
   tableHeader: ['table', 'horizontalRule'], // Block tables and HRs
-  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList', 'blockquote'] // Only allow paragraphs
+  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList'] // Only allow paragraphs
 };
 
 // ✅ MODULAR BLOCK LIST SYSTEM: Utility function to check if content is blocked
@@ -1419,6 +1419,58 @@ const CustomBlockquote = Blockquote.extend({
   name: 'blockquote',
   content: 'paragraph+', // Only paragraphs allowed, no headings/lists/codeblocks
   draggable: true, // Make blockquotes draggable so dropcursor works
+  
+  addProseMirrorPlugins() {
+    const parentPlugins = this.parent?.() || [];
+    return [
+      ...parentPlugins,
+      new Plugin({
+        key: new PluginKey('blockquoteNesting'),
+        props: {
+          handleDrop(view, event, slice, moved) {
+            // Get drop position
+            const dropPos = view.posAtCoords({ 
+              left: event.clientX, 
+              top: event.clientY 
+            });
+            if (!dropPos || dropPos.pos < 0) return false;
+            
+            // Check if the slice contains a blockquote
+            let containsBlockquote = false;
+            slice.content.descendants((node) => {
+              if (node.type.name === 'blockquote') {
+                containsBlockquote = true;
+                return false; // Stop iteration
+              }
+            });
+            
+            if (!containsBlockquote) {
+              return false; // Not dropping a blockquote
+            }
+            
+            // Check if dropping into a blockquote
+            try {
+              const $dropPos = view.state.doc.resolve(dropPos.pos);
+              
+              for (let d = $dropPos.depth; d > 0; d--) {
+                if ($dropPos.node(d).type.name === 'blockquote') {
+                  // Prevent the drop
+                  if (DEBUG) console.log('🚫 Preventing blockquote drop into blockquote');
+                  return true; // Returning true prevents the drop
+                }
+              }
+            } catch (e) {
+              // Position error - prevent drop
+              if (DEBUG) console.log('🚫 Preventing blockquote drop due to position error:', e);
+              return true;
+            }
+            
+            return false;
+          }
+        }
+      })
+    ];
+  },
   
   addKeyboardShortcuts() {
     return {

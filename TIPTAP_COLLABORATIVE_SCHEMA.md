@@ -1,8 +1,10 @@
 # 🏗️ Y.js Collaborative Schema for DLUX Posts
 
+> **📍 NOTE**: This document describes the **current implementation** of DLUX's collaborative features. For a simplified view of just the Y.js structure, see [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md).
+
 ## 📋 **Overview**
 
-This document outlines the clean, optimal Y.js collaborative document schema designed specifically for DLUX post creation. Following TipTap.dev best practices, this implementation uses an **always-collaborative, offline-first architecture** with Y.js + IndexedDB persistence and comprehensive content validation.
+This document outlines the implemented Y.js collaborative document schema for DLUX post creation. Following TipTap.dev best practices, the implementation uses an **always-collaborative, offline-first architecture** with Y.js + IndexedDB persistence.
 
 ## 🎯 **Core Design Principles**
 
@@ -360,64 +362,35 @@ async function validatePermissions(req, res, next) {
 - 🎯 Clean error logs without workaround messages
 - 🎯 Optimal performance without fallback logic
 
-## 📊 **Schema Structure**
-
-### **Core Collaborative Content**
-
-**IMPORTANT**: Following TipTap v3 best practices, DLUX uses a **single editor architecture**:
-- **Title**: Simple `<input>` field with `v-model="titleInput"`
-- **Body**: Single TipTap editor instance with `field: 'body'`
+## 📊 **Y.js Schema Structure**
 
 ```javascript
-// Single Editor Architecture - Title in config map
+// Y.js Maps (3 total)
 ydoc.getMap('config')                   // Document metadata & configuration
-├── title: String                           // Post title (plain text)
-├── documentName: String                    // Display name for document
-├── postType: String                        // 'blog', 'video', '360', 'dapp', 'remix'
-├── version: String                         // '1.0.0'
-├── appVersion: String                      // 'dlux/1.0.0'
-├── lastModified: String                    // ISO timestamp
-└── owner: String                           // Document owner (Note: localStorage uses 'creator' for legacy compatibility)
+├── documentName: String                // Display name for document
+├── lastModified: String                // ISO timestamp
+├── owner: String                       // Document owner
+├── created: String                     // Creation timestamp
+├── version: String                     // Document version
+└── documentType: String                // Document type
 
-// Body content (Y.XmlFragment for TipTap editor)
-ydoc.get('body', Y.XmlFragment)         // Post body content (rich text)
+ydoc.getMap('metadata')                 // Publishing data
+├── title: String                       // Post title
+├── tags: Array                         // Tags array (stored as value, not Y.Array)
+├── beneficiaries: Array                // Beneficiaries (stored as value, not Y.Array)
+├── customJson: Object                  // Custom JSON (stored as value, not Y.Map)
+├── permlink: String                    // Hive permlink
+└── commentOptions: Object              // Comment options object containing:
+    ├── allowVotes: Boolean
+    ├── allowCurationRewards: Boolean
+    ├── maxAcceptedPayout: String
+    └── percentHbd: Number
 
-// Advanced publishing options (Y.Map for atomic values only)
-ydoc.getMap('publishOptions')           // Atomic publishing settings
-├── maxAcceptedPayout: String               // '1000000.000 HBD'
-├── percentHbd: Number                      // 10000 = 100% HBD
-├── allowVotes: Boolean                     // true
-└── allowCurationRewards: Boolean           // true
+ydoc.getMap('permissions')              // Server-managed permissions (read-only)
+└── [username]: Object                  // Per-user permission data
 
-// Conflict-free collaborative arrays and maps
-ydoc.getArray('tags')                   // Conflict-free tag management
-ydoc.getArray('beneficiaries')          // Conflict-free beneficiary management  
-ydoc.getMap('customJson')               // Granular custom field updates
-
-// Operation coordination and schema versioning
-ydoc.getMap('_locks')                   // Operation locks (publishing, etc.)
-ydoc.getMap('_metadata')                // Schema versioning and metadata
-
-// Individual asset transform maps (created dynamically)
-ydoc.getMap('transform_${assetId}')     // Per-asset conflict-free positioning
-
-// Media assets (Y.Array for ordered collections)
-ydoc.getArray('images')                 // Image assets
-ydoc.getArray('videos')                 // Video assets  
-ydoc.getArray('assets360')              // 360° scene assets
-ydoc.getArray('attachments')            // General file attachments
-
-// Video-specific data (Y.Map for video posts)
-ydoc.getMap('videoData')                // Video transcoding & streaming
-├── transcodeStatus: String                 // 'pending', 'processing', 'completed', 'failed'
-├── resolutions: Array                      // Available video resolutions
-├── playlist: String                        // M3U8 playlist URL/content
-├── duration: Number                        // Video duration in seconds
-└── thumbnails: Array                       // Video thumbnail URLs
-
-// Real-time collaboration (Y.Map for user presence)
-ydoc.getMap('presence')                 // User presence data
-└── [username]: Object                      // Per-user presence info
+// Body content (managed by TipTap)
+ydoc.getXmlFragment('body')             // Created automatically by Collaboration extension
 ```
 
 ## 🔄 **Hive Collaboration API Endpoints**
@@ -2115,4 +2088,3 @@ handleSpkAddToEditor(fileData) {
   }
 }
 ```
-``` 
