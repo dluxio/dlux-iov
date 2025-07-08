@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
-import { Editor, Extension, Node } from '@tiptap/core';
+import { Editor, Extension, Node, findParentNode } from '@tiptap/core';
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -318,6 +318,11 @@ const CustomHorizontalRule = HorizontalRule.extend({
   atom: true,        // Mark as atomic node (no content inside)
   draggable: true,   // Make draggable
   selectable: true,  // Ensure it can be selected
+  
+  // Inherit parent commands to preserve setHorizontalRule
+  addCommands() {
+    return this.parent?.() || {}
+  },
   
   // Render with wrapper div for better positioning
   renderHTML({ HTMLAttributes }) {
@@ -1393,79 +1398,51 @@ const CustomDropcursor = Dropcursor.extend({
 });
 
 
-// ✅ CUSTOM BLOCKQUOTE: Allow paragraphs for proper markdown compatibility
+// Custom Blockquote that only allows paragraphs
+// This prevents headings, code blocks, lists from being created inside blockquotes
 const CustomBlockquote = Blockquote.extend({
-  name: 'blockquote', // Keep same name to replace default
-  content: 'paragraph*', // Allow multiple paragraphs for multi-line blockquotes
-  
-  
-  addProseMirrorPlugins() {
-    const plugins = this.parent?.() || [];
+  name: 'blockquote',
+  content: 'paragraph+', // Only paragraphs allowed, no headings/lists/codeblocks
+});
+
+// Custom Heading that prevents input rules inside blockquotes
+const CustomHeading = Heading.extend({
+  addInputRules() {
+    const rules = this.parent?.() || [];
     
-    return [
-      ...plugins,
-      new Plugin({
-        key: new PluginKey('customBlockquoteDrop'),
-        props: {
-          handleDrop(view, event, slice, moved) {
-            // Check if we're dropping into a blockquote
-            const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-            if (!pos) return false;
-            
-            const $pos = view.state.doc.resolve(pos.pos);
-            let isInBlockquote = false;
-            
-            for (let d = $pos.depth; d > 0; d--) {
-              const node = $pos.node(d);
-              if (node.type.name === 'blockquote') {
-                isInBlockquote = true;
-                break;
-              }
+    // Wrap each rule to check if we're in a blockquote
+    return rules.map(rule => {
+      const originalHandler = rule.handler;
+      
+      return {
+        ...rule,
+        handler: (props) => {
+          const { state } = props;
+          const { $from } = state.selection;
+          
+          // Check if we're inside a blockquote
+          for (let d = $from.depth; d > 0; d--) {
+            if ($from.node(d).type.name === 'blockquote') {
+              // Don't apply the rule inside blockquotes
+              return null;
             }
-            
-            // Transform content if dropping into blockquote
-            if (isInBlockquote && slice) {
-              // Check if slice contains any complex nodes that need transformation
-              let needsTransformation = false;
-              slice.content.forEach(node => {
-                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'].includes(node.type.name)) {
-                  needsTransformation = true;
-                }
-              });
-              
-              if (needsTransformation) {
-                // Transform the content (reuse table cell transformation)
-                const transformedSlice = transformContentForTableCell(slice, view.state.schema);
-                
-                // Handle the drop with transformed content
-                const tr = view.state.tr;
-                
-                if (moved) {
-                  // For moved content, delete from original position first
-                  const { from, to } = view.state.selection;
-                  let targetPos = pos.pos;
-                  if (targetPos > from) {
-                    targetPos = targetPos - (to - from);
-                  }
-                  tr.delete(from, to);
-                  tr.insert(targetPos, transformedSlice.content);
-                } else {
-                  // For copy/paste, just insert
-                  tr.insert(pos.pos, transformedSlice.content);
-                }
-                
-                view.dispatch(tr);
-                return true; // We handled it
-              }
-            }
-            
-            return false; // Let default handling continue
           }
+          
+          // Apply the rule normally
+          return originalHandler(props);
         }
-      })
-    ];
+      };
+    });
   }
 });
+
+// RestrictedParagraph removed - using standard paragraphs
+
+// Using standard ListItem
+
+// Using standard BulletList
+
+// Using standard OrderedList
 
 // Create collaborative document helper
 function createCollaborativeDocument() {
@@ -1513,14 +1490,14 @@ const TiptapCollaboration = {
   Strike,
   Underline,
   Code,
-  Heading,
-  BulletList,
-  OrderedList,
-  ListItem,
+  Heading: CustomHeading, // Export custom with blockquote-aware input rules
+  ListItem, // Export standard
+  BulletList, // Export standard
+  OrderedList, // Export standard
   TaskList,
   TaskItem,
-  CustomBlockquote, // Use custom paragraph-only version
-  CustomHorizontalRule, // Use custom draggable version
+  Blockquote: CustomBlockquote, // Export custom with paragraph-only content
+  HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
   // Additional extensions
@@ -1530,6 +1507,7 @@ const TiptapCollaboration = {
   CodeBlock,
   // Dropcursor, // Don't export default - we use CustomDropcursor
   CustomDropcursor,
+  CustomHorizontalRule, // Export the custom extension directly for backward compatibility
   Gapcursor,
   CharacterCount,
   Typography,

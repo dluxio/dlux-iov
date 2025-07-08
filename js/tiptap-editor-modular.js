@@ -1868,9 +1868,12 @@ class EditorFactory {
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
-        const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
+        const Blockquote = tiptapBundle.Blockquote;
+        const BulletList = tiptapBundle.BulletList;
+        const OrderedList = tiptapBundle.OrderedList;
+        const ListItem = tiptapBundle.ListItem;
         const Link = tiptapBundle.Link;
-        const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
@@ -1891,7 +1894,10 @@ class EditorFactory {
             CustomImage: !!CustomImage,
             CustomDropcursor: !!CustomDropcursor,
             CustomHorizontalRule: !!CustomHorizontalRule,
-            CustomBlockquote: !!CustomBlockquote,
+            Blockquote: !!Blockquote,
+            BulletList: !!BulletList,
+            OrderedList: !!OrderedList,
+            ListItem: !!ListItem,
             Extension: !!Extension,
             Plugin: !!window.TiptapCollaboration?.Plugin,
             PluginKey: !!window.TiptapCollaboration?.PluginKey,
@@ -1939,7 +1945,7 @@ class EditorFactory {
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
                 horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
-                blockquote: false    // ✅ Disable built-in blockquote to use custom paragraph-only version
+                heading: false       // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2005,10 +2011,8 @@ class EditorFactory {
             }),
             // ✅ Add CustomHorizontalRule with draggable functionality
             CustomHorizontalRule && CustomHorizontalRule,
-            // ✅ Add CustomBlockquote with text-only content
-            CustomBlockquote && CustomBlockquote,
-            // ✅ Add Underline formatting
-            Underline && Underline,
+            // ✅ Add CustomHeading that prevents input rules inside blockquotes
+            Heading && Heading,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2550,9 +2554,12 @@ class EditorFactory {
         const DragHandle = tiptapBundle.DragHandle;
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
-        const CustomBlockquote = tiptapBundle.CustomBlockquote;
+        const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
+        const Blockquote = tiptapBundle.Blockquote;
+        const BulletList = tiptapBundle.BulletList;
+        const OrderedList = tiptapBundle.OrderedList;
+        const ListItem = tiptapBundle.ListItem;
         const Link = tiptapBundle.Link;
-        const Underline = tiptapBundle.Underline;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
 
@@ -2569,7 +2576,7 @@ class EditorFactory {
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
                 horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
-                blockquote: false    // ✅ Disable built-in blockquote to use custom paragraph-only version
+                heading: false       // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2635,10 +2642,8 @@ class EditorFactory {
             }),
             // ✅ Add CustomHorizontalRule with draggable functionality
             CustomHorizontalRule && CustomHorizontalRule,
-            // ✅ Add CustomBlockquote with text-only content
-            CustomBlockquote && CustomBlockquote,
-            // ✅ Add Underline formatting
-            Underline && Underline,
+            // ✅ Add CustomHeading that prevents input rules inside blockquotes
+            Heading && Heading,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -5953,6 +5958,39 @@ export default {
             
             // Default
             return 'Format';
+        },
+
+        // Check if text alignment is allowed at current position
+        canUseTextAlign() {
+            // Reference the counter to make Vue track selection changes
+            this.selectionUpdateCounter;
+            
+            if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
+            
+            // Check if we're in any node that shouldn't have text alignment
+            if (this.isActive('blockquote')) return false;
+            if (this.isActive('bulletList')) return false;
+            if (this.isActive('orderedList')) return false;
+            if (this.isActive('taskList')) return false;
+            if (this.isActive('codeBlock')) return false;
+            if (this.isInTable) return false; // Already have this property
+            
+            return true;
+        },
+
+        // Check if horizontal rule can be inserted at current position
+        canInsertHorizontalRule() {
+            // Reference the counter to make Vue track selection changes
+            this.selectionUpdateCounter;
+            
+            if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
+            
+            // Check if we're in any node that blocks horizontal rules
+            if (this.isInTable) return false; // No HRs in tables
+            if (this.isActive('blockquote')) return false; // No HRs in blockquotes
+            if (this.isActive('codeBlock')) return false; // No HRs in code blocks
+            
+            return true;
         },
 
         // ✅ CONSOLIDATED USERNAME: Single source of truth for username with proper auth state handling
@@ -14259,12 +14297,12 @@ export default {
                     renderToMarkdown,
                     Document,
                     Paragraph,
+                    RestrictedParagraph,
                     Text,
                     Heading,
                     Bold,
                     Italic,
                     Strike,
-                    Underline,
                     Code,
                     BulletList,
                     OrderedList,
@@ -14304,11 +14342,11 @@ export default {
                         alignments: ['left', 'center', 'right', 'justify']
                     }),
                     Paragraph,
+                    RestrictedParagraph,
                     Heading,
                     Bold,
                     Italic,
                     Strike,
-                    Underline,
                     Code,
                     BulletList,
                     OrderedList,
@@ -14420,6 +14458,13 @@ export default {
                             return `<div class="text-justify">${content}</div>\n\n`;
                         }
                         // 'left' is default, no special handling needed
+                        return `${content}\n\n`;
+                    },
+                    
+                    // Restricted paragraph (no alignment support)
+                    restrictedParagraph({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        // RestrictedParagraph doesn't support alignment, just return content
                         return `${content}\n\n`;
                     },
                     
@@ -14828,7 +14873,22 @@ export default {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
             try {
-                this.bodyEditor.chain().focus().toggleHeading({ level }).run();
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    // First lift out of blockquote, then apply heading
+                    // This ensures heading replaces blockquote rather than being added inside
+                    this.bodyEditor.chain()
+                        .focus()
+                        .lift('blockquote')
+                        .toggleHeading({ level })
+                        .run();
+                } else {
+                    // Normal heading toggle
+                    this.bodyEditor.chain()
+                        .focus()
+                        .toggleHeading({ level })
+                        .run();
+                }
             } catch (error) {
                 console.error('Heading command failed:', error);
             }
@@ -14871,7 +14931,22 @@ export default {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
             try {
-                this.bodyEditor.chain().focus().toggleBulletList().run();
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    // First lift out of blockquote, then apply bullet list
+                    // This ensures list replaces blockquote rather than being added inside
+                    this.bodyEditor.chain()
+                        .focus()
+                        .lift('blockquote')
+                        .toggleBulletList()
+                        .run();
+                } else {
+                    // Normal bullet list toggle
+                    this.bodyEditor.chain()
+                        .focus()
+                        .toggleBulletList()
+                        .run();
+                }
             } catch (error) {
                 console.error('Bullet list command failed:', error);
             }
@@ -14881,7 +14956,22 @@ export default {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
             try {
-                this.bodyEditor.chain().focus().toggleOrderedList().run();
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    // First lift out of blockquote, then apply ordered list
+                    // This ensures list replaces blockquote rather than being added inside
+                    this.bodyEditor.chain()
+                        .focus()
+                        .lift('blockquote')
+                        .toggleOrderedList()
+                        .run();
+                } else {
+                    // Normal ordered list toggle
+                    this.bodyEditor.chain()
+                        .focus()
+                        .toggleOrderedList()
+                        .run();
+                }
             } catch (error) {
                 console.error('Ordered list command failed:', error);
             }
@@ -14897,11 +14987,55 @@ export default {
             }
         },
 
+        setBlockquote() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+
+            try {
+                // Check if we're already in a blockquote
+                const isInBlockquote = this.bodyEditor.isActive('blockquote');
+                
+                if (isInBlockquote) {
+                    // If in blockquote, lift out of it (converts to paragraph)
+                    this.bodyEditor.chain()
+                        .focus()
+                        .lift('blockquote')
+                        .run();
+                } else {
+                    // For all other nodes (paragraphs, headings, lists, code blocks)
+                    // Use clearNodes to remove all node-level formatting first
+                    // This converts headings, lists, code blocks to plain paragraphs
+                    // Then apply blockquote formatting
+                    this.bodyEditor.chain()
+                        .focus()
+                        .clearNodes()
+                        .setBlockquote()
+                        .run();
+                }
+            } catch (error) {
+                console.error('Set blockquote command failed:', error);
+            }
+        },
+
         toggleCodeBlock() {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
             try {
-                this.bodyEditor.chain().focus().toggleCodeBlock().run();
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    // First lift out of blockquote, then apply code block
+                    // This ensures code block replaces blockquote rather than being added inside
+                    this.bodyEditor.chain()
+                        .focus()
+                        .lift('blockquote')
+                        .toggleCodeBlock()
+                        .run();
+                } else {
+                    // Normal code block toggle
+                    this.bodyEditor.chain()
+                        .focus()
+                        .toggleCodeBlock()
+                        .run();
+                }
             } catch (error) {
                 console.error('Code block command failed:', error);
             }
@@ -21256,22 +21390,22 @@ export default {
                 <div role="group">
                   <button @click="setTextAlign('left')" @mousedown.prevent :class="{active: isActive({textAlign: 'left'})}" 
                           class="btn btn-sm btn-dark" title="Align Left"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || !canUseTextAlign">
                     <i class="fas fa-align-left"></i>
                   </button>
                   <button @click="setTextAlign('center')" @mousedown.prevent :class="{active: isActive({textAlign: 'center'})}" 
                           class="btn btn-sm btn-dark" title="Align Center"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || !canUseTextAlign">
                     <i class="fas fa-align-center"></i>
                   </button>
                   <button @click="setTextAlign('right')" @mousedown.prevent :class="{active: isActive({textAlign: 'right'})}" 
                           class="btn btn-sm btn-dark" title="Align Right"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || !canUseTextAlign">
                     <i class="fas fa-align-right"></i>
                   </button>
                   <button @click="setTextAlign('justify')" @mousedown.prevent :class="{active: isActive({textAlign: 'justify'})}" 
                           class="btn btn-sm btn-dark" title="Justify"
-                          :disabled="isReadOnlyMode">
+                          :disabled="isReadOnlyMode || !canUseTextAlign">
                     <i class="fas fa-align-justify"></i>
                   </button>
                 </div>
@@ -21338,7 +21472,7 @@ export default {
 
                 <!-- Block Elements -->
                 <div role="group">
-                  <button @click="toggleBlockquote()" @mousedown.prevent :class="{active: isActive('blockquote')}" 
+                  <button @click="setBlockquote()" @mousedown.prevent :class="{active: isActive('blockquote')}" 
                           class="btn btn-sm btn-dark" title="Quote"
                           :disabled="isReadOnlyMode || isInTable">
                     <i class="fas fa-quote-left"></i>
@@ -21349,7 +21483,7 @@ export default {
                     <i class="fas fa-terminal"></i>
                   </button>
                   <button @click="insertHorizontalRule()" @mousedown.prevent class="btn btn-sm btn-dark" title="Horizontal Rule"
-                          :disabled="isReadOnlyMode || isInTable">
+                          :disabled="isReadOnlyMode || !canInsertHorizontalRule">
                     <i class="fas fa-minus"></i>
                   </button>
                 </div>
@@ -21442,13 +21576,14 @@ export default {
                     </a>
                     <div class="dropdown-submenu-horizontal">
                       <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleBlockquote()" @mousedown.prevent title="Blockquote">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="setBlockquote()" @mousedown.prevent title="Blockquote">
                           <i class="fas fa-quote-left"></i>
                         </button>
                         <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleCodeBlock()" @mousedown.prevent title="Code Block">
                           <i class="fas fa-code"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertHorizontalRule()" @mousedown.prevent title="Horizontal Rule">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertHorizontalRule()" @mousedown.prevent title="Horizontal Rule"
+                                :disabled="!canInsertHorizontalRule">
                           <i class="fas fa-minus"></i>
                         </button>
                         <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertTable()" @mousedown.prevent 
