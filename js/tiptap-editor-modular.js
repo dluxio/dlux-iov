@@ -1874,6 +1874,7 @@ class EditorFactory {
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
         const Link = tiptapBundle.Link;
+        const TextSelection = tiptapBundle.TextSelection;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
@@ -2023,7 +2024,11 @@ class EditorFactory {
                 },
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
+                    // Store in both locations for compatibility with CustomDropcursor
                     this.component.dragHandleHoveredNode = node;
+                    if (window.dluxEditor) {
+                        window.dluxEditor.dragHandleHoveredNode = node;
+                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2084,7 +2089,19 @@ class EditorFactory {
                     const node = $from.parent;
                     
                     // Check if it's an empty paragraph
-                    return node.type.name === 'paragraph' && node.content.size === 0;
+                    if (node.type.name !== 'paragraph' || node.content.size !== 0) {
+                        return false;
+                    }
+                    
+                    // Check if paragraph is inside a list or blockquote
+                    for (let d = $from.depth; d > 0; d--) {
+                        const parentNode = $from.node(d);
+                        if (['bulletList', 'orderedList', 'blockquote'].includes(parentNode.type.name)) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
                 }
             }));
             if (DEBUG) console.log('✅ FloatingMenu extension added with element ref');
@@ -2560,6 +2577,7 @@ class EditorFactory {
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
         const Link = tiptapBundle.Link;
+        const TextSelection = tiptapBundle.TextSelection;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
 
@@ -2654,7 +2672,11 @@ class EditorFactory {
                 },
                 onNodeChange: ({ node }) => {
                     // Track which node the drag handle is hovering over
+                    // Store in both locations for compatibility with CustomDropcursor
                     this.component.dragHandleHoveredNode = node;
+                    if (window.dluxEditor) {
+                        window.dluxEditor.dragHandleHoveredNode = node;
+                    }
                 },
                 tippyOptions: {
                     duration: 0,
@@ -2716,7 +2738,19 @@ class EditorFactory {
                     const node = $from.parent;
                     
                     // Check if it's an empty paragraph
-                    return node.type.name === 'paragraph' && node.content.size === 0;
+                    if (node.type.name !== 'paragraph' || node.content.size !== 0) {
+                        return false;
+                    }
+                    
+                    // Check if paragraph is inside a list or blockquote
+                    for (let d = $from.depth; d > 0; d--) {
+                        const parentNode = $from.node(d);
+                        if (['bulletList', 'orderedList', 'blockquote'].includes(parentNode.type.name)) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
                 }
             }));
             if (DEBUG) console.log('✅ FloatingMenu extension added with element ref');
@@ -14518,6 +14552,20 @@ export default {
                         return blockquoteContent + '\n\n';
                     },
                     
+                    // CustomBlockquote (same as blockquote)
+                    customBlockquote({ node, children, options }) {
+                        const content = renderChildren(children, options);
+                        // Remove trailing newlines and split by double newlines (paragraph breaks)
+                        const paragraphs = content.trim().split('\n\n');
+                        // Join paragraphs with single newline and prefix each line with >
+                        const blockquoteContent = paragraphs
+                            .join('\n')
+                            .split('\n')
+                            .map(line => line ? `> ${line}` : '>')
+                            .join('\n');
+                        return blockquoteContent + '\n\n';
+                    },
+                    
                     // Horizontal rule
                     horizontalRule() {
                         return '---\n\n';
@@ -15016,6 +15064,58 @@ export default {
             }
         },
 
+        // ✅ REACTIVE COMMAND PATTERN: Exit blockquote and continue writing
+        // This demonstrates proper command chaining without setTimeout
+        exitBlockquoteAndContinue() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+
+            try {
+                const { state } = this.bodyEditor;
+                const { $from } = state.selection;
+                
+                // Check if we're inside a blockquote
+                let blockquoteDepth = null;
+                for (let d = $from.depth; d > 0; d--) {
+                    if ($from.node(d).type.name === 'blockquote') {
+                        blockquoteDepth = d;
+                        break;
+                    }
+                }
+                
+                if (blockquoteDepth === null) {
+                    console.log('Not inside a blockquote');
+                    return;
+                }
+                
+                // Use command chaining with a custom command function
+                this.bodyEditor.chain()
+                    .focus()
+                    .command(({ tr, dispatch }) => {
+                        // Get blockquote position
+                        const blockquotePos = $from.before(blockquoteDepth);
+                        const blockquote = $from.node(blockquoteDepth);
+                        const afterPos = blockquotePos + blockquote.nodeSize;
+                        
+                        // Insert a paragraph after the blockquote
+                        const paragraph = state.schema.nodes.paragraph.create();
+                        tr.insert(afterPos, paragraph);
+                        
+                        // Move cursor to the new paragraph
+                        const newPos = tr.doc.resolve(afterPos + 1);
+                        const { TextSelection } = window.TiptapCollaboration;
+                        tr.setSelection(TextSelection.near(newPos));
+                        
+                        if (dispatch) dispatch(tr);
+                        return true;
+                    })
+                    .run();
+                    
+                console.log('Exited blockquote and created new paragraph');
+            } catch (error) {
+                console.error('Exit blockquote command failed:', error);
+            }
+        },
+
         toggleCodeBlock() {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
@@ -15044,22 +15144,57 @@ export default {
         insertHorizontalRule() {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
 
-            setTimeout(() => {
-                if (this.bodyEditor && !this.bodyEditor.isDestroyed) {
-                    try {
-                        this.bodyEditor.chain().focus().setHorizontalRule().run();
-                    } catch (error) {
-                        console.error('Horizontal rule command failed:', error);
-                        setTimeout(() => {
-                            try {
-                                this.bodyEditor?.chain().focus().setHorizontalRule().run();
-                            } catch (retryError) {
-                                console.error('Horizontal rule command retry failed:', retryError);
+            try {
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    // Exit blockquote and insert HR after it (preserving the blockquote)
+                    this.bodyEditor.chain()
+                        .focus()
+                        .command(({ tr, dispatch }) => {
+                            const { $from } = tr.selection;
+                            
+                            // Find the blockquote depth
+                            let blockquoteDepth = -1;
+                            for (let d = $from.depth; d >= 0; d--) {
+                                if ($from.node(d).type.name === 'blockquote') {
+                                    blockquoteDepth = d;
+                                    break;
+                                }
                             }
-                        }, 100);
-                    }
+                            
+                            if (blockquoteDepth >= 0 && dispatch) {
+                                // Get position after blockquote
+                                const blockquotePos = $from.before(blockquoteDepth);
+                                const blockquote = $from.node(blockquoteDepth);
+                                const afterPos = blockquotePos + blockquote.nodeSize;
+                                
+                                // Insert a paragraph after the blockquote
+                                const paragraph = tr.doc.type.schema.nodes.paragraph.create();
+                                tr.insert(afterPos, paragraph);
+                                
+                                // Move cursor to the new paragraph
+                                const { TextSelection } = window.TiptapCollaboration;
+                                const newPos = tr.doc.resolve(afterPos + 1);
+                                tr.setSelection(TextSelection.near(newPos));
+                            }
+                            
+                            return true;
+                        })
+                        .setHorizontalRule()
+                        .run();
+                } else {
+                    // Normal insertion
+                    this.bodyEditor.chain().focus().setHorizontalRule().run();
                 }
-            }, 0);
+            } catch (error) {
+                console.error('Horizontal rule command failed:', error);
+                // Fallback to simple insertion
+                try {
+                    this.bodyEditor?.chain().focus().setHorizontalRule().run();
+                } catch (retryError) {
+                    console.error('Horizontal rule command retry failed:', retryError);
+                }
+            }
         },
 
         insertImage() {
@@ -15113,7 +15248,7 @@ export default {
         },
 
         insertTable() {
-            if (!this.bodyEditor) return;
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
             
             // ✅ NESTED TABLE PREVENTION: Check if cursor is currently inside a table
             // This is now handled by disabling the button, but keep as safety check
@@ -15122,25 +15257,85 @@ export default {
                 return;
             }
             
-            // Check if we're in an empty document (only has an empty paragraph)
-            const { doc, selection } = this.bodyEditor.state;
-            const isEmptyDoc = doc.childCount === 1 && 
-                              doc.firstChild.type.name === 'paragraph' && 
-                              doc.firstChild.content.size === 0;
-            
-            if (isEmptyDoc) {
-                // Replace the empty paragraph with the table
-                this.bodyEditor.chain()
-                    .focus()
-                    .deleteRange({ from: 0, to: doc.content.size })
-                    .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
-                    .run();
-            } else {
-                // Insert normally
-                this.bodyEditor.chain()
-                    .focus()
-                    .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
-                    .run();
+            try {
+                // Check if we're inside a blockquote
+                if (this.bodyEditor.isActive('blockquote')) {
+                    const { state } = this.bodyEditor;
+                    const { $from } = state.selection;
+                    
+                    // Check if blockquote is empty by looking at the current paragraph
+                    const currentNode = $from.parent;
+                    const isEmpty = currentNode.type.name === 'paragraph' && currentNode.content.size === 0;
+                    
+                    if (isEmpty) {
+                        // Replace empty blockquote with table
+                        this.bodyEditor.chain()
+                            .focus()
+                            .lift('blockquote')
+                            .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                            .run();
+                    } else {
+                        // Use proper command pattern to exit blockquote and insert table
+                        this.bodyEditor.chain()
+                            .focus()
+                            .command(({ tr, dispatch }) => {
+                                const { $from } = tr.selection;
+                                
+                                // Find the blockquote depth
+                                let blockquoteDepth = -1;
+                                for (let d = $from.depth; d >= 0; d--) {
+                                    if ($from.node(d).type.name === 'blockquote') {
+                                        blockquoteDepth = d;
+                                        break;
+                                    }
+                                }
+                                
+                                if (blockquoteDepth >= 0 && dispatch) {
+                                    // Get position after blockquote
+                                    const blockquoteEnd = $from.end(blockquoteDepth);
+                                    const afterPos = blockquoteEnd + 1;
+                                    
+                                    // Insert a paragraph after the blockquote
+                                    const paragraph = tr.doc.type.schema.nodes.paragraph.create();
+                                    tr.insert(afterPos, paragraph);
+                                    
+                                    // Move cursor to the new paragraph
+                                    const { TextSelection } = window.TiptapCollaboration;
+                                    const newPos = tr.doc.resolve(afterPos + 1);
+                                    const selection = TextSelection.near(newPos);
+                                    tr.setSelection(selection);
+                                }
+                                
+                                return true;
+                            })
+                            .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                            .run();
+                    }
+                    return;
+                }
+                
+                // Check if we're in an empty document (only has an empty paragraph)
+                const { doc } = this.bodyEditor.state;
+                const isEmptyDoc = doc.childCount === 1 && 
+                                  doc.firstChild.type.name === 'paragraph' && 
+                                  doc.firstChild.content.size === 0;
+                
+                if (isEmptyDoc) {
+                    // Replace the empty paragraph with the table
+                    this.bodyEditor.chain()
+                        .focus()
+                        .deleteRange({ from: 0, to: doc.content.size })
+                        .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                        .run();
+                } else {
+                    // Insert normally
+                    this.bodyEditor.chain()
+                        .focus()
+                        .insertTable({ rows: 3, cols: 3, withHeaderRow: false })
+                        .run();
+                }
+            } catch (error) {
+                console.error('Table insertion failed:', error);
             }
         },
         
@@ -21483,7 +21678,7 @@ export default {
                     <i class="fas fa-terminal"></i>
                   </button>
                   <button @click="insertHorizontalRule()" @mousedown.prevent class="btn btn-sm btn-dark" title="Horizontal Rule"
-                          :disabled="isReadOnlyMode || !canInsertHorizontalRule">
+                          :disabled="isReadOnlyMode">
                     <i class="fas fa-minus"></i>
                   </button>
                 </div>
@@ -21582,8 +21777,7 @@ export default {
                         <button type="button" class="btn btn-sm btn-dark" @click.prevent="toggleCodeBlock()" @mousedown.prevent title="Code Block">
                           <i class="fas fa-code"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertHorizontalRule()" @mousedown.prevent title="Horizontal Rule"
-                                :disabled="!canInsertHorizontalRule">
+                        <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertHorizontalRule()" @mousedown.prevent title="Horizontal Rule">
                           <i class="fas fa-minus"></i>
                         </button>
                         <button type="button" class="btn btn-sm btn-dark" @click.prevent="insertTable()" @mousedown.prevent 

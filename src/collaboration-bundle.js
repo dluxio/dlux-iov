@@ -32,7 +32,7 @@ import suggestion from '@tiptap/suggestion';
 // Table extensions for markdown-compatible tables
 import { TableKit } from '@tiptap/extension-table/kit';
 import TableCell from '@tiptap/extension-table-cell';
-import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state';
 import { DecorationSet } from '@tiptap/pm/view';
 
 // UI extensions for floating toolbars
@@ -1317,22 +1317,35 @@ const CustomDropcursor = Dropcursor.extend({
             
             if (hoveredNode) {
               draggingNodeType = hoveredNode.type.name;
+              if (DEBUG) console.log('🎯 CustomDropcursor: Dragging node type from hoveredNode:', draggingNodeType);
             } else {
               // Fallback to selection-based detection
               const { state } = editorView;
               const { from } = state.selection;
-              const node = state.doc.nodeAt(from);
+              const $from = state.doc.resolve(from);
               
+              // First try to get the node at position
+              const node = state.doc.nodeAt(from);
               if (node) {
                 draggingNodeType = node.type.name;
               } else {
-                // Try to get parent node type
-                const $from = state.doc.resolve(from);
-                if ($from.parent) {
-                  draggingNodeType = $from.parent.type.name;
+                // No node at position, check parent
+                draggingNodeType = $from.parent.type.name;
+              }
+              
+              // For certain inline/text selections, check if we're inside a blockquote
+              if (draggingNodeType === 'paragraph' || draggingNodeType === 'text') {
+                // Walk up the node tree to find significant block nodes
+                for (let d = $from.depth; d >= 0; d--) {
+                  const ancestor = $from.node(d);
+                  if (ancestor && ['blockquote', 'table', 'codeBlock', 'heading'].includes(ancestor.type.name)) {
+                    draggingNodeType = ancestor.type.name;
+                    break;
+                  }
                 }
               }
               
+              if (DEBUG) console.log('🎯 CustomDropcursor: Dragging node type from fallback:', draggingNodeType);
             }
           }
         };
@@ -1360,6 +1373,7 @@ const CustomDropcursor = Dropcursor.extend({
             }
             // Add class to change cursor
             editorView.dom.classList.add('table-drag-over-cell');
+            if (DEBUG) console.log('🚫 CustomDropcursor: Blocking', draggingNodeType, 'at position', pos.pos, blockInfo);
           } else {
             if (styleElement) {
               removeStyleElement();
@@ -1403,6 +1417,114 @@ const CustomDropcursor = Dropcursor.extend({
 const CustomBlockquote = Blockquote.extend({
   name: 'blockquote',
   content: 'paragraph+', // Only paragraphs allowed, no headings/lists/codeblocks
+  draggable: true, // Make blockquotes draggable so dropcursor works
+  
+  addKeyboardShortcuts() {
+    return {
+      ...this.parent?.(),
+      // Exit blockquote with Mod-Enter
+      'Mod-Enter': () => {
+        const { state, dispatch } = this.editor.view;
+        const { $from } = state.selection;
+        
+        // Check if we're inside a blockquote
+        let blockquotePos = null;
+        for (let d = $from.depth; d > 0; d--) {
+          if ($from.node(d).type.name === 'blockquote') {
+            blockquotePos = $from.before(d);
+            break;
+          }
+        }
+        
+        if (blockquotePos === null) {
+          return false; // Not in a blockquote
+        }
+        
+        // Create a transaction
+        const tr = state.tr;
+        
+        // Find the position after the blockquote
+        const resolvedPos = state.doc.resolve(blockquotePos);
+        const blockquoteNode = state.doc.nodeAt(blockquotePos);
+        if (!blockquoteNode) return false;
+        
+        const afterPos = blockquotePos + blockquoteNode.nodeSize;
+        
+        // Insert a paragraph after the blockquote
+        const paragraph = state.schema.nodes.paragraph.create();
+        tr.insert(afterPos, paragraph);
+        
+        // Move cursor to the new paragraph
+        const newPos = state.doc.resolve(afterPos + 1);
+        tr.setSelection(TextSelection.near(newPos));
+        
+        // Dispatch the transaction
+        if (dispatch) dispatch(tr);
+        
+        return true;
+      },
+      
+      // Also handle Enter at the end of a blockquote
+      'Enter': ({ editor }) => {
+        const { state } = editor;
+        const { $from, $to } = state.selection;
+        
+        // Check if we're at the end of a blockquote
+        if ($from.pos !== $to.pos) return false; // Not a collapsed selection
+        
+        // Check if we're inside a blockquote
+        let inBlockquote = false;
+        let blockquoteDepth = 0;
+        for (let d = $from.depth; d > 0; d--) {
+          if ($from.node(d).type.name === 'blockquote') {
+            inBlockquote = true;
+            blockquoteDepth = d;
+            break;
+          }
+        }
+        
+        if (!inBlockquote) return false;
+        
+        // Check if we're at the end of the blockquote
+        const blockquote = $from.node(blockquoteDepth);
+        const indexInParent = $from.index(blockquoteDepth);
+        const isLastParagraph = indexInParent === blockquote.childCount - 1;
+        const paragraph = $from.parent;
+        const isEmptyParagraph = paragraph.content.size === 0;
+        const isAtEndOfParagraph = $from.parentOffset === paragraph.content.size;
+        
+        // Exit if we're in the last paragraph and it's empty, or we're at the end of the last paragraph
+        if (isLastParagraph && (isEmptyParagraph || isAtEndOfParagraph)) {
+          // Exit the blockquote
+          return editor.chain()
+            .command(({ tr, dispatch }) => {
+              const blockquotePos = $from.before(blockquoteDepth);
+              const afterPos = blockquotePos + blockquote.nodeSize;
+              
+              // If paragraph is empty, remove it
+              if (isEmptyParagraph) {
+                const paragraphPos = $from.before();
+                tr.delete(paragraphPos, paragraphPos + paragraph.nodeSize);
+              }
+              
+              // Insert new paragraph after blockquote
+              const newParagraph = state.schema.nodes.paragraph.create();
+              tr.insert(afterPos, newParagraph);
+              
+              // Set selection in new paragraph
+              const resolvedPos = tr.doc.resolve(afterPos + 1);
+              tr.setSelection(TextSelection.near(resolvedPos));
+              
+              if (dispatch) dispatch(tr);
+              return true;
+            })
+            .run();
+        }
+        
+        return false; // Let default Enter behavior handle it
+      }
+    };
+  }
 });
 
 // Custom Heading that prevents input rules inside blockquotes
@@ -1496,7 +1618,7 @@ const TiptapCollaboration = {
   OrderedList, // Export standard
   TaskList,
   TaskItem,
-  Blockquote: CustomBlockquote, // Export custom with paragraph-only content
+  CustomBlockquote, // Export custom with paragraph-only content
   HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
@@ -1532,6 +1654,7 @@ const TiptapCollaboration = {
   // ProseMirror utilities
   Plugin,
   PluginKey,
+  TextSelection,
   DecorationSet,
   
   // Static renderer utilities
