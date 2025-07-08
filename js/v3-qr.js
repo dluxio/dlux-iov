@@ -43,6 +43,25 @@ console.log({
   lapi,
 });
 
+// Add global navigation monitoring
+window.addEventListener('popstate', (event) => {
+  console.log('[QR Navigation Debug] popstate event:', window.location.href);
+});
+
+// Monitor for any URL changes
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function(...args) {
+  console.log('[QR Navigation Debug] pushState called:', args);
+  return originalPushState.apply(history, args);
+};
+
+history.replaceState = function(...args) {
+  console.log('[QR Navigation Debug] replaceState called:', args);
+  return originalReplaceState.apply(history, args);
+};
+
 createApp({ // vue 3
   data() {
     return {
@@ -3527,6 +3546,9 @@ createApp({ // vue 3
     },
   },
       mounted() {
+    console.log('[QR Navigation Debug] Component mounted. Current URL:', window.location.href);
+    console.log('[QR Navigation Debug] requestUsername value:', this.requestUsername);
+    
     // Ensure newAccount is properly initialized
     if (!this.newAccount.username) {
       this.newAccount.username = '';
@@ -3569,18 +3591,29 @@ createApp({ // vue 3
     }
     
     // Parse URL parameters for friend referrals
+    console.log('[QR Navigation Debug] Initial URL:', window.location.href);
+    console.log('[QR Navigation Debug] Search params:', window.location.search);
     const urlParams = new URLSearchParams(window.location.search);
     const followParam = urlParams.get('follow');
+    console.log('[QR Navigation Debug] Follow param:', followParam);
+    
     if (followParam) {
+      console.log('[QR Navigation Debug] Setting requestUsername to:', followParam);
       this.requestUsername = followParam;
       // Set payment method to request when follow parameter is provided
       this.paymentMethod = 'request';
+      console.log('[QR Navigation Debug] Payment method set to:', this.paymentMethod);
+      
       // Only redirect if user is logged in AND not in onboarding mode
       if(this.account && this.account != 'GUEST' && this.onboardingStep === 0){
-        console.log("followParam", followParam, this.account);
+        console.log("[QR Navigation Debug] User logged in - followParam:", followParam, "account:", this.account);
         // Don't redirect immediately - let user choose to help create account or view profile
         // window.location.href = `/@${followParam}`
+      } else {
+        console.log('[QR Navigation Debug] User not logged in or in onboarding. Account:', this.account, 'OnboardingStep:', this.onboardingStep);
       }
+    } else {
+      console.log('[QR Navigation Debug] No follow parameter found in URL');
     }
     
     // Check for recovery parameter
