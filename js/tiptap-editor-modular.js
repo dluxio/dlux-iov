@@ -15958,37 +15958,6 @@ export default {
             }
         },
 
-        // ✅ BUBBLE MENU FIX: Dedicated text alignment active check for better reactivity
-        isTextAlignActive(alignType) {
-            // Safety check
-            if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
-            try {
-                // If alignment is disabled in current context, no button should be active
-                if (!this.canUseTextAlign) return false;
-                
-                // Check if nodes have explicit textAlign attribute
-                const hasExplicitAlign = this.bodyEditor.isActive('paragraph', { textAlign: alignType }) || 
-                                       this.bodyEditor.isActive('heading', { textAlign: alignType });
-                
-                // For 'left' alignment, also check if no explicit alignment is set (default behavior)
-                if (alignType === 'left' && !hasExplicitAlign) {
-                    // Check if current node has no explicit textAlign (defaults to left)
-                    try {
-                        const { selection } = this.bodyEditor.state;
-                        const { $from } = selection;
-                        const currentNode = $from.node();
-                        return !currentNode.attrs?.textAlign;
-                    } catch (error) {
-                        return false;
-                    }
-                }
-                
-                return hasExplicitAlign;
-            } catch (error) {
-                // During Y.js sync, isActive might fail
-                return false;
-            }
-        },
 
         // NOTE: performUndo() and performRedo() methods removed - requires TipTap Pro extension
 
@@ -22064,7 +22033,7 @@ export default {
               <div class="btn-group ms-1" role="group">
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{active: bodyEditor && isTextAlignActive('left')}"
+                        :class="{active: isActive({textAlign: 'left'})}"
                         @click="setTextAlign('left')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22073,7 +22042,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{active: bodyEditor && isTextAlignActive('center')}"
+                        :class="{active: isActive({textAlign: 'center'})}"
                         @click="setTextAlign('center')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22082,7 +22051,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{active: bodyEditor && isTextAlignActive('right')}"
+                        :class="{active: isActive({textAlign: 'right'})}"
                         @click="setTextAlign('right')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22091,7 +22060,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{active: bodyEditor && isTextAlignActive('justify')}"
+                        :class="{active: isActive({textAlign: 'justify'})}"
                         @click="setTextAlign('justify')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"

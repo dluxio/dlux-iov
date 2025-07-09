@@ -117,9 +117,7 @@ const CustomTextAlign = TextAlign.extend({
   name: 'textAlign',
   
   onCreate() {
-    if (DEBUG) {
-      console.log('✅ CustomTextAlign extension loaded and initialized - supports paragraph and heading');
-    }
+    // Extension loaded and initialized - supports paragraph and heading
   },
   
   addOptions() {
@@ -134,8 +132,6 @@ const CustomTextAlign = TextAlign.extend({
   addCommands() {
     return {
       setTextAlign: (alignment) => ({ state, dispatch, commands }) => {
-        console.log('🎯 CustomTextAlign: setTextAlign called with alignment:', alignment);
-        
         // Check if we're inside a blockquote
         const { selection } = state;
         const { $from } = selection;
@@ -144,21 +140,15 @@ const CustomTextAlign = TextAlign.extend({
         for (let depth = $from.depth; depth > 0; depth--) {
           const node = $from.node(depth);
           if (node.type.name === 'blockquote') {
-            console.log('🚫 CustomTextAlign: Blocking alignment inside blockquote for alignment:', alignment);
             return false; // Block the command
           }
         }
-        
-        console.log('✅ CustomTextAlign: Allowing alignment', alignment, '- not in blockquote');
         
         try {
           // Get the current node to determine its type
           const currentNode = $from.node();
           const nodeType = currentNode.type.name;
           
-          if (DEBUG) {
-            console.log('🎯 CustomTextAlign: Current node type:', nodeType);
-          }
           
           // Apply alignment to the appropriate node type
           if (nodeType === 'heading' || nodeType === 'paragraph') {
@@ -169,20 +159,14 @@ const CustomTextAlign = TextAlign.extend({
               const ancestorNode = $from.node(depth);
               
               if (ancestorNode.type.name === 'heading' || ancestorNode.type.name === 'paragraph') {
-                if (DEBUG) {
-                  console.log('✅ CustomTextAlign: Applying alignment to ancestor', ancestorNode.type.name);
-                }
                 return commands.updateAttributes(ancestorNode.type.name, { textAlign: alignment });
               }
             }
           }
           
-          if (DEBUG) {
-            console.log('⚠️ CustomTextAlign: No suitable node found for alignment');
-          }
           return false;
         } catch (error) {
-          console.error('🚫 CustomTextAlign: Error in setTextAlign:', error);
+          console.error('CustomTextAlign: Error in setTextAlign:', error);
           return false;
         }
       }
