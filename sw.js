@@ -1,4 +1,4 @@
-this.version = "2025.07.08.1";
+this.version = "2025.07.09.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.08.22",
-  "generated": "2025-07-09T05:35:08Z",
+  "version": "2025.07.09.1",
+  "generated": "2025-07-09T05:35:24Z",
   "files": {
-    "/css/bootstrap-reboot.css": {
-      "checksum": "4092253288fe829ab354cc4a7d73450a",
-      "size": 11895,
-      "priority": "critical"
-    },
     "/css/bootstrap-utilities.css": {
       "checksum": "de92f706ebf333fb981cbb719aa5130d",
       "size": 101679,
@@ -616,11 +611,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/@markegiles/coastal-bike-tour-in-buenos-aires/remix.html": {
-      "checksum": "dc78a573c334458ea6203098725b83ad",
-      "size": 86881,
-      "priority": "important"
     },
     "/blog/index.html": {
       "checksum": "72a557bb642e16e37c09ec3f3e38b9b0",
@@ -2042,11 +2032,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/js/aframe-environment-component.min.js": {
-      "checksum": "b24c9108753f2af21987ba83c9674ff1",
-      "size": 49209,
-      "priority": "page-specific"
-    },
     "/js/aframe-extras.min.js": {
       "checksum": "0a0818f80d22eea6b402187404738a23",
       "size": 170829,
@@ -2967,11 +2952,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/mde-old.js": {
-      "checksum": "67a091a43612269b845cb304e43af640",
-      "size": 1038,
-      "priority": "lazy"
-    },
     "/js/modalvue-old.js": {
       "checksum": "b3b3a6b376fd063cc48b52a2c1505216",
       "size": 40019,
@@ -3008,8 +2988,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
