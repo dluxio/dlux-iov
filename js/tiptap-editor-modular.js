@@ -14479,17 +14479,19 @@ export default {
                         return '';
                     }
                     
-                    return childArray.map(child => {
+                    return childArray.map((child, index) => {
                         if (typeof child === 'string') return child;
                         if (child.type === 'text') {
-                            return options.nodeMapping.text ? options.nodeMapping.text({ node: child }) : child.text || '';
+                            return options.nodeMapping.text ? options.nodeMapping.text({ node: child, context: options.context }) : child.text || '';
                         }
                         const mapping = options.nodeMapping[child.type];
                         if (mapping) {
                             return mapping({ 
                                 node: child, 
                                 children: child.content || child,
-                                options 
+                                options,
+                                context: options.context,
+                                index 
                             });
                         }
                         return '';
@@ -14508,6 +14510,12 @@ export default {
                  * - Video elements with full attribute preservation
                  * - Standard markdown elements (headings, lists, etc.)
                  */
+                // Initialize context object for tracking rendering state
+                const context = {
+                    inTableCell: false,
+                    isFirstParagraph: true
+                };
+                
                 const nodeMapping = {
                     // Text node
                     text({ node }) {
@@ -14516,8 +14524,30 @@ export default {
                     },
                     
                     // Paragraph with full text alignment support
-                    paragraph({ node, children, options }) {
-                        const content = renderChildren(children, { ...options, nodeMapping });
+                    paragraph({ node, children, options, context, index }) {
+                        const content = renderChildren(children, { ...options, nodeMapping, context });
+                        
+                        // In table cells, handle line breaks differently
+                        if (context?.inTableCell) {
+                            let result = '';
+                            // Add <br> before paragraph if it's not the first one
+                            if (index > 0) {
+                                result = '<br>';
+                            }
+                            
+                            if (node.attrs?.textAlign === 'center') {
+                                result += `<div class="text-center">${content}</div>`;
+                            } else if (node.attrs?.textAlign === 'right') {
+                                result += `<div class="text-right">${content}</div>`;
+                            } else if (node.attrs?.textAlign === 'justify') {
+                                result += `<div class="text-justify">${content}</div>`;
+                            } else {
+                                result += content;
+                            }
+                            return result;
+                        }
+                        
+                        // Normal paragraph handling outside table cells
                         if (node.attrs?.textAlign === 'center') {
                             return `<div class="text-center">${content}</div>\n\n`;
                         } else if (node.attrs?.textAlign === 'right') {
@@ -14621,8 +14651,8 @@ export default {
                     },
                     
                     // Hard break (line break with Shift+Enter)
-                    hardBreak() {
-                        return '\n';
+                    hardBreak({ context }) {
+                        return context?.inTableCell ? '<br>' : '\n';
                     },
                     
                     // Code block
@@ -14712,51 +14742,99 @@ export default {
                     },
                     
                     // Table cell - join children without commas and handle text alignment
-                    tableCell({ node, children }) {
+                    tableCell({ node, children, options, context }) {
+                        // Set context for table cell
+                        const cellContext = { ...context, inTableCell: true };
+                        
                         // Handle different types of children
                         let content = '';
                         if (typeof children === 'function') {
                             const result = children();
                             if (Array.isArray(result)) {
-                                content = result.join(''); // Join without commas
+                                // Process children with context
+                                content = result.map((child, index) => {
+                                    if (typeof child === 'object' && child.type) {
+                                        const mapping = options.nodeMapping[child.type];
+                                        if (mapping) {
+                                            return mapping({ 
+                                                node: child, 
+                                                children: child.content || child,
+                                                options,
+                                                context: cellContext,
+                                                index 
+                                            });
+                                        }
+                                    }
+                                    return child;
+                                }).join('');
                             } else {
                                 content = String(result || '');
                             }
                         } else if (Array.isArray(children)) {
-                            content = children.join(''); // Join without commas
+                            // If children is already processed content, just join
+                            content = children.join(''); 
+                        } else if (node.content && node.content.content) {
+                            // Process node content directly with context
+                            content = renderChildren(node.content, { ...options, nodeMapping, context: cellContext });
                         } else {
                             content = String(children || '');
                         }
                         
                         // Apply text alignment if specified
                         if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
-                            return `<div class="text-${node.attrs.textAlign}">${content}</div>`;
+                            content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
                         }
-                        return content;
+                        
+                        // Replace all newlines with <br> to keep table cell content on a single line
+                        return content.replace(/\n+/g, '<br>');
                     },
                     
                     // Table header - join children without commas and handle text alignment
-                    tableHeader({ node, children }) {
+                    tableHeader({ node, children, options, context }) {
+                        // Set context for table cell (headers are also cells)
+                        const cellContext = { ...context, inTableCell: true };
+                        
                         // Handle different types of children
                         let content = '';
                         if (typeof children === 'function') {
                             const result = children();
                             if (Array.isArray(result)) {
-                                content = result.join(''); // Join without commas
+                                // Process children with context
+                                content = result.map((child, index) => {
+                                    if (typeof child === 'object' && child.type) {
+                                        const mapping = options.nodeMapping[child.type];
+                                        if (mapping) {
+                                            return mapping({ 
+                                                node: child, 
+                                                children: child.content || child,
+                                                options,
+                                                context: cellContext,
+                                                index 
+                                            });
+                                        }
+                                    }
+                                    return child;
+                                }).join('');
                             } else {
                                 content = String(result || '');
                             }
                         } else if (Array.isArray(children)) {
-                            content = children.join(''); // Join without commas
+                            // If children is already processed content, just join
+                            content = children.join(''); 
+                        } else if (node.content && node.content.content) {
+                            // Process node content directly with context
+                            content = renderChildren(node.content, { ...options, nodeMapping, context: cellContext });
                         } else {
                             content = String(children || '');
                         }
                         
                         // Apply text alignment if specified
                         if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
-                            return `<div class="text-${node.attrs.textAlign}">${content}</div>`;
+                            content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
                         }
-                        return content;
+                        
+                        // Replace all newlines with <br> to keep table cell content on a single line
+                        return content.replace(/\n+/g, '<br>');
                     },
                     
                     // Video (custom)
@@ -14835,7 +14913,8 @@ export default {
                         content: doc,
                         options: {
                             nodeMapping,
-                            markMapping
+                            markMapping,
+                            context
                         }
                     });
                 } catch (renderError) {
