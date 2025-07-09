@@ -2,6 +2,9 @@ import debugLogger from '/js/utils/debug-logger.js';
 import hlsDebug from '/js/utils/hls-debug.js';
 import IPFSHLSPlayer from '/js/services/ipfs-hls-player.js';
 
+// Debug flag to control logging - set to true to enable verbose logging
+const DEBUG = false;
+
 export default {
   searchHiveAccounts(query, limit = 10) {
     return new Promise((resolve, reject) => {
@@ -672,9 +675,9 @@ export default {
         this.callbacks = callbacks;
         
         // Production mode detection - reduces console noise in production
-        const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+        // Using global DEBUG flag for logging
         
-        if (!PRODUCTION_MODE) {
+        if (DEBUG) {
           console.log('IPFS Loader load called with:', {
             context: context,
             callbacks: typeof callbacks,
@@ -689,7 +692,7 @@ export default {
         };
 
         const url = context.url;
-        if (!PRODUCTION_MODE) {
+        if (DEBUG) {
           console.log('IPFS Loader loading:', url);
         }
 
@@ -697,7 +700,7 @@ export default {
         
         // Handle blob URLs for preview mode
         if (url.startsWith('blob:')) {
-          if (!PRODUCTION_MODE) {
+          if (DEBUG) {
             console.log('IPFS Loader handling blob URL for preview:', url);
           }
           ipfsUrl = url; // Use blob URL directly
@@ -707,12 +710,12 @@ export default {
           ipfsUrl = url;
           
           // Log the URL being used for debugging
-          if (!PRODUCTION_MODE) {
+          if (DEBUG) {
             console.log('IPFS Loader using URL as-is:', ipfsUrl);
           }
         }
 
-        if (!PRODUCTION_MODE) {
+        if (DEBUG) {
           console.log('IPFS Loader fetching:', ipfsUrl);
         }
 
@@ -940,13 +943,13 @@ export default {
 
       hls.on(Hls.Events.MANIFEST_PARSED, async () => {
         // HLS initialized successfully
-        if (!PRODUCTION_MODE) {
+        if (DEBUG) {
           console.log('✅ HLS playback ready for:', videoSrc);
         }
         
         // If this was a tryHls attempt and it worked, set the type for future persistence
         if (shouldTryHls) {
-          if (!PRODUCTION_MODE) {
+          if (DEBUG) {
             console.log('✅ IPFS video is HLS! Setting type attributes for persistence');
           }
           videoElement.setAttribute('type', 'application/x-mpegURL');

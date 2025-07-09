@@ -1,5 +1,8 @@
 //import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
 import { createApp, toRaw } from '/js/vue.esm-browser.js'
+
+// Debug flag to control logging - set to true to enable verbose logging
+const DEBUG = false;
 import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
@@ -1239,9 +1242,8 @@ PORT=3000
     },
     
     handleEditorReady() {
-      // Production mode detection - reduces console noise in production
-      const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
-      if (!PRODUCTION_MODE) {
+      // Debug mode detection - enables console logging in development
+      if (DEBUG) {
         console.log('TipTap editor ready event received');
       }
       this.editorAvailable = true;
@@ -1417,9 +1419,8 @@ PORT=3000
         
         metadata.observe(this.yjsCustomJsonObserver);
         
-        // Production mode detection - reduces console noise in production
-        const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
-        if (!PRODUCTION_MODE) {
+        // Debug mode detection - enables console logging in development
+        if (DEBUG) {
           console.log('✅ Set up Y.js custom JSON observer');
         }
         
@@ -1453,9 +1454,8 @@ PORT=3000
         window.addEventListener('message', this.fieldSubscriptionHandler);
       }
       
-      // Production mode detection - reduces console noise in production
-      const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
-      if (!PRODUCTION_MODE) {
+      // Debug mode detection - enables console logging in development
+      if (DEBUG) {
         console.log('✅ Y.js field subscription system ready');
       }
     },

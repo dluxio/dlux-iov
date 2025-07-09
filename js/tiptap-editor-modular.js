@@ -6,9 +6,6 @@ import URLProcessor from '/js/utils/url-processor.js';
 // Debug flag to control logging - set to true to enable verbose logging
 const DEBUG = false;
 
-// Production mode detection - reduces console noise in production
-const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io' || DEBUG === false;
-
 /**
  * ⚠️ CRITICAL: TipTap Editor Modular Architecture - Following Official Best Practices
  * Version: 2025.01.21.1 - Fixed fragment initialization
@@ -1861,7 +1858,14 @@ class EditorFactory {
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
-        const TextAlign = tiptapBundle.TextAlign;
+        const CustomTextAlign = tiptapBundle.CustomTextAlign || tiptapBundle.TextAlign;
+        if (DEBUG) {
+            console.log('🔍 TextAlign debug:', {
+                hasCustomTextAlign: !!tiptapBundle.CustomTextAlign,
+                hasTextAlign: !!tiptapBundle.TextAlign,
+                usingCustom: !!tiptapBundle.CustomTextAlign
+            });
+        }
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
@@ -1896,7 +1900,7 @@ class EditorFactory {
             CollaborationCaret: !!CollaborationCaret,
             Placeholder: !!Placeholder,
             BubbleMenu: !!BubbleMenu,
-            TextAlign: !!TextAlign,
+            CustomTextAlign: !!CustomTextAlign,
             SpkVideo: !!SpkVideo,
             DluxVideo: !!DluxVideo,
             CustomImage: !!CustomImage,
@@ -1966,7 +1970,7 @@ class EditorFactory {
             Placeholder.configure({
                 placeholder: 'Start writing your content...'
             }),
-            TextAlign.configure({
+            CustomTextAlign.configure({
                 types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
@@ -2577,7 +2581,14 @@ class EditorFactory {
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
-        const TextAlign = tiptapBundle.TextAlign;
+        const CustomTextAlign = tiptapBundle.CustomTextAlign || tiptapBundle.TextAlign;
+        if (DEBUG) {
+            console.log('🔍 TextAlign debug:', {
+                hasCustomTextAlign: !!tiptapBundle.CustomTextAlign,
+                hasTextAlign: !!tiptapBundle.TextAlign,
+                usingCustom: !!tiptapBundle.CustomTextAlign
+            });
+        }
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
@@ -2627,7 +2638,7 @@ class EditorFactory {
             Placeholder.configure({
                 placeholder: 'Start writing your content...'
             }),
-            TextAlign.configure({
+            CustomTextAlign.configure({
                 types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
@@ -14390,7 +14401,7 @@ export default {
                     Link,
                     CustomImage,
                     CodeBlock,
-                    TextAlign,
+                    CustomTextAlign,
                     SpkVideo,
                     DluxVideo,
                     Mention,
@@ -14418,7 +14429,7 @@ export default {
                 ] : [
                     Document,
                     Text,
-                    TextAlign && TextAlign.configure({
+                    CustomTextAlign && CustomTextAlign.configure({
                         types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                         alignments: ['left', 'center', 'right', 'justify']
                     }),

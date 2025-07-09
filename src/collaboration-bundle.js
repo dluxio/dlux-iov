@@ -83,15 +83,12 @@ import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 
-// Production mode detection - reduces console noise in production
-const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
-
 // ✅ CUSTOM PARAGRAPH: Context-aware textAlign attribute validation
 const CustomParagraph = Paragraph.extend({
   name: 'paragraph',
   
   onCreate() {
-    if (!PRODUCTION_MODE) {
+    if (DEBUG) {
       console.log('✅ CustomParagraph extension loaded - context-aware textAlign validation');
     }
   },
@@ -115,13 +112,22 @@ const CustomParagraph = Paragraph.extend({
   }
 });
 
-// ✅ CUSTOM TEXT ALIGN: Prevents alignment inside blockquotes
+// ✅ CUSTOM TEXT ALIGN: Prevents alignment inside blockquotes and supports both paragraphs and headings
 const CustomTextAlign = TextAlign.extend({
   name: 'textAlign',
   
   onCreate() {
-    if (!PRODUCTION_MODE) {
-      console.log('✅ CustomTextAlign extension loaded and initialized');
+    if (DEBUG) {
+      console.log('✅ CustomTextAlign extension loaded and initialized - supports paragraph and heading');
+    }
+  },
+  
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      types: ['heading', 'paragraph'], // Explicitly support both types
+      alignments: ['left', 'center', 'right', 'justify'],
+      defaultAlignment: 'left',
     }
   },
   
@@ -145,9 +151,48 @@ const CustomTextAlign = TextAlign.extend({
         
         console.log('✅ CustomTextAlign: Allowing alignment', alignment, '- not in blockquote');
         
-        // Use the standard setTextAlign command from the parent
-        // The parent TextAlign extension provides the actual implementation
-        return commands.updateAttributes('paragraph', { textAlign: alignment });
+        try {
+          // Get the current node to determine its type
+          const currentNode = $from.node();
+          const nodeType = currentNode.type.name;
+          
+          console.log('🎯 CustomTextAlign: Current node type:', nodeType);
+          console.log('🎯 CustomTextAlign: Current node depth:', $from.depth);
+          console.log('🎯 CustomTextAlign: Current node attrs:', currentNode.attrs);
+          
+          // Apply alignment to the appropriate node type
+          if (nodeType === 'heading' || nodeType === 'paragraph') {
+            console.log('✅ CustomTextAlign: Applying alignment to', nodeType);
+            console.log('🎯 CustomTextAlign: Calling updateAttributes with:', nodeType, { textAlign: alignment });
+            
+            const result = commands.updateAttributes(nodeType, { textAlign: alignment });
+            console.log('🎯 CustomTextAlign: updateAttributes result:', result);
+            return result;
+          } else {
+            console.log('🔍 CustomTextAlign: Node type not directly supported, checking ancestors');
+            
+            // For other contexts, try to find the parent paragraph or heading
+            for (let depth = $from.depth; depth > 0; depth--) {
+              const ancestorNode = $from.node(depth);
+              console.log(`🔍 CustomTextAlign: Checking ancestor at depth ${depth}:`, ancestorNode.type.name);
+              
+              if (ancestorNode.type.name === 'heading' || ancestorNode.type.name === 'paragraph') {
+                console.log('✅ CustomTextAlign: Applying alignment to ancestor', ancestorNode.type.name);
+                console.log('🎯 CustomTextAlign: Calling updateAttributes with:', ancestorNode.type.name, { textAlign: alignment });
+                
+                const result = commands.updateAttributes(ancestorNode.type.name, { textAlign: alignment });
+                console.log('🎯 CustomTextAlign: updateAttributes result:', result);
+                return result;
+              }
+            }
+          }
+          
+          console.log('⚠️ CustomTextAlign: No suitable node found for alignment');
+          return false;
+        } catch (error) {
+          console.error('🚫 CustomTextAlign: Error in setTextAlign:', error);
+          return false;
+        }
       }
     };
   }
@@ -158,7 +203,7 @@ const BlockquoteAlignmentFilter = Extension.create({
   name: 'blockquoteAlignmentFilter',
   
   onCreate() {
-    if (!PRODUCTION_MODE) {
+    if (DEBUG) {
       console.log('✅ BlockquoteAlignmentFilter extension loaded - schema-level enforcement');
     }
   },
@@ -216,20 +261,49 @@ const BlockquoteAlignmentFilter = Extension.create({
           const tr = newState.tr;
           let hasChanges = false;
           
+          // Only process if document actually changed
+          const docChanged = transactions.some(tx => tx.docChanged);
+          if (!docChanged) return null;
+          
           // Scan the document for textAlign attributes in blockquotes
           newState.doc.descendants((node, pos) => {
-            if (node.type.name === 'paragraph' && node.attrs.textAlign) {
-              // Check if this paragraph is inside a blockquote
-              const $pos = newState.doc.resolve(pos);
-              for (let depth = $pos.depth; depth > 0; depth--) {
-                const parentNode = $pos.node(depth);
-                if (parentNode.type.name === 'blockquote') {
+            if ((node.type.name === 'paragraph' || node.type.name === 'heading') && node.attrs.textAlign) {
+              if (DEBUG) {
+                console.log(`🔍 BlockquoteAlignmentFilter: Found ${node.type.name} with textAlign:`, node.attrs.textAlign, 'at pos:', pos);
+              }
+              
+              // Check if this paragraph/heading is inside a blockquote
+              try {
+                const $pos = newState.doc.resolve(pos);
+                let isInBlockquote = false;
+                const ancestorNodes = [];
+                
+                // Build ancestor chain for debugging
+                for (let depth = $pos.depth; depth > 0; depth--) {
+                  const parentNode = $pos.node(depth);
+                  ancestorNodes.push(`depth ${depth}: ${parentNode.type.name}`);
+                  
+                  if (parentNode.type.name === 'blockquote') {
+                    isInBlockquote = true;
+                    break;
+                  }
+                }
+                
+                if (DEBUG) {
+                  console.log(`🔍 BlockquoteAlignmentFilter: Ancestor chain for ${node.type.name}:`, ancestorNodes);
+                  console.log(`🔍 BlockquoteAlignmentFilter: Is in blockquote:`, isInBlockquote);
+                }
+                
+                if (isInBlockquote) {
                   // Remove textAlign attribute
-                  console.log('🧹 BlockquoteAlignmentFilter: Removing textAlign from paragraph in blockquote');
+                  console.log(`🧹 BlockquoteAlignmentFilter: Removing textAlign from ${node.type.name} in blockquote`);
                   tr.setNodeMarkup(pos, null, { ...node.attrs, textAlign: null });
                   hasChanges = true;
-                  break;
+                } else if (DEBUG) {
+                  console.log(`✅ BlockquoteAlignmentFilter: Keeping textAlign on ${node.type.name} (not in blockquote)`);
                 }
+              } catch (error) {
+                console.error('🚫 BlockquoteAlignmentFilter: Error resolving position:', error, 'pos:', pos);
               }
             }
           });
@@ -1677,7 +1751,7 @@ const CustomBlockquote = Blockquote.extend({
   draggable: true, // Enable drag handle
   
   onCreate() {
-    if (!PRODUCTION_MODE) {
+    if (DEBUG) {
       console.log('✅ CustomBlockquote extension loaded and initialized');
     }
   },
@@ -1893,8 +1967,34 @@ const BlockquoteNestingFilter = Extension.create({
   }
 });
 
-// Custom Heading that prevents input rules inside blockquotes
+// Custom Heading that prevents input rules inside blockquotes and supports textAlign
 const CustomHeading = Heading.extend({
+  name: 'heading',
+  
+  onCreate() {
+    if (DEBUG) {
+      console.log('✅ CustomHeading extension loaded - blockquote-aware input rules + textAlign support');
+    }
+  },
+  
+  addAttributes() {
+    const parentAttrs = this.parent?.() || {};
+    
+    // Add textAlign attribute with context validation
+    return {
+      ...parentAttrs,
+      textAlign: {
+        default: null,
+        parseHTML: element => element.style.textAlign || null,
+        renderHTML: attributes => {
+          if (!attributes.textAlign) return {};
+          return { style: `text-align: ${attributes.textAlign}` };
+        }
+        // Validation is handled by BlockquoteAlignmentFilter at transaction level
+      }
+    };
+  },
+  
   addInputRules() {
     const rules = this.parent?.() || [];
     
@@ -2006,7 +2106,7 @@ const TiptapCollaboration = {
   Subscript,
   Superscript,
   TextStyle,
-  TextAlign: CustomTextAlign, // Export custom text align that blocks alignment in blockquotes
+  CustomTextAlign, // Export custom text align that blocks alignment in blockquotes
   
   // Media extensions
   Youtube,
