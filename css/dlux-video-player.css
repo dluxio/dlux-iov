@@ -11,7 +11,13 @@
   height: 100% !important;
 }
 
-/* Ensure video container fills space properly */
+/* Ensure video container fills space properly and contains absolutely positioned elements */
+.dlux-video-player {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+
 .dlux-video-player .video-js {
   background-color: #000;
   width: 100% !important;
