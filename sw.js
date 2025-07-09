@@ -1,4 +1,4 @@
-this.version = "2025.07.09.1";
+this.version = "2025.07.08.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,22 +554,17 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.1",
-  "generated": "2025-07-09T00:02:10Z",
+  "version": "2025.07.08.17",
+  "generated": "2025-07-09T00:31:12Z",
   "files": {
-    "/js/vue.esm-browser.js": {
-      "checksum": "232af68f6551a87a4732981749dd5265",
-      "size": 531704,
-      "priority": "critical"
-    },
     "/js/v3-nav.js": {
       "checksum": "140f54eddd2c3d3bd06b6084a5ba8af5",
       "size": 254588,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "b209fcc8bbbe91c2e68df9b8fde5d946",
-      "size": 101901,
+      "checksum": "5eaf1195bce70f38cd7abdcb4e3930b6",
+      "size": 101315,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -641,11 +636,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/.src/index.js": {
-      "checksum": "7dcb7b0624cda5d531b74a6e6c17df17",
-      "size": 599,
-      "priority": "important"
     },
     "/3speak-publisher/app.js": {
       "checksum": "15bddcdb50ae3e4e3b273d9b02d8a617",
@@ -738,8 +728,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/css/tiptap-editor.css": {
-      "checksum": "c1622b67f9e295a5348f3fd2599d3800",
-      "size": 24366,
+      "checksum": "99902dcc412ca46e339d52ed0382ba96",
+      "size": 24405,
       "priority": "important"
     },
     "/css/vr-presence.css": {
@@ -2097,11 +2087,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/aframe-builder/index2.html": {
-      "checksum": "50d15bdba6ab42cde3109e5935abf189",
-      "size": 119115,
-      "priority": "page-specific"
-    },
     "/chat/gpt.html": {
       "checksum": "e1dc032c0377f6a6761db8518162e6c2",
       "size": 12889,
@@ -3047,11 +3032,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/bennies-old.js": {
-      "checksum": "2c4324cb1894d251a4aceb16125aa6ee",
-      "size": 7941,
-      "priority": "lazy"
-    },
     "/js/contractvue-old.js": {
       "checksum": "05243466168d1f1452c58fb91bd0d7bb",
       "size": 118493,
@@ -3113,8 +3093,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {

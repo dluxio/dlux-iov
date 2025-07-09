@@ -2433,6 +2433,69 @@ class CrossTabSync {
 
 ---
 
+## 🏗️ Modular Architecture Patterns
+
+### BlockquoteNestingFilter Extension
+Prevents nested blockquotes using both `filterTransaction` and `appendTransaction`:
+
+```javascript
+const BlockquoteNestingFilter = Extension.create({
+  name: 'blockquoteNestingFilter',
+  
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        // Block transactions that would create nested blockquotes
+        filterTransaction(transaction, state) {
+          // Check if transaction would nest blockquotes
+          // Return false to block the transaction
+        },
+        
+        // Clean up any nested blockquotes that slip through
+        appendTransaction(transactions, oldState, newState) {
+          // Find and unwrap nested blockquotes
+          // Return transaction with fixes
+        }
+      })
+    ];
+  }
+});
+```
+
+### Drag Tracking with window.dluxEditor
+The system uses global references for drag-and-drop operations:
+
+```javascript
+// Track dragged images/videos
+window.dluxEditor = {
+  draggingImagePos: pos,      // Position of dragged image
+  draggingVideoPos: pos,      // Position of dragged video
+  dragHandleHoveredNode: node // Node being dragged via handle
+};
+```
+
+**Important**: These are required for proper drag-and-drop functionality and should not be removed.
+
+### Modular Block List System
+Content restrictions are defined in a single registry:
+
+```javascript
+const nodeBlockLists = {
+  tableCell: {
+    blocks: ['table', 'horizontalRule'],     // Completely blocked
+    transforms: ['heading', 'codeBlock', ...] // Transformed to paragraphs
+  }
+};
+```
+
+This enables:
+- Single source of truth for restrictions
+- Automatic coordination between dropcursor and drop handlers
+- Easy extension by updating the registry
+- Content transformation instead of hard blocking
+
+---
+
 ## 🎯 Final Checklist
 
 Before going to production, ensure:
@@ -2449,6 +2512,9 @@ Before going to production, ensure:
 - [ ] Content Security Policy allows WebSocket
 - [ ] Rate limiting is implemented
 - [ ] Monitoring and alerting are set up
+- [ ] BlockquoteNestingFilter is included in extensions
+- [ ] Drag tracking system is functioning
+- [ ] Content transformation is working for table cells
 
 ---
 

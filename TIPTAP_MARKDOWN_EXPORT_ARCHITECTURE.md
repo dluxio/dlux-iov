@@ -462,6 +462,75 @@ nodeMapping: {
    - Invalidate on editor updates
    - Use content hash for cache keys
 
+## 🔧 **Recent Fixes & Improvements**
+
+### **1. List Content Rendering Fix**
+**Problem**: Lists were showing numbers/bullets but no text content
+**Cause**: Manually processing `node.content.content` instead of using the `children` parameter
+**Solution**: Use the `children` parameter provided by static renderer
+
+```javascript
+// ❌ OLD - Manual processing
+bulletList({ node }) {
+  const items = node.content.content.map((listItem) => {
+    const itemContent = renderChildren(listItem.content, options);
+    return `- ${itemContent}\n`;
+  });
+}
+
+// ✅ NEW - Use children parameter
+bulletList({ children }) {
+  let itemsArray = [];
+  if (typeof children === 'function') {
+    const result = children();
+    itemsArray = Array.isArray(result) ? result : [result];
+  } else if (Array.isArray(children)) {
+    itemsArray = children;
+  }
+  return itemsArray.map(item => `- ${item.trim()}\n`).join('');
+}
+```
+
+### **2. Table Header Separator Fix**
+**Problem**: Tables weren't generating header separator (|---|---|)
+**Cause**: Checking for `tableHeader` cells, but editor only uses `tableCell`
+**Solution**: Always treat first row as header
+
+```javascript
+table({ children }) {
+  let rowsArray = /* convert children to array */;
+  
+  let output = '';
+  rowsArray.forEach((row, index) => {
+    output += row;
+    
+    // Add separator after first row
+    if (index === 0 && row.trim()) {
+      const columnCount = (row.match(/\|/g) || []).length - 1;
+      if (columnCount > 0) {
+        const separator = Array(columnCount).fill('---').join(' | ');
+        output += '| ' + separator + ' |\n';
+      }
+    }
+  });
+  
+  return output + '\n';
+}
+```
+
+### **3. Underline Extension Addition**
+**Problem**: "Unknown node type: underline" error
+**Solution**: Add Underline to both destructuring and extensions array
+
+### **4. RenderChildren Options Fix**
+**Problem**: TypeError - options.nodeMapping undefined
+**Solution**: Pass nodeMapping in options when calling renderChildren
+
+```javascript
+// Ensure nodeMapping is included
+const itemContent = renderChildren(listItem.content, { ...options, nodeMapping });
+```
+
 ## 🎯 **Summary**
 
 The markdown export system provides:
@@ -471,5 +540,6 @@ The markdown export system provides:
 3. **Hive blockchain compatibility** - Preserves required HTML
 4. **Extensible architecture** - Easy to add new nodes
 5. **Robust error handling** - Graceful fallbacks
+6. **Recent fixes** - List rendering, table headers, underline support
 
 This architecture ensures accurate, performant markdown generation while maintaining compatibility with both TipTap v3 and Hive blockchain requirements.

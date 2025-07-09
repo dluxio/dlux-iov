@@ -21,7 +21,7 @@ const nodeBlockLists = {
   },
   blockquote: {
     blocks: ['table', 'horizontalRule'], // Completely blocked content
-    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'] // Content that gets transformed
+    transforms: ['heading', 'codeBlock', 'bulletList', 'orderedList'] // Content that gets transformed
   }
 };
 ```
@@ -67,34 +67,32 @@ function isContentBlockedAt(state, pos, contentType) {
     const $pos = state.doc.resolve(pos);
     
     // Check all ancestor nodes for block lists
-    for (let depth = $pos.depth; depth > 0; depth--) {
-      const node = $pos.node(depth);
+    for (let d = $pos.depth; d > 0; d--) {
+      const node = $pos.node(d);
       const nodeType = node.type.name;
       
-      // Check if this node type has a block list
-      if (nodeBlockLists[nodeType]) {
-        const blockedTypes = nodeBlockLists[nodeType];
-        
-        // Check if the content type is blocked
-        if (blockedTypes.includes(contentType)) {
-          return {
-            blocked: true,
-            byNode: nodeType,
-            atDepth: depth
-          };
-        }
+      // Get blocked content from the registry
+      const blockedContent = getBlockedContent(nodeType);
+      
+      if (blockedContent.includes(contentType)) {
+        return {
+          blocked: true,
+          byNode: nodeType,
+          atDepth: d,
+          blockedContent: blockedContent,
+          canTransform: canTransformContent(nodeType, contentType)
+        };
       }
     }
     
     return { blocked: false };
   } catch (error) {
-    console.error('Error checking content block:', error);
     return { blocked: false };
   }
 }
 ```
 
-This function traverses the document tree to determine if content is blocked at a given position and whether it can be transformed.
+This enhanced function now returns whether content can be transformed when blocked, enabling smart content conversion.
 
 ### **2. Unified Dropcursor Check: `shouldShowDropcursor`**
 
@@ -219,23 +217,47 @@ const observer = new MutationObserver((mutations) => {
 
 This multi-layered approach ensures the dropcursor is completely hidden and the cursor changes to "not-allowed" when dragging blocked content over restricted areas.
 
-### **3. CustomTableCell Extension**
+### **4. CustomTableCell Extension**
 
 Enforces restrictions and transforms content:
 
 ```javascript
 const CustomTableCell = TableCell.extend({
-  name: 'tableCell',
-  
   addProseMirrorPlugins() {
     return [
       new Plugin({
         props: {
           handleDrop(view, event, slice, moved) {
-            // Check if drop position is in a table cell
-            // Use isContentBlockedAt to check restrictions
-            // Transform content if needed
-            // Handle the drop with transformations
+            // Check each dropped type against block lists
+            for (const nodeType of droppedTypes) {
+              const blockInfo = isContentBlockedAt(view.state, dropPos.pos, nodeType);
+              
+              // Only block if content is blocked AND cannot be transformed
+              if (blockInfo.blocked && !blockInfo.canTransform) {
+                event.preventDefault();
+                return true; // Block the drop
+              }
+            }
+            
+            // Transform content if dropping into table cell
+            if (isInTableCell && slice) {
+              // Check if slice contains transformable nodes
+              let needsTransformation = false;
+              slice.content.forEach(node => {
+                if (['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList'].includes(node.type.name)) {
+                  needsTransformation = true;
+                }
+              });
+              
+              if (needsTransformation) {
+                const transformedSlice = transformRestrictedContent(slice, view.state.schema);
+                // Insert transformed content
+                const tr = view.state.tr;
+                tr.replaceRange(dropPos.pos, dropPos.pos, transformedSlice);
+                view.dispatch(tr);
+                return true;
+              }
+            }
           }
         }
       })
@@ -570,14 +592,48 @@ This will log:
 - Whether content is blocked
 - How content is transformed
 
+## 🔍 **Drag Tracking System**
+
+The system uses `window.dluxEditor` for tracking drag operations:
+
+### **Image/Video Drag Tracking**
+```javascript
+// Store position when dragging starts
+window.dluxEditor = window.dluxEditor || {};
+window.dluxEditor.draggingImagePos = pos;
+
+// Use position on drop to handle move operation
+if (window.dluxEditor?.draggingImagePos !== undefined) {
+  const pos = window.dluxEditor.draggingImagePos;
+  // Move image from old position to new position
+}
+```
+
+### **Drag Handle Integration**
+```javascript
+// DragHandle tracks which node is being dragged
+onNodeChange: ({ node }) => {
+  window.dluxEditor.dragHandleHoveredNode = node;
+}
+
+// CustomTableCell checks this to detect table drags
+const hoveredNode = window.dluxEditor?.dragHandleHoveredNode;
+if (hoveredNode && hoveredNode.type.name === 'table') {
+  // Prevent table from being dropped into table cell
+}
+```
+
+These global references are **required** for proper drag-and-drop functionality and should not be removed.
+
 ## 🎯 **Summary**
 
 The schema enforcement system provides:
 
-1. **Registry-based restrictions** - Single source of truth
+1. **Registry-based restrictions** - Single source of truth with blocks and transforms
 2. **Visual feedback** - Dropcursor hiding and cursor changes
 3. **Content transformation** - Graceful handling of restricted content
 4. **UI adaptation** - Toolbar buttons disable in context
-5. **Easy extension** - Just update the registry
+5. **Drag tracking** - Global references for move operations
+6. **Easy extension** - Just update the registry
 
 This architecture ensures consistent, predictable behavior while maintaining flexibility for future requirements.
