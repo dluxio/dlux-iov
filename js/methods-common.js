@@ -962,11 +962,18 @@ export default {
           try {
             const createQualitySelector = await this.loadQualitySelector();
             if (createQualitySelector && hls.levels.length > 1) {
-              videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
-                position: 'top-right',
-                showBitrate: true,
-                persistQuality: true
-              });
+              // Add a small delay to ensure video element is fully attached to DOM
+              setTimeout(() => {
+                try {
+                  videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
+                    position: 'top-right',
+                    showBitrate: true,
+                    persistQuality: true
+                  });
+                } catch (e) {
+                  console.log('Could not add quality selector (retry):', e);
+                }
+              }, 100);
             }
           } catch (e) {
             // Quality selector is optional, continue without it

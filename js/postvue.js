@@ -1,5 +1,4 @@
 import Tagify from "/js/tagifyvue.js";
-import CollaborativeTiptapEditor from "/js/collaborative-tiptap-editor.js";
 import Bennies from "/js/bennies.js";
 import commonMethods from "/js/methods-common.js";
 
@@ -33,14 +32,11 @@ export default {
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="body">Post Body</label>
-            <collaborative-tiptap-editor 
+            <textarea 
                 v-model="postBody"
                 placeholder="Write your post content..."
-                :show-collaboration="isCollaborativeMode"
-                :collaboration-config="collaborationConfig"
-                @connected="onCollaborationConnected"
-                @disconnected="onCollaborationDisconnected"
-                @error="onCollaborationError"/>
+                class="form-control"
+                rows="8"></textarea>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="tags">Tags</label><br>
@@ -459,7 +455,6 @@ export default {
   },
   components: {
     "tagify": Tagify,
-    "collaborative-tiptap-editor": CollaborativeTiptapEditor,
     "bennies": Bennies
   },
   watch: {

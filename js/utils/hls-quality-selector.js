@@ -31,11 +31,13 @@ export class HLSQualitySelector {
         
         // Wait for manifest to be parsed
         if (this.hls.levels && this.hls.levels.length > 0) {
-            this.createUI();
+            this.ensureVideoReady(() => this.createUI());
         } else {
             this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                this.createUI();
-                this.applyPendingQuality(); // Apply any pending quality preference
+                this.ensureVideoReady(() => {
+                    this.createUI();
+                    this.applyPendingQuality(); // Apply any pending quality preference
+                });
             });
         }
         
@@ -54,6 +56,31 @@ export class HLSQualitySelector {
         });
         observer.observe(document.body, { childList: true, subtree: true });
         this.observer = observer;
+    }
+    
+    ensureVideoReady(callback) {
+        // Check if video element is attached to DOM
+        if (this.video.parentNode && this.video.parentNode !== document.body) {
+            // Video is ready, execute callback
+            callback();
+        } else {
+            // Video not ready, wait for next frame and try again (with max retries)
+            let retryCount = 0;
+            const maxRetries = 10; // Limit retries to avoid infinite loops
+            
+            const checkReady = () => {
+                if (this.video.parentNode && this.video.parentNode !== document.body) {
+                    callback();
+                } else if (retryCount < maxRetries) {
+                    retryCount++;
+                    requestAnimationFrame(checkReady);
+                } else {
+                    console.warn('Video element never became ready for quality selector');
+                }
+            };
+            
+            requestAnimationFrame(checkReady);
+        }
     }
     
     createUI() {
@@ -110,6 +137,12 @@ export class HLSQualitySelector {
         // Find or create wrapper
         let wrapper = this.video.parentElement;
         if (!wrapper || wrapper === document.body) {
+            // Check if video element has a parent node before trying to insert
+            if (!this.video.parentNode) {
+                console.warn('Video element has no parent node, cannot create quality selector wrapper');
+                return;
+            }
+            
             wrapper = document.createElement('div');
             wrapper.className = 'hls-video-wrapper';
             this.video.parentNode.insertBefore(wrapper, this.video);

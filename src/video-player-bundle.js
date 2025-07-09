@@ -5,26 +5,13 @@
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
-// Static imports to prevent chunking
-import qualityLevelsPlugin from 'videojs-contrib-quality-levels';
-import hlsQualitySelectorPlugin from 'videojs-hls-quality-selector';
-
-// Function to ensure plugins are loaded and registered
-function ensurePluginsLoaded() {
-  if (!videojs.getPlugin('qualityLevels')) {
-    videojs.registerPlugin('qualityLevels', qualityLevelsPlugin);
-  }
-  
-  if (!videojs.getPlugin('hlsQualitySelector')) {
-    videojs.registerPlugin('hlsQualitySelector', hlsQualitySelectorPlugin);
-  }
-}
+// Note: qualityLevels plugin is built into video.js core (no import needed)
+// Only import the external hlsQualitySelector plugin
+import 'videojs-hls-quality-selector';
 
 // DLUX Video Player Service
 class DluxVideoPlayer {
   static async initializePlayer(element, options = {}) {
-    // Ensure plugins are loaded
-    ensurePluginsLoaded();
     
     // Ensure element has an ID for Video.js
     if (!element.id) {
@@ -113,7 +100,7 @@ class DluxVideoPlayer {
     return 'video/mp4'; // Default
   }
   
-  static enhanceVideoElement(video, options = {}) {
+  static async enhanceVideoElement(video, options = {}) {
     // Check if already enhanced
     if (video.dataset.dluxEnhanced === 'true') {
       return video._dluxVideoPlayer;
@@ -130,8 +117,8 @@ class DluxVideoPlayer {
       ...options
     };
     
-    // Initialize player
-    const player = this.initializePlayer(video, elementOptions);
+    // Initialize player (plugins are already loaded statically)
+    const player = await this.initializePlayer(video, elementOptions);
     
     // Mark as enhanced
     video.dataset.dluxEnhanced = 'true';
@@ -139,18 +126,19 @@ class DluxVideoPlayer {
     return player;
   }
   
-  static enhanceAllVideos(container = document) {
+  static async enhanceAllVideos(container = document) {
     const videos = container.querySelectorAll('video:not([data-dlux-enhanced])');
     const players = [];
     
-    videos.forEach(video => {
+    // Wait for all video enhancements to complete
+    await Promise.all(Array.from(videos).map(async (video) => {
       try {
-        const player = this.enhanceVideoElement(video);
+        const player = await this.enhanceVideoElement(video);
         players.push(player);
       } catch (error) {
         console.error('Failed to enhance video:', error);
       }
-    });
+    }));
     
     return players;
   }
@@ -170,8 +158,12 @@ if (typeof window !== 'undefined') {
   
   // Auto-enhance videos on DOMContentLoaded if enabled
   if (!window.dluxVideoPlayerConfig || window.dluxVideoPlayerConfig.autoEnhance !== false) {
-    document.addEventListener('DOMContentLoaded', () => {
-      DluxVideoPlayer.enhanceAllVideos();
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await DluxVideoPlayer.enhanceAllVideos();
+      } catch (error) {
+        console.error('Failed to auto-enhance videos:', error);
+      }
     });
   }
 }
