@@ -1871,6 +1871,7 @@ class EditorFactory {
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
         const Blockquote = tiptapBundle.Blockquote;
         const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
+        const BlockquoteAlignmentFilter = tiptapBundle.BlockquoteAlignmentFilter;
         const BulletList = tiptapBundle.BulletList;
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
@@ -1881,6 +1882,8 @@ class EditorFactory {
         const renderToMarkdown = tiptapBundle.renderToMarkdown;
         const Plugin = tiptapBundle.Plugin;
         const PluginKey = tiptapBundle.PluginKey;
+        const Subscript = tiptapBundle.Subscript;
+        const Superscript = tiptapBundle.Superscript;
 
         if (DEBUG) console.log('✅ FINAL COMPONENT CHECK:', {
             usingDefaultExport: tiptapBundle === window.TiptapCollaboration.default,
@@ -1945,11 +1948,13 @@ class EditorFactory {
         const bodyExtensions = [
             // Filtering extension - must be early to catch transactions
             BlockquoteNestingFilter,
+            BlockquoteAlignmentFilter,
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
                 horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
-                heading: false       // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
+                heading: false,      // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
+                blockquote: false    // ✅ Disable built-in blockquote to use CustomBlockquote with alignment restrictions
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -1959,7 +1964,7 @@ class EditorFactory {
                 placeholder: 'Start writing your content...'
             }),
             TextAlign.configure({
-                types: ['heading', 'paragraph'],
+                types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
             SpkVideo.configure({
@@ -2017,6 +2022,11 @@ class EditorFactory {
             CustomHorizontalRule && CustomHorizontalRule,
             // ✅ Add CustomHeading that prevents input rules inside blockquotes
             Heading && Heading,
+            // ✅ Add CustomBlockquote with alignment restrictions and input rule handling
+            Blockquote && Blockquote,
+            // ✅ Add Subscript and Superscript extensions
+            Subscript && Subscript,
+            Superscript && Superscript,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -2577,6 +2587,7 @@ class EditorFactory {
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
         const Blockquote = tiptapBundle.Blockquote;
         const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
+        const BlockquoteAlignmentFilter = tiptapBundle.BlockquoteAlignmentFilter;
         const BulletList = tiptapBundle.BulletList;
         const OrderedList = tiptapBundle.OrderedList;
         const ListItem = tiptapBundle.ListItem;
@@ -2584,6 +2595,8 @@ class EditorFactory {
         const TextSelection = tiptapBundle.TextSelection;
         const Extension = tiptapBundle.Extension;
         const tippy = tiptapBundle.tippy;
+        const Subscript = tiptapBundle.Subscript;
+        const Superscript = tiptapBundle.Superscript;
 
         if (!Editor || !StarterKit || !Collaboration) {
             throw new Error('Required TipTap components missing from bundle and window');
@@ -2596,11 +2609,13 @@ class EditorFactory {
         const bodyExtensions = [
             // Filtering extension - must be early to catch transactions
             BlockquoteNestingFilter,
+            BlockquoteAlignmentFilter,
             StarterKit.configure({
                 undoRedo: false,     // ✅ v3: Disable UndoRedo (included in StarterKit) when using Collaboration
                 dropcursor: false,   // ✅ Disable default dropcursor to use CustomDropcursor
                 horizontalRule: false, // ✅ Disable built-in HR to use custom draggable version
-                heading: false       // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
+                heading: false,      // ✅ Disable built-in heading to use CustomHeading with blockquote-aware input rules
+                blockquote: false    // ✅ Disable built-in blockquote to use CustomBlockquote with alignment restrictions
             }),
             Collaboration.configure({
                 document: yjsDoc,
@@ -2610,7 +2625,7 @@ class EditorFactory {
                 placeholder: 'Start writing your content...'
             }),
             TextAlign.configure({
-                types: ['heading', 'paragraph'],
+                types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
             }),
             SpkVideo.configure({
@@ -2668,6 +2683,11 @@ class EditorFactory {
             CustomHorizontalRule && CustomHorizontalRule,
             // ✅ Add CustomHeading that prevents input rules inside blockquotes
             Heading && Heading,
+            // ✅ Add CustomBlockquote with alignment restrictions and input rule handling
+            Blockquote && Blockquote,
+            // ✅ Add Subscript and Superscript extensions
+            Subscript && Subscript,
+            Superscript && Superscript,
             DragHandle && DragHandle.configure({
                 render: () => {
                     const element = document.createElement('div');
@@ -6008,12 +6028,23 @@ export default {
             if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
             
             // Check if we're in any node that shouldn't have text alignment
-            if (this.isActive('blockquote')) return false;
-            if (this.isActive('bulletList')) return false;
-            if (this.isActive('orderedList')) return false;
-            if (this.isActive('taskList')) return false;
-            if (this.isActive('codeBlock')) return false;
-            if (this.isInTable) return false; // Already have this property
+            const inBlockquote = this.isActive('blockquote');
+            const inBulletList = this.isActive('bulletList');
+            const inOrderedList = this.isActive('orderedList');
+            const inTaskList = this.isActive('taskList');
+            const inCodeBlock = this.isActive('codeBlock');
+            
+            // Debug logging to see what's happening
+            if (inBlockquote) {
+                console.log('🚫 canUseTextAlign: In blockquote, disabling alignment buttons');
+            }
+            
+            if (inBlockquote) return false;
+            if (inBulletList) return false;
+            if (inOrderedList) return false;
+            if (inTaskList) return false;
+            if (inCodeBlock) return false;
+            // Removed: if (this.isInTable) return false; - Now allowing text alignment in tables
             
             return true;
         },
@@ -14345,6 +14376,8 @@ export default {
                     Strike,
                     Underline,
                     Code,
+                    Subscript,
+                    Superscript,
                     BulletList,
                     OrderedList,
                     ListItem,
@@ -14379,10 +14412,11 @@ export default {
                 const extensions = [
                     // Filtering extension - must be early to catch transactions
                     BlockquoteNestingFilter,
+            BlockquoteAlignmentFilter,
                     Document,
                     Text,
                     TextAlign && TextAlign.configure({
-                        types: ['heading', 'paragraph'],
+                        types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                         alignments: ['left', 'center', 'right', 'justify']
                     }),
                     Paragraph,
@@ -14393,6 +14427,8 @@ export default {
                     Strike,
                     Underline,
                     Code,
+                    Subscript,
+                    Superscript,
                     BulletList,
                     OrderedList,
                     ListItem,
@@ -14709,34 +14745,52 @@ export default {
                         }
                     },
                     
-                    // Table cell - join children without commas
-                    tableCell({ children }) {
+                    // Table cell - join children without commas and handle text alignment
+                    tableCell({ node, children }) {
                         // Handle different types of children
+                        let content = '';
                         if (typeof children === 'function') {
                             const result = children();
                             if (Array.isArray(result)) {
-                                return result.join(''); // Join without commas
+                                content = result.join(''); // Join without commas
+                            } else {
+                                content = String(result || '');
                             }
-                            return String(result || '');
                         } else if (Array.isArray(children)) {
-                            return children.join(''); // Join without commas
+                            content = children.join(''); // Join without commas
+                        } else {
+                            content = String(children || '');
                         }
-                        return String(children || '');
+                        
+                        // Apply text alignment if specified
+                        if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
+                            return `<div class="text-${node.attrs.textAlign}">${content}</div>`;
+                        }
+                        return content;
                     },
                     
-                    // Table header - join children without commas
-                    tableHeader({ children }) {
+                    // Table header - join children without commas and handle text alignment
+                    tableHeader({ node, children }) {
                         // Handle different types of children
+                        let content = '';
                         if (typeof children === 'function') {
                             const result = children();
                             if (Array.isArray(result)) {
-                                return result.join(''); // Join without commas
+                                content = result.join(''); // Join without commas
+                            } else {
+                                content = String(result || '');
                             }
-                            return String(result || '');
                         } else if (Array.isArray(children)) {
-                            return children.join(''); // Join without commas
+                            content = children.join(''); // Join without commas
+                        } else {
+                            content = String(children || '');
                         }
-                        return String(children || '');
+                        
+                        // Apply text alignment if specified
+                        if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
+                            return `<div class="text-${node.attrs.textAlign}">${content}</div>`;
+                        }
+                        return content;
                     },
                     
                     // Video (custom)
@@ -14799,6 +14853,12 @@ export default {
                     },
                     code({ children }) {
                         return `\`${children}\``;
+                    },
+                    subscript({ children }) {
+                        return `<sub>${children}</sub>`;
+                    },
+                    superscript({ children }) {
+                        return `<sup>${children}</sup>`;
                     }
                 };
                 
@@ -14913,6 +14973,16 @@ export default {
             this.executeFormattingCommand('underline');
         },
 
+        formatSubscript() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+            this.executeFormattingCommand('subscript');
+        },
+
+        formatSuperscript() {
+            if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
+            this.executeFormattingCommand('superscript');
+        },
+
         // ✅ HELPER: Execute formatting commands following TipTap v3 best practices
         executeFormattingCommand(commandName) {
             if (!this.bodyEditor || this.isReadOnlyMode || this.bodyEditor.isDestroyed) return;
@@ -14958,6 +15028,20 @@ export default {
                             return false;
                         }
                         return chain.toggleUnderline().run();
+
+                    case 'subscript':
+                        if (!this.bodyEditor.can().chain().focus().toggleSubscript().run()) {
+                            console.warn('Subscript command not available in current state');
+                            return false;
+                        }
+                        return chain.toggleSubscript().run();
+
+                    case 'superscript':
+                        if (!this.bodyEditor.can().chain().focus().toggleSuperscript().run()) {
+                            console.warn('Superscript command not available in current state');
+                            return false;
+                        }
+                        return chain.toggleSuperscript().run();
 
                     default:
                         console.error(`Unknown formatting command: ${commandName}`);
@@ -21628,6 +21712,16 @@ export default {
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-code"></i>
                   </button>
+                  <button @click="formatSubscript()" @mousedown.prevent :class="{active: isActive('subscript')}" 
+                          class="btn btn-sm btn-dark" title="Subscript"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-subscript"></i>
+                  </button>
+                  <button @click="formatSuperscript()" @mousedown.prevent :class="{active: isActive('superscript')}" 
+                          class="btn btn-sm btn-dark" title="Superscript"
+                          :disabled="isReadOnlyMode">
+                    <i class="fas fa-superscript"></i>
+                  </button>
                   <button @click="insertLink()" class="btn btn-sm btn-dark" title="Insert Link"
                           :disabled="isReadOnlyMode">
                     <i class="fas fa-link"></i>
@@ -21919,12 +22013,70 @@ export default {
                 </button>
                 <button type="button" 
                         class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('subscript') }"
+                        @click="formatSubscript()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Subscript">
+                  <i class="fas fa-subscript"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('superscript') }"
+                        @click="formatSuperscript()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Superscript">
+                  <i class="fas fa-superscript"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
                         :class="{ 'active': bodyEditor && bodyEditor.isActive('link') }"
                         @click="insertLink()"
                         @mousedown.prevent
                         :disabled="!bodyEditor"
                         title="Insert/Edit Link">
                   <i class="fas fa-link"></i>
+                </button>
+              </div>
+              
+              <!-- Alignment buttons -->
+              <div class="btn-group ms-1" role="group">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'left'}) }"
+                        @click="setTextAlign('left')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Left">
+                  <i class="fas fa-align-left"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'center'}) }"
+                        @click="setTextAlign('center')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Center">
+                  <i class="fas fa-align-center"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'right'}) }"
+                        @click="setTextAlign('right')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Right">
+                  <i class="fas fa-align-right"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'justify'}) }"
+                        @click="setTextAlign('justify')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Justify">
+                  <i class="fas fa-align-justify"></i>
                 </button>
               </div>
             </div>

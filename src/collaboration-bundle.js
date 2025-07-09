@@ -10,7 +10,7 @@ import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
-import { Editor, Extension, Node, findParentNode } from '@tiptap/core';
+import { Editor, Extension, Node, findParentNode, wrappingInputRule } from '@tiptap/core';
 import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
@@ -82,6 +82,177 @@ import Superscript from '@tiptap/extension-superscript';
 import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
+
+// ✅ CUSTOM PARAGRAPH: Context-aware textAlign attribute validation
+const CustomParagraph = Paragraph.extend({
+  name: 'paragraph',
+  
+  onCreate() {
+    console.log('✅ CustomParagraph extension loaded - context-aware textAlign validation');
+  },
+  
+  addAttributes() {
+    const parentAttrs = this.parent?.() || {};
+    
+    // Add textAlign attribute with context validation
+    return {
+      ...parentAttrs,
+      textAlign: {
+        default: null,
+        parseHTML: element => element.style.textAlign || null,
+        renderHTML: attributes => {
+          if (!attributes.textAlign) return {};
+          return { style: `text-align: ${attributes.textAlign}` };
+        },
+        // Schema-level validation - prevents textAlign in blockquotes
+        validate: (value, { node, pos, state }) => {
+          if (!value || !state || !pos) return value;
+          
+          try {
+            const doc = state.doc;
+            const $pos = doc.resolve(pos);
+            
+            // Check if this paragraph is inside a blockquote
+            for (let depth = $pos.depth; depth > 0; depth--) {
+              const parentNode = $pos.node(depth);
+              if (parentNode.type.name === 'blockquote') {
+                console.log('🚫 CustomParagraph: Rejecting textAlign in blockquote via schema validation');
+                return null; // Invalid - remove the attribute
+              }
+            }
+            
+            return value;
+          } catch (error) {
+            console.log('⚠️ CustomParagraph: Schema validation error, allowing value:', error);
+            return value;
+          }
+        }
+      }
+    };
+  }
+});
+
+// ✅ CUSTOM TEXT ALIGN: Prevents alignment inside blockquotes
+const CustomTextAlign = TextAlign.extend({
+  name: 'textAlign',
+  
+  onCreate() {
+    console.log('✅ CustomTextAlign extension loaded and initialized');
+  },
+  
+  addCommands() {
+    return {
+      setTextAlign: (alignment) => ({ state, dispatch, commands }) => {
+        console.log('🎯 CustomTextAlign: setTextAlign called with alignment:', alignment);
+        
+        // Check if we're inside a blockquote
+        const { selection } = state;
+        const { $from } = selection;
+        
+        // Check all ancestor nodes for blockquote
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'blockquote') {
+            console.log('🚫 CustomTextAlign: Blocking alignment inside blockquote for alignment:', alignment);
+            return false; // Block the command
+          }
+        }
+        
+        console.log('✅ CustomTextAlign: Allowing alignment', alignment, '- not in blockquote');
+        
+        // Use the standard setTextAlign command from the parent
+        // The parent TextAlign extension provides the actual implementation
+        return commands.updateAttributes('paragraph', { textAlign: alignment });
+      }
+    };
+  }
+});
+
+// ✅ BLOCKQUOTE ALIGNMENT FILTER: Schema-level enforcement plugin
+const BlockquoteAlignmentFilter = Extension.create({
+  name: 'blockquoteAlignmentFilter',
+  
+  onCreate() {
+    console.log('✅ BlockquoteAlignmentFilter extension loaded - schema-level enforcement');
+  },
+  
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('blockquoteAlignmentFilter'),
+        
+        // Filter transactions to prevent textAlign in blockquotes
+        filterTransaction(transaction, state) {
+          let hasBlockedAlignment = false;
+          
+          // Check each step in the transaction
+          transaction.steps.forEach(step => {
+            if (step.slice) {
+              // Check if slice contains aligned content going into blockquotes
+              const checkSliceForAlignment = (slice) => {
+                slice.content.forEach(node => {
+                  if (node.attrs?.textAlign) {
+                    // Check if this is being inserted into a blockquote
+                    const from = step.from;
+                    if (from !== undefined) {
+                      try {
+                        const $from = state.doc.resolve(from);
+                        for (let depth = $from.depth; depth > 0; depth--) {
+                          if ($from.node(depth).type.name === 'blockquote') {
+                            console.log('🚫 BlockquoteAlignmentFilter: Blocking transaction with textAlign in blockquote');
+                            hasBlockedAlignment = true;
+                            return;
+                          }
+                        }
+                      } catch (e) {
+                        // Position might be invalid, continue
+                      }
+                    }
+                  }
+                  
+                  // Recursively check child nodes
+                  if (node.content) {
+                    checkSliceForAlignment(node.content);
+                  }
+                });
+              };
+              
+              checkSliceForAlignment(step.slice);
+            }
+          });
+          
+          return !hasBlockedAlignment;
+        },
+        
+        // Transform content after transactions to clean up any alignment in blockquotes
+        appendTransaction(transactions, oldState, newState) {
+          const tr = newState.tr;
+          let hasChanges = false;
+          
+          // Scan the document for textAlign attributes in blockquotes
+          newState.doc.descendants((node, pos) => {
+            if (node.type.name === 'paragraph' && node.attrs.textAlign) {
+              // Check if this paragraph is inside a blockquote
+              const $pos = newState.doc.resolve(pos);
+              for (let depth = $pos.depth; depth > 0; depth--) {
+                const parentNode = $pos.node(depth);
+                if (parentNode.type.name === 'blockquote') {
+                  // Remove textAlign attribute
+                  console.log('🧹 BlockquoteAlignmentFilter: Removing textAlign from paragraph in blockquote');
+                  tr.setNodeMarkup(pos, null, { ...node.attrs, textAlign: null });
+                  hasChanges = true;
+                  break;
+                }
+              }
+            }
+          });
+          
+          return hasChanges ? tr : null;
+        }
+      })
+    ];
+  }
+});
 
 // ✅ CUSTOM IMAGE EXTENSION: Handle drag behavior to prevent duplication
 const CustomImage = Image.extend({
@@ -408,15 +579,16 @@ function isContentBlockedAt(state, pos, contentType) {
 }
 
 // ✅ CONTENT TRANSFORMATION: Convert complex nodes to paragraphs for restricted contexts
-function transformRestrictedContent(slice, schema) {
+function transformRestrictedContent(slice, schema, targetContext = null) {
   const transformedContent = [];
   
   slice.content.forEach(node => {
     switch (node.type.name) {
       case 'heading':
-        // Convert heading to paragraph, preserving marks
+        // Convert heading to paragraph, preserving marks but removing alignment for blockquotes
+        const attrs = targetContext === 'blockquote' ? {} : node.attrs;
         transformedContent.push(
-          schema.nodes.paragraph.create(null, node.content)
+          schema.nodes.paragraph.create(attrs, node.content)
         );
         break;
         
@@ -430,8 +602,10 @@ function transformRestrictedContent(slice, schema) {
             codeContent.push(child.mark(marks));
           }
         });
+        // Remove alignment attributes for blockquotes
+        const codeAttrs = targetContext === 'blockquote' ? {} : node.attrs;
         transformedContent.push(
-          schema.nodes.paragraph.create(null, codeContent)
+          schema.nodes.paragraph.create(codeAttrs, codeContent)
         );
         break;
         
@@ -439,14 +613,18 @@ function transformRestrictedContent(slice, schema) {
         // Extract paragraphs from blockquote
         node.content.forEach(child => {
           if (child.type.name === 'paragraph') {
-            transformedContent.push(child);
+            // Strip alignment for blockquotes
+            const paragraphAttrs = targetContext === 'blockquote' ? {} : child.attrs;
+            transformedContent.push(
+              schema.nodes.paragraph.create(paragraphAttrs, child.content)
+            );
           } else {
             // Recursively transform nested content
             const nestedSlice = slice.constructor.maxOpen(schema.nodeFromJSON({ 
               type: 'doc', 
               content: [child.toJSON()] 
             }).content);
-            const transformed = transformRestrictedContent(nestedSlice, schema);
+            const transformed = transformRestrictedContent(nestedSlice, schema, targetContext);
             transformedContent.push(...transformed.content.content);
           }
         });
@@ -459,11 +637,16 @@ function transformRestrictedContent(slice, schema) {
           if (listItem.type.name === 'listItem') {
             listItem.content.forEach(child => {
               if (child.type.name === 'paragraph') {
-                transformedContent.push(child);
+                // Strip alignment for blockquotes
+                const listParaAttrs = targetContext === 'blockquote' ? {} : child.attrs;
+                transformedContent.push(
+                  schema.nodes.paragraph.create(listParaAttrs, child.content)
+                );
               } else {
                 // Handle nested content
+                const nestedAttrs = targetContext === 'blockquote' ? {} : child.attrs;
                 transformedContent.push(
-                  schema.nodes.paragraph.create(null, child.content)
+                  schema.nodes.paragraph.create(nestedAttrs, child.content)
                 );
               }
             });
@@ -473,21 +656,34 @@ function transformRestrictedContent(slice, schema) {
         
         
       case 'paragraph':
+        // Keep paragraphs but strip alignment for blockquotes
+        if (targetContext === 'blockquote') {
+          transformedContent.push(
+            schema.nodes.paragraph.create({}, node.content)
+          );
+        } else {
+          transformedContent.push(node);
+        }
+        break;
+        
       case 'text':
-        // Keep paragraphs and text as-is
+        // Keep text nodes as-is
         transformedContent.push(node);
         break;
         
       default:
         // For other nodes, try to extract text content into paragraphs
         if (node.isBlock && node.content.size > 0) {
+          // Strip alignment for blockquotes
+          const defaultAttrs = targetContext === 'blockquote' ? {} : node.attrs;
           transformedContent.push(
-            schema.nodes.paragraph.create(null, node.content)
+            schema.nodes.paragraph.create(defaultAttrs, node.content)
           );
         } else if (node.isInline || node.isText) {
           // Wrap inline content in a paragraph
+          const inlineAttrs = targetContext === 'blockquote' ? {} : null;
           transformedContent.push(
-            schema.nodes.paragraph.create(null, [node])
+            schema.nodes.paragraph.create(inlineAttrs, [node])
           );
         }
         // Skip nodes with no content
@@ -1487,7 +1683,130 @@ const CustomDropcursor = Dropcursor.extend({
 });
 
 
-// Using standard Blockquote from TipTap
+// ✅ CUSTOM BLOCKQUOTE: Enforces paragraph-only content and strips alignment on drop
+const CustomBlockquote = Blockquote.extend({
+  name: 'blockquote',
+  content: 'paragraph+', // Only paragraphs allowed
+  draggable: true, // Enable drag handle
+  
+  onCreate() {
+    console.log('✅ CustomBlockquote extension loaded and initialized');
+  },
+  
+  addInputRules() {
+    // Override parent input rules to ensure proper alignment handling
+    return [
+      wrappingInputRule({
+        find: /^>\s$/,
+        type: this.type,
+        // Ensure the created blockquote doesn't allow initial alignment
+        getAttributes: () => {
+          return {};
+        }
+      })
+    ];
+  },
+  
+  addProseMirrorPlugins() {
+    const plugins = this.parent?.() || [];
+    
+    return [
+      ...plugins,
+      new Plugin({
+        key: new PluginKey('blockquoteDropHandler'),
+        props: {
+          handleDrop(view, event, slice, moved) {
+            if (!slice) return false;
+            
+            // Get drop position
+            const dropPos = view.posAtCoords({
+              left: event.clientX,
+              top: event.clientY
+            });
+            
+            if (!dropPos) return false;
+            
+            // Check if we're dropping into a blockquote
+            const $pos = view.state.doc.resolve(dropPos.pos);
+            let isInBlockquote = false;
+            
+            for (let d = $pos.depth; d > 0; d--) {
+              if ($pos.node(d).type.name === 'blockquote') {
+                isInBlockquote = true;
+                break;
+              }
+            }
+            
+            // If dropping into blockquote, transform the content
+            if (isInBlockquote) {
+              // Comprehensive check for content that needs transformation
+              const hasAlignmentOrRestrictedContent = (node) => {
+                // Check if this node has textAlign
+                if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
+                  if (DEBUG) console.log('🎯 Found textAlign:', node.attrs.textAlign, 'on node:', node.type.name);
+                  return true;
+                }
+                
+                // Check if this node type is restricted
+                if (['heading', 'codeBlock', 'bulletList', 'orderedList'].includes(node.type.name)) {
+                  if (DEBUG) console.log('🎯 Found restricted node type:', node.type.name);
+                  return true;
+                }
+                
+                // Recursively check child nodes
+                if (node.content && node.content.size > 0) {
+                  let hasAlignment = false;
+                  node.content.forEach(child => {
+                    if (hasAlignmentOrRestrictedContent(child)) {
+                      hasAlignment = true;
+                    }
+                  });
+                  return hasAlignment;
+                }
+                
+                return false;
+              };
+              
+              let needsTransformation = false;
+              slice.content.forEach(node => {
+                if (hasAlignmentOrRestrictedContent(node)) {
+                  needsTransformation = true;
+                }
+              });
+              
+              if (DEBUG) console.log('🎯 Drop into blockquote - needs transformation:', needsTransformation);
+              
+              if (needsTransformation) {
+                // Transform content to strip alignment and convert restricted nodes
+                const transformedSlice = transformRestrictedContent(slice, view.state.schema, 'blockquote');
+                
+                // Handle the drop with transformed content
+                const tr = view.state.tr;
+                
+                if (moved) {
+                  // This is a move operation - delete the original content first
+                  const $from = view.state.selection.$from;
+                  const $to = view.state.selection.$to;
+                  tr.delete($from.pos, $to.pos);
+                }
+                
+                // Insert the transformed content
+                tr.replaceRange(dropPos.pos, dropPos.pos, transformedSlice);
+                view.dispatch(tr);
+                
+                event.preventDefault();
+                return true; // We handled the drop
+              }
+            }
+            
+            // Let default handling continue
+            return false;
+          }
+        }
+      })
+    ];
+  }
+});
 
 // ✅ BLOCKQUOTE NESTING FILTER: Prevents nested blockquotes via transaction filtering
 const BlockquoteNestingFilter = Extension.create({
@@ -1660,7 +1979,7 @@ const TiptapCollaboration = {
   
   // Basic extensions
   Document,
-  Paragraph,
+  Paragraph: CustomParagraph, // Export custom paragraph with context-aware textAlign validation
   Text,
   Placeholder,
   
@@ -1676,7 +1995,7 @@ const TiptapCollaboration = {
   OrderedList, // Export standard
   TaskList,
   TaskItem,
-  Blockquote, // Export standard blockquote
+  Blockquote: CustomBlockquote, // Export custom blockquote with drop handling
   HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
@@ -1698,7 +2017,7 @@ const TiptapCollaboration = {
   Subscript,
   Superscript,
   TextStyle,
-  TextAlign,
+  TextAlign: CustomTextAlign, // Export custom text align that blocks alignment in blockquotes
   
   // Media extensions
   Youtube,
@@ -1711,6 +2030,7 @@ const TiptapCollaboration = {
   
   // Filtering extensions
   BlockquoteNestingFilter,
+  BlockquoteAlignmentFilter,
   
   // ProseMirror utilities
   Plugin,

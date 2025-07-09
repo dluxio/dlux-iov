@@ -567,6 +567,12 @@
   z-index: 1000;
   position: absolute;
   
+  /* Flexbox for button group wrapping */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: 400px;
+  
   /* Let TipTap control visibility through positioning */
   visibility: hidden;
   transform: translateY(-8px);

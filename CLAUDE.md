@@ -31,34 +31,11 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 
 ## Y.js Document Structure
 
-> **Note**: This shows the actual implemented structure. For the full aspirational design, see `TIPTAP_COLLABORATIVE_SCHEMA.md`.
+> **Note**: For the complete Y.js schema implementation, see [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md).
 
-```javascript
-// 1. CONFIG MAP - Document metadata (handled by config observer)
-ydoc.getMap('config')
-  .set('documentName', 'My Document')     // → currentFile.name/documentName (auto-set from title if default)
-  .set('lastModified', '2024-01-01T12:00:00Z')
-  .set('owner', 'username')               // Document owner
-
-// 2. METADATA MAP - Publishing data (handled by metadata observer)
-ydoc.getMap('metadata')
-  .set('title', 'Document Title')         // → titleInput (with recursion protection)
-  .set('tags', ['tag1', 'tag2'])          // → reactiveTags + content.tags
-  .set('beneficiaries', [{account: 'alice', weight: 500}])  // → reactiveBeneficiaries + content.beneficiaries
-  .set('customJson', { app: 'dlux/1.0' }) // → reactiveCustomJson + customJsonString
-  .set('permlink', 'my-post-url')         // ↔ permlinkInput (bidirectional with recursion protection)
-  .set('allowVotes', true)                // → reactiveCommentOptions + commentOptions
-  .set('allowCurationRewards', true)      // → reactiveCommentOptions + commentOptions
-  .set('maxAcceptedPayout', '1000000.000 SBD')  // → reactiveCommentOptions + commentOptions
-  .set('percentHbd', true)                // → reactiveCommentOptions + commentOptions
-
-// 3. PERMISSIONS MAP - Server-managed
-ydoc.getMap('permissions')  // DO NOT modify directly
-
-// 4. BODY FRAGMENT - Managed by TipTap
-// Created automatically via Collaboration extension
-// Never access directly - use editor.getText() etc.
-```
+The editor uses a simplified Y.js structure with:
+- **3 Y.js Maps**: `config`, `metadata`, `permissions`
+- **1 Y.js XML Fragment**: `body` (managed by TipTap)
 
 ## Observer Architecture
 
@@ -68,45 +45,7 @@ The system uses two dedicated Y.js observers for clean separation of concerns:
 - **CONFIG OBSERVER**: Document management metadata (documentName, owner, lastModified)
 - **METADATA OBSERVER**: Publishing metadata (title, tags, beneficiaries, permlink, comment options, customJson)
 
-### Field Sync Patterns
-```javascript
-// CONFIG MAP → Vue reactive properties
-documentName  → currentFile.name/documentName (auto-set from title if default)
-
-// METADATA MAP → Vue reactive properties  
-title         → titleInput (with recursion protection)
-tags          → reactiveTags + content.tags
-beneficiaries → reactiveBeneficiaries + content.beneficiaries
-permlink      ↔ permlinkInput (bidirectional with recursion protection)
-customJson    → reactiveCustomJson + customJsonString + content.custom_json
-allowVotes    → reactiveCommentOptions + commentOptions.allowVotes
-// ... other comment options follow same pattern
-```
-
-### Recursion Protection
-Critical fields use recursion protection flags:
-- **title**: Uses implicit Vue watcher debouncing
-- **permlink**: Uses `_isUpdatingPermlink` flag to prevent circular updates
-- **Remote vs Local**: Y.js observers only update Vue when not in local update cycle
-
-### User Intent & Persistence
-**Any user interaction shows intent to create a document**:
-- **Metadata changes** (tags, beneficiaries, custom JSON, permlink) → immediate persistence
-- **Content changes** (title, body) → immediate persistence  
-- **Document settings** (document name, comment options) → immediate persistence
-- **No content validation**: Metadata-only documents are valid user intent
-- **Consistent behavior**: All fields trigger autosave and document creation equally
-
-### File Operations
-**File > New Behavior** (Complete Reset Pattern):
-- **Input Fields**: All cleared to defaults (`titleInput = ''`, `permlinkInput = ''`, `tagInput = ''`, etc.)
-- **Reactive Properties**: Reset to defaults (`reactiveTags = []`, `reactiveBeneficiaries = []`, `reactiveCommentOptions = {...}`)
-- **UI State**: All modals/editors closed (`showPermlinkEditor = false`, `showAdvancedOptions = false`)
-- **Y.js Documents**: Properly destroyed and recreated with fresh state
-- **Observers**: Cleaned up and reattached to new Y.js document
-- **Protection Flags**: All reset (`_isUpdatingPermlink = false`)
-- **Timers**: All debounce timers cleared to prevent persistence issues
-- **Result**: Complete clean slate - no field values persist from previous document
+For detailed implementation, see [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md).
 
 ## API Endpoints
 
@@ -184,78 +123,40 @@ this.canManagePermissions   // Permission management (owner only)
 
 ### Modular Drag & Drop System
 
-The editor implements a modular block list system that controls what content can be dropped into specific nodes (e.g., preventing tables from being dropped into table cells).
+> **See [`TIPTAP_SCHEMA_ENFORCEMENT.md`](./TIPTAP_SCHEMA_ENFORCEMENT.md) for complete documentation.**
 
-#### How It Works
+The editor uses a registry-based system to control what content can be dropped into specific nodes:
 
-1. **Registry-Based Block Lists** (`src/collaboration-bundle.js`):
 ```javascript
 const nodeBlockLists = {
-  tableCell: ['table', 'horizontalRule'],    // Table cells block tables and HRs
-  tableHeader: ['table', 'horizontalRule'],  // Table headers have same restrictions
-  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']  // Blockquotes only allow paragraphs
-};
-```
-
-2. **Utility Function** checks if content is blocked at a position:
-```javascript
-function isContentBlockedAt(state, pos, contentType) {
-  // Checks all ancestor nodes for block lists
-  // Returns { blocked: true/false, byNode, atDepth }
-}
-```
-
-3. **CustomDropcursor** hides the drop cursor for blocked content:
-- Tracks what's being dragged
-- Uses `isContentBlockedAt` to check if it's blocked
-- Hides dropcursor and shows "not-allowed" cursor when over blocked areas
-
-4. **CustomTableCell** enforces the block rules:
-- Uses same `isContentBlockedAt` check
-- Prevents drops of blocked content
-- Handles position adjustment for downward drags
-
-#### Adding Content to Block Lists
-
-To block additional content types from being dropped into table cells:
-
-```javascript
-// In src/collaboration-bundle.js
-const nodeBlockLists = {
-  tableCell: ['table', 'horizontalRule', 'image'],    // Example: Add 'image' to also block images
-  tableHeader: ['table', 'horizontalRule', 'image'],   // Keep consistent
+  tableCell: ['table', 'horizontalRule'],
+  tableHeader: ['table', 'horizontalRule'],
   blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']
 };
 ```
 
-To add block lists for new node types:
+## Documentation Index
 
-```javascript
-const nodeBlockLists = {
-  tableCell: {    // Enhanced format
-    blocks: ['table', 'horizontalRule'],
-    transforms: ['heading', 'codeBlock', 'blockquote', 'bulletList', 'orderedList']
-  },
-  codeBlock: {    // New node with restrictions
-    blocks: ['table', 'image', 'video'],
-    transforms: []  // No transformations, just blocks
-  }
-};
-```
+### Core Documentation
+- **Y.js Schema**: [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md) - Complete Y.js structure
+- **Collaboration Architecture**: [`TIPTAP_COLLABORATIVE_SCHEMA.md`](./TIPTAP_COLLABORATIVE_SCHEMA.md) - High-level design
+- **Best Practices**: [`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md) - Implementation patterns
+- **Schema Enforcement**: [`TIPTAP_SCHEMA_ENFORCEMENT.md`](./TIPTAP_SCHEMA_ENFORCEMENT.md) - Content restrictions
+- **Markdown Export**: [`TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md`](./TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md) - Export system
+- **API Documentation**: [`Collaboration_editor.md`](./Collaboration_editor.md) - Hive API reference
 
-#### Architecture Benefits
-- **Single Source of Truth**: Block lists defined in one registry
-- **Automatic Coordination**: Dropcursor and drop handling stay in sync
-- **Easy Extension**: Just update the registry, no code changes needed
-- **Type-Safe**: Each node declares what it blocks
+### Feature Documentation
+- **SPK Drive Integration**: [`TIPTAP_SPK_DRIVE_INTEGRATION.md`](./TIPTAP_SPK_DRIVE_INTEGRATION.md) - Media insertion
+- **UI Features**: [`TIPTAP_FEATURES.md`](./TIPTAP_FEATURES.md) - BubbleMenu, table toolbar, etc.
+- **Troubleshooting**: [`TIPTAP_TROUBLESHOOTING.md`](./TIPTAP_TROUBLESHOOTING.md) - Common issues & fixes
 
-#### Implementation Details
-- CustomTableCell replaces the default tableCell from TableKit
-- TableHeader uses the default from TableKit (no custom version needed)
-- Both Tier 1 and Tier 2 editors use the same extensions
-- Markdown export includes all custom extensions
+### Official TipTap Documentation
+- **TipTap v3 Docs**: https://next.tiptap.dev/docs
+- **Y.js Docs**: https://docs.yjs.dev/
+- **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
 
-## Official Documentation
+
+## Official Documentation Links
 
 ### Core Collaboration Framework
 - **TipTap Editor Overview**: https://next.tiptap.dev/docs/editor/getting-started/overview
@@ -283,7 +184,10 @@ const nodeBlockLists = {
 - **TipTap Drag Handle Vue Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/drag-handle-vue
 - **TipTap Bubble Menu Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/bubble-menu
 - **TipTap Text Align**: https://next.tiptap.dev/docs/editor/extensions/functionality/textalign
+- **TipTap Subscript**: https://next.tiptap.dev/docs/editor/extensions/marks/subscript
+- **TipTap Superscript**: https://next.tiptap.dev/docs/editor/extensions/marks/superscript
 
+### Extension Guidelines
 When extending always import standalone extension, do not import from kits like starter kit or table kit
 - **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
 - **TipTap Table Cell Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/table-cell
@@ -292,7 +196,7 @@ When extending always import standalone extension, do not import from kits like 
 - **TipTap Image Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/image
 - **TipTap Blockquote Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/blockquote
 
-DEPRECIATED - SpkVideo Extends YouTube and is superceeded by DluxVideo
+**DEPRECATED** - SpkVideo Extends YouTube and is superseded by DluxVideo
 - **TipTap YouTube Extension**: https://next.tiptap.dev/docs/editor/extensions/nodes/youtube
 
 ### Server Implementation
@@ -302,57 +206,21 @@ DEPRECIATED - SpkVideo Extends YouTube and is superceeded by DluxVideo
 - **TipTap REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
 
 ### TipTap API
-https://next.tiptap.dev/docs/editor/api/editor
-https://next.tiptap.dev/docs/editor/api/commands
-https://next.tiptap.dev/docs/editor/api/commands/content
-https://next.tiptap.dev/docs/editor/api/commands/nodes-and-marks
-https://next.tiptap.dev/docs/editor/api/commands/lists
-https://next.tiptap.dev/docs/editor/api/commands/selection
-https://next.tiptap.dev/docs/editor/api/utilities
-https://next.tiptap.dev/docs/editor/api/node-positions
-https://next.tiptap.dev/docs/editor/api/events
-
-
-## Key Architectural Patterns
-
-### Modular Block List System
-The editor uses a registry-based system for content restrictions:
-```javascript
-const nodeBlockLists = {
-  tableCell: ['table', 'horizontalRule'],
-  tableHeader: ['table', 'horizontalRule'],
-  blockquote: ['table', 'horizontalRule', 'heading', 'codeBlock', 'bulletList', 'orderedList']
-};
-```
-See `TIPTAP_SCHEMA_ENFORCEMENT.md` for full documentation.
-
-### Markdown Export Architecture
-- **All extensions must be synchronized** between editor and export
-- **Custom node mappings** for Hive blockchain compatibility
-- **Children type handling** for different renderer outputs
-See `TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md` for details.
-
-### Simple Y.js Schema
-The actual implementation uses just 3 maps + 1 fragment:
-- **config map**: Document metadata
-- **metadata map**: Publishing data
-- **permissions map**: Server-managed
-- **body fragment**: TipTap-managed content
-See `TIPTAP_COLLABORATIVE_SCHEMA.md` for the real structure.
+- https://next.tiptap.dev/docs/editor/api/editor
+- https://next.tiptap.dev/docs/editor/api/commands
+- https://next.tiptap.dev/docs/editor/api/commands/content
+- https://next.tiptap.dev/docs/editor/api/commands/nodes-and-marks
+- https://next.tiptap.dev/docs/editor/api/commands/lists
+- https://next.tiptap.dev/docs/editor/api/commands/selection
+- https://next.tiptap.dev/docs/editor/api/utilities
+- https://next.tiptap.dev/docs/editor/api/node-positions
+- https://next.tiptap.dev/docs/editor/api/events
 
 ## Common Issues & Solutions
 
-For detailed troubleshooting, patterns, and implementation guidelines, see:
-**`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`**
+For comprehensive troubleshooting, see [`TIPTAP_TROUBLESHOOTING.md`](./TIPTAP_TROUBLESHOOTING.md).
 
-Key issues covered:
-- "RangeError: Applying a mismatched transaction"
-- "function () { [native code] }" display
-- Permlink editing reverting/not saving
-- State synchronization problems
-- Memory management and cleanup
-
-**Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
+For implementation patterns and best practices, see [`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md).
 
 ## TipTap v3 Compliance Status (Audited 2025.06.25)
 
@@ -410,308 +278,25 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - **Comprehensive Coverage**: Tests all permission types and broadcast scenarios
 - **Production Ready**: Validated end-to-end permission broadcast pipeline
 
-## Recent Updates (v2025.06.24)
-### ✅ Title Field Migration to Metadata Map
-- **Issue Fixed**: Title was inconsistently stored in config map while other Hive post attributes were in metadata
-- **Solution**: Moved title from config map to metadata map for logical grouping with other publishable fields
-- **Result**: Cleaner architecture - config map for document management, metadata map for all Hive post attributes
+## Recent Implementation Highlights
 
-### ✅ Save Indicator Fix for All Input Fields
-- **Issue Fixed**: Save indicator only showed for body editor, not for title/tags/beneficiaries changes
-- **Root Cause**: Input handlers were missing the immediate `updateSaveStatus()` call after setting `hasUnsavedChanges`
-- **Solution**: Applied consistent pattern to all field handlers:
-  ```javascript
-  this.hasUnsavedChanges = true;
-  this.hasUserIntent = true;
-  // Call updateSaveStatus directly to ensure message shows
-  this.$nextTick(() => {
-      this.updateSaveStatus();
-  });
-  ```
-- **Fixed Handlers**:
-  - Title input (for both temp and persistent documents)
-  - Tag operations (addTagToYjs, removeTagFromYjs)
-  - Beneficiary operations (addBeneficiary, removeBeneficiary)
-  - Comment options (all checkbox watchers)
-  - Custom JSON editor (handleCustomJsonInput)
-  - Generic metadata handler (triggerUserIntentDetection)
-- **Result**: "Saving locally..." message now appears immediately for all user inputs
+### Critical Security Enhancements
+- **Authentication State Management**: Username changes trigger permission re-validation and cache clearing
+- **Local Document Security**: Cross-user access prevention for local documents
+- **Permission Caching**: Force `no-access` for unauthenticated users without cache fallback
 
-## Recent Updates (v2025.06.25)
-### ✅ CRITICAL Security Fix - Local Document Permission Bypass
-- **Issue Fixed**: Username watcher was not validating permissions for local documents when switching users
-- **Root Cause**: Username watcher only checked collaborative documents, allowing cross-user access to local files
-- **Solution**: Added local document ownership validation in username watcher
-- **Result**: Users cannot access other users' local documents after switching accounts
-- **Additional Fix**: Unauthenticated users (no username or expired auth) now immediately lose access to all documents
-
-### ✅ Authentication Bypass Security Fix  
-- **Issue Fixed**: Unauthenticated users could maintain access via cached permissions
-- **Root Cause**: `validateCurrentDocumentPermissions()` fell back to cached permissions when not authenticated
-- **Solution**: Force `no-access` for unauthenticated users without cache fallback
-- **Result**: Expired/logged out users immediately lose document access
-
-### ✅ Editor Lock-Down Fix for Permission Changes
-- **Issue Fixed**: Editor remained editable when switching to readonly user in collaborative mode
-- **Root Cause**: 
-  1. `handlePermissionBroadcast` tried to directly set `isReadOnlyMode` (a computed property)
-  2. `validateCurrentDocumentPermissions` didn't update editor state when permissions changed
-  3. Vue reactivity wasn't detecting deep cache object changes
-- **Solution**: 
-  1. Remove invalid computed property assignments
-  2. Update cached permissions properly to trigger computed property
-  3. Add `$forceUpdate()` to ensure Vue recalculates `isReadOnlyMode`
-  4. Explicitly call `setEditable()` based on new permission level
-- **Result**: Editor properly locks/unlocks when user permissions change
-
-### ✅ BubbleMenu Extension Integration - NEW FEATURE
-- **Feature Added**: TipTap BubbleMenu extension for floating formatting toolbar on text selection
-- **UI Enhancement**: Bubble menu with Bold, Italic, Strike, Code, and Link buttons
-- **Vue 3 Compliant**: Fixed DOM timing issues with permanent element and safe event handling
-- **Button Fix**: Used `@mousedown.prevent` pattern to maintain text selection
-- **Smart Visibility**: CSS-based hiding with TipTap Floating UI control
-- **Package**: Added `@tiptap/extension-bubble-menu@3.0.0-beta.15` to dependencies
-- **Bundle Update**: Included in collaboration bundle and exported via `window.TiptapCollaboration.BubbleMenu`
-- **Styling**: Added dark-themed bubble menu styles to `css/tiptap-editor.css` with `display: none` initial state
-- **Fixed**: Corrected visibility logic - let TipTap extension handle show/hide rather than Vue template conditions
-
-### ✅ BubbleMenu "domFromPos" Error Fix
-- **Issue Fixed**: "Cannot read properties of null (reading 'domFromPos')" error when unmounting component
-- **Root Cause**: Floating UI async positioning calculations continuing after editor destruction
-- **Solution 1**: Added `editor.isDestroyed` and `isUnmounting` checks in shouldShow callback
-- **Solution 2**: Force hide bubble menu element in beforeUnmount to cancel pending calculations
-- **Solution 3**: Increased updateDelay from 100ms to 250ms to reduce positioning frequency
-- **Solution 4**: Added tippyOptions with onHide/onDestroy handlers for cleanup
-- **Result**: No more errors during rapid document switching or component unmounting
-
-### ✅ Document Duplicate Functionality - NEW FEATURE  
-- **Feature Added**: Duplicate button in File menu dropdown creates exact copy of current document
-- **Implementation**: Complete duplicate system for both local and collaborative documents
-- **Data Copying**: All document data preserved (title, body, metadata, tags, beneficiaries, custom JSON, comment options)
-- **Naming Convention**: Appends " - Copy" to original document name
-- **Type Support**: Works for both local documents (creates IndexedDB copy) and collaborative documents (creates new cloud document)
-- **TipTap v3 Compliant**: Uses proper Y.js transactions with origin tags, follows all best practices
-- **Location**: `js/tiptap-editor-modular.js:14043` - `duplicateDocument()` method with helper functions
-- **Persistence Logic**: `canDuplicate` computed property controls button state with helpful UX:
-  - **Collaborative documents**: Always enabled (server-persisted)
-  - **Local documents**: Enabled only after IndexedDB persistence created (user intent + autosave)
-  - **Temporary documents**: Shown as disabled with tooltip "Document must be saved before it can be duplicated"
-  - **No current file**: Button hidden completely
-- **Fix Applied**: Corrected collaborative document loading to use proper `loadDocument(file)` method with correct file structure
-
-### ✅ Security Fix - Authentication State Change Vulnerability
-- **Issue Fixed**: Switching users didn't immediately revoke collaborative document access
-- **Root Cause**: Permission caches not invalidated on auth state changes
-- **Solution**: Added username watcher that clears all permission caches and re-validates current document
-- **Security Impact**: Prevents unauthorized access after logout or account switching
-- **Implementation**: 
-  - Username watcher detects auth changes
-  - `clearAllPermissionCaches()` invalidates all cached permissions
-  - `validateCurrentDocumentPermissions()` fetches fresh permissions from server
-  - Document closed if user has no-access, WebSocket reconnected if permissions changed
-
-### ✅ Cloud Button Background Color Fix
-- **Issue Fixed**: Cloud button background colors not displaying
-- **Root Cause**: Template incorrectly calling `getStatusStyle(cloudButtonStyle.state)` 
-- **Solution**: Changed to directly use `:style="cloudButtonStyle"`
-- **Result**: Proper background colors - grey (local), green (connected), orange (connecting), blue (offline)
-
-### ✅ Permlink Auto-Generate UX Enhancement
-- **Issue Fixed**: Auto-generate button didn't update edit preview when clicked during editing
-- **Solution**: Added `permlinkInputTemp` update in `useGeneratedPermlink()`
-- **Result**: Users can click auto-generate while editing to reset to generated value and continue editing
-
-### ✅ Fix Persistent Document Creation on Page Refresh - COMPLETE
-- **Issue Fixed**: Persistent documents were created immediately on page refresh without user interaction
-- **Root Cause**: 
-  1. Y.js observers were setting `hasUserIntent = true` during initial document load from IndexedDB/WebSocket sync
-  2. TipTap editor fires `onUpdate` events during initialization, triggering `debouncedUpdateContent`
-  3. Multiple code paths were triggering persistence creation before editor was ready
-  4. Metadata changes from Y.js sync were triggering `autoSave()` during initialization
-- **Solution**: Added comprehensive multi-layer protection to prevent false user intent detection:
-  1. **isLoadingDocument flag**: Prevents intent detection during document loading
-  2. **editorInitialized flag**: Prevents auto-save triggers during editor initialization
-- **Implementation Details**:
-  - Added `editorInitialized = false` to data properties
-  - Set `editorInitialized = true` after 1.5s delay in editor's `onCreate` callback
-  - Added protection checks in ALL critical methods:
-    - `autoSave()` - early return if editor not initialized
-    - Both `debouncedUpdateContent()` methods - early return if editor not initialized
-    - `debouncedCheckUserIntentAndCreatePersistence()` - checks both flags
-    - `onUpdate` callback - checks both flags before calling methods
-    - Metadata observer - checks both flags before setting user intent
-    - Title change handler - checks both flags before setting user intent
-  - Reset both flags in `resetComponentState` and `newDocument`
-  - Set `isLoadingDocument = true` at start of document loading methods
-  - Reset `isLoadingDocument = false` after successful load
-- **Result**: Documents are only persisted when user actually interacts with editor after full initialization, preventing false persistence on page load
-
-### ✅ Document Name Display Consistency Fix
-- **Issue Fixed**: Drafts modal showed old document names (e.g., "fresh test 1") instead of updated names
-- **Root Cause**: `getDocumentDisplayName()` method used fallback chains (`file.name || file.documentName`) that could show stale data
-- **Solution**: Removed fallback chains - collaborative documents now only use `file.documentName`, local files only use `file.name`
-- **Pattern Applied**: 
-  - `getDocumentDisplayName()` method - single source of truth for document names
-  - `displayDocumentName` computed property - consistent logic for current document
-  - Delete confirmation dialogs - use `getDocumentDisplayName()` for consistency
-  - Debug logging - use `getDocumentDisplayName()` for accurate display
-- **Result**: Document names update correctly in all UI locations when changed
-
-## Recent Updates (v2025.06.24)
-### ✅ File > New Reset Fix
-- **Issue Fixed**: Custom permlink persisted after File > New, making document appear still loaded
-- **Root Cause**: `permlinkInput` was intentionally not reset due to recursion concerns
-- **Solution**: Reset `permlinkInput = ''` and `_isUpdatingPermlink = false` in resetComponentState
-- **Result**: Complete clean slate - all fields properly reset for new documents
-
-### ✅ User Intent & Persistence Fix
-- **Issue Fixed**: Metadata changes (tags, beneficiaries, custom JSON) were hanging on save
-- **Root Cause**: Content validation blocking metadata-only documents from creating persistence
-- **Solution**: Removed `checkRealContentForIntent()` - any user interaction shows intent
-- **Result**: All fields consistently trigger autosave and document creation
-
-### ✅ Permlink Sync Resolution  
-- **Issue Fixed**: Permlink changes now sync correctly between owner and editor users
-- **Root Cause**: Missing permlink handler in metadata observer
-- **Solution**: Added bidirectional permlink sync with recursion protection
-- **Architecture**: Unified observer system handling all metadata fields consistently
-
-### ✅ WebSocket Permission Broadcast System - PRODUCTION READY
-- **Client-Side**: ✅ Complete - Y.js permission observer processes real-time broadcasts
-- **Server-Side**: ✅ Complete - REST API triggers Y.js WebSocket broadcasts via internal API
-- **Broadcast API**: ✅ Complete - Dedicated server on port 1235 for permission broadcasts
-- **Performance**: ✅ Achieved - 1-2 second real-time permission updates via Y.js sync
-- **Integration**: ✅ Complete - All permission endpoints trigger WebSocket broadcasts
-
-### Real-time Permission System Enhancement
-- **Adaptive Permission Refresh**: Dynamic refresh rates (30s during collaboration, 1min normal)
-- **Seamless Permission Transitions**: All permission level changes update UI without page refresh
-- **WebSocket Reconnection**: Automatic reconnection when crossing readonly/editable boundary
-- **Comprehensive UI Updates**: All computed properties react instantly to permission changes
-- **Broadcast Handling**: Immediate permission refresh when server broadcasts changes
-
-### Permission Level Management
-- **Five-Tier System**: `no-access`, `readonly`, `editable`, `postable`, `owner`
-- **Owner-Only Controls**: Delete and permission management restricted to owners
-- **Computed Properties**: Reactive UI elements based on permission levels
-- **Real-time Detection**: WebSocket broadcasts + 5-minute polling fallback
-
-### Security Enhancements
-- **Owner-Based API Strategy**: Non-owners skip permissions endpoint to prevent 403 errors
-- **Permission Hierarchy**: Clear authority structure with proper access controls
-- **Authentication Validation**: Robust auth header validation for all operations
-- **Graceful Degradation**: Cached permissions ensure offline-first functionality
-
-## Recent Updates (v2025.01.24)
-### Readonly User Collaboration Fix
-- **Server-Side**: Added onAwarenessUpdate handler to accept cursor/presence updates from readonly users
-- **Server-Side**: Modified beforeHandleMessage to delegate awareness messages to Hocuspocus
-- **Client-Side**: Implemented Y.js-compliant awareness heartbeat (15s interval for 30s timeout)
-- **Client-Side**: Removed all artificial keepalive mechanisms in favor of standard awareness protocol
+### Key Features
+- **WebSocket Permission Broadcasts**: Real-time permission updates (1-2 seconds) via Y.js awareness
+- **Two-Tier Collaboration**: Local (Tier 1) and Cloud (Tier 2) document support
+- **Modular Drag & Drop**: Registry-based content restrictions for table cells and other nodes
+- **Markdown Export**: Full extension synchronization between editor and export
+- **BubbleMenu Integration**: Floating formatting toolbar with proper cleanup
+- **Table Toolbar**: CSS-based positioning for table manipulation
 
 ### Y.js Awareness Compliance
-- **Heartbeat**: Sends awareness updates every 15 seconds to maintain Y.js 30-second timeout
-- **Cleanup**: Proper interval cleanup on provider destroy and component unmount
-- **Standard Protocol**: Uses `setLocalStateField('lastActivity', Date.now())` for heartbeat
-- **Message Handling**: Readonly users can now send all protocol messages (0-4, 8) including Awareness
-- **Connection Monitoring**: Server logs keepalive every 30 seconds
-- **Enhanced Logging**: Detailed connection/disconnection tracking
-
-### Client-Side Changes
-- **Removed Custom Extensions**: All users now use standard CollaborationCaret
-- **No More Workarounds**: Removed ReadOnlyCollaborationCaret custom extension
-- **Simplified Code**: Unified cursor handling for all permission levels
-
-## Recent Updates (v2025.01.23)
-- Migrated to single editor architecture
-- Consolidated all metadata into single Y.js map
-- Fixed Vue 3 computed property access patterns
-- Implemented three-state edit pattern for inline fields
-- Updated permlink handling with proper state management
-
-## Recent Updates (v2025.07.03)
-### ✅ BubbleMenu "domFromPos" Error Fix
-- **Issue Fixed**: "Cannot read properties of null (reading 'domFromPos')" error in tiptap-collaboration.bundle.js
-- **Error Context**: Occurred during coordsAtPos → posToDOMRect → getBoundingClientRect → Floating UI positioning
-- **Root Cause**: BubbleMenu's Floating UI tried to calculate positions after editor view was destroyed
-- **Timing Issue**: Async computePosition calls continued after component unmount/editor destruction
-- **Solutions Implemented**:
-  1. Added safety checks in shouldShow: `editor.isDestroyed` and `component.isUnmounting`
-  2. Force hide bubble menu DOM element in beforeUnmount lifecycle hook
-  3. Increased updateDelay from 100ms to 250ms (TipTap default) to reduce positioning frequency
-  4. Added tippyOptions with cleanup handlers for better lifecycle management
-- **Prevention**: All format methods already check `bodyEditor.isDestroyed` before execution
-- **Result**: Eliminated errors during rapid document switching, permission changes, and component unmounting
-
-### ✅ Table Toolbar Implementation - CSS-Based Positioning
-- **Feature Added**: Floating toolbar above tables for table manipulation
-- **Initial Approach**: Tried FloatingMenu extension but it positions at cursor, not above table blocks
-- **Solution**: CSS-based positioning with DOM selection tracking
-- **Implementation Details**:
-  1. **State Tracking**: `isInTable` reactive property tracks when cursor is in a table via `editor.isActive('table')`
-  2. **onSelectionUpdate Handler**: Updates `isInTable` and always calls `updateTableToolbarPosition()` when in a table
-  3. **CSS Visibility**: `.table-toolbar-visible` class controls show/hide with opacity transitions
-  4. **Position Calculation**: Uses standard DOM APIs to find the active table element
-- **Best Practices Applied**:
-  - No ProseMirror internals - avoided `domAtPos` and position calculations
-  - Uses TipTap's `.selectedCell` class when cells are selected
-  - Falls back to browser's `window.getSelection()` API for cursor position
-  - Simple DOM traversal with `element.closest('.ProseMirror table')`
-  - Fixed positioning with calculated `left` and `top` values
-- **Table-to-Table Navigation Fix**: 
-  - Original issue: Toolbar stayed on first table when moving between tables
-  - Root cause: Only updated position on state change, but `isActive('table')` stays true
-  - Solution: Always update position when in any table, not just on state changes
-- **Clean Architecture**:
-  - Removed FloatingMenu extension and all related code
-  - Single `isInTable` boolean for state tracking
-  - Standard DOM methods for element finding
-  - CSS handles all animations and transitions
-- **Result**: Performant table toolbar that appears above tables and correctly repositions when navigating between tables
-
-### ✅ Table Markdown Export Fix
-- **Issue Fixed**: Table content not exporting to markdown, then pipe structure broken
-- **Root Cause**: TipTap static renderer passes `children` as either a function getter, array, or string depending on the node type
-- **Solution**: Handle all possible types of children parameter:
-  ```javascript
-  tableRow({ node, children }) {
-      // Convert children to array regardless of type
-      let cellsArray = [];
-      if (Array.isArray(children)) {
-          cellsArray = children;
-      } else if (typeof children === 'function') {
-          // If children is a getter function, call it
-          const result = children();
-          cellsArray = Array.isArray(result) ? result : [result];
-      } else if (children) {
-          cellsArray = [children];
-      }
-      
-      // Format cells as markdown table row
-      const cells = cellsArray.map(cell => String(cell).trim());
-      let rowOutput = '| ' + cells.join(' | ') + ' |\n';
-      
-      if (isHeaderRow) {
-          const separator = Array(cells.length).fill('---').join(' | ');
-          rowOutput += '| ' + separator + ' |\n';
-      }
-      return rowOutput;
-  }
-  ```
-- **Key Insight**: The static renderer uses lazy evaluation with getter functions for performance, so we must check the type and handle accordingly
-- **Result**: Tables now export correctly to markdown with proper pipe structure and content
-
-## Recent Updates (v2025.07.02)
-### ✅ Markdown Export Extension Synchronization
-- **Issue Fixed**: "Unknown node type" errors when exporting markdown (hardBreak, dropcursor, gapcursor)
-- **Root Cause**: Extensions used in editor but not included in markdown export
-- **Critical Principle**: **ALL extensions used in the editor MUST be included in markdown export**
-- **Solution**: 
-  - Added HardBreak, Dropcursor, Gapcursor to collaboration bundle
-  - Included all StarterKit extensions in markdown export
-  - Even extensions without markdown output (cursors) must be included for schema
-- **Prevention**: Always synchronize editor and markdown export extensions
-- **Documentation**: Added explicit guidance in MARKDOWN_EXPORT_DOCUMENTATION.md
+- Standard 15-second heartbeat for 30-second timeout
+- Readonly users can send all protocol messages (0-4, 8)
+- Proper cleanup on provider destroy and component unmount
 
 ## Development Workflow
 1. Check `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` for patterns
@@ -721,5 +306,4 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 5. Always handle both Tier 1 and Tier 2 scenarios
 
 ---
-For comprehensive implementation details, patterns, and best practices, refer to:
-**`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`**
+**For the complete list of documentation files, see the [Documentation Index](#documentation-index) above.**

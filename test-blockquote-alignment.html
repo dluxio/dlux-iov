@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Blockquote Alignment Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .instructions {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blockquote Alignment Fix - Test Results</h1>
+    
+    <div class="instructions">
+        <strong>Testing Instructions:</strong>
+        <ol>
+            <li>Open the DLUX editor at <code>http://localhost:5000/new/</code></li>
+            <li>Test each scenario below and verify the expected behavior</li>
+            <li>Mark each test as PASS or FAIL based on the results</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 1: Create blockquote with > shortcut</div>
+        <p><strong>Steps:</strong></p>
+        <ol>
+            <li>Type <code>></code> followed by a space</li>
+            <li>The line should convert to a blockquote</li>
+            <li>Try to apply text alignment (center/right) using the toolbar</li>
+        </ol>
+        <p><strong>Expected:</strong> Alignment buttons should be disabled or have no effect inside the blockquote</p>
+        <p><strong>Result:</strong> <span class="status fail">PENDING TEST</span></p>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 2: Create blockquote with button</div>
+        <p><strong>Steps:</strong></p>
+        <ol>
+            <li>Type some text</li>
+            <li>Select the text</li>
+            <li>Click the blockquote button in the toolbar</li>
+            <li>Try to apply text alignment (center/right) using the toolbar</li>
+        </ol>
+        <p><strong>Expected:</strong> Alignment buttons should be disabled or have no effect inside the blockquote</p>
+        <p><strong>Result:</strong> <span class="status fail">PENDING TEST</span></p>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 3: Drag aligned content into blockquote</div>
+        <p><strong>Steps:</strong></p>
+        <ol>
+            <li>Create a paragraph outside a blockquote</li>
+            <li>Apply center or right alignment to it</li>
+            <li>Drag the aligned paragraph into an existing blockquote</li>
+        </ol>
+        <p><strong>Expected:</strong> The alignment should be removed when dropped into the blockquote</p>
+        <p><strong>Result:</strong> <span class="status fail">PENDING TEST</span></p>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 4: Empty blockquote edge case</div>
+        <p><strong>Steps:</strong></p>
+        <ol>
+            <li>Type <code>></code> followed by a space to create empty blockquote</li>
+            <li>Without typing any text, immediately try to apply alignment</li>
+        </ol>
+        <p><strong>Expected:</strong> Alignment should not be applied to the empty blockquote</p>
+        <p><strong>Result:</strong> <span class="status fail">PENDING TEST</span></p>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">Test 5: Paste aligned content into blockquote</div>
+        <p><strong>Steps:</strong></p>
+        <ol>
+            <li>Create aligned text outside the editor (or in another paragraph)</li>
+            <li>Copy the aligned text</li>
+            <li>Paste it inside a blockquote</li>
+        </ol>
+        <p><strong>Expected:</strong> The pasted content should lose its alignment when pasted into blockquote</p>
+        <p><strong>Result:</strong> <span class="status fail">PENDING TEST</span></p>
+    </div>
+
+    <div class="test-section">
+        <h2>Summary</h2>
+        <p><strong>What was fixed:</strong></p>
+        <ul>
+            <li>✅ Disabled default blockquote from StarterKit to use CustomBlockquote</li>
+            <li>✅ Added input rule to CustomBlockquote for > shortcut</li>
+            <li>✅ BlockquoteAlignmentFilter already exists and handles alignment removal</li>
+            <li>✅ CustomTextAlign prevents alignment operations inside blockquotes</li>
+        </ul>
+        <p><strong>The fix addresses:</strong></p>
+        <ul>
+            <li>Creating blockquotes with > shortcut now uses CustomBlockquote with proper restrictions</li>
+            <li>Both button and > shortcut creation methods now follow the same rules</li>
+            <li>Any alignment attributes are removed from content inside blockquotes</li>
+        </ul>
+    </div>
+</body>
+</html>
