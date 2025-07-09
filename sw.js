@@ -1,4 +1,4 @@
-this.version = "2025.07.09.2";
+this.version = "2025.07.10.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -555,13 +555,8 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.07.09.16",
-  "generated": "2025-07-09T23:11:04Z",
+  "generated": "2025-07-09T23:26:15Z",
   "files": {
-    "/css/webfonts/fa-solid-900.woff2": {
-      "checksum": "4a6591ab5460ae5cbff1ecbd6e52193a",
-      "size": 158220,
-      "priority": "important"
-    },
     "/css/webfonts/fa-v4compatibility.ttf": {
       "checksum": "4ed293ceaca9b5b2d9cd74a477963fae",
       "size": 10836,
@@ -1488,7 +1483,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "1ac5156c36911752a250d10700645709",
+      "checksum": "920d9ed413496ca07d7dced9ae6c333e",
       "size": 36523,
       "priority": "important"
     },
@@ -1743,7 +1738,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b3f285dfc468ad60603dc1e7d448faf0",
+      "checksum": "60ac4a1dd37061bbf57b6d15ec1a4699",
       "size": 7299,
       "priority": "important"
     },
@@ -1841,11 +1836,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/js/convertStateToSceneData.js": {
-      "checksum": "9444c580a4a073115902a932394240a8",
-      "size": 2379,
-      "priority": "page-specific"
     },
     "/naf-playground/js/core.js": {
       "checksum": "9030645f5dd8e3cf2967e581c30ded13",
@@ -2662,12 +2652,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
