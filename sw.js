@@ -1,4 +1,4 @@
-this.version = "2025.07.09.8";
+this.version = "2025.07.09.9";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.10",
-  "generated": "2025-07-09T17:53:10Z",
+  "version": "2025.07.09.9",
+  "generated": "2025-07-09T17:53:25Z",
   "files": {
-    "/css/custom-popover.css": {
-      "checksum": "272dac40ceb0d411fa7d6f094b013ab3",
-      "size": 2573,
-      "priority": "critical"
-    },
     "/css/customaf.css": {
       "checksum": "77f6758aadb843a30c49b08f154a042b",
       "size": 300474,
@@ -576,11 +571,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/font-awesome.min.css": {
-      "checksum": "d4077f5858fb8dabea37daccbf260c9e",
-      "size": 73830,
-      "priority": "important"
     },
     "/css/mobile-first-editor.css": {
       "checksum": "cfdf1a53ea4d66fba39ecfbfa9c32702",
@@ -1962,11 +1952,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/naf-playground/assets/textures/sky/milkyway.jpg": {
-      "checksum": "82c7278828d85ace9036d87c72801e20",
-      "size": 124780,
-      "priority": "page-specific"
-    },
     "/naf-playground/css/invr-styles.css": {
       "checksum": "e361e97c459b7c200bd99d2c509a0e9e",
       "size": 22768,
@@ -2847,12 +2832,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
