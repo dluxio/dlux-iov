@@ -2,7 +2,7 @@
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
 
 // Debug flag - set to true for development debugging
-const DEBUG = true;
+const DEBUG = false;
 
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { WebrtcProvider } from 'y-webrtc';
@@ -156,38 +156,30 @@ const CustomTextAlign = TextAlign.extend({
           const currentNode = $from.node();
           const nodeType = currentNode.type.name;
           
-          console.log('🎯 CustomTextAlign: Current node type:', nodeType);
-          console.log('🎯 CustomTextAlign: Current node depth:', $from.depth);
-          console.log('🎯 CustomTextAlign: Current node attrs:', currentNode.attrs);
+          if (DEBUG) {
+            console.log('🎯 CustomTextAlign: Current node type:', nodeType);
+          }
           
           // Apply alignment to the appropriate node type
           if (nodeType === 'heading' || nodeType === 'paragraph') {
-            console.log('✅ CustomTextAlign: Applying alignment to', nodeType);
-            console.log('🎯 CustomTextAlign: Calling updateAttributes with:', nodeType, { textAlign: alignment });
-            
-            const result = commands.updateAttributes(nodeType, { textAlign: alignment });
-            console.log('🎯 CustomTextAlign: updateAttributes result:', result);
-            return result;
+            return commands.updateAttributes(nodeType, { textAlign: alignment });
           } else {
-            console.log('🔍 CustomTextAlign: Node type not directly supported, checking ancestors');
-            
             // For other contexts, try to find the parent paragraph or heading
             for (let depth = $from.depth; depth > 0; depth--) {
               const ancestorNode = $from.node(depth);
-              console.log(`🔍 CustomTextAlign: Checking ancestor at depth ${depth}:`, ancestorNode.type.name);
               
               if (ancestorNode.type.name === 'heading' || ancestorNode.type.name === 'paragraph') {
-                console.log('✅ CustomTextAlign: Applying alignment to ancestor', ancestorNode.type.name);
-                console.log('🎯 CustomTextAlign: Calling updateAttributes with:', ancestorNode.type.name, { textAlign: alignment });
-                
-                const result = commands.updateAttributes(ancestorNode.type.name, { textAlign: alignment });
-                console.log('🎯 CustomTextAlign: updateAttributes result:', result);
-                return result;
+                if (DEBUG) {
+                  console.log('✅ CustomTextAlign: Applying alignment to ancestor', ancestorNode.type.name);
+                }
+                return commands.updateAttributes(ancestorNode.type.name, { textAlign: alignment });
               }
             }
           }
           
-          console.log('⚠️ CustomTextAlign: No suitable node found for alignment');
+          if (DEBUG) {
+            console.log('⚠️ CustomTextAlign: No suitable node found for alignment');
+          }
           return false;
         } catch (error) {
           console.error('🚫 CustomTextAlign: Error in setTextAlign:', error);
@@ -231,7 +223,9 @@ const BlockquoteAlignmentFilter = Extension.create({
                         const $from = state.doc.resolve(from);
                         for (let depth = $from.depth; depth > 0; depth--) {
                           if ($from.node(depth).type.name === 'blockquote') {
-                            console.log('🚫 BlockquoteAlignmentFilter: Blocking transaction with textAlign in blockquote');
+                            if (DEBUG) {
+                              console.log('🚫 BlockquoteAlignmentFilter: Blocking transaction with textAlign in blockquote');
+                            }
                             hasBlockedAlignment = true;
                             return;
                           }
@@ -268,20 +262,14 @@ const BlockquoteAlignmentFilter = Extension.create({
           // Scan the document for textAlign attributes in blockquotes
           newState.doc.descendants((node, pos) => {
             if ((node.type.name === 'paragraph' || node.type.name === 'heading') && node.attrs.textAlign) {
-              if (DEBUG) {
-                console.log(`🔍 BlockquoteAlignmentFilter: Found ${node.type.name} with textAlign:`, node.attrs.textAlign, 'at pos:', pos);
-              }
-              
               // Check if this paragraph/heading is inside a blockquote
               try {
                 const $pos = newState.doc.resolve(pos);
                 let isInBlockquote = false;
-                const ancestorNodes = [];
                 
-                // Build ancestor chain for debugging
+                // Check ancestor chain
                 for (let depth = $pos.depth; depth > 0; depth--) {
                   const parentNode = $pos.node(depth);
-                  ancestorNodes.push(`depth ${depth}: ${parentNode.type.name}`);
                   
                   if (parentNode.type.name === 'blockquote') {
                     isInBlockquote = true;
@@ -289,18 +277,13 @@ const BlockquoteAlignmentFilter = Extension.create({
                   }
                 }
                 
-                if (DEBUG) {
-                  console.log(`🔍 BlockquoteAlignmentFilter: Ancestor chain for ${node.type.name}:`, ancestorNodes);
-                  console.log(`🔍 BlockquoteAlignmentFilter: Is in blockquote:`, isInBlockquote);
-                }
-                
                 if (isInBlockquote) {
                   // Remove textAlign attribute
-                  console.log(`🧹 BlockquoteAlignmentFilter: Removing textAlign from ${node.type.name} in blockquote`);
+                  if (DEBUG) {
+                    console.log(`🧹 BlockquoteAlignmentFilter: Removing textAlign from ${node.type.name} in blockquote`);
+                  }
                   tr.setNodeMarkup(pos, null, { ...node.attrs, textAlign: null });
                   hasChanges = true;
-                } else if (DEBUG) {
-                  console.log(`✅ BlockquoteAlignmentFilter: Keeping textAlign on ${node.type.name} (not in blockquote)`);
                 }
               } catch (error) {
                 console.error('🚫 BlockquoteAlignmentFilter: Error resolving position:', error, 'pos:', pos);

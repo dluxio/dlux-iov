@@ -1858,14 +1858,7 @@ class EditorFactory {
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
-        const CustomTextAlign = tiptapBundle.CustomTextAlign || tiptapBundle.TextAlign;
-        if (DEBUG) {
-            console.log('🔍 TextAlign debug:', {
-                hasCustomTextAlign: !!tiptapBundle.CustomTextAlign,
-                hasTextAlign: !!tiptapBundle.TextAlign,
-                usingCustom: !!tiptapBundle.CustomTextAlign
-            });
-        }
+        const CustomTextAlign = tiptapBundle.CustomTextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
@@ -2581,14 +2574,7 @@ class EditorFactory {
         const Placeholder = tiptapBundle.Placeholder;
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
-        const CustomTextAlign = tiptapBundle.CustomTextAlign || tiptapBundle.TextAlign;
-        if (DEBUG) {
-            console.log('🔍 TextAlign debug:', {
-                hasCustomTextAlign: !!tiptapBundle.CustomTextAlign,
-                hasTextAlign: !!tiptapBundle.TextAlign,
-                usingCustom: !!tiptapBundle.CustomTextAlign
-            });
-        }
+        const CustomTextAlign = tiptapBundle.CustomTextAlign;
         const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
@@ -15942,12 +15928,62 @@ export default {
             try {
                 // Handle object syntax for text alignment checks
                 if (typeof name === 'object' && name.textAlign) {
-                    // For text alignment, check if any node has the specified textAlign attribute
-                    return this.bodyEditor.isActive('paragraph', { textAlign: name.textAlign }) || 
-                           this.bodyEditor.isActive('heading', { textAlign: name.textAlign });
+                    // If alignment is disabled in current context, no button should be active
+                    if (!this.canUseTextAlign) return false;
+                    
+                    // Check if nodes have explicit textAlign attribute
+                    const hasExplicitAlign = this.bodyEditor.isActive('paragraph', { textAlign: name.textAlign }) || 
+                                           this.bodyEditor.isActive('heading', { textAlign: name.textAlign });
+                    
+                    // For 'left' alignment, also check if no explicit alignment is set (default behavior)
+                    if (name.textAlign === 'left' && !hasExplicitAlign) {
+                        // Check if current node has no explicit textAlign (defaults to left)
+                        try {
+                            const { selection } = this.bodyEditor.state;
+                            const { $from } = selection;
+                            const currentNode = $from.node();
+                            return !currentNode.attrs?.textAlign;
+                        } catch (error) {
+                            return false;
+                        }
+                    }
+                    
+                    return hasExplicitAlign;
                 }
                 // Standard string-based check
                 return this.bodyEditor.isActive(name, attrs);
+            } catch (error) {
+                // During Y.js sync, isActive might fail
+                return false;
+            }
+        },
+
+        // ✅ BUBBLE MENU FIX: Dedicated text alignment active check for better reactivity
+        isTextAlignActive(alignType) {
+            // Safety check
+            if (!this.bodyEditor || this.bodyEditor.isDestroyed) return false;
+            try {
+                // If alignment is disabled in current context, no button should be active
+                if (!this.canUseTextAlign) return false;
+                
+                // Check if nodes have explicit textAlign attribute
+                const hasExplicitAlign = this.bodyEditor.isActive('paragraph', { textAlign: alignType }) || 
+                                       this.bodyEditor.isActive('heading', { textAlign: alignType });
+                
+                // For 'left' alignment, also check if no explicit alignment is set (default behavior)
+                if (alignType === 'left' && !hasExplicitAlign) {
+                    // Check if current node has no explicit textAlign (defaults to left)
+                    try {
+                        const { selection } = this.bodyEditor.state;
+                        const { $from } = selection;
+                        const currentNode = $from.node();
+                        return !currentNode.attrs?.textAlign;
+                    } catch (error) {
+                        return false;
+                    }
+                }
+                
+                return hasExplicitAlign;
             } catch (error) {
                 // During Y.js sync, isActive might fail
                 return false;
@@ -22028,7 +22064,7 @@ export default {
               <div class="btn-group ms-1" role="group">
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'left'}) }"
+                        :class="{active: bodyEditor && isTextAlignActive('left')}"
                         @click="setTextAlign('left')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22037,7 +22073,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'center'}) }"
+                        :class="{active: bodyEditor && isTextAlignActive('center')}"
                         @click="setTextAlign('center')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22046,7 +22082,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'right'}) }"
+                        :class="{active: bodyEditor && isTextAlignActive('right')}"
                         @click="setTextAlign('right')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
@@ -22055,7 +22091,7 @@ export default {
                 </button>
                 <button type="button"
                         class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'justify'}) }"
+                        :class="{active: bodyEditor && isTextAlignActive('justify')}"
                         @click="setTextAlign('justify')"
                         @mousedown.prevent
                         :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
