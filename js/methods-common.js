@@ -956,32 +956,7 @@ export default {
           videoElement.setAttribute('data-type', 'm3u8');
         }
         
-        // Add quality selector if available (but not for videos inside TipTap editor)
-        const isInTipTapEditor = videoElement.closest('.ProseMirror') !== null;
-        if (!isInTipTapEditor) {
-          try {
-            const createQualitySelector = await this.loadQualitySelector();
-            if (createQualitySelector && hls.levels.length > 1) {
-              // Add a small delay to ensure video element is fully attached to DOM
-              setTimeout(() => {
-                try {
-                  videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
-                    position: 'top-right',
-                    showBitrate: true,
-                    persistQuality: true
-                  });
-                } catch (e) {
-                  console.log('Could not add quality selector (retry):', e);
-                }
-              }, 100);
-            }
-          } catch (e) {
-            // Quality selector is optional, continue without it
-            console.log('Could not add quality selector:', e);
-          }
-        } else {
-          console.log('Quality selector disabled for video in TipTap editor');
-        }
+        // Quality selector will be added after LEVEL_LOADED for better timing
         
         // Autoplay the video (muted to ensure it works in all browsers)
         if (videoElement.autoplay !== false) { // Only autoplay if not explicitly disabled
@@ -1003,8 +978,35 @@ export default {
         // Manifest loaded
       });
 
-      hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-        // Level loaded
+      hls.on(Hls.Events.LEVEL_LOADED, async (event, data) => {
+        // Level loaded - better timing for quality selector creation
+        // Add quality selector if available (but not for videos inside TipTap editor)
+        const isInTipTapEditor = videoElement.closest('.ProseMirror') !== null;
+        if (!isInTipTapEditor) {
+          try {
+            // Defensive validation before creating quality selector
+            if (videoElement && videoElement.parentNode && hls && hls.levels && hls.levels.length > 1) {
+              const createQualitySelector = await this.loadQualitySelector();
+              if (createQualitySelector) {
+                // Use quality selector's built-in reactive DOM readiness with null safety
+                try {
+                  videoElement.hlsQualitySelector = createQualitySelector(hls, videoElement, {
+                    position: 'top-right',
+                    showBitrate: true,
+                    persistQuality: true
+                  });
+                } catch (e) {
+                  console.log('Could not add quality selector:', e);
+                }
+              }
+            }
+          } catch (e) {
+            // Quality selector is optional, continue without it
+            console.log('Could not add quality selector:', e);
+          }
+        } else {
+          console.log('Quality selector disabled for video in TipTap editor');
+        }
       });
 
       hls.on(Hls.Events.ERROR, (event, data) => {

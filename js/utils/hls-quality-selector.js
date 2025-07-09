@@ -59,6 +59,12 @@ export class HLSQualitySelector {
     }
     
     ensureVideoReady(callback) {
+        // Add null check first to prevent errors
+        if (!this.video) {
+            console.warn('Video element is null, cannot create quality selector');
+            return;
+        }
+        
         // Check if video element is attached to DOM
         if (this.video.parentNode && this.video.parentNode !== document.body) {
             // Video is ready, execute callback
@@ -69,6 +75,12 @@ export class HLSQualitySelector {
             const maxRetries = 10; // Limit retries to avoid infinite loops
             
             const checkReady = () => {
+                // Add null check in retry loop
+                if (!this.video) {
+                    console.warn('Video element became null during readiness check');
+                    return;
+                }
+                
                 if (this.video.parentNode && this.video.parentNode !== document.body) {
                     callback();
                 } else if (retryCount < maxRetries) {
