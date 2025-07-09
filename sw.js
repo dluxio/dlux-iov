@@ -1,4 +1,4 @@
-this.version = "2025.07.09.4";
+this.version = "2025.07.09.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.02",
-  "generated": "2025-07-09T09:19:40Z",
+  "version": "2025.07.09.5",
+  "generated": "2025-07-09T09:19:55Z",
   "files": {
-    "/css/bootstrap/bootstrap-reboot.css": {
-      "checksum": "a2c742a5d35fafe705ffc2f23f05b9be",
-      "size": 11998,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-utilities.css": {
       "checksum": "3302f743a95e6cbeace85ca6c02638d4",
       "size": 104721,
@@ -596,11 +591,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/codemirror-monokai.min.css": {
-      "checksum": "6cb64c5347235494cdc346527fc0e35d",
-      "size": 1902,
-      "priority": "important"
     },
     "/css/codemirror.min.css": {
       "checksum": "c1da630111dc87f804761ecc75f89eac",
@@ -2002,11 +1992,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/js/chatvue.js": {
-      "checksum": "42c56d94e0753ac58265d3af75a59f55",
-      "size": 6802,
-      "priority": "page-specific"
-    },
     "/naf-playground/aframe/aframe-inspector.min.js": {
       "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
       "size": 437913,
@@ -2907,11 +2892,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/postvue-old.js": {
-      "checksum": "f2bd9df92455de434430c350ed37641a",
-      "size": 12673,
-      "priority": "lazy"
-    },
     "/js/utils/debug-logger.js": {
       "checksum": "763b9d06f7f93ba1e37d562ae8843e31",
       "size": 2556,
@@ -2928,8 +2908,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
