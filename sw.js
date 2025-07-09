@@ -1,4 +1,4 @@
-this.version = "2025.07.09.1";
+this.version = "2025.07.09.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.1",
-  "generated": "2025-07-09T05:35:24Z",
+  "version": "2025.07.09.01",
+  "generated": "2025-07-09T08:58:35Z",
   "files": {
-    "/css/bootstrap-utilities.css": {
-      "checksum": "de92f706ebf333fb981cbb719aa5130d",
-      "size": 101679,
-      "priority": "critical"
-    },
     "/css/bootstrap.css": {
       "checksum": "60def5490c429c25858ae0c72462b38b",
       "size": 271584,
@@ -611,11 +606,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/blog/index.html": {
-      "checksum": "72a557bb642e16e37c09ec3f3e38b9b0",
-      "size": 7542,
-      "priority": "important"
     },
     "/build/index.html": {
       "checksum": "ec7f244058ec296d25c648d61620b367",
@@ -1293,8 +1283,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaboration.bundle.js": {
-      "checksum": "8b2ba9bf3a8c241025a2f5c51be89876",
-      "size": 841334,
+      "checksum": "e1d4ba4d5946fea228a11d7fe31fd1da",
+      "size": 840962,
       "priority": "important"
     },
     "/js/collaborative-docs.js": {
@@ -1663,7 +1653,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "6c6e294b066e598a59aedb0f9a308f65",
+      "checksum": "1ac5156c36911752a250d10700645709",
       "size": 36523,
       "priority": "important"
     },
@@ -1678,8 +1668,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-modular.js": {
-      "checksum": "f21e56f2e9e8c1b50307aa81f7e83941",
-      "size": 1096263,
+      "checksum": "d390180bd5de1af6e6a915cc940f159e",
+      "size": 1094985,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -1933,13 +1923,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "29e09c03414d8cd3c4ff11f6c29d5f62",
+      "checksum": "b3f285dfc468ad60603dc1e7d448faf0",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "a19599fe5c2f6ebb6f9d18c01c0778af",
-      "size": 72392,
+      "checksum": "2ad2c9ef5b32138762d952772c14628d",
+      "size": 71513,
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
@@ -2031,11 +2021,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/js/aframe-extras.min.js": {
-      "checksum": "0a0818f80d22eea6b402187404738a23",
-      "size": 170829,
-      "priority": "page-specific"
     },
     "/js/aframe-inspector.min.js": {
       "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
@@ -2952,11 +2937,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/modalvue-old.js": {
-      "checksum": "b3b3a6b376fd063cc48b52a2c1505216",
-      "size": 40019,
-      "priority": "lazy"
-    },
     "/js/navue-old.js": {
       "checksum": "22b4cad654ee4fba41856abd5057b0ef",
       "size": 49954,
@@ -2988,8 +2968,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {

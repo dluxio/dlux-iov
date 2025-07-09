@@ -1869,7 +1869,7 @@ class EditorFactory {
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
-        const Blockquote = tiptapBundle.Blockquote;
+        const CustomBlockquote = tiptapBundle.CustomBlockquote;
         const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
         const BlockquoteAlignmentFilter = tiptapBundle.BlockquoteAlignmentFilter;
         const BulletList = tiptapBundle.BulletList;
@@ -1899,7 +1899,7 @@ class EditorFactory {
             CustomImage: !!CustomImage,
             CustomDropcursor: !!CustomDropcursor,
             CustomHorizontalRule: !!CustomHorizontalRule,
-            Blockquote: !!Blockquote,
+            CustomBlockquote: !!CustomBlockquote,
             BulletList: !!BulletList,
             OrderedList: !!OrderedList,
             ListItem: !!ListItem,
@@ -2023,7 +2023,7 @@ class EditorFactory {
             // ✅ Add CustomHeading that prevents input rules inside blockquotes
             Heading && Heading,
             // ✅ Add CustomBlockquote with alignment restrictions and input rule handling
-            Blockquote && Blockquote,
+            CustomBlockquote && CustomBlockquote,
             // ✅ Add Subscript and Superscript extensions
             Subscript && Subscript,
             Superscript && Superscript,
@@ -2585,7 +2585,7 @@ class EditorFactory {
         const CustomDropcursor = tiptapBundle.CustomDropcursor;
         const CustomHorizontalRule = tiptapBundle.CustomHorizontalRule;
         const Heading = tiptapBundle.Heading; // This is actually CustomHeading from bundle
-        const Blockquote = tiptapBundle.Blockquote;
+        const CustomBlockquote = tiptapBundle.CustomBlockquote;
         const BlockquoteNestingFilter = tiptapBundle.BlockquoteNestingFilter;
         const BlockquoteAlignmentFilter = tiptapBundle.BlockquoteAlignmentFilter;
         const BulletList = tiptapBundle.BulletList;
@@ -2684,7 +2684,7 @@ class EditorFactory {
             // ✅ Add CustomHeading that prevents input rules inside blockquotes
             Heading && Heading,
             // ✅ Add CustomBlockquote with alignment restrictions and input rule handling
-            Blockquote && Blockquote,
+            CustomBlockquote && CustomBlockquote,
             // ✅ Add Subscript and Superscript extensions
             Subscript && Subscript,
             Superscript && Superscript,
@@ -14363,12 +14363,12 @@ export default {
                 const doc = this.bodyEditor.getJSON();
                 
                 // Get TipTap extensions from the global bundle
-                const tiptapBundle = window.TiptapCollaboration?.default || window.TiptapCollaboration || {};
+                // Use the same pattern as the editor to ensure we get the correct bundle
+                const tiptapBundle = window.TiptapCollaboration.Editor ? window.TiptapCollaboration : window.TiptapCollaboration.default;
                 const {
                     renderToMarkdown,
                     Document,
                     Paragraph,
-                    RestrictedParagraph,
                     Text,
                     Heading,
                     Bold,
@@ -14381,7 +14381,7 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
-                    Blockquote,
+                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14392,16 +14392,7 @@ export default {
                     DluxVideo,
                     Mention,
                     TableKit,
-                    CustomTableCell,
-                    CustomDropcursor,
-                    DragHandle,
-                    Gapcursor,
-                    Placeholder,
-                    Collaboration,
-                    CollaborationCaret,
-                    BubbleMenu,
-                    FloatingMenu,
-                    BlockquoteNestingFilter
+                    CustomTableCell
                 } = tiptapBundle;
                 
                 if (!renderToMarkdown) {
@@ -14409,10 +14400,19 @@ export default {
                 }
                 
                 // Build extensions array
-                const extensions = [
-                    // Filtering extension - must be early to catch transactions
-                    BlockquoteNestingFilter,
-            BlockquoteAlignmentFilter,
+                // Note: Only include extensions that define node/mark schemas
+                // Behavioral extensions (filters, UI menus, drag handles) are excluded
+                
+                // Test with minimal extensions first
+                const minimalTest = false; // Set to true to test with minimal extensions
+                
+                const extensions = minimalTest ? [
+                    Document,
+                    Text,
+                    Paragraph,
+                    Bold,
+                    Italic
+                ] : [
                     Document,
                     Text,
                     TextAlign && TextAlign.configure({
@@ -14420,7 +14420,6 @@ export default {
                         alignments: ['left', 'center', 'right', 'justify']
                     }),
                     Paragraph,
-                    RestrictedParagraph,
                     Heading,
                     Bold,
                     Italic,
@@ -14432,7 +14431,7 @@ export default {
                     BulletList,
                     OrderedList,
                     ListItem,
-                    Blockquote,
+                    CustomBlockquote,
                     CustomHorizontalRule,
                     HardBreak,
                     Link,
@@ -14450,24 +14449,12 @@ export default {
                             allowTableNodeSelection: false
                         }
                     }),
-                    CustomTableCell,
-                    CustomDropcursor,
-                    DragHandle,
-                    Gapcursor,
-                    Placeholder && Placeholder.configure({
-                        placeholder: 'Start writing your content...'
-                    }),
-                    // Add collaboration extensions for schema compatibility
-                    Collaboration && Collaboration.configure({
-                        document: null,  // Not needed for static rendering
-                        field: 'body'
-                    }),
-                    CollaborationCaret && CollaborationCaret.configure({
-                        provider: null  // Not needed for static rendering
-                    }),
-                    BubbleMenu,
-                    FloatingMenu
-                ].filter(ext => ext !== undefined && ext !== null);
+                    CustomTableCell
+                ].filter(ext => !!ext);  // Filter out ALL falsy values
+                
+                // Simple check to ensure extensions are defined
+                console.log('Extensions count:', extensions.length);
+                console.log('First few extensions:', extensions.slice(0, 5).map(ext => ext?.name || 'unnamed'));
                 
                 // Using TipTap static renderer with custom node mappings for Hive-compatible markdown
                 
@@ -14539,13 +14526,6 @@ export default {
                             return `<div class="text-justify">${content}</div>\n\n`;
                         }
                         // 'left' is default, no special handling needed
-                        return `${content}\n\n`;
-                    },
-                    
-                    // Restricted paragraph (no alignment support)
-                    restrictedParagraph({ node, children, options }) {
-                        const content = renderChildren(children, { ...options, nodeMapping });
-                        // RestrictedParagraph doesn't support alignment, just return content
                         return `${content}\n\n`;
                     },
                     
@@ -14623,20 +14603,6 @@ export default {
                     
                     // Blockquote
                     blockquote({ node, children, options }) {
-                        const content = renderChildren(children, { ...options, nodeMapping });
-                        // Remove trailing newlines and split by double newlines (paragraph breaks)
-                        const paragraphs = content.trim().split('\n\n');
-                        // Join paragraphs with single newline and prefix each line with >
-                        const blockquoteContent = paragraphs
-                            .join('\n')
-                            .split('\n')
-                            .map(line => line ? `> ${line}` : '>')
-                            .join('\n');
-                        return blockquoteContent + '\n\n';
-                    },
-                    
-                    // CustomBlockquote (same as blockquote)
-                    customBlockquote({ node, children, options }) {
                         const content = renderChildren(children, { ...options, nodeMapping });
                         // Remove trailing newlines and split by double newlines (paragraph breaks)
                         const paragraphs = content.trim().split('\n\n');
@@ -14862,14 +14828,21 @@ export default {
                     }
                 };
                 
-                const finalMarkdown = renderToMarkdown({
-                    extensions,
-                    content: doc,
-                    options: {
-                        nodeMapping,
-                        markMapping
-                    }
-                });
+                let finalMarkdown;
+                try {
+                    finalMarkdown = renderToMarkdown({
+                        extensions: extensions,
+                        content: doc,
+                        options: {
+                            nodeMapping,
+                            markMapping
+                        }
+                    });
+                } catch (renderError) {
+                    console.error('Error in renderToMarkdown:', renderError);
+                    console.error('Error stack:', renderError.stack);
+                    throw renderError;
+                }
 
                 console.log('Final markdown from static renderer:', finalMarkdown);
                 return finalMarkdown;

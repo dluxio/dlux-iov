@@ -103,30 +103,8 @@ const CustomParagraph = Paragraph.extend({
         renderHTML: attributes => {
           if (!attributes.textAlign) return {};
           return { style: `text-align: ${attributes.textAlign}` };
-        },
-        // Schema-level validation - prevents textAlign in blockquotes
-        validate: (value, { node, pos, state }) => {
-          if (!value || !state || !pos) return value;
-          
-          try {
-            const doc = state.doc;
-            const $pos = doc.resolve(pos);
-            
-            // Check if this paragraph is inside a blockquote
-            for (let depth = $pos.depth; depth > 0; depth--) {
-              const parentNode = $pos.node(depth);
-              if (parentNode.type.name === 'blockquote') {
-                console.log('🚫 CustomParagraph: Rejecting textAlign in blockquote via schema validation');
-                return null; // Invalid - remove the attribute
-              }
-            }
-            
-            return value;
-          } catch (error) {
-            console.log('⚠️ CustomParagraph: Schema validation error, allowing value:', error);
-            return value;
-          }
         }
+        // Validation is handled by BlockquoteAlignmentFilter at transaction level
       }
     };
   }
@@ -1995,7 +1973,7 @@ const TiptapCollaboration = {
   OrderedList, // Export standard
   TaskList,
   TaskItem,
-  Blockquote: CustomBlockquote, // Export custom blockquote with drop handling
+  CustomBlockquote, // Export custom blockquote with drop handling
   HorizontalRule: CustomHorizontalRule, // Use custom draggable version
   HardBreak,
   
