@@ -3531,7 +3531,7 @@ class SyncManager {
                 if (event.keysChanged.has('customJson')) {
                     if (DEBUG) console.log('🔄 Custom JSON changed in Y.js, updating UI:', customJson);
                     this.component.customJsonString = JSON.stringify(customJson, null, 2);
-                    this.component.content.custom_json = customJson; // Legacy support
+                    this.component.content.custom_json = customJson; // Sync for backward compatibility
                     
                     // Force Vue to update the UI
                     this.component.$forceUpdate();
@@ -3551,7 +3551,7 @@ class SyncManager {
                     percentHbd: metadata.get('percentHbd') === true
                 };
 
-                // Legacy support: Also sync to non-reactive commentOptions
+                // Also sync to non-reactive commentOptions for external API compatibility
                 if (event.keysChanged.has('allowVotes')) {
                     this.component.commentOptions.allowVotes = metadata.get('allowVotes') !== false;
                 }
@@ -14499,6 +14499,109 @@ export default {
                 };
                 
                 /**
+                 * Processes table cell content with proper context and formatting.
+                 * Shared logic for both tableCell and tableHeader handlers.
+                 * 
+                 * @param {Object} node - The table cell/header node
+                 * @param {*} children - The cell content in various formats
+                 * @param {Object} options - Rendering options
+                 * @param {Object} context - Current rendering context
+                 * @returns {string} Processed cell content with line breaks replaced
+                 */
+                const processTableCellContent = (node, children, options, context) => {
+                    // Set context for table cell
+                    const cellContext = { ...context, inTableCell: true };
+                    
+                    // Handle different types of children
+                    let content = '';
+                    if (typeof children === 'function') {
+                        const result = children();
+                        if (Array.isArray(result)) {
+                            // Process children with context
+                            content = result.map((child, index) => {
+                                if (typeof child === 'object' && child.type) {
+                                    const mapping = options.nodeMapping[child.type];
+                                    if (mapping) {
+                                        return mapping({ 
+                                            node: child, 
+                                            children: child.content || child,
+                                            options,
+                                            context: cellContext,
+                                            index 
+                                        });
+                                    }
+                                }
+                                return child;
+                            }).join('');
+                        } else {
+                            content = String(result || '');
+                        }
+                    } else if (Array.isArray(children)) {
+                        // If children is already processed content, just join
+                        content = children.join(''); 
+                    } else if (node.content && node.content.content) {
+                        // Process node content directly with context
+                        content = renderChildren(node.content, { ...options, nodeMapping, context: cellContext });
+                    } else {
+                        content = String(children || '');
+                    }
+                    
+                    // Apply text alignment if specified
+                    if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
+                        content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
+                    }
+                    
+                    // Debug: Log the content before processing
+                    console.log('Table cell content before processing:', JSON.stringify(content));
+                    
+                    // Remove the base 2 trailing newlines that are automatically added by the static renderer
+                    content = content.replace(/\n\n$/, '');
+                    
+                    // Debug: Log content after removing base newlines
+                    console.log('Table cell content after removing base newlines:', JSON.stringify(content));
+                    
+                    // Convert pairs of newlines (user line breaks) to single <br> tags
+                    content = content.replace(/\n\n/g, '<br>');
+                    
+                    // Debug: Log content after converting pairs
+                    console.log('Table cell content after converting pairs:', JSON.stringify(content));
+                    
+                    // Convert any remaining single newlines to <br>
+                    const result = content.replace(/\n/g, '<br>');
+                    
+                    // Debug: Log the result after processing
+                    console.log('Table cell content after processing:', JSON.stringify(result));
+                    
+                    return result;
+                };
+                
+                /**
+                 * Normalizes the children parameter into a consistent array format.
+                 * Handles various input types: function, array, string, or object with content.
+                 * 
+                 * @param {Function|Array|string|Object} children - The children parameter in various formats
+                 * @returns {Array} Normalized array of children
+                 */
+                const normalizeChildren = (children) => {
+                    if (!children) return [];
+                    
+                    if (Array.isArray(children)) {
+                        return children;
+                    }
+                    
+                    if (typeof children === 'function') {
+                        const result = children();
+                        return Array.isArray(result) ? result : [result];
+                    }
+                    
+                    if (children && typeof children === 'object' && children.content) {
+                        return Array.isArray(children.content) ? children.content : [children.content];
+                    }
+                    
+                    return [children];
+                };
+                
+                /**
                  * Complete node mapping configuration for TipTap static renderer.
                  * Each mapping function receives:
                  * - node: The current TipTap node to render
@@ -14511,9 +14614,9 @@ export default {
                  * - Standard markdown elements (headings, lists, etc.)
                  */
                 // Initialize context object for tracking rendering state
+                // Currently tracks whether we're inside a table cell to handle line breaks differently
                 const context = {
-                    inTableCell: false,
-                    isFirstParagraph: true
+                    inTableCell: false
                 };
                 
                 const nodeMapping = {
@@ -14529,10 +14632,12 @@ export default {
                         
                         // In table cells, handle line breaks differently
                         if (context?.inTableCell) {
+                            console.log(`Table paragraph ${index}: content =`, JSON.stringify(content));
                             let result = '';
                             // Add <br> before paragraph if it's not the first one
                             if (index > 0) {
                                 result = '<br>';
+                                console.log(`Added <br> before paragraph ${index}`);
                             }
                             
                             if (node.attrs?.textAlign === 'center') {
@@ -14544,6 +14649,7 @@ export default {
                             } else {
                                 result += content;
                             }
+                            console.log(`Table paragraph ${index} result:`, JSON.stringify(result));
                             return result;
                         }
                         
@@ -14578,16 +14684,7 @@ export default {
                     
                     // Lists
                     bulletList({ node, children, options }) {
-                        // Handle children parameter which can be function, array, or string
-                        let itemsArray = [];
-                        if (Array.isArray(children)) {
-                            itemsArray = children;
-                        } else if (typeof children === 'function') {
-                            const result = children();
-                            itemsArray = Array.isArray(result) ? result : [result];
-                        } else if (children) {
-                            itemsArray = [children];
-                        }
+                        const itemsArray = normalizeChildren(children);
                         
                         // The children are already rendered list items, just add bullet prefix
                         const items = itemsArray.map(item => {
@@ -14599,16 +14696,7 @@ export default {
                     },
                     
                     orderedList({ node, children, options }) {
-                        // Handle children parameter which can be function, array, or string
-                        let itemsArray = [];
-                        if (Array.isArray(children)) {
-                            itemsArray = children;
-                        } else if (typeof children === 'function') {
-                            const result = children();
-                            itemsArray = Array.isArray(result) ? result : [result];
-                        } else if (children) {
-                            itemsArray = [children];
-                        }
+                        const itemsArray = normalizeChildren(children);
                         
                         // The children are already rendered list items, add numbered prefix
                         const items = itemsArray.map((item, index) => {
@@ -14622,13 +14710,8 @@ export default {
                     listItem({ node, children, options }) {
                         // The static renderer processes list items
                         // Just return the content without prefix (parent list will add it)
-                        if (typeof children === 'function') {
-                            children = children();
-                        }
-                        if (Array.isArray(children)) {
-                            children = children.join('');
-                        }
-                        return String(children).trim();
+                        const childArray = normalizeChildren(children);
+                        return childArray.join('').trim();
                     },
                     
                     // Blockquote
@@ -14652,7 +14735,11 @@ export default {
                     
                     // Hard break (line break with Shift+Enter)
                     hardBreak({ context }) {
-                        return context?.inTableCell ? '<br>' : '\n';
+                        const result = context?.inTableCell ? '<br>' : '\n';
+                        if (context?.inTableCell) {
+                            console.log('Table hardBreak returning:', JSON.stringify(result));
+                        }
+                        return result;
                     },
                     
                     // Code block
@@ -14678,16 +14765,7 @@ export default {
                     
                     // Table - process rows and add header separator after first row
                     table({ children }) {
-                        // Convert children to array
-                        let rowsArray = [];
-                        if (typeof children === 'function') {
-                            const result = children();
-                            rowsArray = Array.isArray(result) ? result : [result];
-                        } else if (Array.isArray(children)) {
-                            rowsArray = children;
-                        } else if (children) {
-                            rowsArray = [children];
-                        }
+                        const rowsArray = normalizeChildren(children);
                         
                         // Process rows and add header separator after first row
                         let output = '';
@@ -14710,18 +14788,7 @@ export default {
                     
                     // Table row - format as markdown row
                     tableRow({ node, children }) {
-                        // Convert children to array if it's not already
-                        let cellsArray = [];
-                        if (Array.isArray(children)) {
-                            cellsArray = children;
-                        } else if (typeof children === 'function') {
-                            // If children is a getter function, call it
-                            const result = children();
-                            cellsArray = Array.isArray(result) ? result : [result];
-                        } else if (children) {
-                            // Single child case
-                            cellsArray = [children];
-                        }
+                        const cellsArray = normalizeChildren(children);
                         
                         // Clean up cell content (remove delimiters if present)
                         const cells = cellsArray.map(cell => {
@@ -14741,100 +14808,14 @@ export default {
                         }
                     },
                     
-                    // Table cell - join children without commas and handle text alignment
+                    // Table cell - handle content with context and alignment
                     tableCell({ node, children, options, context }) {
-                        // Set context for table cell
-                        const cellContext = { ...context, inTableCell: true };
-                        
-                        // Handle different types of children
-                        let content = '';
-                        if (typeof children === 'function') {
-                            const result = children();
-                            if (Array.isArray(result)) {
-                                // Process children with context
-                                content = result.map((child, index) => {
-                                    if (typeof child === 'object' && child.type) {
-                                        const mapping = options.nodeMapping[child.type];
-                                        if (mapping) {
-                                            return mapping({ 
-                                                node: child, 
-                                                children: child.content || child,
-                                                options,
-                                                context: cellContext,
-                                                index 
-                                            });
-                                        }
-                                    }
-                                    return child;
-                                }).join('');
-                            } else {
-                                content = String(result || '');
-                            }
-                        } else if (Array.isArray(children)) {
-                            // If children is already processed content, just join
-                            content = children.join(''); 
-                        } else if (node.content && node.content.content) {
-                            // Process node content directly with context
-                            content = renderChildren(node.content, { ...options, nodeMapping, context: cellContext });
-                        } else {
-                            content = String(children || '');
-                        }
-                        
-                        // Apply text alignment if specified
-                        if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
-                            content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
-                        }
-                        
-                        // Replace all newlines with <br> to keep table cell content on a single line
-                        return content.replace(/\n+/g, '<br>');
+                        return processTableCellContent(node, children, options, context);
                     },
                     
-                    // Table header - join children without commas and handle text alignment
+                    // Table header - handle content with context and alignment (headers are also cells)
                     tableHeader({ node, children, options, context }) {
-                        // Set context for table cell (headers are also cells)
-                        const cellContext = { ...context, inTableCell: true };
-                        
-                        // Handle different types of children
-                        let content = '';
-                        if (typeof children === 'function') {
-                            const result = children();
-                            if (Array.isArray(result)) {
-                                // Process children with context
-                                content = result.map((child, index) => {
-                                    if (typeof child === 'object' && child.type) {
-                                        const mapping = options.nodeMapping[child.type];
-                                        if (mapping) {
-                                            return mapping({ 
-                                                node: child, 
-                                                children: child.content || child,
-                                                options,
-                                                context: cellContext,
-                                                index 
-                                            });
-                                        }
-                                    }
-                                    return child;
-                                }).join('');
-                            } else {
-                                content = String(result || '');
-                            }
-                        } else if (Array.isArray(children)) {
-                            // If children is already processed content, just join
-                            content = children.join(''); 
-                        } else if (node.content && node.content.content) {
-                            // Process node content directly with context
-                            content = renderChildren(node.content, { ...options, nodeMapping, context: cellContext });
-                        } else {
-                            content = String(children || '');
-                        }
-                        
-                        // Apply text alignment if specified
-                        if (node.attrs?.textAlign && node.attrs.textAlign !== 'left') {
-                            content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
-                        }
-                        
-                        // Replace all newlines with <br> to keep table cell content on a single line
-                        return content.replace(/\n+/g, '<br>');
+                        return processTableCellContent(node, children, options, context);
                     },
                     
                     // Video (custom)
@@ -18288,7 +18269,7 @@ export default {
                 percentHbd: metadata.get('percentHbd') === true
             };
 
-            // Legacy support for comment options
+            // Sync reactive properties to non-reactive object for API compatibility
             this.commentOptions.allowVotes = this.reactiveCommentOptions.allowVotes;
             this.commentOptions.allowCurationRewards = this.reactiveCommentOptions.allowCurationRewards;
             this.commentOptions.maxAcceptedPayout = this.reactiveCommentOptions.maxAcceptedPayout;

@@ -93,6 +93,18 @@ const extensions = [
 
 ## 📊 **Node Mappings**
 
+### **Context Object**
+
+The markdown export system uses a context object to track rendering state:
+
+```javascript
+const context = {
+  inTableCell: false  // Tracks whether content is being rendered inside a table cell
+};
+```
+
+This context is passed through the rendering pipeline and modified when entering table cells. It allows different rendering behavior for content inside tables (e.g., using `<br>` instead of newlines for paragraphs).
+
 ### **Text Nodes**
 
 ```javascript
@@ -252,39 +264,97 @@ dluxvideo: ({ node }) => {
 
 ## 🔧 **Helper Functions**
 
+### **Context-Aware Rendering System**
+
+The markdown export uses a context object to track rendering state and modify behavior based on the current context:
+
+```javascript
+// Initialize context for tracking rendering state
+const context = {
+  inTableCell: false  // Tracks if we're rendering inside a table cell
+};
+
+// Context is passed through the rendering pipeline
+renderToMarkdown({
+  extensions: extensions,
+  content: doc,
+  options: {
+    nodeMapping,
+    markMapping,
+    context
+  }
+});
+```
+
+#### **Table Cell Context**
+
+When rendering content inside table cells, special handling is required for line breaks since markdown tables require all content to be on a single line:
+
+```javascript
+// Hard breaks render differently in table cells
+hardBreak({ context }) {
+  return context?.inTableCell ? '<br>' : '\n';
+},
+
+// Paragraphs in table cells don't add double newlines
+paragraph({ node, children, options, context, index }) {
+  const content = renderChildren(children, { ...options, nodeMapping, context });
+  
+  if (context?.inTableCell) {
+    // Add <br> between paragraphs, but not before the first one
+    let result = index > 0 ? '<br>' : '';
+    result += content;
+    return result;
+  }
+  
+  // Normal paragraph handling outside tables
+  return `${content}\n\n`;
+}
+
+// Table cells use a shared processing function
+tableCell({ node, children, options, context }) {
+  return processTableCellContent(node, children, options, context);
+},
+
+// The processTableCellContent helper:
+// 1. Sets inTableCell context to true
+// 2. Processes all children with the table context
+// 3. Applies text alignment if specified
+// 4. Replaces all newlines with <br> tags to keep content on single line
+```
+
 ### **Recursive Children Renderer**
 
 ```javascript
-function renderChildren(children) {
+function renderChildren(children, options) {
   if (!children) return '';
+  if (typeof children === 'string') return children;
   
-  // Handle function type (lazy evaluation)
-  if (typeof children === 'function') {
-    const result = children();
-    return renderChildren(result);
+  // Handle both array of children and content object with content array
+  let childArray = children;
+  if (children.content && Array.isArray(children.content)) {
+    childArray = children.content;
+  } else if (!Array.isArray(children)) {
+    return '';
   }
   
-  // Handle array of children
-  if (Array.isArray(children)) {
-    return children.map(child => {
-      if (typeof child === 'string') {
-        return child;
-      }
-      return renderChildren(child);
-    }).join('');
-  }
-  
-  // Handle direct string
-  if (typeof children === 'string') {
-    return children;
-  }
-  
-  // Handle node with text
-  if (children.text !== undefined) {
-    return children.text;
-  }
-  
-  return String(children);
+  return childArray.map((child, index) => {
+    if (typeof child === 'string') return child;
+    if (child.type === 'text') {
+      return options.nodeMapping.text ? options.nodeMapping.text({ node: child, context: options.context }) : child.text || '';
+    }
+    const mapping = options.nodeMapping[child.type];
+    if (mapping) {
+      return mapping({ 
+        node: child, 
+        children: child.content || child,
+        options,
+        context: options.context,
+        index 
+      });
+    }
+    return '';
+  }).join('');
 }
 ```
 

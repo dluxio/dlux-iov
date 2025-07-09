@@ -20,17 +20,22 @@ export class HLSQualitySelector {
         this.menu = null;
         this.isMenuOpen = false;
         this.currentLevelIndex = -1;
+        this.pendingQuality = undefined; // Store quality preference until HLS is ready
         
         this.init();
     }
     
     init() {
+        // Load quality preference early (will be stored as pending if needed)
+        this.loadQualityPreference();
+        
         // Wait for manifest to be parsed
         if (this.hls.levels && this.hls.levels.length > 0) {
             this.createUI();
         } else {
             this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
                 this.createUI();
+                this.applyPendingQuality(); // Apply any pending quality preference
             });
         }
         
@@ -189,6 +194,12 @@ export class HLSQualitySelector {
     }
     
     selectQuality(levelIndex) {
+        // Guard against destroyed HLS instance
+        if (!this.hls) {
+            debugLogger.debug('HLS instance is null, cannot select quality');
+            return;
+        }
+        
         this.hls.currentLevel = levelIndex;
         this.closeMenu();
         
@@ -198,6 +209,17 @@ export class HLSQualitySelector {
         }
         
         debugLogger.debug(`Quality changed to level ${levelIndex}`);
+    }
+    
+    applyPendingQuality() {
+        if (this.pendingQuality !== undefined && this.hls && this.hls.levels && this.hls.levels.length > 0) {
+            const levelIndex = this.pendingQuality;
+            if (levelIndex === -1 || (levelIndex >= 0 && levelIndex < this.hls.levels.length)) {
+                debugLogger.debug(`Applying pending quality preference: ${levelIndex}`);
+                this.selectQuality(levelIndex);
+            }
+            this.pendingQuality = undefined;
+        }
     }
     
     updateButtonText() {
@@ -246,12 +268,13 @@ export class HLSQualitySelector {
             const saved = localStorage.getItem(this.options.storageKey);
             if (saved !== null) {
                 const levelIndex = parseInt(saved);
-                if (levelIndex === -1 || (levelIndex >= 0 && levelIndex < this.hls.levels.length)) {
-                    // Delay to ensure video is ready
-                    setTimeout(() => {
-                        this.selectQuality(levelIndex);
-                    }, 100);
+                this.pendingQuality = levelIndex; // Store for reactive application
+                
+                // Apply immediately if levels are ready
+                if (this.hls && this.hls.levels && this.hls.levels.length > 0) {
+                    this.applyPendingQuality();
                 }
+                // Otherwise, it will be applied when MANIFEST_PARSED fires
             }
         } catch (e) {
             debugLogger.debug('Could not load quality preference:', e);
