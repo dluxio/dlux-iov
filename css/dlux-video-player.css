@@ -165,3 +165,23 @@ vjs-duration,
 .dlux-video-player video[src*="ipfs"] {
   object-fit: contain;
 }
+
+/* General video element styles (for videos not using Video.js player) */
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background-color: #000; /* Black background while loading */
+  margin: 0 auto;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+video[width="100%"] {
+  width: 100%;
+}
+
+/* Ensure video controls are visible */
+video[controls] {
+  cursor: pointer;
+}
