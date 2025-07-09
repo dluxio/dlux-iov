@@ -1,4 +1,4 @@
-this.version = "2025.07.08.1";
+this.version = "2025.07.09.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.08.17",
-  "generated": "2025-07-09T00:01:55Z",
+  "version": "2025.07.09.1",
+  "generated": "2025-07-09T00:02:10Z",
   "files": {
-    "/css/custom.css": {
-      "checksum": "fe581072f244e04c6aada1963a5ee514",
-      "size": 347238,
-      "priority": "critical"
-    },
     "/js/vue.esm-browser.js": {
       "checksum": "232af68f6551a87a4732981749dd5265",
       "size": 531704,
@@ -573,8 +568,8 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "9bafd8b5a861a66529edc6b3e07c5029",
-      "size": 102306,
+      "checksum": "b209fcc8bbbe91c2e68df9b8fde5d946",
+      "size": 101901,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -646,11 +641,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/.ipfs/index.html": {
-      "checksum": "fbed18dd2cf4e8f4f7915e75841f94af",
-      "size": 8924,
-      "priority": "important"
     },
     "/.src/index.js": {
       "checksum": "7dcb7b0624cda5d531b74a6e6c17df17",
@@ -2107,11 +2097,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/aframe-builder/index.html": {
-      "checksum": "1210ec91cd15f9b555f01acd34cf06a0",
-      "size": 388594,
-      "priority": "page-specific"
-    },
     "/aframe-builder/index2.html": {
       "checksum": "50d15bdba6ab42cde3109e5935abf189",
       "size": 119115,
@@ -3062,11 +3047,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/debug-control.html": {
-      "checksum": "377c12e0856efee57c4692fcb0870b73",
-      "size": 6255,
-      "priority": "lazy"
-    },
     "/js/bennies-old.js": {
       "checksum": "2c4324cb1894d251a4aceb16125aa6ee",
       "size": 7941,
@@ -3133,8 +3113,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
