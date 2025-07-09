@@ -15,6 +15,7 @@
 .dlux-video-player {
   position: relative;
   width: 100%;
+  aspect-ratio: 16/9; /* Provide proper aspect ratio for height reference */
   height: auto;
 }
 
@@ -22,6 +23,9 @@
   background-color: #000;
   width: 100% !important;
   height: 100% !important;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 /* Fix poster and text track positioning */
