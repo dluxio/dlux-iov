@@ -146,7 +146,7 @@ export default {
       try {
         // Check if TipTap collaboration bundle is loaded
         if (!window.TiptapCollaboration) {
-          throw new Error('TipTap collaboration bundle not loaded. Make sure tiptap-collaboration.bundle.js is included.');
+          throw new Error('TipTap collaboration bundle not loaded. Make sure collaboration.bundle.js is included.');
         }
 
         // Debug what's actually in the bundle

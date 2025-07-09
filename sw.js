@@ -1,4 +1,4 @@
-this.version = "2025.07.09.15";
+this.version = "2025.07.09.16";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.15",
-  "generated": "2025-07-09T20:42:05Z",
+  "version": "2025.07.09.14",
+  "generated": "2025-07-09T21:19:57Z",
   "files": {
-    "/css/vr-presence.css": {
-      "checksum": "5f7c4863adcfef034d636bbca064cdca",
-      "size": 6903,
-      "priority": "important"
-    },
     "/css/webfonts/fa-brands-400.ttf": {
       "checksum": "15d54d142da2f2d6f2e90ed1d55121af",
       "size": 210792,
@@ -1102,11 +1097,6 @@ self.cacheManifest =
       "size": 1581,
       "priority": "important"
     },
-    "/js/564.bundle.js": {
-      "checksum": "4cbef67e040b98f1a4642cf4beaa4118",
-      "size": 544737,
-      "priority": "important"
-    },
     "/js/appvue.js": {
       "checksum": "b10fc31c6505c6008635c0c001c15c37",
       "size": 45982,
@@ -1168,8 +1158,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaboration.bundle.js": {
-      "checksum": "5e9bef4300383ee8b02667e11f1b09ae",
-      "size": 840423,
+      "checksum": "006d535bd3d8d9ea2c894eada272997f",
+      "size": 1377589,
       "priority": "important"
     },
     "/js/collaborative-docs.js": {
@@ -1177,14 +1167,9 @@ self.cacheManifest =
       "size": 36408,
       "priority": "important"
     },
-    "/js/collaborative-post-editor.js": {
-      "checksum": "dad8423ad38a3f86dd3597eda9ab2762",
-      "size": 46364,
-      "priority": "important"
-    },
     "/js/collaborative-tiptap-editor.js": {
-      "checksum": "623a94ea112d8b45d6491acf1be211a0",
-      "size": 16226,
+      "checksum": "0766e40a96a3f87014dc38aec86329e0",
+      "size": 16219,
       "priority": "important"
     },
     "/js/components/360-asset-manager-iframe-adapter.js": {
@@ -1538,7 +1523,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "4479b9d8338d701940ed1d80cdd9faca",
+      "checksum": "41b118a66cb293e105ea276241a629d9",
       "size": 36524,
       "priority": "important"
     },
@@ -1555,21 +1540,6 @@ self.cacheManifest =
     "/js/tiptap-editor-modular.js": {
       "checksum": "1e4845d9aa0c99992f86ac9027e22449",
       "size": 1099044,
-      "priority": "important"
-    },
-    "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "7c6dad8ccec7bea9c58d1724e005da9f",
-      "size": 725418,
-      "priority": "important"
-    },
-    "/js/tiptap-editor.js": {
-      "checksum": "f96826534f8ff1d4edd88a6aca40deeb",
-      "size": 19217,
-      "priority": "important"
-    },
-    "/js/tiptap-file-manager.js": {
-      "checksum": "e3a24394bea2f379796abfc85a9b7c47",
-      "size": 39205,
       "priority": "important"
     },
     "/js/toastvue.js": {
@@ -1658,8 +1628,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "58e9df0e626e7b64f1332e55148c3eaf",
-      "size": 285974,
+      "checksum": "8fc2e2d59364769320b7a4e7bb73d509",
+      "size": 285844,
       "priority": "important"
     },
     "/js/video-choice-modal.js": {
@@ -1673,8 +1643,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/videoPlayer.bundle.js": {
-      "checksum": "f28aad591a9761030784ee1ee5310294",
-      "size": 774333,
+      "checksum": "1da7a3f402adf1d280cae171df0c75ca",
+      "size": 776461,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1738,8 +1708,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "5ceb373769af4c29db9396967b5a4996",
-      "size": 124427,
+      "checksum": "4a284063f8aedd1ef64116e431ccbb03",
+      "size": 124394,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1808,7 +1778,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "93e887a4f33e896f56fcc39a047a99d0",
+      "checksum": "25442fe8f569f0494690e01ee03a7e44",
       "size": 7300,
       "priority": "important"
     },
@@ -1818,8 +1788,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
-      "checksum": "ef4b0152b344e2c28e7a045c2635a2ef",
-      "size": 5652,
+      "checksum": "edbf3a324d53e003c99283a73c7fe5e5",
+      "size": 5086,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1906,11 +1876,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/index.html": {
-      "checksum": "c479c117c9749ebd6d972bf466a9a50c",
-      "size": 30871,
-      "priority": "page-specific"
     },
     "/naf-playground/invr.html": {
       "checksum": "385cb62d74dedabc140eeaf8981f9cad",
@@ -2757,12 +2722,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

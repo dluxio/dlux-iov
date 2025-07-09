@@ -5,32 +5,18 @@
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
-// Lazy load and register plugins only if not already registered
-let qualityLevelsPlugin = null;
-let hlsQualitySelectorPlugin = null;
+// Static imports to prevent chunking
+import qualityLevelsPlugin from 'videojs-contrib-quality-levels';
+import hlsQualitySelectorPlugin from 'videojs-hls-quality-selector';
 
 // Function to ensure plugins are loaded and registered
-async function ensurePluginsLoaded() {
+function ensurePluginsLoaded() {
   if (!videojs.getPlugin('qualityLevels')) {
-    if (!qualityLevelsPlugin) {
-      const module = await import('videojs-contrib-quality-levels');
-      qualityLevelsPlugin = module.default || module;
-    }
-    // Only register if still not registered (in case of race conditions)
-    if (!videojs.getPlugin('qualityLevels')) {
-      videojs.registerPlugin('qualityLevels', qualityLevelsPlugin);
-    }
+    videojs.registerPlugin('qualityLevels', qualityLevelsPlugin);
   }
   
   if (!videojs.getPlugin('hlsQualitySelector')) {
-    if (!hlsQualitySelectorPlugin) {
-      const module = await import('videojs-hls-quality-selector');
-      hlsQualitySelectorPlugin = module.default || module;
-    }
-    // Only register if still not registered (in case of race conditions)
-    if (!videojs.getPlugin('hlsQualitySelector')) {
-      videojs.registerPlugin('hlsQualitySelector', hlsQualitySelectorPlugin);
-    }
+    videojs.registerPlugin('hlsQualitySelector', hlsQualitySelectorPlugin);
   }
 }
 
@@ -38,7 +24,7 @@ async function ensurePluginsLoaded() {
 class DluxVideoPlayer {
   static async initializePlayer(element, options = {}) {
     // Ensure plugins are loaded
-    await ensurePluginsLoaded();
+    ensurePluginsLoaded();
     
     // Ensure element has an ID for Video.js
     if (!element.id) {

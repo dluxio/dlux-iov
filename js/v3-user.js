@@ -12,7 +12,6 @@ import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import CollaborativeDocs from "/js/collaborative-docs.js";
-import CollaborativePostEditor from "/js/collaborative-post-editor.js";
 import SimpleFieldEditor from "/js/simple-field-editor.js";
 import JsonEditor from "/js/json-editor.js";
 import ChoicesVue from '/js/choices-vue.js';
@@ -1162,7 +1161,6 @@ PORT=3000
     "vue-ratings": Ratings,
     "mde": MDE,
     "collaborative-docs": CollaborativeDocs,
-    "collaborative-post-editor": CollaborativePostEditor,
     "simple-field-editor": SimpleFieldEditor,
     "json-editor": JsonEditor,
     "replies": Replies,

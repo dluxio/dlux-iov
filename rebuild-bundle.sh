@@ -22,19 +22,19 @@ npm install @tiptap/extension-history@^3.0.0 @tiptap/extension-link@^3.0.0 @tipt
 
 # Clean old bundle
 echo "🧹 Cleaning old bundle..."
-rm -f js/tiptap-collaboration.bundle.js
+rm -f js/collaboration.bundle.js
 
 # Build the bundle
 echo "🏗️  Building bundle..."
 npm run build
 
 # Check if build was successful
-if [ -f "js/tiptap-collaboration.bundle.js" ]; then
+if [ -f "js/collaboration.bundle.js" ]; then
     echo "✅ Bundle rebuilt successfully!"
-    echo "📦 Bundle location: js/tiptap-collaboration.bundle.js"
+    echo "📦 Bundle location: js/collaboration.bundle.js"
     
     # Show bundle size
-    size=$(ls -lh js/tiptap-collaboration.bundle.js | awk '{print $5}')
+    size=$(ls -lh js/collaboration.bundle.js | awk '{print $5}')
     echo "📏 Bundle size: $size"
 else
     echo "❌ Build failed! Check the error messages above."
