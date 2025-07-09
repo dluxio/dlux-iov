@@ -4,7 +4,10 @@ import { createMentionSuggestion } from '/js/services/mention-suggestion.js';
 import URLProcessor from '/js/utils/url-processor.js';
 
 // Debug flag to control logging - set to true to enable verbose logging
-const DEBUG = true;
+const DEBUG = false;
+
+// Production mode detection - reduces console noise in production
+const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io' || DEBUG === false;
 
 /**
  * ⚠️ CRITICAL: TipTap Editor Modular Architecture - Following Official Best Practices
@@ -14499,14 +14502,21 @@ export default {
                 };
                 
                 /**
-                 * Processes table cell content with proper context and formatting.
+                 * Processes table cell content with proper context and line break handling.
                  * Shared logic for both tableCell and tableHeader handlers.
                  * 
+                 * Handles the complex line break processing required for table cells:
+                 * 1. Sets inTableCell context to true for child processing
+                 * 2. Processes all children with the table context
+                 * 3. Applies text alignment if specified
+                 * 4. Converts newlines to <br> tags using 3-step process to handle
+                 *    the static renderer's automatic doubling of user line breaks
+                 * 
                  * @param {Object} node - The table cell/header node
-                 * @param {*} children - The cell content in various formats
-                 * @param {Object} options - Rendering options
+                 * @param {Function|Array|string|Object} children - The cell content in various formats
+                 * @param {Object} options - Rendering options containing nodeMapping
                  * @param {Object} context - Current rendering context
-                 * @returns {string} Processed cell content with line breaks replaced
+                 * @returns {string} Processed cell content with proper line breaks for markdown tables
                  */
                 const processTableCellContent = (node, children, options, context) => {
                     // Set context for table cell
@@ -14551,28 +14561,16 @@ export default {
                         content = `<div class="text-${node.attrs.textAlign}">${content}</div>`;
                     }
                     
-                    // Debug: Log the content before processing
-                    console.log('Table cell content before processing:', JSON.stringify(content));
-                    
-                    // Remove the base 2 trailing newlines that are automatically added by the static renderer
+                    // Process line breaks in table cells using 3-step approach:
+                    // 1. Remove base trailing newlines automatically added by static renderer
                     content = content.replace(/\n\n$/, '');
                     
-                    // Debug: Log content after removing base newlines
-                    console.log('Table cell content after removing base newlines:', JSON.stringify(content));
-                    
-                    // Convert pairs of newlines (user line breaks) to single <br> tags
+                    // 2. Convert pairs of newlines (user line breaks) to single <br> tags
+                    // The static renderer doubles each user line break, so we convert pairs back to singles
                     content = content.replace(/\n\n/g, '<br>');
                     
-                    // Debug: Log content after converting pairs
-                    console.log('Table cell content after converting pairs:', JSON.stringify(content));
-                    
-                    // Convert any remaining single newlines to <br>
-                    const result = content.replace(/\n/g, '<br>');
-                    
-                    // Debug: Log the result after processing
-                    console.log('Table cell content after processing:', JSON.stringify(result));
-                    
-                    return result;
+                    // 3. Convert any remaining single newlines to <br>
+                    return content.replace(/\n/g, '<br>');
                 };
                 
                 /**
@@ -14632,12 +14630,10 @@ export default {
                         
                         // In table cells, handle line breaks differently
                         if (context?.inTableCell) {
-                            console.log(`Table paragraph ${index}: content =`, JSON.stringify(content));
                             let result = '';
                             // Add <br> before paragraph if it's not the first one
                             if (index > 0) {
                                 result = '<br>';
-                                console.log(`Added <br> before paragraph ${index}`);
                             }
                             
                             if (node.attrs?.textAlign === 'center') {
@@ -14649,7 +14645,6 @@ export default {
                             } else {
                                 result += content;
                             }
-                            console.log(`Table paragraph ${index} result:`, JSON.stringify(result));
                             return result;
                         }
                         
@@ -14666,9 +14661,9 @@ export default {
                     },
                     
                     // Heading with full text alignment support
-                    heading({ node, children, options }) {
+                    heading({ node, children, options, context }) {
                         const level = node.attrs?.level || 1;
-                        const content = renderChildren(children, { ...options, nodeMapping });
+                        const content = renderChildren(children, { ...options, nodeMapping, context });
                         const hashes = '#'.repeat(level);
                         
                         if (node.attrs?.textAlign === 'center') {
@@ -14735,11 +14730,7 @@ export default {
                     
                     // Hard break (line break with Shift+Enter)
                     hardBreak({ context }) {
-                        const result = context?.inTableCell ? '<br>' : '\n';
-                        if (context?.inTableCell) {
-                            console.log('Table hardBreak returning:', JSON.stringify(result));
-                        }
-                        return result;
+                        return context?.inTableCell ? '<br>' : '\n';
                     },
                     
                     // Code block
@@ -21997,7 +21988,71 @@ export default {
             </div>
             
             <!-- Bubble Menu (floating toolbar) - Always in DOM for TipTap reference -->
-            <div ref="bubbleMenu" class="bubble-menu">
+            <div ref="bubbleMenu" class="bubble-menu justify-content-center">
+              
+            <div class="btn-group" role="group">
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('subscript') }"
+                        @click="formatSubscript()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Subscript">
+                  <i class="fas fa-subscript"></i>
+                </button>
+                
+                <button type="button" 
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive('superscript') }"
+                        @click="formatSuperscript()"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor"
+                        title="Superscript">
+                  <i class="fas fa-superscript"></i>
+                </button>
+                
+              </div>
+              
+              <!-- Alignment buttons -->
+              <div class="btn-group ms-1" role="group">
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'left'}) }"
+                        @click="setTextAlign('left')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Left">
+                  <i class="fas fa-align-left"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'center'}) }"
+                        @click="setTextAlign('center')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Center">
+                  <i class="fas fa-align-center"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'right'}) }"
+                        @click="setTextAlign('right')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Align Right">
+                  <i class="fas fa-align-right"></i>
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-secondary"
+                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'justify'}) }"
+                        @click="setTextAlign('justify')"
+                        @mousedown.prevent
+                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
+                        title="Justify">
+                  <i class="fas fa-align-justify"></i>
+                </button>
+              </div>
+
               <div class="btn-group" role="group">
                 <button type="button" 
                         class="btn btn-sm btn-secondary"
@@ -22046,24 +22101,6 @@ export default {
                 </button>
                 <button type="button" 
                         class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive('subscript') }"
-                        @click="formatSubscript()"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor"
-                        title="Subscript">
-                  <i class="fas fa-subscript"></i>
-                </button>
-                <button type="button" 
-                        class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive('superscript') }"
-                        @click="formatSuperscript()"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor"
-                        title="Superscript">
-                  <i class="fas fa-superscript"></i>
-                </button>
-                <button type="button" 
-                        class="btn btn-sm btn-secondary"
                         :class="{ 'active': bodyEditor && bodyEditor.isActive('link') }"
                         @click="insertLink()"
                         @mousedown.prevent
@@ -22071,47 +22108,7 @@ export default {
                         title="Insert/Edit Link">
                   <i class="fas fa-link"></i>
                 </button>
-              </div>
-              
-              <!-- Alignment buttons -->
-              <div class="btn-group ms-1" role="group">
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'left'}) }"
-                        @click="setTextAlign('left')"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
-                        title="Align Left">
-                  <i class="fas fa-align-left"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'center'}) }"
-                        @click="setTextAlign('center')"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
-                        title="Align Center">
-                  <i class="fas fa-align-center"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'right'}) }"
-                        @click="setTextAlign('right')"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
-                        title="Align Right">
-                  <i class="fas fa-align-right"></i>
-                </button>
-                <button type="button"
-                        class="btn btn-sm btn-secondary"
-                        :class="{ 'active': bodyEditor && bodyEditor.isActive({textAlign: 'justify'}) }"
-                        @click="setTextAlign('justify')"
-                        @mousedown.prevent
-                        :disabled="!bodyEditor || isReadOnlyMode || !canUseTextAlign"
-                        title="Justify">
-                  <i class="fas fa-align-justify"></i>
-                </button>
-              </div>
+            </div>
             </div>
             
             <!-- Table Toolbar - CSS controls visibility and positioning -->

@@ -320,7 +320,34 @@ tableCell({ node, children, options, context }) {
 // 1. Sets inTableCell context to true
 // 2. Processes all children with the table context
 // 3. Applies text alignment if specified
-// 4. Replaces all newlines with <br> tags to keep content on single line
+// 4. Processes line breaks using 3-step approach (see below)
+```
+
+#### **Table Cell Line Break Processing**
+
+Table cells require special line break handling because:
+- Markdown tables must have all content on a single line
+- The static renderer automatically adds extra newlines
+- User line breaks need to be preserved as `<br>` tags
+
+**3-Step Processing:**
+
+```javascript
+// Step 1: Remove base trailing newlines added by static renderer
+content = content.replace(/\n\n$/, '');
+
+// Step 2: Convert pairs of newlines (user line breaks) to single <br>
+// The static renderer doubles each user line break, so pairs = single breaks
+content = content.replace(/\n\n/g, '<br>');
+
+// Step 3: Convert any remaining single newlines to <br>
+return content.replace(/\n/g, '<br>');
+```
+
+**Example Processing:**
+- User adds 0 breaks: `"text\n\n"` → `"text"` → `"text"` → `"text"`
+- User adds 1 break: `"text\n\n\n\n"` → `"text\n\n"` → `"text<br>"` → `"text<br>"`
+- User adds 2 breaks: `"text\n\n\n\n\n\n"` → `"text\n\n\n\n"` → `"text<br><br>"` → `"text<br><br>"`
 ```
 
 ### **Recursive Children Renderer**

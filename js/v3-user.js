@@ -1239,7 +1239,11 @@ PORT=3000
     },
     
     handleEditorReady() {
-      console.log('TipTap editor ready event received');
+      // Production mode detection - reduces console noise in production
+      const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+      if (!PRODUCTION_MODE) {
+        console.log('TipTap editor ready event received');
+      }
       this.editorAvailable = true;
     },
     
@@ -1412,7 +1416,12 @@ PORT=3000
         };
         
         metadata.observe(this.yjsCustomJsonObserver);
-        console.log('✅ Set up Y.js custom JSON observer');
+        
+        // Production mode detection - reduces console noise in production
+        const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+        if (!PRODUCTION_MODE) {
+          console.log('✅ Set up Y.js custom JSON observer');
+        }
         
         // Also set up field subscription system
         this.setupYjsFieldSubscriptions();
@@ -1444,7 +1453,11 @@ PORT=3000
         window.addEventListener('message', this.fieldSubscriptionHandler);
       }
       
-      console.log('✅ Y.js field subscription system ready');
+      // Production mode detection - reduces console noise in production
+      const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+      if (!PRODUCTION_MODE) {
+        console.log('✅ Y.js field subscription system ready');
+      }
     },
     
     // Handle field subscription from iframe

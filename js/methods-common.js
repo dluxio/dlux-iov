@@ -671,12 +671,17 @@ export default {
         this.context = context;
         this.callbacks = callbacks;
         
-        console.log('IPFS Loader load called with:', {
-          context: context,
-          callbacks: typeof callbacks,
-          hasOnSuccess: !!(callbacks && callbacks.onSuccess),
-          hasOnError: !!(callbacks && callbacks.onError)
-        });
+        // Production mode detection - reduces console noise in production
+        const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+        
+        if (!PRODUCTION_MODE) {
+          console.log('IPFS Loader load called with:', {
+            context: context,
+            callbacks: typeof callbacks,
+            hasOnSuccess: !!(callbacks && callbacks.onSuccess),
+            hasOnError: !!(callbacks && callbacks.onError)
+          });
+        }
         this.stats = {
           loading: { start: performance.now(), first: 0, end: 0 },
           parsing: { start: 0, end: 0 },
@@ -684,13 +689,17 @@ export default {
         };
 
         const url = context.url;
-        console.log('IPFS Loader loading:', url);
+        if (!PRODUCTION_MODE) {
+          console.log('IPFS Loader loading:', url);
+        }
 
         let ipfsUrl = url;
         
         // Handle blob URLs for preview mode
         if (url.startsWith('blob:')) {
-          console.log('IPFS Loader handling blob URL for preview:', url);
+          if (!PRODUCTION_MODE) {
+            console.log('IPFS Loader handling blob URL for preview:', url);
+          }
           ipfsUrl = url; // Use blob URL directly
         } else if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
           // Use IPFS URLs as-is without modifying them
@@ -698,10 +707,14 @@ export default {
           ipfsUrl = url;
           
           // Log the URL being used for debugging
-          console.log('IPFS Loader using URL as-is:', ipfsUrl);
+          if (!PRODUCTION_MODE) {
+            console.log('IPFS Loader using URL as-is:', ipfsUrl);
+          }
         }
 
-        console.log('IPFS Loader fetching:', ipfsUrl);
+        if (!PRODUCTION_MODE) {
+          console.log('IPFS Loader fetching:', ipfsUrl);
+        }
 
         // Fetching URL
 
@@ -927,11 +940,15 @@ export default {
 
       hls.on(Hls.Events.MANIFEST_PARSED, async () => {
         // HLS initialized successfully
-        console.log('✅ HLS playback ready for:', videoSrc);
+        if (!PRODUCTION_MODE) {
+          console.log('✅ HLS playback ready for:', videoSrc);
+        }
         
         // If this was a tryHls attempt and it worked, set the type for future persistence
         if (shouldTryHls) {
-          console.log('✅ IPFS video is HLS! Setting type attributes for persistence');
+          if (!PRODUCTION_MODE) {
+            console.log('✅ IPFS video is HLS! Setting type attributes for persistence');
+          }
           videoElement.setAttribute('type', 'application/x-mpegURL');
           videoElement.setAttribute('data-type', 'm3u8');
         }

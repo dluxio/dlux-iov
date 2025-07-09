@@ -83,12 +83,17 @@ import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube';
 
+// Production mode detection - reduces console noise in production
+const PRODUCTION_MODE = location.hostname === 'dlux.io' || location.hostname === 'data.dlux.io';
+
 // ✅ CUSTOM PARAGRAPH: Context-aware textAlign attribute validation
 const CustomParagraph = Paragraph.extend({
   name: 'paragraph',
   
   onCreate() {
-    console.log('✅ CustomParagraph extension loaded - context-aware textAlign validation');
+    if (!PRODUCTION_MODE) {
+      console.log('✅ CustomParagraph extension loaded - context-aware textAlign validation');
+    }
   },
   
   addAttributes() {
@@ -115,7 +120,9 @@ const CustomTextAlign = TextAlign.extend({
   name: 'textAlign',
   
   onCreate() {
-    console.log('✅ CustomTextAlign extension loaded and initialized');
+    if (!PRODUCTION_MODE) {
+      console.log('✅ CustomTextAlign extension loaded and initialized');
+    }
   },
   
   addCommands() {
@@ -151,7 +158,9 @@ const BlockquoteAlignmentFilter = Extension.create({
   name: 'blockquoteAlignmentFilter',
   
   onCreate() {
-    console.log('✅ BlockquoteAlignmentFilter extension loaded - schema-level enforcement');
+    if (!PRODUCTION_MODE) {
+      console.log('✅ BlockquoteAlignmentFilter extension loaded - schema-level enforcement');
+    }
   },
   
   addProseMirrorPlugins() {
@@ -1668,7 +1677,9 @@ const CustomBlockquote = Blockquote.extend({
   draggable: true, // Enable drag handle
   
   onCreate() {
-    console.log('✅ CustomBlockquote extension loaded and initialized');
+    if (!PRODUCTION_MODE) {
+      console.log('✅ CustomBlockquote extension loaded and initialized');
+    }
   },
   
   addInputRules() {

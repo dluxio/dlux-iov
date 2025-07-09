@@ -1,4 +1,4 @@
-this.version = "2025.07.09.7";
+this.version = "2025.07.09.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.09.7",
-  "generated": "2025-07-09T17:03:42Z",
+  "version": "2025.07.09.10",
+  "generated": "2025-07-09T17:53:10Z",
   "files": {
-    "/css/custom-old.css": {
-      "checksum": "d05166f557dbe2ffa4e68d15a849cc95",
-      "size": 7317,
-      "priority": "critical"
-    },
     "/css/custom-popover.css": {
       "checksum": "272dac40ceb0d411fa7d6f094b013ab3",
       "size": 2573,
@@ -581,11 +576,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/drag-sort.css": {
-      "checksum": "693eee9d441c6e004ed4a7b413962c36",
-      "size": 1077,
-      "priority": "important"
     },
     "/css/font-awesome.min.css": {
       "checksum": "d4077f5858fb8dabea37daccbf260c9e",
@@ -618,7 +608,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/css/tiptap-editor.css": {
-      "checksum": "b3691b18d51d0634a50f53c533e8464b",
+      "checksum": "ee37d4371debcd2b3c7ca921679d140e",
       "size": 24522,
       "priority": "important"
     },
@@ -1233,8 +1223,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaboration.bundle.js": {
-      "checksum": "e1d4ba4d5946fea228a11d7fe31fd1da",
-      "size": 840962,
+      "checksum": "387431ca752a834fc7e350acfd72fbcc",
+      "size": 841047,
       "priority": "important"
     },
     "/js/collaborative-docs.js": {
@@ -1413,8 +1403,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/methods-common.js": {
-      "checksum": "44911fb0da3901c7693631c7f57cec16",
-      "size": 39866,
+      "checksum": "3494dee3d351e7edbb9348ce1888d798",
+      "size": 40385,
       "priority": "important"
     },
     "/js/methods-modals.js": {
@@ -1603,7 +1593,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "12baef6b52baae8bdb5790c3eaca18cb",
+      "checksum": "344ca8240319f2056c20dff883a98c69",
       "size": 36523,
       "priority": "important"
     },
@@ -1618,8 +1608,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-modular.js": {
-      "checksum": "9fa600ab2f202f365d26dc577faa6bcd",
-      "size": 1098565,
+      "checksum": "b73def5d77355dce730d3861ccba6945",
+      "size": 1098311,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -1723,8 +1713,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "4fbfed71f219b85060fdd7121e775395",
-      "size": 285564,
+      "checksum": "a6e45c7f20949dc3cc7c8bfd5b556b7c",
+      "size": 286229,
       "priority": "important"
     },
     "/js/video-choice-modal.js": {
@@ -1803,8 +1793,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "9fc68e75d7c604bf4737dd563133e64d",
-      "size": 124418,
+      "checksum": "5ceb373769af4c29db9396967b5a4996",
+      "size": 124427,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1873,13 +1863,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "a1c9459ba469fb4664ff0c9e78aac1f5",
+      "checksum": "9606f784fbe3b0ac3007570cb6b5a4f4",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "2ad2c9ef5b32138762d952772c14628d",
-      "size": 71513,
+      "checksum": "cf5e8ae2488a8d9a477cd78a522dd5cc",
+      "size": 71822,
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
@@ -1971,11 +1961,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/aframe/networked-aframe.min.js": {
-      "checksum": "4b25bad9a7b40896916bcb097db405ba",
-      "size": 98119,
-      "priority": "page-specific"
     },
     "/naf-playground/assets/textures/sky/milkyway.jpg": {
       "checksum": "82c7278828d85ace9036d87c72801e20",
@@ -2862,14 +2847,9 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/test-blockquote.html": {
-      "checksum": "7f1049d48cc5c264e3252712b43e34f7",
-      "size": 1037,
-      "priority": "lazy"
-    },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
