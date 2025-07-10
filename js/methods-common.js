@@ -1117,7 +1117,26 @@ export default {
         }
       }
       
-      setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+      // Enhance with Video.js bundle if available (for proper styling)
+      if (typeof DluxVideoPlayer !== 'undefined' && DluxVideoPlayer.enhanceVideoElement) {
+        try {
+          DluxVideoPlayer.enhanceVideoElement(video).then(() => {
+            // Video.js handles HLS automatically, so only fallback to our custom HLS if needed
+            if (!video._dluxVideoPlayer && video.type === 'application/x-mpegURL') {
+              setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+            }
+          }).catch(error => {
+            console.log('Video.js enhancement failed, using fallback HLS:', error);
+            setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+          });
+        } catch (error) {
+          console.log('Video.js enhancement not available, using fallback HLS:', error);
+          setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+        }
+      } else {
+        // Fallback to custom HLS implementation
+        setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+      }
     };
 
     const observer = new MutationObserver((mutations) => {
