@@ -1,4 +1,4 @@
-this.version = "2025.07.10.1";
+this.version = "2025.07.09.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.10.1",
-  "generated": "2025-07-10T00:08:49Z",
+  "version": "2025.07.09.17",
+  "generated": "2025-07-10T00:14:18Z",
   "files": {
-    "/img/FFmpeg_logo.svg": {
-      "checksum": "d9bd07ebe503cd4927e7d84644793a54",
-      "size": 22917,
-      "priority": "important"
-    },
     "/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg": {
       "checksum": "0b5b9bd4b565aca151bf1a4f8341e371",
       "size": 20339,
@@ -1538,8 +1533,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/videoPlayer.bundle.js": {
-      "checksum": "d9bed7414a60dc57d1cf88b303156bd0",
-      "size": 776133,
+      "checksum": "a5118e03923e3d6edfbd58f9e45228c0",
+      "size": 776591,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1683,8 +1678,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
-      "checksum": "334d239a5eb3d070c1214132a1dff7ca",
-      "size": 6563,
+      "checksum": "06aeb6934a2929ce381a02164fb932da",
+      "size": 7502,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1771,11 +1766,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/js/invr-collaborative-editor.js": {
-      "checksum": "a93d869e3c5846373d1a2f5dd162e294",
-      "size": 5744,
-      "priority": "page-specific"
     },
     "/naf-playground/js/invr-vr-editor.js": {
       "checksum": "ee263a70c796f08122e6a36f7fe00399",
@@ -2522,12 +2512,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

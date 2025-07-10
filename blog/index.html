@@ -42,6 +42,10 @@
     <!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
+    <script>
+    // Disable auto-enhancement to prevent conflicts with methods-common.js video processing
+    window.dluxVideoPlayerConfig = { autoEnhance: false };
+    </script>
     <script src="/js/videoPlayer.bundle.js"></script>
     <script type="module" src="/js/v3-app.js"></script>
     <link href="/css/smde-comment.css" rel="stylesheet" />

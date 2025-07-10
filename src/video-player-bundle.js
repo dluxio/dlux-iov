@@ -12,6 +12,14 @@ import 'videojs-hls-quality-selector';
 // DLUX Video Player Service
 class DluxVideoPlayer {
   static async initializePlayer(element, options = {}) {
+    // Prevent double initialization
+    if (element._dluxVideoPlayer || element.dataset.dluxEnhanced === 'true') {
+      console.log('Video already enhanced, skipping duplicate initialization');
+      return element._dluxVideoPlayer;
+    }
+    
+    // Ensure Video.js CSS is loaded before creating player
+    await ensureVideoJSStyles();
     
     // Ensure element has an ID for Video.js
     if (!element.id) {
@@ -146,26 +154,31 @@ class DluxVideoPlayer {
 
 // Ensure Video.js CSS is loaded - fallback for webpack CSS injection timing issues
 function ensureVideoJSStyles() {
-  // Check if Video.js styles are already loaded
-  const existingStyles = document.querySelector('style[data-vjs-styles]') || 
-                        document.querySelector('link[href*="video-js"]') ||
-                        document.querySelector('style[data-video-js]');
+  // Check if Video.js styles are already loaded by URL or inline
+  const existingStyleLink = document.querySelector('link[href*="video-js"]');
+  const existingVjsFallback = document.querySelector('link[data-vjs-fallback="true"]');
   
-  if (existingStyles) {
+  if (existingStyleLink || existingVjsFallback) {
     return; // Styles already loaded
   }
   
-  // Check if we can find Video.js elements to confirm styles are working
+  // More comprehensive test for Video.js CSS by checking multiple key properties
   const testElement = document.createElement('div');
   testElement.className = 'video-js';
   testElement.style.position = 'absolute';
   testElement.style.left = '-9999px';
+  testElement.style.visibility = 'hidden';
   document.body.appendChild(testElement);
   
   const computedStyle = window.getComputedStyle(testElement);
-  const hasVideoJSStyles = computedStyle.position === 'relative' || 
-                          computedStyle.display === 'inline-block' ||
-                          computedStyle.fontSize === '10px';
+  
+  // Test multiple Video.js specific properties
+  const hasVideoJSStyles = (
+    computedStyle.position === 'relative' ||
+    computedStyle.display === 'inline-block' ||
+    computedStyle.fontSize === '10px' ||
+    computedStyle.boxSizing === 'border-box'
+  );
   
   document.body.removeChild(testElement);
   
@@ -177,7 +190,16 @@ function ensureVideoJSStyles() {
     link.href = 'https://vjs.zencdn.net/8.6.1/video-js.css';
     link.dataset.vjsFallback = 'true';
     document.head.appendChild(link);
+    
+    // Force styles to load before proceeding
+    return new Promise((resolve) => {
+      link.onload = resolve;
+      link.onerror = resolve; // Continue even if CDN fails
+      setTimeout(resolve, 2000); // Timeout after 2 seconds
+    });
   }
+  
+  return Promise.resolve();
 }
 
 // Export everything
@@ -192,12 +214,19 @@ if (typeof window !== 'undefined') {
   window.DluxVideoPlayer = DluxVideoPlayer;
   window.VideoPlayerBundle = VideoPlayerBundle;
   
-  // Ensure styles are loaded
+  // Ensure styles are loaded immediately
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ensureVideoJSStyles);
+    document.addEventListener('DOMContentLoaded', () => {
+      ensureVideoJSStyles().catch(console.error);
+    });
   } else {
-    ensureVideoJSStyles();
+    ensureVideoJSStyles().catch(console.error);
   }
+  
+  // Also ensure styles are loaded when bundle is first imported
+  setTimeout(() => {
+    ensureVideoJSStyles().catch(console.error);
+  }, 100);
   
   // Auto-enhance videos on DOMContentLoaded if enabled
   if (!window.dluxVideoPlayerConfig || window.dluxVideoPlayerConfig.autoEnhance !== false) {
