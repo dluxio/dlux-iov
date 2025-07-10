@@ -144,6 +144,42 @@ class DluxVideoPlayer {
   }
 }
 
+// Ensure Video.js CSS is loaded - fallback for webpack CSS injection timing issues
+function ensureVideoJSStyles() {
+  // Check if Video.js styles are already loaded
+  const existingStyles = document.querySelector('style[data-vjs-styles]') || 
+                        document.querySelector('link[href*="video-js"]') ||
+                        document.querySelector('style[data-video-js]');
+  
+  if (existingStyles) {
+    return; // Styles already loaded
+  }
+  
+  // Check if we can find Video.js elements to confirm styles are working
+  const testElement = document.createElement('div');
+  testElement.className = 'video-js';
+  testElement.style.position = 'absolute';
+  testElement.style.left = '-9999px';
+  document.body.appendChild(testElement);
+  
+  const computedStyle = window.getComputedStyle(testElement);
+  const hasVideoJSStyles = computedStyle.position === 'relative' || 
+                          computedStyle.display === 'inline-block' ||
+                          computedStyle.fontSize === '10px';
+  
+  document.body.removeChild(testElement);
+  
+  if (!hasVideoJSStyles) {
+    console.warn('Video.js CSS not detected, adding fallback link');
+    // Add Video.js CSS as fallback
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://vjs.zencdn.net/8.6.1/video-js.css';
+    link.dataset.vjsFallback = 'true';
+    document.head.appendChild(link);
+  }
+}
+
 // Export everything
 const VideoPlayerBundle = {
   videojs,
@@ -155,6 +191,13 @@ if (typeof window !== 'undefined') {
   window.videojs = videojs;
   window.DluxVideoPlayer = DluxVideoPlayer;
   window.VideoPlayerBundle = VideoPlayerBundle;
+  
+  // Ensure styles are loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureVideoJSStyles);
+  } else {
+    ensureVideoJSStyles();
+  }
   
   // Auto-enhance videos on DOMContentLoaded if enabled
   if (!window.dluxVideoPlayerConfig || window.dluxVideoPlayerConfig.autoEnhance !== false) {
