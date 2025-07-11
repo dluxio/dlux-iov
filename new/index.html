@@ -1870,16 +1870,14 @@
       if (window.Vue && window.Vue.nextTick && window.DluxVideoPlayer) {
         window.Vue.nextTick(() => {
           // Ensure Video.js CSS is loaded early for TipTap editor content
-          if (typeof ensureVideoJSStyles === 'function') {
-            ensureVideoJSStyles();
+          if (window.DluxVideoPlayer.ensureVideoJSStyles) {
+            window.DluxVideoPlayer.ensureVideoJSStyles();
           }
         });
-      } else if (window.DluxVideoPlayer) {
+      } else if (window.DluxVideoPlayer && window.DluxVideoPlayer.ensureVideoJSStyles) {
         // Fallback timing for early CSS injection
         setTimeout(() => {
-          if (typeof ensureVideoJSStyles === 'function') {
-            ensureVideoJSStyles();
-          }
+          window.DluxVideoPlayer.ensureVideoJSStyles();
         }, 100);
       }
     });

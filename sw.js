@@ -1,4 +1,4 @@
-this.version = "2025.07.11.2";
+this.version = "2025.07.11.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.2",
-  "generated": "2025-07-11T17:14:26Z",
+  "version": "2025.07.11.10",
+  "generated": "2025-07-11T17:22:12Z",
   "files": {
-    "/img/ar-vr-icon.svg": {
-      "checksum": "250b54554e360185204104ff1295c810",
-      "size": 10355,
-      "priority": "important"
-    },
     "/img/avi-file-type-svgrepo-com.svg": {
       "checksum": "35d1d30fbe77b4fcadfcfd049d03682f",
       "size": 1452,
@@ -1388,7 +1383,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "373f7f053f983f6f36130a110b18882f",
+      "checksum": "8690de5b6d4e10a07c29d56906cc5e80",
       "size": 36523,
       "priority": "important"
     },
@@ -1508,8 +1503,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/videoPlayer.bundle.js": {
-      "checksum": "ffab33e6a5105fca2f29c48e13e8fdbb",
-      "size": 776793,
+      "checksum": "bf8d7befda11528f460834d121471599",
+      "size": 777550,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1573,8 +1568,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "3d28d2baa851110d88e3ea62ae8e0b4a",
-      "size": 125169,
+      "checksum": "74e281901364f12e13e5adc189fd1c3a",
+      "size": 125189,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1643,7 +1638,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "5da95694acc677dd4e5c9c791eabe204",
+      "checksum": "c3c885370b8c28f9c94832d21f9f39ad",
       "size": 7299,
       "priority": "important"
     },
@@ -1653,8 +1648,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
-      "checksum": "c3c2690cece2cd4c0d6e38cc274e6071",
-      "size": 8242,
+      "checksum": "f383bb4c37b46c085d021f89e58273f5",
+      "size": 9363,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1741,11 +1736,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/js/network.js": {
-      "checksum": "c47bdabff89051bd383584f1125de1e5",
-      "size": 16806,
-      "priority": "page-specific"
     },
     "/naf-playground/js/scene-loader.js": {
       "checksum": "8896d79d20479a74f4cc1a438ca097bd",
@@ -2462,12 +2452,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
