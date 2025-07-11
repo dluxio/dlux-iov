@@ -1,4 +1,4 @@
-this.version = "2025.07.11.7";
+this.version = "2025.07.11.8";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.11",
-  "generated": "2025-07-11T18:53:12Z",
+  "version": "2025.07.11.8",
+  "generated": "2025-07-11T18:53:27Z",
   "files": {
-    "/img/dapps/3speak.png": {
-      "checksum": "50f5f9a73a795dff6948d3fc3dbeb857",
-      "size": 12264,
-      "priority": "important"
-    },
     "/img/dex-vr-comp.jpg": {
       "checksum": "e763f32eddfb928e99597355486c7654",
       "size": 101824,
@@ -1701,11 +1696,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/base/browser/ui/codicons/codicon/codicon.ttf": {
-      "checksum": "cb7f0a51c106a33fb4abab8c454373d8",
-      "size": 80340,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/base/worker/workerMain.js": {
       "checksum": "b56d63807a3d5b23cb061ce224156c8c",
       "size": 376515,
@@ -2376,12 +2366,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
