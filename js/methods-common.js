@@ -1056,24 +1056,34 @@ export default {
     
     // Enhanced TipTap video detection with multiple methods
     const isTipTapVideo = (video) => {
-      // Method 1: Check if video is inside dlux-video-container
+      // Method 1: Check for TipTap data attribute (most reliable)
+      if (video.hasAttribute('data-tiptap-video')) {
+        console.log('TipTap video detected by data attribute:', video.id || 'no-id');
+        return true;
+      }
+      
+      // Method 2: Check if video is inside dlux-video-container
       if (video.closest('.dlux-video-container')) {
+        console.log('TipTap video detected by container:', video.id || 'no-id');
         return true;
       }
       
-      // Method 2: Check for Video.js classes that TipTap uses
-      if (video.classList.contains('video-js') || 
-          video.classList.contains('vjs-default-skin') ||
-          video.classList.contains('vjs-big-play-centered') ||
-          video.classList.contains('vjs-fluid')) {
+      // Method 3: Check for Video.js classes that TipTap uses
+      if (video.classList.contains('video-js') && 
+          (video.classList.contains('vjs-default-skin') ||
+           video.classList.contains('vjs-big-play-centered') ||
+           video.classList.contains('vjs-fluid'))) {
+        console.log('TipTap video detected by Video.js classes:', video.id || 'no-id', video.className);
         return true;
       }
       
-      // Method 3: Check for dlux-video ID pattern
+      // Method 4: Check for dlux-video ID pattern
       if (video.id && video.id.startsWith('dlux-video-')) {
+        console.log('TipTap video detected by ID pattern:', video.id);
         return true;
       }
       
+      console.log('Regular video - processing with methods-common:', video.id || 'no-id', video.className);
       return false;
     };
 
@@ -1084,8 +1094,19 @@ export default {
       
       // Skip videos managed by TipTap DluxVideo extension to prevent double processing
       if (isTipTapVideo(video)) {
-        console.log('Skipping TipTap video:', video.id || 'no-id', video.className);
         return; // TipTap DluxVideo extension handles these exclusively
+      }
+      
+      // Ensure video is properly attached to DOM before processing
+      if (!document.contains(video)) {
+        console.log('⏭️ Skipping video not in DOM:', video.id || 'no-id', 'will retry if re-added');
+        return; // Video not in DOM yet, MutationObserver will catch it when it's added
+      }
+      
+      // Filter out temporary/placeholder videos that lack meaningful content
+      if (!video.src && !video.querySelector('source') && !video.getAttribute('data-src')) {
+        console.log('⏭️ Skipping video without source:', video.id || 'no-id', video.className);
+        return; // No source to process
       }
       
       processedVideos.add(video);

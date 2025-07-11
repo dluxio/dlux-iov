@@ -159,7 +159,7 @@ function ensureVideoJSStyles() {
   const existingVjsFallback = document.querySelector('link[data-vjs-fallback="true"]');
   
   if (existingStyleLink || existingVjsFallback) {
-    return; // Styles already loaded
+    return Promise.resolve(); // Styles already loaded
   }
   
   // More comprehensive test for Video.js CSS by checking multiple key properties

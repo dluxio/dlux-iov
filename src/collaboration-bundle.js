@@ -938,31 +938,55 @@ const DluxVideo = Node.create({
       // Create video element for Video.js
       const video = document.createElement('video');
       video.className = 'video-js vjs-default-skin vjs-big-play-centered vjs-fluid';
+      video.setAttribute('data-tiptap-video', 'true'); // Mark as TipTap video for detection
       
       wrapper.appendChild(video);
       
       // Initialize player after a short delay to ensure DOM is ready
       let player = null;
       
-      const initializePlayer = () => {
+      const initializePlayer = async () => {
         // Check if DluxVideoPlayer is available
         if (!window.DluxVideoPlayer) {
           console.error('DluxVideoPlayer not available. Make sure video-player-bundle.js is loaded.');
           return;
         }
         
-        // Initialize using the global DluxVideoPlayer service
-        player = window.DluxVideoPlayer.initializePlayer(video, {
-          src: node.attrs.src,
-          type: node.attrs.type || (node.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'),
-          poster: node.attrs.poster,
-          autoplay: node.attrs.autoplay,
-          loop: node.attrs.loop,
-          muted: node.attrs.muted
-        });
+        // Ensure video element is in DOM before initializing
+        if (!document.contains(video)) {
+          console.warn('Video element not in DOM yet, retrying...');
+          setTimeout(initializePlayer, 50);
+          return;
+        }
         
-        // Store player reference on wrapper for cleanup
-        wrapper._dluxVideoPlayer = player;
+        // Check if Video.js CSS is loaded before initializing
+        const hasVideoJSStyles = document.querySelector('link[href*="video-js"]') || 
+                                document.querySelector('link[data-vjs-fallback="true"]') ||
+                                document.querySelector('style[data-vjs-generated="true"]');
+        
+        if (!hasVideoJSStyles) {
+          console.warn('Video.js CSS not loaded yet, retrying...');
+          setTimeout(initializePlayer, 100);
+          return;
+        }
+        
+        try {
+          // Initialize using the global DluxVideoPlayer service
+          player = await window.DluxVideoPlayer.initializePlayer(video, {
+            src: node.attrs.src,
+            type: node.attrs.type || (node.attrs.src && node.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'),
+            poster: node.attrs.poster,
+            autoplay: node.attrs.autoplay,
+            loop: node.attrs.loop,
+            muted: node.attrs.muted
+          });
+          
+          // Store player reference on wrapper for cleanup
+          wrapper._dluxVideoPlayer = player;
+          console.log('DluxVideo player initialized successfully');
+        } catch (error) {
+          console.error('Failed to initialize DluxVideo player:', error);
+        }
       };
       
       // Use setTimeout to ensure DOM is ready and DluxVideoPlayer is loaded
