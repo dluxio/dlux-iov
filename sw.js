@@ -1,4 +1,4 @@
-this.version = "2025.07.11.9";
+this.version = "2025.07.11.10";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.12",
-  "generated": "2025-07-11T19:24:50Z",
+  "version": "2025.07.11.10",
+  "generated": "2025-07-11T19:25:06Z",
   "files": {
-    "/img/dlux-hive-logo-alpha-font_color.svg": {
-      "checksum": "d5cba5e8acda2fd786ec0b8af4580666",
-      "size": 3441,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo-alpha.svg": {
       "checksum": "93b0396ce748e2d51e978260bc3267d2",
       "size": 3416,
@@ -1691,11 +1686,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/abap/abap.js": {
-      "checksum": "36b035c2c53fa2cb6d7a8a244f0c97c1",
-      "size": 14986,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/apex/apex.js": {
       "checksum": "12e909055d8470a47a7b99f21df3687c",
       "size": 4775,
@@ -2356,12 +2346,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
