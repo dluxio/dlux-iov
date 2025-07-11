@@ -1165,31 +1165,22 @@ export default {
       }
     };
 
-    // Vue-aware video processing with proper timing
-    const processVideoWithTiming = (video) => {
-      if (typeof window !== 'undefined' && window.Vue && window.Vue.nextTick) {
-        window.Vue.nextTick(() => processVideo(video));
-      } else {
-        setTimeout(() => processVideo(video), 0);
-      }
-    };
-
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             if (node.tagName === 'VIDEO') {
-              processVideoWithTiming(node);
+              processVideo(node);
             }
             const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
-            videos.forEach(video => processVideoWithTiming(video));
+            videos.forEach(video => processVideo(video));
           }
         });
 
         if (mutation.type === 'attributes' &&
             mutation.target.tagName === 'VIDEO' &&
             (mutation.attributeName === 'src' || mutation.attributeName === 'type' || mutation.attributeName === 'data-type')) {
-          processVideoWithTiming(mutation.target);
+          processVideo(mutation.target);
         }
       });
     });
@@ -1201,8 +1192,8 @@ export default {
       attributeFilter: ['src', 'type', 'data-type']
     });
 
-    // Setup existing video elements with proper timing
-    document.querySelectorAll('video').forEach(video => processVideoWithTiming(video));
+    // Setup existing video elements
+    document.querySelectorAll('video').forEach(video => processVideo(video));
 
     return observer;
   },

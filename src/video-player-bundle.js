@@ -152,74 +152,54 @@ class DluxVideoPlayer {
   }
 }
 
-// Ensure Video.js CSS is loaded - Vue-aware timing for DOM manipulation
+// Ensure Video.js CSS is loaded - fallback for webpack CSS injection timing issues
 function ensureVideoJSStyles() {
-  return new Promise((resolve) => {
-    // Check if Video.js styles are already loaded by URL or inline
-    const existingStyleLink = document.querySelector('link[href*="video-js"]');
-    const existingVjsFallback = document.querySelector('link[data-vjs-fallback="true"]');
+  // Check if Video.js styles are already loaded by URL or inline
+  const existingStyleLink = document.querySelector('link[href*="video-js"]');
+  const existingVjsFallback = document.querySelector('link[data-vjs-fallback="true"]');
+  
+  if (existingStyleLink || existingVjsFallback) {
+    return; // Styles already loaded
+  }
+  
+  // More comprehensive test for Video.js CSS by checking multiple key properties
+  const testElement = document.createElement('div');
+  testElement.className = 'video-js';
+  testElement.style.position = 'absolute';
+  testElement.style.left = '-9999px';
+  testElement.style.visibility = 'hidden';
+  document.body.appendChild(testElement);
+  
+  const computedStyle = window.getComputedStyle(testElement);
+  
+  // Test multiple Video.js specific properties
+  const hasVideoJSStyles = (
+    computedStyle.position === 'relative' ||
+    computedStyle.display === 'inline-block' ||
+    computedStyle.fontSize === '10px' ||
+    computedStyle.boxSizing === 'border-box'
+  );
+  
+  document.body.removeChild(testElement);
+  
+  if (!hasVideoJSStyles) {
+    console.warn('Video.js CSS not detected, adding fallback link');
+    // Add Video.js CSS as fallback
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://vjs.zencdn.net/8.6.1/video-js.css';
+    link.dataset.vjsFallback = 'true';
+    document.head.appendChild(link);
     
-    if (existingStyleLink || existingVjsFallback) {
-      resolve(); // Styles already loaded
-      return;
-    }
-    
-    // Use Vue nextTick if available for proper DOM timing
-    const performCSSTest = () => {
-      // Ensure document.body is available before creating test elements
-      if (!document.body) {
-        setTimeout(() => performCSSTest(), 10);
-        return;
-      }
-      
-      // More comprehensive test for Video.js CSS by checking multiple key properties
-      const testElement = document.createElement('div');
-      testElement.className = 'video-js';
-      testElement.style.position = 'absolute';
-      testElement.style.left = '-9999px';
-      testElement.style.visibility = 'hidden';
-      document.body.appendChild(testElement);
-      
-      const computedStyle = window.getComputedStyle(testElement);
-      
-      // Test multiple Video.js specific properties
-      const hasVideoJSStyles = (
-        computedStyle.position === 'relative' ||
-        computedStyle.display === 'inline-block' ||
-        computedStyle.fontSize === '10px' ||
-        computedStyle.boxSizing === 'border-box'
-      );
-      
-      document.body.removeChild(testElement);
-      
-      if (!hasVideoJSStyles) {
-        console.warn('Video.js CSS not detected, adding fallback link');
-        // Add Video.js CSS as fallback
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://vjs.zencdn.net/8.6.1/video-js.css';
-        link.dataset.vjsFallback = 'true';
-        document.head.appendChild(link);
-        
-        // Force styles to load before proceeding
-        link.onload = resolve;
-        link.onerror = resolve; // Continue even if CDN fails
-        setTimeout(resolve, 2000); // Timeout after 2 seconds
-      } else {
-        resolve();
-      }
-    };
-    
-    // Use Vue nextTick pattern if Vue is available
-    if (typeof window !== 'undefined' && window.Vue && window.Vue.nextTick) {
-      window.Vue.nextTick(() => {
-        performCSSTest();
-      });
-    } else {
-      // Fallback for non-Vue contexts
-      setTimeout(() => performCSSTest(), 0);
-    }
-  });
+    // Force styles to load before proceeding
+    return new Promise((resolve) => {
+      link.onload = resolve;
+      link.onerror = resolve; // Continue even if CDN fails
+      setTimeout(resolve, 2000); // Timeout after 2 seconds
+    });
+  }
+  
+  return Promise.resolve();
 }
 
 // Export everything
