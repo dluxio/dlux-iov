@@ -1054,13 +1054,37 @@ export default {
     // Keep track of processed videos to prevent duplicates
     const processedVideos = new WeakSet();
     
+    // Enhanced TipTap video detection with multiple methods
+    const isTipTapVideo = (video) => {
+      // Method 1: Check if video is inside dlux-video-container
+      if (video.closest('.dlux-video-container')) {
+        return true;
+      }
+      
+      // Method 2: Check for Video.js classes that TipTap uses
+      if (video.classList.contains('video-js') || 
+          video.classList.contains('vjs-default-skin') ||
+          video.classList.contains('vjs-big-play-centered') ||
+          video.classList.contains('vjs-fluid')) {
+        return true;
+      }
+      
+      // Method 3: Check for dlux-video ID pattern
+      if (video.id && video.id.startsWith('dlux-video-')) {
+        return true;
+      }
+      
+      return false;
+    };
+
     const processVideo = (video) => {
       if (processedVideos.has(video)) {
         return; // Already processed this exact video element
       }
       
       // Skip videos managed by TipTap DluxVideo extension to prevent double processing
-      if (video.closest('.dlux-video-container')) {
+      if (isTipTapVideo(video)) {
+        console.log('Skipping TipTap video:', video.id || 'no-id', video.className);
         return; // TipTap DluxVideo extension handles these exclusively
       }
       
@@ -1150,18 +1174,29 @@ export default {
         mutation.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) {
             if (node.tagName === 'VIDEO') {
-              processVideo(node);
+              // Skip TipTap videos to prevent double processing
+              if (!isTipTapVideo(node)) {
+                processVideo(node);
+              }
             }
-            // Skip searching for videos inside TipTap video containers
-            const videos = node.querySelectorAll ? node.querySelectorAll('video:not(.dlux-video-container video)') : [];
-            videos.forEach(video => processVideo(video));
+            // Find all videos and filter out TipTap videos
+            const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
+            videos.forEach(video => {
+              // Skip TipTap videos to prevent double processing
+              if (!isTipTapVideo(video)) {
+                processVideo(video);
+              }
+            });
           }
         });
 
         if (mutation.type === 'attributes' &&
             mutation.target.tagName === 'VIDEO' &&
             (mutation.attributeName === 'src' || mutation.attributeName === 'type' || mutation.attributeName === 'data-type')) {
-          processVideo(mutation.target);
+          // Skip TipTap videos to prevent double processing
+          if (!isTipTapVideo(mutation.target)) {
+            processVideo(mutation.target);
+          }
         }
       });
     });
