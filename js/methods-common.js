@@ -821,15 +821,6 @@ export default {
     setupHLSPlayer(videoElement, gatewayUrl = 'https://ipfs.dlux.io') {
     if (!videoElement || !videoElement.src) return;
 
-    // Don't interfere with existing Video.js players
-    const existingPlayer = videoElement._dluxVideoPlayer || 
-                          (videoElement.id && typeof videojs !== 'undefined' && videojs.getPlayers && videojs.getPlayers()[videoElement.id]);
-    
-    if (existingPlayer) {
-      console.log('Video.js player exists, skipping custom HLS setup');
-      return;
-    }
-
     const videoSrc = videoElement.src;
     const videoType = videoElement.type;
     // Video setup logging removed to reduce noise
@@ -1067,6 +1058,12 @@ export default {
       if (processedVideos.has(video)) {
         return; // Already processed this exact video element
       }
+      
+      // Skip videos managed by TipTap DluxVideo extension to prevent double processing
+      if (video.closest('.dlux-video-container')) {
+        return; // TipTap DluxVideo extension handles these exclusively
+      }
+      
       processedVideos.add(video);
       
       // Check if this is a blob URL that needs restoration
@@ -1126,42 +1123,25 @@ export default {
         }
       }
       
-      // Check if Video.js is already initialized on this element
-      const existingPlayer = video._dluxVideoPlayer || 
-                             (video.id && typeof videojs !== 'undefined' && videojs.getPlayers && videojs.getPlayers()[video.id]);
-      
-      if (existingPlayer) {
-        console.log('Video.js player already exists, skipping initialization');
-        return; // Already has a Video.js player
-      }
-      
       // Enhance with Video.js bundle if available (for proper styling)
       if (typeof DluxVideoPlayer !== 'undefined' && DluxVideoPlayer.enhanceVideoElement) {
         try {
-          // Properly await the enhancement and check for success
-          DluxVideoPlayer.enhanceVideoElement(video).then((player) => {
-            // Check if Video.js enhancement was successful
-            if (player && video._dluxVideoPlayer) {
-              console.log('Video.js enhancement successful, Video.js will handle HLS');
-              // Video.js handles HLS automatically, no need for custom HLS
-            } else {
-              console.log('Video.js enhancement completed but no player found, using fallback HLS');
-              // Only use custom HLS if Video.js enhancement failed
-              if (video.type === 'application/x-mpegURL') {
-                setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 50);
-              }
+          DluxVideoPlayer.enhanceVideoElement(video).then(() => {
+            // Video.js handles HLS automatically, so only fallback to our custom HLS if needed
+            if (!video._dluxVideoPlayer && video.type === 'application/x-mpegURL') {
+              setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
             }
           }).catch(error => {
             console.log('Video.js enhancement failed, using fallback HLS:', error);
-            setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 50);
+            setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
           });
         } catch (error) {
           console.log('Video.js enhancement not available, using fallback HLS:', error);
-          setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 50);
+          setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
         }
       } else {
         // Fallback to custom HLS implementation
-        setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 50);
+        setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
       }
     };
 
@@ -1172,7 +1152,8 @@ export default {
             if (node.tagName === 'VIDEO') {
               processVideo(node);
             }
-            const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
+            // Skip searching for videos inside TipTap video containers
+            const videos = node.querySelectorAll ? node.querySelectorAll('video:not(.dlux-video-container video)') : [];
             videos.forEach(video => processVideo(video));
           }
         });

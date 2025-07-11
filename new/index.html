@@ -1862,6 +1862,10 @@
         };
     </script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
+    <script>
+    // Disable auto-enhancement to prevent conflicts with TipTap DluxVideo extension
+    window.dluxVideoPlayerConfig = { autoEnhance: false };
+    </script>
     <script src="/js/videoPlayer.bundle.js"></script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
     <script src="/js/collaboration.bundle.js"></script>
