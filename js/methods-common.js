@@ -1083,6 +1083,24 @@ export default {
         return true;
       }
       
+      // Method 5: Check if video already has Video.js player instance
+      if (video.id && window.videojs && window.videojs.getPlayer && window.videojs.getPlayer(video.id)) {
+        console.log('Video already has Video.js player - skipping:', video.id);
+        return true;
+      }
+      
+      // Method 6: Check for Video.js player reference on element
+      if (video._dluxVideoPlayer || video.player) {
+        console.log('Video already enhanced - skipping:', video.id || 'no-id');
+        return true;
+      }
+      
+      // Method 7: Check for data-dlux-enhanced attribute
+      if (video.hasAttribute('data-dlux-enhanced') && video.getAttribute('data-dlux-enhanced') === 'true') {
+        console.log('Video already dlux-enhanced - skipping:', video.id || 'no-id');
+        return true;
+      }
+      
       console.log('Regular video - processing with methods-common:', video.id || 'no-id', video.className);
       return false;
     };

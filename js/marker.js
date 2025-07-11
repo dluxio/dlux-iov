@@ -57,10 +57,28 @@ export default {
           return;
         }
         
-        // Find all video elements in the rendered content
+        // Helper function to detect TipTap videos to prevent conflicts
+        const isTipTapVideo = (video) => {
+          return video.hasAttribute('data-tiptap-video') ||
+                 video.closest('.dlux-video-container') ||
+                 (video.classList.contains('video-js') && 
+                  (video.classList.contains('vjs-default-skin') || 
+                   video.classList.contains('vjs-big-play-centered'))) ||
+                 (video.id && video.id.startsWith('dlux-video-')) ||
+                 video._dluxVideoPlayer ||
+                 video.player;
+        };
+        
+        // Find all video elements in the rendered content, excluding TipTap and already enhanced videos
         const videos = this.$refs.markdownContent.querySelectorAll('video:not([data-dlux-enhanced])');
         
         videos.forEach(video => {
+          // Skip TipTap videos to prevent double processing
+          if (isTipTapVideo(video)) {
+            console.log('Skipping TipTap video in marker.js:', video.id || 'no-id');
+            return;
+          }
+          
           try {
             // Enhance the video with DLUX Video Player
             window.DluxVideoPlayer.enhanceVideoElement(video);

@@ -940,21 +940,101 @@ const DluxVideo = Node.create({
       video.className = 'video-js vjs-default-skin vjs-big-play-centered vjs-fluid';
       video.setAttribute('data-tiptap-video', 'true'); // Mark as TipTap video for detection
       
+      // Additional safety: ensure attribute is properly set
+      if (!video.hasAttribute('data-tiptap-video')) {
+        console.warn('Failed to set data-tiptap-video attribute, retrying...');
+        video.setAttribute('data-tiptap-video', 'true');
+      }
+      
       wrapper.appendChild(video);
+      console.log('DluxVideo element created with data-tiptap-video:', video.hasAttribute('data-tiptap-video'));
       
       // Initialize player after a short delay to ensure DOM is ready
       let player = null;
       
+      // Retry limits to prevent infinite loops
+      let domRetryCount = 0;
+      let cssRetryCount = 0;
+      const MAX_DOM_RETRIES = 20; // 20 retries × 50ms = 1 second max
+      const MAX_CSS_RETRIES = 15; // 15 retries × 100ms = 1.5 seconds max
+      const startTime = Date.now();
+      const MAX_TOTAL_TIMEOUT = 5000; // 5 seconds total timeout
+      
       const initializePlayer = async () => {
+        // Early exit conditions
+        if (video._dluxInitialized) {
+          console.log('DluxVideo already initialized for:', video.id || 'no-id');
+          return;
+        }
+        
+        if (video._dluxInitializationFailed) {
+          console.warn('DluxVideo initialization previously failed for:', video.id || 'no-id', 'skipping retry');
+          return;
+        }
+        
+        // Check total timeout first
+        if (Date.now() - startTime > MAX_TOTAL_TIMEOUT) {
+          console.warn('DluxVideo initialization timeout exceeded (5s). Giving up for video:', video.id || 'no-id');
+          return;
+        }
+        
         // Check if DluxVideoPlayer is available
         if (!window.DluxVideoPlayer) {
           console.error('DluxVideoPlayer not available. Make sure video-player-bundle.js is loaded.');
           return;
         }
         
-        // Ensure video element is in DOM before initializing
-        if (!document.contains(video)) {
-          console.warn('Video element not in DOM yet, retrying...');
+        // Collaborative update awareness - avoid initialization during Y.js sync
+        const isCollaborativeUpdateActive = () => {
+          // Check if any Y.js documents are currently applying transactions
+          if (typeof window !== 'undefined' && window.ydoc) {
+            // Simple heuristic: if the document was updated very recently, wait
+            const lastUpdate = window.ydoc._lastUpdate || 0;
+            if (Date.now() - lastUpdate < 100) { // Wait 100ms after last Y.js update
+              return true;
+            }
+          }
+          return false;
+        };
+        
+        if (isCollaborativeUpdateActive()) {
+          // Don't count this as a retry, just delay briefly
+          console.warn('Y.js collaborative update in progress, delaying video initialization...');
+          setTimeout(initializePlayer, 100);
+          return;
+        }
+        
+        // Enhanced DOM attachment detection
+        const isProperlyAttached = () => {
+          // Check 1: Video element is in document
+          if (!document.contains(video)) return false;
+          
+          // Check 2: Wrapper is in document  
+          if (!document.contains(wrapper)) return false;
+          
+          // Check 3: Video has proper parent (wrapper)
+          if (video.parentElement !== wrapper) return false;
+          
+          // Check 4: Video element is visible (has dimensions or is not display:none)
+          const style = window.getComputedStyle(video);
+          if (style.display === 'none') return false;
+          
+          return true;
+        };
+        
+        if (!isProperlyAttached()) {
+          domRetryCount++;
+          if (domRetryCount >= MAX_DOM_RETRIES) {
+            console.warn('DluxVideo DOM attachment failed after', MAX_DOM_RETRIES, 'retries. Video state:', {
+              inDocument: document.contains(video),
+              wrapperInDocument: document.contains(wrapper),
+              hasParent: !!video.parentElement,
+              parentIsWrapper: video.parentElement === wrapper,
+              display: window.getComputedStyle(video).display
+            });
+            return;
+          }
+          console.warn('Video element not properly attached, retrying... (', domRetryCount, '/', MAX_DOM_RETRIES, ')');
           setTimeout(initializePlayer, 50);
           return;
         }
@@ -965,12 +1045,25 @@ const DluxVideo = Node.create({
                                 document.querySelector('style[data-vjs-generated="true"]');
         
         if (!hasVideoJSStyles) {
-          console.warn('Video.js CSS not loaded yet, retrying...');
-          setTimeout(initializePlayer, 100);
-          return;
+          cssRetryCount++;
+          if (cssRetryCount >= MAX_CSS_RETRIES) {
+            console.warn('Video.js CSS loading failed after', MAX_CSS_RETRIES, 'retries. Proceeding without CSS check for video:', video.id || 'no-id');
+            // Continue initialization even without CSS - Video.js will handle fallbacks
+          } else {
+            console.warn('Video.js CSS not loaded yet, retrying... (', cssRetryCount, '/', MAX_CSS_RETRIES, ')');
+            setTimeout(initializePlayer, 100);
+            return;
+          }
         }
         
         try {
+          // Mark as initialization in progress to prevent multiple attempts
+          if (video._dluxInitializing) {
+            console.warn('DluxVideo initialization already in progress for:', video.id || 'no-id');
+            return;
+          }
+          video._dluxInitializing = true;
+          
           // Initialize using the global DluxVideoPlayer service
           player = await window.DluxVideoPlayer.initializePlayer(video, {
             src: node.attrs.src,
@@ -983,9 +1076,28 @@ const DluxVideo = Node.create({
           
           // Store player reference on wrapper for cleanup
           wrapper._dluxVideoPlayer = player;
-          console.log('DluxVideo player initialized successfully');
+          video._dluxInitialized = true;
+          const totalTime = Date.now() - startTime;
+          console.log('DluxVideo player initialized successfully for:', video.id || 'no-id', 'in', totalTime, 'ms, data-tiptap-video:', video.hasAttribute('data-tiptap-video'));
+          
         } catch (error) {
-          console.error('Failed to initialize DluxVideo player:', error);
+          console.error('Failed to initialize DluxVideo player for:', video.id || 'no-id', 'Error:', error);
+          
+          // Clean up on failure
+          if (player && typeof player.dispose === 'function') {
+            try {
+              player.dispose();
+            } catch (disposeError) {
+              console.error('Error disposing failed player:', disposeError);
+            }
+          }
+          
+          // Mark as failed to prevent further attempts
+          video._dluxInitializationFailed = true;
+          
+        } finally {
+          // Always clean up initialization flag
+          delete video._dluxInitializing;
         }
       };
       

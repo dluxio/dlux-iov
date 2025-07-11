@@ -1,4 +1,4 @@
-this.version = "2025.07.11.8";
+this.version = "2025.07.11.9";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.8",
-  "generated": "2025-07-11T18:53:27Z",
+  "version": "2025.07.11.12",
+  "generated": "2025-07-11T19:24:50Z",
   "files": {
-    "/img/dex-vr-comp.jpg": {
-      "checksum": "e763f32eddfb928e99597355486c7654",
-      "size": 101824,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo-alpha-font_color.svg": {
       "checksum": "d5cba5e8acda2fd786ec0b8af4580666",
       "size": 3441,
@@ -987,8 +982,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaboration.bundle.js": {
-      "checksum": "4d9bbbcf7c7ba3b97432b6eaf2e44682",
-      "size": 1384729,
+      "checksum": "2dfd2f09c691a846d1539d06436db3d4",
+      "size": 1386968,
       "priority": "important"
     },
     "/js/components/360-asset-manager-iframe-adapter.js": {
@@ -1142,8 +1137,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/marker.js": {
-      "checksum": "1895ed8d6bf7ca21b573dffbcdd6af4c",
-      "size": 7536,
+      "checksum": "5a8adecc4653aa9e8dd1849c1a620e17",
+      "size": 8407,
       "priority": "important"
     },
     "/js/mde.js": {
@@ -1152,8 +1147,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/methods-common.js": {
-      "checksum": "be383e759c2ad0a4b9ead9e2d060028c",
-      "size": 44566,
+      "checksum": "528a0932ec22d0a4f51e2ec4b075716a",
+      "size": 45381,
       "priority": "important"
     },
     "/js/methods-modals.js": {
@@ -1342,7 +1337,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ec12254f36490f6601f1e58e933a3db2",
+      "checksum": "46c5155f2572d94d073cf05362b6c636",
       "size": 36523,
       "priority": "important"
     },
@@ -1597,13 +1592,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "496e622e833dccfd8fc5b7380992b2e6",
+      "checksum": "c16e690297735117ef84d62e89e48a8e",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "5cbd9f2b48e5c4de75d421823e491cc2",
-      "size": 74975,
+      "checksum": "ff4a7c3a5a75e938df9ed9633331d425",
+      "size": 79932,
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
@@ -1695,11 +1690,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/base/worker/workerMain.js": {
-      "checksum": "b56d63807a3d5b23cb061ce224156c8c",
-      "size": 376515,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/abap/abap.js": {
       "checksum": "36b035c2c53fa2cb6d7a8a244f0c97c1",
@@ -2366,12 +2356,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
