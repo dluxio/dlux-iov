@@ -38,34 +38,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
     rel="stylesheet">
-  <!-- DLUX Video Player Styles -->
-  <link href="/css/dlux-video-player.css" rel="stylesheet" />
   <!-- Icons -->
   <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
-  <script src="/js/videoPlayer.bundle.js"></script>
-  <script>
-  // Early CSS injection with Vue timing for main page videos
-  document.addEventListener('DOMContentLoaded', function() {
-    // Use Vue nextTick if available for proper timing
-    if (window.Vue && window.Vue.nextTick && window.DluxVideoPlayer) {
-      window.Vue.nextTick(() => {
-        // Ensure Video.js CSS is loaded early for blog content
-        if (window.DluxVideoPlayer.ensureVideoJSStyles) {
-          window.DluxVideoPlayer.ensureVideoJSStyles();
-        }
-      });
-    } else if (window.DluxVideoPlayer && window.DluxVideoPlayer.ensureVideoJSStyles) {
-      // Fallback timing for early CSS injection
-      setTimeout(() => {
-        window.DluxVideoPlayer.ensureVideoJSStyles();
-      }, 100);
-    }
-  });
-  </script>
   <script type="module" src="/js/v3-index.js"></script>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
