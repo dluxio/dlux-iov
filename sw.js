@@ -1,4 +1,4 @@
-this.version = "2025.07.11.5";
+this.version = "2025.07.11.6";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.10",
-  "generated": "2025-07-11T17:30:27Z",
+  "version": "2025.07.11.6",
+  "generated": "2025-07-11T17:30:44Z",
   "files": {
-    "/img/crypto/ethereum.svg": {
-      "checksum": "54b6a875127d0b7c67a45fdd96e2cedc",
-      "size": 306,
-      "priority": "important"
-    },
     "/img/crypto/polygon.svg": {
       "checksum": "fa36cccf8cf4f5a620caeade8f7cf8a5",
       "size": 321,
@@ -1727,11 +1722,6 @@ self.cacheManifest =
       "size": 38190,
       "priority": "important"
     },
-    "/naf-playground/js/state.js": {
-      "checksum": "a642907c751f5cc9bb05a5bf87abedca",
-      "size": 17766,
-      "priority": "page-specific"
-    },
     "/naf-playground/js/systems/avatar-system.js": {
       "checksum": "967780e84b123c15244d099e634ebfa3",
       "size": 2236,
@@ -2432,12 +2422,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
