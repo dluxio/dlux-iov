@@ -1863,6 +1863,27 @@
     </script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
     <script src="/js/videoPlayer.bundle.js"></script>
+    <script>
+    // Early CSS injection with Vue timing for editor page videos
+    document.addEventListener('DOMContentLoaded', function() {
+      // Use Vue nextTick if available for proper timing
+      if (window.Vue && window.Vue.nextTick && window.DluxVideoPlayer) {
+        window.Vue.nextTick(() => {
+          // Ensure Video.js CSS is loaded early for TipTap editor content
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
+          }
+        });
+      } else if (window.DluxVideoPlayer) {
+        // Fallback timing for early CSS injection
+        setTimeout(() => {
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
+          }
+        }, 100);
+      }
+    });
+    </script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
     <script src="/js/collaboration.bundle.js"></script>
     <script>

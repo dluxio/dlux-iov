@@ -42,11 +42,28 @@
     <!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
-    <script>
-    // Disable auto-enhancement to prevent conflicts with methods-common.js video processing
-    window.dluxVideoPlayerConfig = { autoEnhance: false };
-    </script>
     <script src="/js/videoPlayer.bundle.js"></script>
+    <script>
+    // Early CSS injection with Vue timing for blog page videos
+    document.addEventListener('DOMContentLoaded', function() {
+      // Use Vue nextTick if available for proper timing
+      if (window.Vue && window.Vue.nextTick && window.DluxVideoPlayer) {
+        window.Vue.nextTick(() => {
+          // Ensure Video.js CSS is loaded early for blog content
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
+          }
+        });
+      } else if (window.DluxVideoPlayer) {
+        // Fallback timing for early CSS injection
+        setTimeout(() => {
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
+          }
+        }, 100);
+      }
+    });
+    </script>
     <script type="module" src="/js/v3-app.js"></script>
     <link href="/css/smde-comment.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
