@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 this.version = "2025.07.11.7";
+=======
+this.version = "2025.07.11.2";
+>>>>>>> parent of 4e4b1a30 (2025.07.11.3)
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,9 +558,29 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.7",
-  "generated": "2025-07-11T17:37:13Z",
+  "version": "2025.07.11.10",
+  "generated": "2025-07-11T17:37:59Z",
   "files": {
+    "/img/avi-file-type-svgrepo-com.svg": {
+      "checksum": "35d1d30fbe77b4fcadfcfd049d03682f",
+      "size": 1452,
+      "priority": "important"
+    },
+    "/img/crypto/bnb.svg": {
+      "checksum": "60ca7a9d786038944537c250266c63dc",
+      "size": 399,
+      "priority": "important"
+    },
+    "/img/crypto/ethereum.svg": {
+      "checksum": "54b6a875127d0b7c67a45fdd96e2cedc",
+      "size": 306,
+      "priority": "important"
+    },
+    "/img/crypto/polygon.svg": {
+      "checksum": "fa36cccf8cf4f5a620caeade8f7cf8a5",
+      "size": 321,
+      "priority": "important"
+    },
     "/img/crypto/solana.svg": {
       "checksum": "e7689ba617436aa6551ec68b4cb1f612",
       "size": 289,
@@ -1363,8 +1387,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ac73c3732bcedf179f272b301cea5ad0",
-      "size": 36523,
+      "checksum": "81bd1ef9cac21770d77bf54601ca5eae",
+      "size": 36624,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1483,8 +1507,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/videoPlayer.bundle.js": {
-      "checksum": "bf8d7befda11528f460834d121471599",
-      "size": 777550,
+      "checksum": "ffab33e6a5105fca2f29c48e13e8fdbb",
+      "size": 776793,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1548,8 +1572,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "74e281901364f12e13e5adc189fd1c3a",
-      "size": 125189,
+      "checksum": "3d28d2baa851110d88e3ea62ae8e0b4a",
+      "size": 125169,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1618,8 +1642,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "95a3e90d890f0a75105a837ce2141e8b",
-      "size": 7299,
+      "checksum": "cbf30b72218c5c313601f204a7191bdc",
+      "size": 7435,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
@@ -1628,8 +1652,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/src/video-player-bundle.js": {
-      "checksum": "f383bb4c37b46c085d021f89e58273f5",
-      "size": 9363,
+      "checksum": "c3c2690cece2cd4c0d6e38cc274e6071",
+      "size": 8242,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1716,6 +1740,26 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
+    },
+    "/naf-playground/js/scene-loader.js": {
+      "checksum": "8896d79d20479a74f4cc1a438ca097bd",
+      "size": 41693,
+      "priority": "page-specific"
+    },
+    "/naf-playground/js/sky-manager.js": {
+      "checksum": "0cebed6cf4f7a9d312d3b3465d4f07ff",
+      "size": 37455,
+      "priority": "page-specific"
+    },
+    "/naf-playground/js/state.js": {
+      "checksum": "a642907c751f5cc9bb05a5bf87abedca",
+      "size": 17766,
+      "priority": "page-specific"
+    },
+    "/naf-playground/js/systems/avatar-system.js": {
+      "checksum": "967780e84b123c15244d099e634ebfa3",
+      "size": 2236,
+      "priority": "page-specific"
     },
     "/naf-playground/js/ui.js": {
       "checksum": "728816b63e1206b98763b4bc56cc6b56",
@@ -2413,8 +2457,8 @@ self.cacheManifest =
       "priority": "page-specific"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {

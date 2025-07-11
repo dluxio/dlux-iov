@@ -12,16 +12,10 @@ import 'videojs-hls-quality-selector';
 // DLUX Video Player Service
 class DluxVideoPlayer {
   static async initializePlayer(element, options = {}) {
-    // Prevent double initialization - check multiple sources
+    // Prevent double initialization
     if (element._dluxVideoPlayer || element.dataset.dluxEnhanced === 'true') {
       console.log('Video already enhanced, skipping duplicate initialization');
       return element._dluxVideoPlayer;
-    }
-    
-    // Additional check for existing Video.js player
-    if (element.id && typeof videojs !== 'undefined' && videojs.getPlayers && videojs.getPlayers()[element.id]) {
-      console.log('Video.js player already exists for element, skipping initialization');
-      return videojs.getPlayers()[element.id];
     }
     
     // Ensure Video.js CSS is loaded before creating player
@@ -120,43 +114,24 @@ class DluxVideoPlayer {
       return video._dluxVideoPlayer;
     }
     
-    // Use Vue nextTick if available for proper DOM timing
-    return new Promise((resolve, reject) => {
-      const performEnhancement = async () => {
-        try {
-          // Extract options from video element
-          const elementOptions = {
-            src: video.src || video.currentSrc,
-            type: video.type || video.getAttribute('type'),
-            poster: video.poster,
-            autoplay: video.autoplay,
-            loop: video.loop,
-            muted: video.muted,
-            ...options
-          };
-          
-          // Initialize player (plugins are already loaded statically)
-          const player = await this.initializePlayer(video, elementOptions);
-          
-          // Mark as enhanced
-          video.dataset.dluxEnhanced = 'true';
-          
-          resolve(player);
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      // Use Vue nextTick pattern if Vue is available
-      if (typeof window !== 'undefined' && window.Vue && window.Vue.nextTick) {
-        window.Vue.nextTick(() => {
-          performEnhancement();
-        });
-      } else {
-        // Fallback for non-Vue contexts
-        setTimeout(() => performEnhancement(), 0);
-      }
-    });
+    // Extract options from video element
+    const elementOptions = {
+      src: video.src || video.currentSrc,
+      type: video.type || video.getAttribute('type'),
+      poster: video.poster,
+      autoplay: video.autoplay,
+      loop: video.loop,
+      muted: video.muted,
+      ...options
+    };
+    
+    // Initialize player (plugins are already loaded statically)
+    const player = await this.initializePlayer(video, elementOptions);
+    
+    // Mark as enhanced
+    video.dataset.dluxEnhanced = 'true';
+    
+    return player;
   }
   
   static async enhanceAllVideos(container = document) {
@@ -250,15 +225,13 @@ function ensureVideoJSStyles() {
 // Export everything
 const VideoPlayerBundle = {
   videojs,
-  DluxVideoPlayer,
-  ensureVideoJSStyles
+  DluxVideoPlayer
 };
 
 // Make globally available
 if (typeof window !== 'undefined') {
   window.videojs = videojs;
   window.DluxVideoPlayer = DluxVideoPlayer;
-  window.DluxVideoPlayer.ensureVideoJSStyles = ensureVideoJSStyles;
   window.VideoPlayerBundle = VideoPlayerBundle;
   
   // Ensure styles are loaded immediately

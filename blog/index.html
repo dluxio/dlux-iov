@@ -50,14 +50,16 @@
       if (window.Vue && window.Vue.nextTick && window.DluxVideoPlayer) {
         window.Vue.nextTick(() => {
           // Ensure Video.js CSS is loaded early for blog content
-          if (window.DluxVideoPlayer.ensureVideoJSStyles) {
-            window.DluxVideoPlayer.ensureVideoJSStyles();
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
           }
         });
-      } else if (window.DluxVideoPlayer && window.DluxVideoPlayer.ensureVideoJSStyles) {
+      } else if (window.DluxVideoPlayer) {
         // Fallback timing for early CSS injection
         setTimeout(() => {
-          window.DluxVideoPlayer.ensureVideoJSStyles();
+          if (typeof ensureVideoJSStyles === 'function') {
+            ensureVideoJSStyles();
+          }
         }, 100);
       }
     });
