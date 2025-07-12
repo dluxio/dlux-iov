@@ -122,6 +122,19 @@ createApp({
       videoUploadContract: false,
       showvideoupload: false,
       
+      // SPK Key Notification Properties
+      showKeyMismatchNotification: false,
+      keyMismatchDetails: {
+        currentKey: '',
+        spkKey: '',
+        multipleKeys: false,
+        keyCount: 0,
+        allKeys: [],
+        selectedKey: '',
+        customKey: '',
+        useCustomKey: false
+      },
+      
       // Mobile-First UI Properties
       mediaPanelOpen: false,
       showEnhanceModal: false,
@@ -1833,18 +1846,26 @@ PORT=3000
               }
             }
           }
-          // Check if Hive posting key and SPK key are different and SPK key isn't 'NA'
-          if (this.accountinfo.posting && this.spkapi.pubKey !== 'NA' && 
-              this.accountinfo.posting.key_auths && 
-              this.accountinfo.posting.key_auths[0] && 
-              this.accountinfo.posting.key_auths[0][0] !== this.spkapi.pubKey) {
+          // Check if viewing own profile and if keys need attention
+          if (this.me && this.account === this.pageAccount && this.accountinfo.posting && this.accountinfo.posting.key_auths) {
+            const keyAuths = this.accountinfo.posting.key_auths;
+            const hasMultipleKeys = keyAuths.length > 1;
+            const currentPostingKey = keyAuths[0] && keyAuths[0][0];
+            const spkKeyMismatch = this.spkapi.pubKey !== 'NA' && currentPostingKey && currentPostingKey !== this.spkapi.pubKey;
             
-            // Create a confirmation dialog with Continue and Cancel buttons
-            if (confirm("Your Hive posting public key is different from your SPK public key. Would you like to update your SPK key to match your Hive posting key?")) {
-              // User clicked Continue - update the key
-              this.updatePubkey();
-            } else {
-              // User clicked Cancel - do nothing or handle as needed
+            // Show notification if either condition is met
+            if (spkKeyMismatch || hasMultipleKeys) {
+              this.showKeyMismatchNotification = true;
+              this.keyMismatchDetails = {
+                currentKey: currentPostingKey || '',
+                spkKey: this.spkapi.pubKey || 'NA',
+                multipleKeys: hasMultipleKeys,
+                keyCount: keyAuths.length,
+                allKeys: keyAuths.map(ka => ka[0]),
+                selectedKey: currentPostingKey || '',
+                customKey: '',
+                useCustomKey: false
+              };
             }
           }
           
@@ -1967,19 +1988,34 @@ PORT=3000
       }
     },
     updatePubkey() {
+      // Determine which key to use
+      const keyToUse = this.keyMismatchDetails.useCustomKey 
+        ? this.keyMismatchDetails.customKey 
+        : this.keyMismatchDetails.selectedKey;
+      
+      if (!keyToUse) {
+        alert("Please select a key or enter a custom key.");
+        return;
+      }
+      
       var cja = {
-        pubKey: this.accountinfo.posting.key_auths[0][0]
+        pubKey: keyToUse
       };
       this.toSign = {
         type: "cja",
         cj: cja,
         id: `spkccT_register_authority`,
-        msg: `Registering: ${this.account}:${this.accountinfo.posting.key_auths[0][0]}`,
+        msg: `Registering: ${this.account}:${keyToUse}`,
         ops: ["getSapi"],
         api: sapi,
         txid: `spkccT_register_authority`,
       };
+      // Dismiss notification after initiating update
+      this.showKeyMismatchNotification = false;
       setTimeout(() => { this.getSPKUser() }, 7000);
+    },
+    dismissKeyNotification() {
+      this.showKeyMismatchNotification = false;
     },
     petitionForContract(provider = 'dlux-io',) {
       this.services[provider].memo = 'Preparing'
