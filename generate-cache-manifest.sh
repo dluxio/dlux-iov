@@ -236,23 +236,51 @@ echo "📦 Generated temporary cache manifest"
 # Update the service worker with the new version and manifest
 echo "🔄 Updating service worker..."
 
-if grep -q "self.cacheManifest =" sw.js; then
-    echo "   📝 Replacing existing cache manifest..."
-    sed '/\/\/ Cache manifest with checksums - auto-generated/,$d' sw.js > "$TEMP_SW"
+# Create a clean service worker without any existing cache manifest
+if [ -f sw.js.backup ]; then
+    echo "   📝 Using backup file..."
+    cp sw.js.backup "$TEMP_SW"
+elif grep -q "self.cacheManifest =" sw.js; then
+    echo "   📝 Removing existing cache manifest..."
+    # Remove the cache manifest block
+    awk '
+        /\/\/ Cache manifest with checksums - auto-generated/ { in_manifest = 1 }
+        in_manifest && /^};$/ { in_manifest = 0; next }
+        !in_manifest && !/self\.cacheManifest = / { print }
+    ' sw.js > "$TEMP_SW"
 else
-    echo "   📝 Adding new cache manifest..."
+    echo "   📝 No existing cache manifest found..."
     cp sw.js "$TEMP_SW"
 fi
 
-cat >> "$TEMP_SW" << 'EOF'
-// Cache manifest with checksums - auto-generated
-self.cacheManifest = 
-EOF
+# Now insert the new cache manifest at the beginning (after initial setup)
+# Create final service worker with cache manifest at the beginning
+{
+    # Find where to insert the cache manifest (after CACHE_NAME declaration)
+    # Look for the line that defines CACHE_NAME
+    cache_line=$(grep -n '^const CACHE_NAME = ' "$TEMP_SW" | head -1 | cut -d: -f1)
+    
+    if [ -z "$cache_line" ]; then
+        echo "   ⚠️  Warning: Could not find CACHE_NAME line, using fallback position"
+        cache_line=8
+    fi
+    
+    # Copy lines up to and including CACHE_NAME
+    head -n "$cache_line" "$TEMP_SW"
+    
+    # Add blank line and cache manifest
+    echo ""
+    echo "// Cache manifest with checksums - auto-generated"
+    echo "self.cacheManifest = "
+    cat "$TEMP_MANIFEST"
+    echo ";"
+    echo ""
+    
+    # Add the rest of the service worker
+    tail -n +$((cache_line + 1)) "$TEMP_SW"
+} > sw.js
 
-cat "$TEMP_MANIFEST" >> "$TEMP_SW"
-echo ";" >> "$TEMP_SW"
-
-mv "$TEMP_SW" sw.js
+rm -f "$TEMP_SW"
 
 echo "✅ Updated sw.js with version $TIMESTAMP and cache manifest"
 echo "📊 Manifest contains $(grep -c '"checksum"' "$TEMP_MANIFEST") files"

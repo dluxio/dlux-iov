@@ -19,9 +19,18 @@ shift $((OPTIND - 1))
 file="./sw.js"
 
 if [ -f "$file" ]; then
-    # Read the first line of sw.js
-    first_line=$(head -n 1 "$file")
-    echo "$first_line"
+    # Find the line with version declaration
+    version_line=$(grep -n '^this\.version = ' "$file" | head -1)
+    
+    if [ -z "$version_line" ]; then
+        echo "Error: Could not find version line in $file"
+        exit 1
+    fi
+    
+    # Extract line number and content
+    line_number=$(echo "$version_line" | cut -d: -f1)
+    line_content=$(echo "$version_line" | cut -d: -f2-)
+    echo "Found version at line $line_number: $line_content"
 
     # Get the current date in YYYY.MM.DD format
     current_day=$(date +%Y.%m.%d)
@@ -29,7 +38,7 @@ if [ -f "$file" ]; then
     # Regex to match the version string, e.g., this.version = "2025.02.13.15";
     version_regex='this.version = "([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)";'
 
-    if [[ $first_line =~ $version_regex ]]; then
+    if [[ $line_content =~ $version_regex ]]; then
         # Extract version date and letter
         version_date="${BASH_REMATCH[1]}"
         version_letter="${BASH_REMATCH[2]}"
