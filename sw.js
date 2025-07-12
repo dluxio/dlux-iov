@@ -1,4 +1,4 @@
-this.version = "2025.07.12.2";
+this.version = "2025.07.12.3";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.12.2",
-  "generated": "2025-07-12T12:41:05Z",
+  "version": "2025.07.12.3",
+  "generated": "2025-07-12T13:20:39Z",
   "files": {
-    "/img/dlux-hive-logo.svg": {
-      "checksum": "96518aec91dcdc4cf306b488344f2281",
-      "size": 3535,
-      "priority": "important"
-    },
     "/img/dlux-icon-192.png": {
       "checksum": "16426fe9577a406f9363aaccfdd97a83",
       "size": 11936,
@@ -1327,8 +1322,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "9b5b9a7f6fb516e250f4e34b1d75dfb1",
-      "size": 36524,
+      "checksum": "ce0cee013341749d19f432126facd3c6",
+      "size": 36523,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1432,8 +1427,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "c673127c1a8d97e9324ed45a6d2cae80",
-      "size": 285740,
+      "checksum": "bad3c9f711bc2a401da9e3a3e1a09ada",
+      "size": 289239,
       "priority": "important"
     },
     "/js/video-choice-modal.js": {
@@ -1582,8 +1577,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "5c32e06e5c3ad2386916a1a2f719cfaa",
-      "size": 7300,
+      "checksum": "746374030dd36d373b43d7206ae7dea7",
+      "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
@@ -1617,8 +1612,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "ee09580bb6811041c736bd5ae7cf4ddc",
-      "size": 302425,
+      "checksum": "10f537bd566a1b9b623fbfb72473e4d6",
+      "size": 304121,
       "priority": "important"
     },
     "/vid/stills/blue_dust.jpg": {
@@ -1677,14 +1672,9 @@ self.cacheManifest =
       "priority": "important"
     },
     "/witnesses/index.html": {
-      "checksum": "c24dff36bb6220af00458aaf383567fa",
-      "size": 38190,
+      "checksum": "9677a29e3bb01e068de8366d8e23be55",
+      "size": 38285,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/azcli/azcli.js": {
-      "checksum": "1987f363de7c4d4b9d891378fe647701",
-      "size": 1673,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/bat/bat.js": {
       "checksum": "d58d256a4680fa6bc99c20baa5bafc70",
@@ -2336,12 +2326,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
