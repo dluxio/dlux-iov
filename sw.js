@@ -1,6 +1,6 @@
-this.version = "2025.07.12.17";
-console.log("SW:" + this.version + " - online.");
-const CACHE_NAME = "sw-cache-v" + this.version;
+const version = "2025.07.12.18";
+console.log("SW:" + version + " - online.");
+const CACHE_NAME = "sw-cache-v" + version;
 
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 

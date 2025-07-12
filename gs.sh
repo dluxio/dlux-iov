@@ -58,7 +58,7 @@ file="./sw.js"
 
 if [ -f "$file" ]; then
     # Find the line with version declaration
-    version_line=$(grep -n '^this\.version = ' "$file" | head -1)
+    version_line=$(grep -n '^const version = ' "$file" | head -1)
     
     if [ -z "$version_line" ]; then
         echo "Error: Could not find version line in $file"
@@ -73,8 +73,8 @@ if [ -f "$file" ]; then
     # Get the current date in YYYY.MM.DD format
     current_day=$(date +%Y.%m.%d)
 
-    # Regex to match the version string, e.g., this.version = "2025.02.13.15";
-    version_regex='this.version = "([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)";'
+    # Regex to match the version string, e.g., const version = "2025.02.13.15";
+    version_regex='const version = "([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)";'
 
     if [[ $line_content =~ $version_regex ]]; then
         # Extract version date and letter
@@ -85,11 +85,11 @@ if [ -f "$file" ]; then
         if [[ $version_date == $current_day ]]; then
             new_version_letter=$((version_letter + 1))
             new_version="$current_day.$new_version_letter"
-            cross_platform_sed "${line_number}s/^.*$/this.version = \"$new_version\";/" "$file"
+            cross_platform_sed "${line_number}s/^.*$/const version = \"$new_version\";/" "$file"
             echo "Line $line_number of $file incremented to: $new_version"
         else
             new_version="$current_day.1"
-            cross_platform_sed "${line_number}s/^.*$/this.version = \"$new_version\";/" "$file"
+            cross_platform_sed "${line_number}s/^.*$/const version = \"$new_version\";/" "$file"
             echo "Line $line_number of $file updated to: $new_version"
         fi
 
