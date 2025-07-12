@@ -1,4 +1,4 @@
-this.version = "2025.07.12.19";
+const version = "2025.07.12.20";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -8519,23 +8519,8 @@ self.cacheManifest =
       "priority": "lazy"
     }
   }
-}
-;
+};
 
-
-;
-
-
-;
-
-
-;
-
-
-;
-
-
-;
 
 
 // All cacheable files are now managed through self.cacheManifest at the bottom of this file
@@ -9086,5 +9071,3 @@ function formatBytes(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
-;
