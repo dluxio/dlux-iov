@@ -242,10 +242,11 @@ if [ -f sw.js.backup ]; then
     cp sw.js.backup "$TEMP_SW"
 elif grep -q "self.cacheManifest =" sw.js; then
     echo "   📝 Removing existing cache manifest..."
-    # Remove the cache manifest block (both occurrences)
+    # Remove ALL cache manifest blocks (improved pattern matching)
     awk '
         /\/\/ Cache manifest with checksums - auto-generated/ { in_manifest = 1; next }
-        /^self\.cacheManifest = $/ { in_manifest = 1; next }
+        /^self\.cacheManifest = / { in_manifest = 1; next }
+        /^self\.cacheManifest =/ { in_manifest = 1; next }
         in_manifest && /^};?$/ { in_manifest = 0; next }
         !in_manifest { print }
     ' sw.js > "$TEMP_SW"
