@@ -1,4 +1,4 @@
-this.version = "2025.07.12.5";
+this.version = "2025.07.12.6";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.12.5",
-  "generated": "2025-07-12T14:20:51Z",
+  "version": "2025.07.12.6",
+  "generated": "2025-07-12T18:44:59Z",
   "files": {
-    "/img/dlux-logo.png": {
-      "checksum": "5892181763fe2e7f3bf5c59b81191f75",
-      "size": 33287,
-      "priority": "important"
-    },
     "/img/dlux-pen.png": {
       "checksum": "0b1b6a3a9e66e6d845f394da6aaef046",
       "size": 14937,
@@ -1312,7 +1307,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "5e3af069555c8e3af75ad417f951894b",
+      "checksum": "e58c059fd97181c5dde5f692c594768f",
       "size": 36523,
       "priority": "important"
     },
@@ -1417,8 +1412,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "bad3c9f711bc2a401da9e3a3e1a09ada",
-      "size": 289239,
+      "checksum": "eb528a2e379ccf985e42baca5a332061",
+      "size": 290325,
       "priority": "important"
     },
     "/js/video-choice-modal.js": {
@@ -1567,7 +1562,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "769317e14be90b87506c7ef4d57dd324",
+      "checksum": "2140bb6a7412fedd675c6786a52f83d4",
       "size": 7299,
       "priority": "important"
     },
@@ -1602,8 +1597,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "10f537bd566a1b9b623fbfb72473e4d6",
-      "size": 304121,
+      "checksum": "6d63871f4c94a02ca890982324434892",
+      "size": 308762,
       "priority": "important"
     },
     "/vid/stills/blue_dust.jpg": {
@@ -1665,11 +1660,6 @@ self.cacheManifest =
       "checksum": "9677a29e3bb01e068de8366d8e23be55",
       "size": 38285,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/cameligo/cameligo.js": {
-      "checksum": "086bbd285be89dc173bcbdc9ebc0b67a",
-      "size": 3016,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/clojure/clojure.js": {
       "checksum": "ec6587729ef31f93d16804a214030220",
@@ -2306,12 +2296,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
