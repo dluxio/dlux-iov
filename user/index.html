@@ -213,8 +213,20 @@
                             <!-- blog repeat -->
                             <div class="container-fluid">
                                 <div class="row">
+                                    <!-- Loading spinner -->
                                     <div class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center"
-                                        v-if="displayPosts.length == 0">
+                                        v-if="displayPosts.length == 0 && postSelect[postSelect.entry].p">
+                                        <div class="text-center">
+                                            <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                                                <span class="sr-only">Loading...</span>
+                                            </div>
+                                            <p class="text-white-50 mt-3">Loading posts...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Empty state -->
+                                    <div class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center"
+                                        v-if="displayPosts.length == 0 && !postSelect[postSelect.entry].p">
                                         <div class="card" style="max-width: 600px;">
                                             <div class="card-body text-center">
                                                 <div style="font-size: 10em;" class="text-white-50 ">
@@ -244,6 +256,15 @@
                                             :has_ipfs="spkapi.storage?.length ? true : false" :contracts="contracts"
                                             :extendcost="extendcost" @tosign="toSign = $event"
                                             @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
+                                    </div>
+                                    <!-- Loading more indicator -->
+                                    <div class="col-12 text-center py-4" v-if="displayPosts.length > 0 && postSelect[postSelect.entry].p">
+                                        <div class="d-inline-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm text-light me-2" role="status">
+                                                <span class="sr-only">Loading...</span>
+                                            </div>
+                                            <span class="text-white-50">Loading more posts...</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

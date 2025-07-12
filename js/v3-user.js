@@ -3205,9 +3205,29 @@ function buyNFT(setname, uid, price, type, callback){
           const threshold = documentHeight - 500;
           const shouldTrigger = scrollPosition + windowHeight >= threshold;
           
+          // Debug logging
+          console.log('Scroll Debug:', {
+            scrollPosition,
+            windowHeight,
+            documentHeight,
+            threshold,
+            shouldTrigger,
+            activeTab: this.activeTab,
+            isLoading: this.postSelect[this.postSelect.entry]?.p,
+            hasEnded: this.postSelect[this.postSelect.entry]?.e,
+            entry: this.postSelect.entry
+          });
+          
           // Trigger when within 500px of the bottom
           if (shouldTrigger) { 
             if (this.activeTab == 'blog') {
+              console.log('Triggering getPosts()');
+              // If we've reached the end but user is still scrolling, reset the end flag
+              // This allows checking for new posts that may have been added
+              if (this.postSelect[this.postSelect.entry].e) {
+                console.log('Resetting end flag to check for new posts');
+                this.postSelect[this.postSelect.entry].e = false;
+              }
               this.getPosts();
             } else if (this.activeTab == 'inventory') {
               this.getNFTs(this.pageAccount || this.account);
@@ -3699,6 +3719,7 @@ function buyNFT(setname, uid, price, type, callback){
       else this[validKey] = true;
     },
     getPosts(reset) {
+      console.log('getPosts() called with reset:', reset);
       var bitMask = 0;
       for (var type in this.postSelect.types) {
         if (this.postSelect.types[type].checked)
@@ -3716,11 +3737,26 @@ function buyNFT(setname, uid, price, type, callback){
         this.postSelect[this.postSelect.entry].start_author = '';
         this.postSelect[this.postSelect.entry].start_permlink = '';
       }
+      
+      console.log('getPosts() state:', {
+        entry: this.postSelect.entry,
+        hasEnded: this.postSelect[this.postSelect.entry].e,
+        isPending: this.postSelect[this.postSelect.entry].p,
+        start_author: this.postSelect[this.postSelect.entry].start_author,
+        start_permlink: this.postSelect[this.postSelect.entry].start_permlink
+      });
+      
+      // Allow retry if ended but enough time has passed (for new posts)
+      const canRetry = this.postSelect[this.postSelect.entry].e && 
+                      this.postSelect[this.postSelect.entry].lastCheck && 
+                      (Date.now() - this.postSelect[this.postSelect.entry].lastCheck > 60000); // 1 minute
+      
       if (
-        !this.postSelect[this.postSelect.entry].e &&
+        (!this.postSelect[this.postSelect.entry].e || canRetry) &&
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
+        console.log('Fetching posts...');
 
         // Use modern bridge API for better performance
         const method = 'bridge.get_account_posts';
@@ -3748,9 +3784,12 @@ function buyNFT(setname, uid, price, type, callback){
           .then((r) => r.json())
           .then((res) => {
             this.postSelect[this.postSelect.entry].p = false;
+            this.postSelect[this.postSelect.entry].lastCheck = Date.now();
+            console.log('Posts fetched:', res.result?.length || 0, 'posts');
 
             if (!res.result || res.result.length === 0) {
               this.postSelect[this.postSelect.entry].e = true;
+              console.log('No more posts - marking as ended');
               return;
             }
 
@@ -3758,6 +3797,7 @@ function buyNFT(setname, uid, price, type, callback){
 
             if (res.result.length < this.postSelect[this.postSelect.entry].a) {
               this.postSelect[this.postSelect.entry].e = true;
+              console.log('Less posts than requested - marking as ended');
             }
 
             // Set pagination parameters for next call
@@ -3905,7 +3945,10 @@ function buyNFT(setname, uid, price, type, callback){
               this.getHiveAuthors(authors);
             }
           })
-          .catch(error => console.error(`Error fetching posts for @${this.pageAccount}:`, error));
+          .catch(error => {
+            console.error(`Error fetching posts for @${this.pageAccount}:`, error);
+            this.postSelect[this.postSelect.entry].p = false;
+          });
       }
     },
     selectPosts(modal, reset) {
@@ -3914,6 +3957,12 @@ function buyNFT(setname, uid, price, type, callback){
         if (this.posturls[this[this.postSelect.entry][i]])
           arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
+      console.log('selectPosts() building displayPosts:', {
+        entry: this.postSelect.entry,
+        keyCount: this[this.postSelect.entry]?.length || 0,
+        newDisplayCount: arr.length,
+        oldDisplayCount: this.displayPosts.length
+      });
       this.displayPosts = arr;
       if (modal) {
         this[modal[0]].items = this.displayPosts;
@@ -7879,6 +7928,30 @@ function buyNFT(setname, uid, price, type, callback){
     document.addEventListener('scroll', this.boundScrollHandler);
     document.documentElement.addEventListener('scroll', this.boundScrollHandler);
     
+    // Also try to add listener to the main container after Vue renders
+    this.$nextTick(() => {
+      const mainContainer = document.querySelector('main[role="main"]');
+      if (mainContainer) {
+        mainContainer.addEventListener('scroll', this.boundScrollHandler);
+        console.log('Added scroll listener to main container');
+      }
+      
+      // Check which element is actually scrollable
+      const elements = [window, document, document.body, document.documentElement, mainContainer];
+      elements.forEach(el => {
+        if (el) {
+          const scrollHeight = el.scrollHeight || el.document?.documentElement?.scrollHeight || 0;
+          const clientHeight = el.clientHeight || el.innerHeight || 0;
+          if (scrollHeight > clientHeight) {
+            console.log('Scrollable element found:', el === window ? 'window' : el.tagName || 'document', {
+              scrollHeight,
+              clientHeight
+            });
+          }
+        }
+      });
+    });
+    
     // Test if scroll listener is working
 
     //check hash
@@ -7990,6 +8063,10 @@ function buyNFT(setname, uid, price, type, callback){
     window.removeEventListener("scroll", this.boundScrollHandler);
     document.removeEventListener("scroll", this.boundScrollHandler);
     document.documentElement.removeEventListener("scroll", this.boundScrollHandler);
+    const mainContainer = document.querySelector('main[role="main"]');
+    if (mainContainer) {
+      mainContainer.removeEventListener("scroll", this.boundScrollHandler);
+    }
     
     // Clean up video observer and HLS instances
     if (this.videoObserver) {

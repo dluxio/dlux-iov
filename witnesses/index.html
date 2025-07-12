@@ -100,9 +100,9 @@
             }
         }
         
-        /* Fix navbar overlap */
-        .container-fluid {
-            padding-top: 20px;
+        /* Fix navbar overlap - using standard dlux-iov spacing */
+        .padmain {
+            padding-top: 94px;
         }
         
         /* v-cloak directive */
@@ -145,6 +145,7 @@
     <div id="app" v-cloak>
         <nav-vue ref="nav" :account="account" :op="toSign" @tosign="sendIt($event)"></nav-vue>
         
+        <main role="main" style="margin-top: 94px;">
         <div class="container-fluid py-4">
             <!-- Header Section -->
             <div class="row mb-4">
@@ -647,6 +648,7 @@
                 </div>
             </div>
         </div>
+        </main>
 
         <foot-vue></foot-vue>
     </div>

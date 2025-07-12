@@ -357,8 +357,20 @@
             </div> -->
 
             <!--main view-->
+            <!-- Loading spinner -->
             <div class="container-fluid d-flex flex-grow-1 mt-4 mb-3 align-items-center justify-content-center"
-                v-if="masonryColumns.length == 0 || masonryColumns.every(col => col.length == 0)">
+                v-if="(masonryColumns.length == 0 || masonryColumns.every(col => col.length == 0)) && postSelect[postSelect.entry].p">
+                <div class="text-center">
+                    <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="text-white-50 mt-3">Loading posts...</p>
+                </div>
+            </div>
+            
+            <!-- Empty state -->
+            <div class="container-fluid d-flex flex-grow-1 mt-4 mb-3 align-items-center justify-content-center"
+                v-if="(masonryColumns.length == 0 || masonryColumns.every(col => col.length == 0)) && !postSelect[postSelect.entry].p">
                 <div class="card" style="max-width: 600px;">
                     <div class="card-body text-center">
                         <div style="font-size: 10em;" class="text-white-50 ">
@@ -379,6 +391,15 @@
                                 :contracts="contracts" :extendcost="extendcost" @tosign="sendIt($event)"
                                 @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
                         </div>
+                    </div>
+                </div>
+                <!-- Loading more indicator -->
+                <div class="text-center py-4" v-if="postSelect[postSelect.entry].p">
+                    <div class="d-inline-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm text-light me-2" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <span class="text-white-50">Loading more posts...</span>
                     </div>
                 </div>
             </div>

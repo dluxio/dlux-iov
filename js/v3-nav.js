@@ -5657,11 +5657,6 @@ export default {
     let isHoverListenerActive = false;
     let styleTag = null; // Reference to the dynamically added style tag
 
-    function toggleNavMore(event) {
-      event.preventDefault();
-      bars.forEach(bar => bar.classList.toggle("x"));
-    }
-
     function closeNavMore(event) {
       if (!navMore.contains(event.target)) {
         bars.forEach(bar => bar.classList.remove("x"));
@@ -5717,9 +5712,23 @@ export default {
       }
     }
 
+    // Create event handlers for proper cleanup
+    const onDropdownShown = () => {
+      bars.forEach(bar => bar.classList.add("x"));
+    };
+    
+    const onDropdownHidden = () => {
+      bars.forEach(bar => bar.classList.remove("x"));
+    };
+    
     // Add event listeners when component is mounted
     if (navMore) {
-      navMore.addEventListener("click", toggleNavMore);
+      // Only use Bootstrap dropdown events to sync X state
+      const navDropdown = navMore.closest('.nav-dropdown');
+      if (navDropdown) {
+        navDropdown.addEventListener('shown.bs.dropdown', onDropdownShown);
+        navDropdown.addEventListener('hidden.bs.dropdown', onDropdownHidden);
+      }
     }
     document.addEventListener("click", closeNavMore);
     handleResize();
@@ -5728,7 +5737,12 @@ export default {
     // Store references for cleanup
     this._cleanup = () => {
       if (navMore) {
-        navMore.removeEventListener("click", toggleNavMore);
+        // Remove Bootstrap dropdown event listeners
+        const navDropdown = navMore.closest('.nav-dropdown');
+        if (navDropdown) {
+          navDropdown.removeEventListener('shown.bs.dropdown', onDropdownShown);
+          navDropdown.removeEventListener('hidden.bs.dropdown', onDropdownHidden);
+        }
       }
       document.removeEventListener("click", closeNavMore);
       window.removeEventListener("resize", handleResize);
