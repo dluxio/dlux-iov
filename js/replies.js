@@ -18,7 +18,8 @@ export default {
 <a role="button" v-if="warn" @click="warn = false" class="text-warning">
   <i class="fa-solid fa-eye-slash me-1"></i>Hidden due to low reputation. Click to show.
 </a>
-<div v-if="!warn" class="d-flex align-items-start">
+<div v-if="!warn" class="position-relative">
+<div class="d-flex align-items-start">
 <a :href="'/@' + post.author" class="no-decoration flex-shrink-0">
 <img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" 
      class="rounded-circle border-2 border-light bg-light img-fluid me-2 cover author-img" 
@@ -56,10 +57,11 @@ export default {
 <span class="text-muted">{{ getCollapsedText() }}</span>
 <a role="button" class="text-info no-decoration ms-1" @click="view = !view">Click to expand</a>
 </div>
-<div v-if="post.replies && post.replies.length > 0" class="nested-replies">
+</div>                 
+</div>
+<div v-if="post.replies && post.replies.length > 0 && view" class="nested-replies" :style="getNestedRepliesStyles()">
 <replies v-for="childReply in post.replies" 
         :key="childReply.author + '-' + childReply.permlink"
-        v-if="view" 
         :post="childReply" 
         :account="account" 
         :voteval="voteval" 
@@ -67,7 +69,6 @@ export default {
         @reply="reply($event)"
         @tosign="sendIt($event)"/>
 </div>
-</div>                 
 </div>
 </div>`,
   props: {
@@ -274,16 +275,21 @@ export default {
       }
       
       // Get the color for this specific depth
-      const colorIndex = depth - 2 % rainbowColors.length // depth-2 because depth 1 has no line
+      const colorIndex = (depth - 2) % rainbowColors.length;
       const color = rainbowColors[colorIndex];
-      
-      // Indent equals the depth in pixels
-      const indent = `${depth * 2}px`;
       
       return {
         'margin-bottom': '1rem',
-        'padding-left': indent,
-        'border-left': `2px solid ${color}`
+        'padding-left': '8px', // Small padding for content from the border
+        'border-left': `2px solid ${color}`,
+        'margin-left': '0px'
+      };
+    },
+    getNestedRepliesStyles() {
+      // Position nested replies to align with the parent's vertical line
+      return {
+        'margin-left': '-6px', // Negative margin to pull replies back to align with parent's border
+        'margin-top': '0.5rem'
       };
     },
     getAvatarSize() {
