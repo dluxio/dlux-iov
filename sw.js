@@ -1,4 +1,4 @@
-this.version = "2025.07.12.1";
+this.version = "2025.07.12.2";
 this.version = "2025.07.11.7";
 =======
 this.version = "2025.07.11.2";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.11.10",
-  "generated": "2025-07-11T19:25:06Z",
+  "version": "2025.07.12.2",
+  "generated": "2025-07-12T12:41:05Z",
   "files": {
-    "/img/dlux-hive-logo-alpha.svg": {
-      "checksum": "93b0396ce748e2d51e978260bc3267d2",
-      "size": 3416,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo.svg": {
       "checksum": "96518aec91dcdc4cf306b488344f2281",
       "size": 3535,
@@ -1032,8 +1027,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/detailvue.js": {
-      "checksum": "ac24de429d0208273e0c7f3ef0ef0683",
-      "size": 52471,
+      "checksum": "4d1e95d8295a45a9a35de8dbb0e3efa2",
+      "size": 52396,
       "priority": "important"
     },
     "/js/dexvue.js": {
@@ -1332,8 +1327,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "46c5155f2572d94d073cf05362b6c636",
-      "size": 36523,
+      "checksum": "9b5b9a7f6fb516e250f4e34b1d75dfb1",
+      "size": 36524,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1587,8 +1582,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "c16e690297735117ef84d62e89e48a8e",
-      "size": 7299,
+      "checksum": "5c32e06e5c3ad2386916a1a2f719cfaa",
+      "size": 7300,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
@@ -1685,11 +1680,6 @@ self.cacheManifest =
       "checksum": "c24dff36bb6220af00458aaf383567fa",
       "size": 38190,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/apex/apex.js": {
-      "checksum": "12e909055d8470a47a7b99f21df3687c",
-      "size": 4775,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/azcli/azcli.js": {
       "checksum": "1987f363de7c4d4b9d891378fe647701",
@@ -2346,12 +2336,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
