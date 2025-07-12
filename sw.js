@@ -1,6 +1,1722 @@
-this.version = "2025.07.12.10";
+this.version = "2025.07.12.7";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
+
+// Cache manifest with checksums - auto-generated
+self.cacheManifest = 
+{
+  "version": "2025.07.12.11",
+  "generated": "2025-07-12T20:42:17Z",
+  "files": {
+    "/img/excel-file-type-svgrepo-com.svg": {
+      "checksum": "9cae63f953dab1bdbe1f1bd2e78504e2",
+      "size": 2197,
+      "priority": "important"
+    },
+    "/img/favicon.ico": {
+      "checksum": "04f7baccd67b245727b07e7b30543234",
+      "size": 3418,
+      "priority": "important"
+    },
+    "/img/gallery-vr-comp.jpg": {
+      "checksum": "df3fae44de67c8af269891561242f6d5",
+      "size": 178796,
+      "priority": "important"
+    },
+    "/img/hbd_green.svg": {
+      "checksum": "4cdd7402ddcbd06d7145d437da14c670",
+      "size": 999,
+      "priority": "important"
+    },
+    "/img/hextacular.svg": {
+      "checksum": "f11afc9005714fcb560171a788ee11bd",
+      "size": 1636,
+      "priority": "important"
+    },
+    "/img/hiveauth.svg": {
+      "checksum": "ac85800f2a11ca62345537f3b2f70e04",
+      "size": 44094,
+      "priority": "important"
+    },
+    "/img/hivesigner.svg": {
+      "checksum": "6958efa0d0564cbf5d2209361551a9d4",
+      "size": 11798,
+      "priority": "important"
+    },
+    "/img/hivesigner_white.svg": {
+      "checksum": "504a9fab6111a49d6cdbb73804c4aa15",
+      "size": 6318,
+      "priority": "important"
+    },
+    "/img/html-file-type-svgrepo-com.svg": {
+      "checksum": "5ab38fd87ea73dbf6ffed1d024b7d35c",
+      "size": 1555,
+      "priority": "important"
+    },
+    "/img/hub-logo.png": {
+      "checksum": "7db4716b5e131ddfffc1827968f195fa",
+      "size": 79254,
+      "priority": "important"
+    },
+    "/img/hypercube.png": {
+      "checksum": "ba9f6e78fa421c4b4731d96da36c9f1e",
+      "size": 11451658,
+      "priority": "important"
+    },
+    "/img/ipfs-logo.svg": {
+      "checksum": "817a79ff9a3eba2725d46a44df0dcd93",
+      "size": 2708,
+      "priority": "important"
+    },
+    "/img/jpg-file-type-svgrepo-com.svg": {
+      "checksum": "9e92500a821234c40cf49f081daa4b44",
+      "size": 1927,
+      "priority": "important"
+    },
+    "/img/jtree-comp.jpg": {
+      "checksum": "bcb9277b1867e82d7415341e9d6a21bf",
+      "size": 311146,
+      "priority": "important"
+    },
+    "/img/keychain.png": {
+      "checksum": "6846c271b72fee4584494eee2383339f",
+      "size": 17563,
+      "priority": "important"
+    },
+    "/img/logo_hiveprojects.png": {
+      "checksum": "c05534ff50e1bd4e17ebcb23322386cc",
+      "size": 79573,
+      "priority": "important"
+    },
+    "/img/meta/about.png": {
+      "checksum": "0e0c6bc95c6e5039795b73e0b7409294",
+      "size": 485764,
+      "priority": "important"
+    },
+    "/img/meta/create.png": {
+      "checksum": "a744ac5d0b197c99c7ce329f63cd990b",
+      "size": 506236,
+      "priority": "important"
+    },
+    "/img/meta/dao.png": {
+      "checksum": "392f062627adf5c61eb191ffa6a8e0c3",
+      "size": 369057,
+      "priority": "important"
+    },
+    "/img/meta/index.png": {
+      "checksum": "cdfd8f211499d38909f21de002319d0b",
+      "size": 584134,
+      "priority": "important"
+    },
+    "/img/meta/mint.png": {
+      "checksum": "b307d0794d165eb0f52f5c642c56c647",
+      "size": 642272,
+      "priority": "important"
+    },
+    "/img/meta/node.png": {
+      "checksum": "10b441a2c9e9e728e7055fae9065769d",
+      "size": 750851,
+      "priority": "important"
+    },
+    "/img/meta/storage1.png": {
+      "checksum": "cb96e8a07b06496384d31e9a30015f9a",
+      "size": 434519,
+      "priority": "important"
+    },
+    "/img/metaverse-vr-comp.jpg": {
+      "checksum": "82c7278828d85ace9036d87c72801e20",
+      "size": 124780,
+      "priority": "important"
+    },
+    "/img/mov-file-type-svgrepo-com.svg": {
+      "checksum": "0af98e452f25a7739bb978a7ed02051b",
+      "size": 1745,
+      "priority": "important"
+    },
+    "/img/mp3-file-type-svgrepo-com.svg": {
+      "checksum": "1004873c11cc066741da417bfe78b80f",
+      "size": 2165,
+      "priority": "important"
+    },
+    "/img/no-user.png": {
+      "checksum": "83327a11fc84f8c65194617bc80b88cf",
+      "size": 12395,
+      "priority": "important"
+    },
+    "/img/other-file-type-svgrepo-com.svg": {
+      "checksum": "93ff030887252d38b07c16d97ff6cb2a",
+      "size": 1627,
+      "priority": "important"
+    },
+    "/img/pdf-file-type-svgrepo-com.svg": {
+      "checksum": "acfd5b697e36e229a5eb3c8dca745eb4",
+      "size": 1732,
+      "priority": "important"
+    },
+    "/img/peakd_logo.svg": {
+      "checksum": "50081d3c4169086a323b14127ecd344f",
+      "size": 552,
+      "priority": "important"
+    },
+    "/img/png-file-type-svgrepo-com.svg": {
+      "checksum": "ba847b53eba1f7e7be13000fc4c5ea27",
+      "size": 1921,
+      "priority": "important"
+    },
+    "/img/ppt-file-type-svgrepo-com.svg": {
+      "checksum": "8487976bee6f78adc7caee5b71479743",
+      "size": 2103,
+      "priority": "important"
+    },
+    "/img/psd-file-type-svgrepo-com.svg": {
+      "checksum": "752cee1bb240f2679af2f068930fa2cf",
+      "size": 2242,
+      "priority": "important"
+    },
+    "/img/ragnarok.png": {
+      "checksum": "5934b1a258fdf602cd78b1c35f276b8d",
+      "size": 133078,
+      "priority": "important"
+    },
+    "/img/ragnarok_sealed.png": {
+      "checksum": "a7558e86491320184e56d6a8f909d695",
+      "size": 74886,
+      "priority": "important"
+    },
+    "/img/rar-file-type-svgrepo-com.svg": {
+      "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
+      "size": 1835,
+      "priority": "important"
+    },
+    "/img/spk192.png": {
+      "checksum": "411500d1b3e3b31bf0b90c5b8126c634",
+      "size": 10149,
+      "priority": "important"
+    },
+    "/img/spk512.png": {
+      "checksum": "98a452727661d34f119ddf6a3fd920a8",
+      "size": 21939,
+      "priority": "important"
+    },
+    "/img/spknetwork.png": {
+      "checksum": "4d91f7a0ed50ac7b0d27cbd52794078a",
+      "size": 51410,
+      "priority": "important"
+    },
+    "/img/sting_white.svg": {
+      "checksum": "b3fb2506f7d51b38fe814243567109cc",
+      "size": 2374,
+      "priority": "important"
+    },
+    "/img/tokens/broca_icon.png": {
+      "checksum": "87aac077c4cfdf4bd02cbbbef8a4c3ba",
+      "size": 33591,
+      "priority": "important"
+    },
+    "/img/tokens/broca_logomark.png": {
+      "checksum": "fcd5ae3ad20ec9cfcee5764ad4f26e9f",
+      "size": 28971,
+      "priority": "important"
+    },
+    "/img/tokens/dlux_icon.png": {
+      "checksum": "5892181763fe2e7f3bf5c59b81191f75",
+      "size": 33287,
+      "priority": "important"
+    },
+    "/img/tokens/duat_icon.png": {
+      "checksum": "eed179af8a36b2d8be72a721dada0f84",
+      "size": 114195,
+      "priority": "important"
+    },
+    "/img/tokens/hbd_icon.svg": {
+      "checksum": "4cdd7402ddcbd06d7145d437da14c670",
+      "size": 999,
+      "priority": "important"
+    },
+    "/img/tokens/hive_icon.svg": {
+      "checksum": "f11afc9005714fcb560171a788ee11bd",
+      "size": 1636,
+      "priority": "important"
+    },
+    "/img/tokens/larynx_icon.png": {
+      "checksum": "27fa9b4e1dc4f0205913529a03a2aced",
+      "size": 29625,
+      "priority": "important"
+    },
+    "/img/tokens/larynx_logomark.png": {
+      "checksum": "c053db05ca715d5494af1e8cf0b9759b",
+      "size": 28604,
+      "priority": "important"
+    },
+    "/img/tokens/spk_icon.png": {
+      "checksum": "ec1db8b25b57776a93d8efd59bcdfd7a",
+      "size": 33772,
+      "priority": "important"
+    },
+    "/img/tokens/spk_logomark.png": {
+      "checksum": "e7488b692154b55e2e2e390b21a7f8bb",
+      "size": 25219,
+      "priority": "important"
+    },
+    "/img/txt-file-type-svgrepo-com.svg": {
+      "checksum": "90a1ea59895f59235680505a41e17d10",
+      "size": 1476,
+      "priority": "important"
+    },
+    "/img/wallets/coinbase-logo.png": {
+      "checksum": "44ee96c50cb5c743af38465a4222cc54",
+      "size": 4939,
+      "priority": "important"
+    },
+    "/img/wallets/coinbase.svg": {
+      "checksum": "4b387163f5f61e77d5dc26015370b7ff",
+      "size": 344,
+      "priority": "important"
+    },
+    "/img/wallets/metamask-logo.svg": {
+      "checksum": "552332e44c0c151c0d031c9509303ec8",
+      "size": 3120,
+      "priority": "important"
+    },
+    "/img/wallets/metamask.svg": {
+      "checksum": "7cfd65ef1830c13da772be92917819d7",
+      "size": 397,
+      "priority": "important"
+    },
+    "/img/wallets/phantom-logo.svg": {
+      "checksum": "ff77552e948c08d94e6ee04e70db9b41",
+      "size": 1134,
+      "priority": "important"
+    },
+    "/img/wallets/phantom.svg": {
+      "checksum": "c93ce1216ab2e6ea877e2e55d4a2274a",
+      "size": 383,
+      "priority": "important"
+    },
+    "/img/wallets/trust.svg": {
+      "checksum": "cd66e6fa039cdc560fe0b11a7921383e",
+      "size": 363,
+      "priority": "important"
+    },
+    "/img/wallets/walletconnect.svg": {
+      "checksum": "5740d34ff67b77f017d12a78e945c656",
+      "size": 441,
+      "priority": "important"
+    },
+    "/img/wav-file-type-svgrepo-com.svg": {
+      "checksum": "6941433f291e8d4263bad8f5c8571100",
+      "size": 1552,
+      "priority": "important"
+    },
+    "/img/word-file-type-svgrepo-com.svg": {
+      "checksum": "442055744681d382526a20c60be69cdd",
+      "size": 2240,
+      "priority": "important"
+    },
+    "/img/zip-file-type-svgrepo-com.svg": {
+      "checksum": "e79c3c0ded94605b92bc4bf522615b9b",
+      "size": 1581,
+      "priority": "important"
+    },
+    "/js/appvue.js": {
+      "checksum": "b10fc31c6505c6008635c0c001c15c37",
+      "size": 45982,
+      "priority": "important"
+    },
+    "/js/assets-min.js": {
+      "checksum": "3daf5f9673debad301f5233205bd9dbe",
+      "size": 11250,
+      "priority": "important"
+    },
+    "/js/assets.js": {
+      "checksum": "a3a16504774a19c7381c88f97917e2fc",
+      "size": 22039,
+      "priority": "important"
+    },
+    "/js/bennies.js": {
+      "checksum": "67ba4fe44747b4c2aac6b80ccf227de4",
+      "size": 8208,
+      "priority": "important"
+    },
+    "/js/blockvue.js": {
+      "checksum": "30d1b55966ab14956f7c6486887ca857",
+      "size": 47346,
+      "priority": "important"
+    },
+    "/js/buffer.js": {
+      "checksum": "e225d02cdfe4a776207cebd5e36052b0",
+      "size": 50387,
+      "priority": "important"
+    },
+    "/js/cardvue.js": {
+      "checksum": "39423715a5e7011068eb2b0511d59e2b",
+      "size": 35865,
+      "priority": "important"
+    },
+    "/js/chartjs-adapter-date-fns.local.js": {
+      "checksum": "cf877b480725fbeb84e0933dc9d1e969",
+      "size": 104968,
+      "priority": "important"
+    },
+    "/js/choices-vue.js": {
+      "checksum": "78be8b37388c4e7fe3905d813e1f75eb",
+      "size": 17670,
+      "priority": "important"
+    },
+    "/js/chrtjscf.js": {
+      "checksum": "fc12ff5661845deb93892ad728434bbd",
+      "size": 27624,
+      "priority": "important"
+    },
+    "/js/codemirror-xml.min.js": {
+      "checksum": "8d67b4230709b35c843970bd30695ab2",
+      "size": 6042,
+      "priority": "important"
+    },
+    "/js/codemirror.min.js": {
+      "checksum": "2263911552d33d0cf4e43b1ea01413bb",
+      "size": 170531,
+      "priority": "important"
+    },
+    "/js/collaboration.bundle.js": {
+      "checksum": "2dfd2f09c691a846d1539d06436db3d4",
+      "size": 1386968,
+      "priority": "important"
+    },
+    "/js/components/360-asset-manager-iframe-adapter.js": {
+      "checksum": "1636668b2dafe7f9f1a54d7cc8341088",
+      "size": 5904,
+      "priority": "important"
+    },
+    "/js/components/360-asset-manager.js": {
+      "checksum": "c6b835480fb83c68d14014529a6622e0",
+      "size": 71907,
+      "priority": "important"
+    },
+    "/js/components/dapp-manager.js": {
+      "checksum": "faf34fb21fa2fd64f851e47227085b74",
+      "size": 57377,
+      "priority": "important"
+    },
+    "/js/components/remix-dapp-manager.js": {
+      "checksum": "834602dc070c1009843a5ec77301a40b",
+      "size": 67874,
+      "priority": "important"
+    },
+    "/js/contract-modal.js": {
+      "checksum": "a5d47779bc8059c6ca334f1a9fabf4c0",
+      "size": 18154,
+      "priority": "important"
+    },
+    "/js/contracts-vue.js": {
+      "checksum": "e22730d638861562df6be63a3d36ac75",
+      "size": 109055,
+      "priority": "important"
+    },
+    "/js/cryptojs.min.js": {
+      "checksum": "d9c6de0df2bf028d93924aff92487904",
+      "size": 60819,
+      "priority": "important"
+    },
+    "/js/cycler.js": {
+      "checksum": "f664b76697d2f4b76bf776284f491c4e",
+      "size": 1118,
+      "priority": "important"
+    },
+    "/js/dataCommon.js": {
+      "checksum": "f38ec95a53d917b4e2d7fe983646d5ea",
+      "size": 229,
+      "priority": "important"
+    },
+    "/js/dd.js": {
+      "checksum": "359b73a60da7efe421181249ece6f7d2",
+      "size": 9257,
+      "priority": "important"
+    },
+    "/js/detailvue.js": {
+      "checksum": "4d1e95d8295a45a9a35de8dbb0e3efa2",
+      "size": 52396,
+      "priority": "important"
+    },
+    "/js/dexvue.js": {
+      "checksum": "0a2809aeee5eb1af609bf1bbc84a48bc",
+      "size": 50115,
+      "priority": "important"
+    },
+    "/js/diff.js": {
+      "checksum": "e771e221748d27a961486d5df12b2471",
+      "size": 81155,
+      "priority": "important"
+    },
+    "/js/dlux-wallet.js": {
+      "checksum": "26c8861b0cb33027adf92f000c63ad0e",
+      "size": 72062,
+      "priority": "important"
+    },
+    "/js/drag-drop.js": {
+      "checksum": "0ec92c44489e6ffbf6ec1234caf84942",
+      "size": 13295,
+      "priority": "important"
+    },
+    "/js/drag-sort.js": {
+      "checksum": "836d807e5e29d1b90376b008e55ceaa5",
+      "size": 2360,
+      "priority": "important"
+    },
+    "/js/election-modal.js": {
+      "checksum": "0c3689e8d2efdfd9c11d836bada0d1c8",
+      "size": 7480,
+      "priority": "important"
+    },
+    "/js/extend-modal.js": {
+      "checksum": "ba61609ef1242c095935a6d60bec203d",
+      "size": 6111,
+      "priority": "important"
+    },
+    "/js/extensionvue.js": {
+      "checksum": "8676c44fc4a602732ea7e3a0c036a879",
+      "size": 18652,
+      "priority": "important"
+    },
+    "/js/filesvue-dd.js": {
+      "checksum": "751961f99cec8c4c66d9bb2f65b76d5e",
+      "size": 312746,
+      "priority": "important"
+    },
+    "/js/filesvue.js": {
+      "checksum": "ad5f3e0cdcf7e68466df43ee9019324d",
+      "size": 91094,
+      "priority": "important"
+    },
+    "/js/footvue.js": {
+      "checksum": "bfbf2e784a2d1ca7f149a08398bc474c",
+      "size": 1333,
+      "priority": "important"
+    },
+    "/js/fttransfer.js": {
+      "checksum": "ff5ac6045a4c04aafa46864a8edd4ab2",
+      "size": 73613,
+      "priority": "important"
+    },
+    "/js/generative-nft-builder.js": {
+      "checksum": "b332a09c82a2324a9628e23ff5413e03",
+      "size": 37740,
+      "priority": "important"
+    },
+    "/js/hive-modal.js": {
+      "checksum": "ea94f917f11b19610b6f01efd2935717",
+      "size": 32362,
+      "priority": "important"
+    },
+    "/js/iframe-customjson-integration.js": {
+      "checksum": "9a927323a2c6f637dd0da274a29fdda1",
+      "size": 10640,
+      "priority": "important"
+    },
+    "/js/img-ipfs.js": {
+      "checksum": "c29daa440ebbab74b34d47cbbdcd59f1",
+      "size": 2340,
+      "priority": "important"
+    },
+    "/js/indexvue.js": {
+      "checksum": "361f81aaa9cf5523af1a4e8a03e53267",
+      "size": 28461,
+      "priority": "important"
+    },
+    "/js/ipfs-video-init.js": {
+      "checksum": "c75d1369a0ad094a5fbda2cc3471c8f0",
+      "size": 847,
+      "priority": "important"
+    },
+    "/js/json-editor.js": {
+      "checksum": "1f85d13cb661dac03fbc3453e96fa16d",
+      "size": 14873,
+      "priority": "important"
+    },
+    "/js/marker.js": {
+      "checksum": "5a8adecc4653aa9e8dd1849c1a620e17",
+      "size": 8407,
+      "priority": "important"
+    },
+    "/js/mde.js": {
+      "checksum": "53b8c9f226da2c3a3a3b3b2ffa21abac",
+      "size": 999,
+      "priority": "important"
+    },
+    "/js/methods-common.js": {
+      "checksum": "528a0932ec22d0a4f51e2ec4b075716a",
+      "size": 45381,
+      "priority": "important"
+    },
+    "/js/methods-modals.js": {
+      "checksum": "f08a459f5f5c673932b1c1cd51540e0b",
+      "size": 1066,
+      "priority": "important"
+    },
+    "/js/methods-spk.js": {
+      "checksum": "e434298a33d0318e41336bcdf551e567",
+      "size": 7542,
+      "priority": "important"
+    },
+    "/js/mfi-vue.js": {
+      "checksum": "7fbd69d4f3b44ab70507017b7cb61e94",
+      "size": 15064,
+      "priority": "important"
+    },
+    "/js/modal-manager.js": {
+      "checksum": "051b4cf0394772b91ff1ff0a8a507de0",
+      "size": 5286,
+      "priority": "important"
+    },
+    "/js/modalvue.js": {
+      "checksum": "e94da9d51e347d514b9d6182e5f52dda",
+      "size": 42661,
+      "priority": "important"
+    },
+    "/js/model-viewer.min.js": {
+      "checksum": "dd677b435b16f44e4ca08a9f354bac24",
+      "size": 955555,
+      "priority": "important"
+    },
+    "/js/nav.js": {
+      "checksum": "7ec38d3ee084cc52ed87ba82bad4d563",
+      "size": 27637,
+      "priority": "important"
+    },
+    "/js/navue.js": {
+      "checksum": "cc57a50722e2c1b2c3c5a19383b79e16",
+      "size": 47919,
+      "priority": "important"
+    },
+    "/js/nft-script-executor.js": {
+      "checksum": "76d7c34dc059e1b6b7eff3007c59720d",
+      "size": 10534,
+      "priority": "important"
+    },
+    "/js/nftcard.js": {
+      "checksum": "eab916cf74635206cdd5cd2d9f7382ca",
+      "size": 18323,
+      "priority": "important"
+    },
+    "/js/nftdetail.js": {
+      "checksum": "eaf16d707930e3782ac391a903240751",
+      "size": 90543,
+      "priority": "important"
+    },
+    "/js/nftsvue.js": {
+      "checksum": "395599cbe864c4640b9764fe2a7e5d4e",
+      "size": 98152,
+      "priority": "important"
+    },
+    "/js/onlyhash.js": {
+      "checksum": "ce57237fd9402179b8dfd8ef7aa1e1be",
+      "size": 707437,
+      "priority": "important"
+    },
+    "/js/pop-frame.js": {
+      "checksum": "679aed3281bcee07fb3942a985e7dbbe",
+      "size": 904,
+      "priority": "important"
+    },
+    "/js/pop.js": {
+      "checksum": "679aed3281bcee07fb3942a985e7dbbe",
+      "size": 904,
+      "priority": "important"
+    },
+    "/js/popover.js": {
+      "checksum": "9a6e9b572a734e9c6708d3359e287222",
+      "size": 1842,
+      "priority": "important"
+    },
+    "/js/postvue.js": {
+      "checksum": "b1445a2922aa1c57172fb989dd2d5481",
+      "size": 17189,
+      "priority": "important"
+    },
+    "/js/purify.min.js": {
+      "checksum": "6d6eab0b233005b7be97072e5b9e1011",
+      "size": 21490,
+      "priority": "important"
+    },
+    "/js/ratings.js": {
+      "checksum": "4f26b88271c105408b4864bf8a2f41fc",
+      "size": 1651,
+      "priority": "important"
+    },
+    "/js/replies.js": {
+      "checksum": "ef6d3545734c869fb2fea7d55be711e8",
+      "size": 12430,
+      "priority": "important"
+    },
+    "/js/scene.js": {
+      "checksum": "aaed69b3bd0a5b44f45e4b3b3f773510",
+      "size": 53733,
+      "priority": "important"
+    },
+    "/js/services/ffmpeg-manager.js": {
+      "checksum": "2813a5b49ec1701bac900e54649add8b",
+      "size": 10683,
+      "priority": "important"
+    },
+    "/js/services/ipfs-hls-player.js": {
+      "checksum": "4eb6135c7e565a1193efaf56c0aad4b6",
+      "size": 12002,
+      "priority": "important"
+    },
+    "/js/services/mention-suggestion.js": {
+      "checksum": "eb351bba70b689d46a1802eec9def78d",
+      "size": 6460,
+      "priority": "important"
+    },
+    "/js/services/playlist-processor.js": {
+      "checksum": "fee9c838cf2342610ca9616bfcf6a61f",
+      "size": 10449,
+      "priority": "important"
+    },
+    "/js/services/thumbnail-service.js": {
+      "checksum": "b23b399f0e55441dbe8b0f1d09570eb1",
+      "size": 21903,
+      "priority": "important"
+    },
+    "/js/session.js": {
+      "checksum": "19fe354a509a25a48a47ae622f4c998e",
+      "size": 48412,
+      "priority": "important"
+    },
+    "/js/setcard.js": {
+      "checksum": "a2f10e9bed812046f0d49a8a6a339d6f",
+      "size": 2890,
+      "priority": "important"
+    },
+    "/js/showdown.js": {
+      "checksum": "c619f8b780850eff22845d1091cfa776",
+      "size": 3760,
+      "priority": "important"
+    },
+    "/js/simple-field-editor.js": {
+      "checksum": "68b87c94d41b38740f445068e1188c2f",
+      "size": 6226,
+      "priority": "important"
+    },
+    "/js/spk-drop-lite.js": {
+      "checksum": "c0a1375f72464b64bb7b08ac70717902",
+      "size": 8574,
+      "priority": "important"
+    },
+    "/js/spk-js.js": {
+      "checksum": "f5907a46fadd42a17504c9aa6a4978b8",
+      "size": 564485,
+      "priority": "important"
+    },
+    "/js/spk-wallet.js": {
+      "checksum": "df8d471e90bfebcb26298de1553f6417",
+      "size": 70838,
+      "priority": "important"
+    },
+    "/js/spkdrive.js": {
+      "checksum": "34e8cf95fda6cc5c3f5865b8b6752657",
+      "size": 85696,
+      "priority": "important"
+    },
+    "/js/spkvue.js": {
+      "checksum": "99073aee13e303e83415618eaa6dfbdb",
+      "size": 92106,
+      "priority": "important"
+    },
+    "/js/standard-modal.js": {
+      "checksum": "5293322d7f75e2e2f70eb203c644230d",
+      "size": 7356,
+      "priority": "important"
+    },
+    "/js/stwidget.js": {
+      "checksum": "0b8f564f8fc83e2587d7cdd557330753",
+      "size": 25863,
+      "priority": "important"
+    },
+    "/js/sw-monitor.js": {
+      "checksum": "6950b879c9767692972ea669fd22a124",
+      "size": 36523,
+      "priority": "important"
+    },
+    "/js/tagify.min.js": {
+      "checksum": "245e4e1b9c956dbebd6b52a595eabd79",
+      "size": 59697,
+      "priority": "important"
+    },
+    "/js/tagifyvue.js": {
+      "checksum": "8c083377956e9a936f47a35f45afc951",
+      "size": 1127,
+      "priority": "important"
+    },
+    "/js/tiptap-editor-modular.js": {
+      "checksum": "1e4845d9aa0c99992f86ac9027e22449",
+      "size": 1099044,
+      "priority": "important"
+    },
+    "/js/toastvue.js": {
+      "checksum": "15a042f49546393a84afe492cbe516d3",
+      "size": 2374,
+      "priority": "important"
+    },
+    "/js/trading-vue.min.js": {
+      "checksum": "6e6bb2f8dd6f94e2c8656759eafc1a26",
+      "size": 264037,
+      "priority": "important"
+    },
+    "/js/upload-everywhere.js": {
+      "checksum": "a36246a6149c569f08b4cd7a286c843b",
+      "size": 62355,
+      "priority": "important"
+    },
+    "/js/uploadvue-dd.js": {
+      "checksum": "15f9d245846ef2bfc53bc9eb8bdfb3a9",
+      "size": 143763,
+      "priority": "important"
+    },
+    "/js/uploadvue.js": {
+      "checksum": "a24c372511a3865e52d1194b8af5bfac",
+      "size": 63528,
+      "priority": "important"
+    },
+    "/js/utils/hls-quality-selector.js": {
+      "checksum": "53e13403519d393b1be94c150e5d2ba9",
+      "size": 13085,
+      "priority": "important"
+    },
+    "/js/utils/processed-file.js": {
+      "checksum": "cc15a1802034026aa8ca8617fea5232c",
+      "size": 1896,
+      "priority": "important"
+    },
+    "/js/utils/url-processor.js": {
+      "checksum": "ab5c2d6c38a325907ee19b2613ea2878",
+      "size": 3780,
+      "priority": "important"
+    },
+    "/js/uuidv.js": {
+      "checksum": "e64fbbb49c9b48c9fb15e778de8d86ad",
+      "size": 1105,
+      "priority": "important"
+    },
+    "/js/v3-app.js": {
+      "checksum": "4d7919c210198f0ac40a9f92a69e42d4",
+      "size": 46537,
+      "priority": "important"
+    },
+    "/js/v3-dex.js": {
+      "checksum": "e4615048077bf0346e5be62a65600d20",
+      "size": 49482,
+      "priority": "important"
+    },
+    "/js/v3-honeyblocks.js": {
+      "checksum": "e4615048077bf0346e5be62a65600d20",
+      "size": 49482,
+      "priority": "important"
+    },
+    "/js/v3-hub.js": {
+      "checksum": "f47a413f713e91899f9384c02767f2e1",
+      "size": 88675,
+      "priority": "important"
+    },
+    "/js/v3-index.js": {
+      "checksum": "1e7ee27dde2b53c3c0596e8ed6d9f987",
+      "size": 191632,
+      "priority": "important"
+    },
+    "/js/v3-nfts.js": {
+      "checksum": "af303885b3fea57983518ccffca8c8c4",
+      "size": 127852,
+      "priority": "important"
+    },
+    "/js/v3-qr.js": {
+      "checksum": "aec5b99676cc179e60c428c84a8661db",
+      "size": 132657,
+      "priority": "important"
+    },
+    "/js/v3-scp.js": {
+      "checksum": "ed22926d15923cfe8d8c99aad4dbe54f",
+      "size": 14434,
+      "priority": "important"
+    },
+    "/js/v3-user.js": {
+      "checksum": "eb528a2e379ccf985e42baca5a332061",
+      "size": 290325,
+      "priority": "important"
+    },
+    "/js/video-choice-modal.js": {
+      "checksum": "60d70daf0b10b5dded76dde022f426e9",
+      "size": 4483,
+      "priority": "important"
+    },
+    "/js/video-transcoder.js": {
+      "checksum": "6b62a25323f1aeef1f0a37303e592321",
+      "size": 87186,
+      "priority": "important"
+    },
+    "/js/videoPlayer.bundle.js": {
+      "checksum": "c29c70e028ee203ad8b14fbd7280c183",
+      "size": 776612,
+      "priority": "important"
+    },
+    "/js/vote.js": {
+      "checksum": "951ba298f73aa36777cb938de3081334",
+      "size": 6129,
+      "priority": "important"
+    },
+    "/js/voting-modal.js": {
+      "checksum": "10fae48422e8e57ca87422eeeae572e2",
+      "size": 7220,
+      "priority": "important"
+    },
+    "/js/vr-presence.js": {
+      "checksum": "1993bb41305967a74be8f0ca9727e427",
+      "size": 44613,
+      "priority": "important"
+    },
+    "/js/vrvue.js": {
+      "checksum": "31e8b69c9bee400abf4603e754e600e3",
+      "size": 44273,
+      "priority": "important"
+    },
+    "/js/vueme.js": {
+      "checksum": "17b7a8148f0850d12a53f1c587e6451d",
+      "size": 149535,
+      "priority": "important"
+    },
+    "/js/vueqr.js": {
+      "checksum": "e5e2b75ee9fdc510a95b5d6de0c3e415",
+      "size": 18813,
+      "priority": "important"
+    },
+    "/js/watchers-common.js": {
+      "checksum": "44cc578056cb32138f1a99d613a12633",
+      "size": 407,
+      "priority": "important"
+    },
+    "/lang/en.js": {
+      "checksum": "a613800bae0e1b2e73add8f719340272",
+      "size": 5689,
+      "priority": "important"
+    },
+    "/mint/index.html": {
+      "checksum": "6af3134b0368a9ac54dacdf2ab491d9f",
+      "size": 4255,
+      "priority": "important"
+    },
+    "/new/360-gallery/index-expanded.html": {
+      "checksum": "b679848cec470474e4bc5aa63340b93d",
+      "size": 16655,
+      "priority": "important"
+    },
+    "/new/360-gallery/index.html": {
+      "checksum": "bb0a1558c7cf973b389ea1b22f0e3f49",
+      "size": 10245,
+      "priority": "important"
+    },
+    "/new/advanced/index.html": {
+      "checksum": "ce30ccec87a967de6103af2d3e583464",
+      "size": 34006,
+      "priority": "important"
+    },
+    "/new/index.html": {
+      "checksum": "4e64e879c9cdc45ddab258da3b7dcd25",
+      "size": 124703,
+      "priority": "important"
+    },
+    "/new/token/index.html": {
+      "checksum": "a687fbc86f8674d8b8bbdae0d25902c7",
+      "size": 45307,
+      "priority": "important"
+    },
+    "/nfts/create/example1.html": {
+      "checksum": "edb083626d86e8b1bc69d38ca24915a8",
+      "size": 2471,
+      "priority": "important"
+    },
+    "/nfts/create/example2.html": {
+      "checksum": "de98570a80f08f2c0260f72f002d0d9b",
+      "size": 7898,
+      "priority": "important"
+    },
+    "/nfts/create/index.html": {
+      "checksum": "e2b47a24a25d77dcafc5a718e8990039",
+      "size": 76931,
+      "priority": "important"
+    },
+    "/nfts/index.html": {
+      "checksum": "4e9b3045398f83dd32ba0e35e6883ca6",
+      "size": 59238,
+      "priority": "important"
+    },
+    "/nfts/old.html": {
+      "checksum": "aeec88d5f54b6d086e6a850672349713",
+      "size": 120053,
+      "priority": "important"
+    },
+    "/nfts/set/index.html": {
+      "checksum": "010a87a8d872fe7dfea46365944fe25f",
+      "size": 43222,
+      "priority": "important"
+    },
+    "/nfts/sets/index.html": {
+      "checksum": "0ed6d641afeddcb51502a0ac02942c79",
+      "size": 10027,
+      "priority": "important"
+    },
+    "/node/index.html": {
+      "checksum": "1201263dae69cc6be1dbe6873c17b66e",
+      "size": 12978,
+      "priority": "important"
+    },
+    "/open.html": {
+      "checksum": "902b0c3c4b34e27f0df076329353b481",
+      "size": 5699,
+      "priority": "important"
+    },
+    "/open/index.html": {
+      "checksum": "14f053cf793e6b6d9a08ab1ccc8b41d4",
+      "size": 5426,
+      "priority": "important"
+    },
+    "/proposals/index.html": {
+      "checksum": "0a4549e65ccb116c3bcaafd06b61019e",
+      "size": 106542,
+      "priority": "important"
+    },
+    "/qr/index.html": {
+      "checksum": "fb6b6d6ec2036bc1dd3859c46fee1499",
+      "size": 70757,
+      "priority": "important"
+    },
+    "/reg-sw.js": {
+      "checksum": "016df57233f0c6160d8a705f00dba721",
+      "size": 7299,
+      "priority": "important"
+    },
+    "/src/collaboration-bundle.js": {
+      "checksum": "ff4a7c3a5a75e938df9ed9633331d425",
+      "size": 79932,
+      "priority": "important"
+    },
+    "/src/video-player-bundle.js": {
+      "checksum": "1d2828d31ed672ebd1f9471584d1acfb",
+      "size": 7520,
+      "priority": "important"
+    },
+    "/storage/index.html": {
+      "checksum": "f815c9c160305a0e993f937a4bd22e4a",
+      "size": 12414,
+      "priority": "important"
+    },
+    "/update.html": {
+      "checksum": "95bad8ba0857205117ee5e96b08374d9",
+      "size": 11375,
+      "priority": "important"
+    },
+    "/update/index.html": {
+      "checksum": "042f265f155fa2cf37f5a2cc888dcd15",
+      "size": 30802,
+      "priority": "important"
+    },
+    "/user/detailmodal.html": {
+      "checksum": "262ab96e38f539f099642c426038e677",
+      "size": 88809,
+      "priority": "important"
+    },
+    "/user/index.html": {
+      "checksum": "6d63871f4c94a02ca890982324434892",
+      "size": 308762,
+      "priority": "important"
+    },
+    "/vid/stills/blue_dust.jpg": {
+      "checksum": "9048079c05ff24442ab88599d7e8920f",
+      "size": 63175,
+      "priority": "important"
+    },
+    "/vid/stills/connected_dots.jpg": {
+      "checksum": "48953804461101ec1d484b86193d9463",
+      "size": 627998,
+      "priority": "important"
+    },
+    "/vid/stills/data_lake.jpg": {
+      "checksum": "9330f312da73d45ae0c6d503ebaa35aa",
+      "size": 452432,
+      "priority": "important"
+    },
+    "/vid/stills/floating_abstract.jpg": {
+      "checksum": "b57ba5c015102610c3f1844c79d432e3",
+      "size": 274779,
+      "priority": "important"
+    },
+    "/vid/stills/glowing_hexagon.jpg": {
+      "checksum": "c4c67dd6fe719ebd2b56cc2d6a66157e",
+      "size": 260964,
+      "priority": "important"
+    },
+    "/vid/stills/gold_wave.jpg": {
+      "checksum": "1b610f7ec6798a0c2ef1215791f49f88",
+      "size": 521372,
+      "priority": "important"
+    },
+    "/vid/stills/orange_cube.jpg": {
+      "checksum": "3917fc5c39d416fc084c46d06c480a4b",
+      "size": 631596,
+      "priority": "important"
+    },
+    "/vr/index.html": {
+      "checksum": "af23926e6aa73e55a7d853f014dde3d3",
+      "size": 89688,
+      "priority": "important"
+    },
+    "/vr/vue.html": {
+      "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
+      "size": 1218,
+      "priority": "important"
+    },
+    "/wallet-example.html": {
+      "checksum": "86d0014930a60bba3bb4007f63c3a5a6",
+      "size": 26417,
+      "priority": "important"
+    },
+    "/webpack.config.js": {
+      "checksum": "10ce408fd3f716a61e3e56820200edd0",
+      "size": 1385,
+      "priority": "important"
+    },
+    "/witnesses/index.html": {
+      "checksum": "9677a29e3bb01e068de8366d8e23be55",
+      "size": 38285,
+      "priority": "important"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
+      "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
+      "size": 2240,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
+      "checksum": "b2fd45e97b30ceda399df4308236204e",
+      "size": 5331,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
+      "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
+      "size": 4212,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
+      "checksum": "38967df16d830aacc5894c0b112b6592",
+      "size": 5073,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
+      "checksum": "b5c785d2bfcdf77920f75f2586899a11",
+      "size": 2704,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ecl/ecl.js": {
+      "checksum": "1965d86914bfbb2b793414e7eaffbbdb",
+      "size": 6163,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/elixir/elixir.js": {
+      "checksum": "d692c71c942192ec653670dd8fe078d2",
+      "size": 11084,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
+      "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
+      "size": 2635,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
+      "checksum": "2772f4aba5601734b07dfd600a7ce23a",
+      "size": 17149,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/fsharp/fsharp.js": {
+      "checksum": "4a10f3fbf8c213d1b471e7b162ff6180",
+      "size": 3810,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/go/go.js": {
+      "checksum": "e2cac655f7d9c01be7b0737335e2648a",
+      "size": 3476,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/graphql/graphql.js": {
+      "checksum": "f441189b06ba23ed43103b8cee0318bd",
+      "size": 3089,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
+      "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
+      "size": 7827,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
+      "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
+      "size": 4411,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
+      "checksum": "c29141ad1c095b7e14e1a37fd4570191",
+      "size": 6055,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
+      "checksum": "13b7f142b621006b63c6061711be4ec1",
+      "size": 1922,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
+      "checksum": "4458f51c0a0084ac4d53ccaca469472b",
+      "size": 4044,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
+      "checksum": "8f2950e482448ab0487d9a1ebd309eef",
+      "size": 7137,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
+      "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
+      "size": 8052,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
+      "checksum": "29b986d5bcd6489356dc6ae20169d520",
+      "size": 4266,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
+      "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
+      "size": 4721,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
+      "checksum": "84e5717bbd776f7141b79675d92a115d",
+      "size": 3262,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
+      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
+      "size": 5005,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
+      "checksum": "f84ef485240448f04f47ae177e7c66f7",
+      "size": 2944,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
+      "checksum": "c34c934e8f69865c733a040288167bca",
+      "size": 3636,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
+      "checksum": "e19ba42ced633c14b87715c3bdf66316",
+      "size": 4619,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
+      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
+      "size": 5916,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
+      "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
+      "size": 3402,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
+      "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
+      "size": 5737,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mysql/mysql.js": {
+      "checksum": "1a8ad678a818b45c28bfec17a122e2d9",
+      "size": 12099,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/objective-c/objective-c.js": {
+      "checksum": "5be9639901ce038cc52633b35437bd0b",
+      "size": 3239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
+      "checksum": "22cc9e523acf30fb92bc43518faff779",
+      "size": 3822,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascaligo/pascaligo.js": {
+      "checksum": "81770539db995e23e17c8ba2b76ff89a",
+      "size": 2833,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/perl/perl.js": {
+      "checksum": "972e976ac4fce38ff54f70755ec1bc65",
+      "size": 9078,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pgsql/pgsql.js": {
+      "checksum": "e2f88dd2221ad3450c2d14948a6f728f",
+      "size": 14289,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/php/php.js": {
+      "checksum": "5d10d6fa26a64b6d666798f7e95f1e2f",
+      "size": 8848,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pla/pla.js": {
+      "checksum": "c9ef8f4e89f51be4b77219f181e4ffbd",
+      "size": 2504,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/postiats/postiats.js": {
+      "checksum": "afb4a398865589aeb02db737b6a840fb",
+      "size": 8687,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powerquery/powerquery.js": {
+      "checksum": "1e1a65ee29ff625295c12f842e779f28",
+      "size": 17774,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powershell/powershell.js": {
+      "checksum": "d42611b54a1b94947c98c575d6dcafed",
+      "size": 4104,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/protobuf/protobuf.js": {
+      "checksum": "8f1f4302b1de0c4a28c7cc1a9fb276c8",
+      "size": 9877,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pug/pug.js": {
+      "checksum": "3bd8dbdb32e51a7a509cdf31a50cf8f7",
+      "size": 5649,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/python/python.js": {
+      "checksum": "6ae01d191e98c27707c061d19695a8eb",
+      "size": 5239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/qsharp/qsharp.js": {
+      "checksum": "ecb49d55a198a1f00ed77b679d7b70d6",
+      "size": 4016,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/r/r.js": {
+      "checksum": "09fe02fe5fd03fec9fa66c9817c82c4d",
+      "size": 3948,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/razor/razor.js": {
+      "checksum": "a2ff1de1f62eef1d8f866e9cd3bc6eb0",
+      "size": 9821,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redis/redis.js": {
+      "checksum": "63714d6db70b460ad0e42aa47b94461f",
+      "size": 4381,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redshift/redshift.js": {
+      "checksum": "9dbf5cfd3b6a45de216fc0c16110b5cd",
+      "size": 12631,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/restructuredtext/restructuredtext.js": {
+      "checksum": "13813b441b00308b856527ceb88289db",
+      "size": 4740,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ruby/ruby.js": {
+      "checksum": "d031fc67fbf7405bc02fb9a785be3683",
+      "size": 9327,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/rust/rust.js": {
+      "checksum": "136827115195f8766e6bd28569c5d50d",
+      "size": 4983,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sb/sb.js": {
+      "checksum": "492ef5b10e9c1e75aed0d11d0b5010e2",
+      "size": 2648,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scala/scala.js": {
+      "checksum": "e33d235fff5d6bec204fdaf45d611b3f",
+      "size": 8143,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scheme/scheme.js": {
+      "checksum": "8459a684a953f7b5bd65752606f700ce",
+      "size": 2594,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scss/scss.js": {
+      "checksum": "3c3637405e97f0f06e042c840458359d",
+      "size": 7232,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/shell/shell.js": {
+      "checksum": "e36a3dc8ecd853ce86ef6d47130db580",
+      "size": 3898,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/solidity/solidity.js": {
+      "checksum": "bfdd1ec8b7391d0dcb81b9635d251f5e",
+      "size": 19428,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
+      "checksum": "122424f290eebd8629588833320d7b50",
+      "size": 3591,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sparql/sparql.js": {
+      "checksum": "b4fbde148a69c3fca7c0690ca3bc84d0",
+      "size": 3379,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sql/sql.js": {
+      "checksum": "702278cfb52c5545c2ad56e8e90870a4",
+      "size": 11118,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/st/st.js": {
+      "checksum": "d809dd5b6e4a1c7212861e3341738836",
+      "size": 8222,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/swift/swift.js": {
+      "checksum": "076c5207d2316b08adde022e0d5f0273",
+      "size": 5997,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/systemverilog/systemverilog.js": {
+      "checksum": "8321b50b1bdb4ade6e6b04f38f6f06ce",
+      "size": 8444,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/tcl/tcl.js": {
+      "checksum": "338956439f15f093079f1e021fb5f775",
+      "size": 4392,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/twig/twig.js": {
+      "checksum": "d137c03322f5585a021df82c3457adb9",
+      "size": 6796,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typescript/typescript.js": {
+      "checksum": "2928d1f58d63f1ca29dfe4e0eb116dd2",
+      "size": 6460,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typespec/typespec.js": {
+      "checksum": "3ea4220c40ac4d11038a4343895f42c5",
+      "size": 3627,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/vb/vb.js": {
+      "checksum": "954c16b916d419d910d6e0d04a77c8fb",
+      "size": 6610,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/wgsl/wgsl.js": {
+      "checksum": "30446e49687b9c62da94e0d7fd9e8a6d",
+      "size": 8146,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/xml/xml.js": {
+      "checksum": "17d082989dab3222da1b3c268c5d9cc8",
+      "size": 3452,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/yaml/yaml.js": {
+      "checksum": "5e1913f1f8de1694eeb42e7ba2323eaf",
+      "size": 5056,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.css": {
+      "checksum": "77292b9ceb0cf21d9c34fdcf95b9b356",
+      "size": 131858,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.js": {
+      "checksum": "8216718a32af36c4cb9484476d428d08",
+      "size": 3766654,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssMode.js": {
+      "checksum": "c116d50b0b63ce239bac1f764f38c7f8",
+      "size": 33094,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssWorker.js": {
+      "checksum": "0f28cabc4e103f7f5011048887c0aa28",
+      "size": 778035,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlMode.js": {
+      "checksum": "c8d05bfbd0ee3e74b9377afc77413d14",
+      "size": 33634,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlWorker.js": {
+      "checksum": "2b4df49b1af87a53c554d7a0ee99ed3e",
+      "size": 449070,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonMode.js": {
+      "checksum": "e4b39dc9f8ce3da292bc86121b9cb804",
+      "size": 42545,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonWorker.js": {
+      "checksum": "967a0435896e2a1ef60866f159cf3002",
+      "size": 131177,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
+      "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
+      "size": 23919,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
+      "checksum": "8ad7f367030861562122593f237c8ce2",
+      "size": 5749518,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/loader.js": {
+      "checksum": "bb6e6a026f04f24eab30a3924c8ccd30",
+      "size": 30051,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.de.js": {
+      "checksum": "cd01fdaf9e23b2da4de6c7628b06e6b3",
+      "size": 119967,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.es.js": {
+      "checksum": "e55051c17fde8e3a33086d9cf68e5be1",
+      "size": 120624,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.fr.js": {
+      "checksum": "1cf35e528d2a195c0e2a1eb91513a5bb",
+      "size": 133124,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.it.js": {
+      "checksum": "98ef8649994cd402d6d53bc4a63febb5",
+      "size": 122202,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ja.js": {
+      "checksum": "98f4b971bbb23837904e3bc9abed163f",
+      "size": 256463,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ko.js": {
+      "checksum": "4b68407fd9261ca0a0d9bc946ee0e5e1",
+      "size": 210086,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ru.js": {
+      "checksum": "0f19eddfec0719f5f559c68e0f17319f",
+      "size": 538578,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
+      "checksum": "73423967cc7656f344cf497626de181f",
+      "size": 157372,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
+      "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
+      "size": 161126,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-proxy.js": {
+      "checksum": "412e79a5731df84cd19fb52ba8d5d1b0",
+      "size": 1741,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test-simple.html": {
+      "checksum": "ba71f9da3bb13e1af2b417758efcb501",
+      "size": 5495,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test.html": {
+      "checksum": "de4d36aa4bd6e4c88edcc0788f2544df",
+      "size": 5544,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-worker-setup.js": {
+      "checksum": "39b0f159b48d4e97940a76342e32fddc",
+      "size": 1291,
+      "priority": "page-specific"
+    },
+    "/naf-playground/scene-test.html": {
+      "checksum": "f556898bea2ca823bca83978ce8f04b8",
+      "size": 2353,
+      "priority": "page-specific"
+    },
+    "/naf-playground/test-video.html": {
+      "checksum": "1ba32579515f864ae6bdf65ba09b3384",
+      "size": 2292,
+      "priority": "page-specific"
+    },
+    "/playground/copy.html": {
+      "checksum": "eaa6a972fcae4bb48121274d44b29367",
+      "size": 2450,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/arches.png": {
+      "checksum": "459b3df0b2d88977b2358145393e6055",
+      "size": 208709,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/checkerboard.png": {
+      "checksum": "1473de04fe511fef22cd990f317b5201",
+      "size": 106971,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/contact.png": {
+      "checksum": "7901857a96f276920a9acc64d6a575fc",
+      "size": 134045,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/default.png": {
+      "checksum": "0b47acc6325bdbae72559e198f6169a8",
+      "size": 117008,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/dream.png": {
+      "checksum": "632127c42e2c92db1bce11add6499e41",
+      "size": 113290,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/egypt.png": {
+      "checksum": "e6c56b2e49a158fecd2a614e063596a0",
+      "size": 142240,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/forest.png": {
+      "checksum": "2b53f99d17a713efa0d95a5eef2df8e5",
+      "size": 140445,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goaland.png": {
+      "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
+      "size": 132405,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goldmine.png": {
+      "checksum": "45fe056e75d02ac5de7b498c380477d5",
+      "size": 85126,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/japan.png": {
+      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
+      "size": 132145,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/moon.png": {
+      "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
+      "size": 211072,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/none.png": {
+      "checksum": "f5dee31316fd9060eea8f8134918c28f",
+      "size": 35892,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/osiris.png": {
+      "checksum": "6e6d7f2537262ae090f61f1f967a8ee5",
+      "size": 147567,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/poison.png": {
+      "checksum": "7c827e4377e8848cbb2ad07162169409",
+      "size": 49060,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/starry.png": {
+      "checksum": "91e683aa6abe9825904483052a0f2d69",
+      "size": 213614,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/threetowers.png": {
+      "checksum": "c24c3d56a600787acda2af591ea761af",
+      "size": 147229,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/tron.png": {
+      "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
+      "size": 129691,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/volcano.png": {
+      "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
+      "size": 141300,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/yavapai.png": {
+      "checksum": "2da358421be2ed384564de674057084a",
+      "size": 163708,
+      "priority": "page-specific"
+    },
+    "/playground/fogworking.html": {
+      "checksum": "b67f8e095072c32c5b59c9f0a66b2adb",
+      "size": 166798,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco-fixed.html": {
+      "checksum": "acedc1f1736c5e3124b1c6db6438a5c9",
+      "size": 126951,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco.html": {
+      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
+      "size": 69233,
+      "priority": "page-specific"
+    },
+    "/playground/index.html": {
+      "checksum": "575f56ba019b1780f56f116799e7648f",
+      "size": 48598,
+      "priority": "page-specific"
+    },
+    "/playground/last-try.html": {
+      "checksum": "a64809066d4ff41d60aebe9a57d17b72",
+      "size": 7021,
+      "priority": "page-specific"
+    },
+    "/playground/new.html": {
+      "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
+      "size": 21317,
+      "priority": "page-specific"
+    },
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    }
+  }
+}
+;
+
 
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
@@ -2277,3 +3993,1747 @@ function formatBytes(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+// Cache manifest with checksums - auto-generated
+self.cacheManifest = 
+{
+  "version": "2025.07.12.7",
+  "generated": "2025-07-12T18:50:07Z",
+  "files": {
+    "/img/dlux-qr.png": {
+      "checksum": "3b4c09f50cb7f2314a3e5effce05ea58",
+      "size": 33251,
+      "priority": "important"
+    },
+    "/img/dluxdefault.png": {
+      "checksum": "362c4095d2752a5d25e5448326f99088",
+      "size": 159810,
+      "priority": "important"
+    },
+    "/img/eps-file-type-svgrepo-com.svg": {
+      "checksum": "54e62783e56be35d720e9be50c7732b6",
+      "size": 2114,
+      "priority": "important"
+    },
+    "/img/excel-file-type-svgrepo-com.svg": {
+      "checksum": "9cae63f953dab1bdbe1f1bd2e78504e2",
+      "size": 2197,
+      "priority": "important"
+    },
+    "/img/favicon.ico": {
+      "checksum": "04f7baccd67b245727b07e7b30543234",
+      "size": 3418,
+      "priority": "important"
+    },
+    "/img/gallery-vr-comp.jpg": {
+      "checksum": "df3fae44de67c8af269891561242f6d5",
+      "size": 178796,
+      "priority": "important"
+    },
+    "/img/hbd_green.svg": {
+      "checksum": "4cdd7402ddcbd06d7145d437da14c670",
+      "size": 999,
+      "priority": "important"
+    },
+    "/img/hextacular.svg": {
+      "checksum": "f11afc9005714fcb560171a788ee11bd",
+      "size": 1636,
+      "priority": "important"
+    },
+    "/img/hiveauth.svg": {
+      "checksum": "ac85800f2a11ca62345537f3b2f70e04",
+      "size": 44094,
+      "priority": "important"
+    },
+    "/img/hivesigner.svg": {
+      "checksum": "6958efa0d0564cbf5d2209361551a9d4",
+      "size": 11798,
+      "priority": "important"
+    },
+    "/img/hivesigner_white.svg": {
+      "checksum": "504a9fab6111a49d6cdbb73804c4aa15",
+      "size": 6318,
+      "priority": "important"
+    },
+    "/img/html-file-type-svgrepo-com.svg": {
+      "checksum": "5ab38fd87ea73dbf6ffed1d024b7d35c",
+      "size": 1555,
+      "priority": "important"
+    },
+    "/img/hub-logo.png": {
+      "checksum": "7db4716b5e131ddfffc1827968f195fa",
+      "size": 79254,
+      "priority": "important"
+    },
+    "/img/hypercube.png": {
+      "checksum": "ba9f6e78fa421c4b4731d96da36c9f1e",
+      "size": 11451658,
+      "priority": "important"
+    },
+    "/img/ipfs-logo.svg": {
+      "checksum": "817a79ff9a3eba2725d46a44df0dcd93",
+      "size": 2708,
+      "priority": "important"
+    },
+    "/img/jpg-file-type-svgrepo-com.svg": {
+      "checksum": "9e92500a821234c40cf49f081daa4b44",
+      "size": 1927,
+      "priority": "important"
+    },
+    "/img/jtree-comp.jpg": {
+      "checksum": "bcb9277b1867e82d7415341e9d6a21bf",
+      "size": 311146,
+      "priority": "important"
+    },
+    "/img/keychain.png": {
+      "checksum": "6846c271b72fee4584494eee2383339f",
+      "size": 17563,
+      "priority": "important"
+    },
+    "/img/logo_hiveprojects.png": {
+      "checksum": "c05534ff50e1bd4e17ebcb23322386cc",
+      "size": 79573,
+      "priority": "important"
+    },
+    "/img/meta/about.png": {
+      "checksum": "0e0c6bc95c6e5039795b73e0b7409294",
+      "size": 485764,
+      "priority": "important"
+    },
+    "/img/meta/create.png": {
+      "checksum": "a744ac5d0b197c99c7ce329f63cd990b",
+      "size": 506236,
+      "priority": "important"
+    },
+    "/img/meta/dao.png": {
+      "checksum": "392f062627adf5c61eb191ffa6a8e0c3",
+      "size": 369057,
+      "priority": "important"
+    },
+    "/img/meta/index.png": {
+      "checksum": "cdfd8f211499d38909f21de002319d0b",
+      "size": 584134,
+      "priority": "important"
+    },
+    "/img/meta/mint.png": {
+      "checksum": "b307d0794d165eb0f52f5c642c56c647",
+      "size": 642272,
+      "priority": "important"
+    },
+    "/img/meta/node.png": {
+      "checksum": "10b441a2c9e9e728e7055fae9065769d",
+      "size": 750851,
+      "priority": "important"
+    },
+    "/img/meta/storage1.png": {
+      "checksum": "cb96e8a07b06496384d31e9a30015f9a",
+      "size": 434519,
+      "priority": "important"
+    },
+    "/img/metaverse-vr-comp.jpg": {
+      "checksum": "82c7278828d85ace9036d87c72801e20",
+      "size": 124780,
+      "priority": "important"
+    },
+    "/img/mov-file-type-svgrepo-com.svg": {
+      "checksum": "0af98e452f25a7739bb978a7ed02051b",
+      "size": 1745,
+      "priority": "important"
+    },
+    "/img/mp3-file-type-svgrepo-com.svg": {
+      "checksum": "1004873c11cc066741da417bfe78b80f",
+      "size": 2165,
+      "priority": "important"
+    },
+    "/img/no-user.png": {
+      "checksum": "83327a11fc84f8c65194617bc80b88cf",
+      "size": 12395,
+      "priority": "important"
+    },
+    "/img/other-file-type-svgrepo-com.svg": {
+      "checksum": "93ff030887252d38b07c16d97ff6cb2a",
+      "size": 1627,
+      "priority": "important"
+    },
+    "/img/pdf-file-type-svgrepo-com.svg": {
+      "checksum": "acfd5b697e36e229a5eb3c8dca745eb4",
+      "size": 1732,
+      "priority": "important"
+    },
+    "/img/peakd_logo.svg": {
+      "checksum": "50081d3c4169086a323b14127ecd344f",
+      "size": 552,
+      "priority": "important"
+    },
+    "/img/png-file-type-svgrepo-com.svg": {
+      "checksum": "ba847b53eba1f7e7be13000fc4c5ea27",
+      "size": 1921,
+      "priority": "important"
+    },
+    "/img/ppt-file-type-svgrepo-com.svg": {
+      "checksum": "8487976bee6f78adc7caee5b71479743",
+      "size": 2103,
+      "priority": "important"
+    },
+    "/img/psd-file-type-svgrepo-com.svg": {
+      "checksum": "752cee1bb240f2679af2f068930fa2cf",
+      "size": 2242,
+      "priority": "important"
+    },
+    "/img/ragnarok.png": {
+      "checksum": "5934b1a258fdf602cd78b1c35f276b8d",
+      "size": 133078,
+      "priority": "important"
+    },
+    "/img/ragnarok_sealed.png": {
+      "checksum": "a7558e86491320184e56d6a8f909d695",
+      "size": 74886,
+      "priority": "important"
+    },
+    "/img/rar-file-type-svgrepo-com.svg": {
+      "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
+      "size": 1835,
+      "priority": "important"
+    },
+    "/img/spk192.png": {
+      "checksum": "411500d1b3e3b31bf0b90c5b8126c634",
+      "size": 10149,
+      "priority": "important"
+    },
+    "/img/spk512.png": {
+      "checksum": "98a452727661d34f119ddf6a3fd920a8",
+      "size": 21939,
+      "priority": "important"
+    },
+    "/img/spknetwork.png": {
+      "checksum": "4d91f7a0ed50ac7b0d27cbd52794078a",
+      "size": 51410,
+      "priority": "important"
+    },
+    "/img/sting_white.svg": {
+      "checksum": "b3fb2506f7d51b38fe814243567109cc",
+      "size": 2374,
+      "priority": "important"
+    },
+    "/img/tokens/broca_icon.png": {
+      "checksum": "87aac077c4cfdf4bd02cbbbef8a4c3ba",
+      "size": 33591,
+      "priority": "important"
+    },
+    "/img/tokens/broca_logomark.png": {
+      "checksum": "fcd5ae3ad20ec9cfcee5764ad4f26e9f",
+      "size": 28971,
+      "priority": "important"
+    },
+    "/img/tokens/dlux_icon.png": {
+      "checksum": "5892181763fe2e7f3bf5c59b81191f75",
+      "size": 33287,
+      "priority": "important"
+    },
+    "/img/tokens/duat_icon.png": {
+      "checksum": "eed179af8a36b2d8be72a721dada0f84",
+      "size": 114195,
+      "priority": "important"
+    },
+    "/img/tokens/hbd_icon.svg": {
+      "checksum": "4cdd7402ddcbd06d7145d437da14c670",
+      "size": 999,
+      "priority": "important"
+    },
+    "/img/tokens/hive_icon.svg": {
+      "checksum": "f11afc9005714fcb560171a788ee11bd",
+      "size": 1636,
+      "priority": "important"
+    },
+    "/img/tokens/larynx_icon.png": {
+      "checksum": "27fa9b4e1dc4f0205913529a03a2aced",
+      "size": 29625,
+      "priority": "important"
+    },
+    "/img/tokens/larynx_logomark.png": {
+      "checksum": "c053db05ca715d5494af1e8cf0b9759b",
+      "size": 28604,
+      "priority": "important"
+    },
+    "/img/tokens/spk_icon.png": {
+      "checksum": "ec1db8b25b57776a93d8efd59bcdfd7a",
+      "size": 33772,
+      "priority": "important"
+    },
+    "/img/tokens/spk_logomark.png": {
+      "checksum": "e7488b692154b55e2e2e390b21a7f8bb",
+      "size": 25219,
+      "priority": "important"
+    },
+    "/img/txt-file-type-svgrepo-com.svg": {
+      "checksum": "90a1ea59895f59235680505a41e17d10",
+      "size": 1476,
+      "priority": "important"
+    },
+    "/img/wallets/coinbase-logo.png": {
+      "checksum": "44ee96c50cb5c743af38465a4222cc54",
+      "size": 4939,
+      "priority": "important"
+    },
+    "/img/wallets/coinbase.svg": {
+      "checksum": "4b387163f5f61e77d5dc26015370b7ff",
+      "size": 344,
+      "priority": "important"
+    },
+    "/img/wallets/metamask-logo.svg": {
+      "checksum": "552332e44c0c151c0d031c9509303ec8",
+      "size": 3120,
+      "priority": "important"
+    },
+    "/img/wallets/metamask.svg": {
+      "checksum": "7cfd65ef1830c13da772be92917819d7",
+      "size": 397,
+      "priority": "important"
+    },
+    "/img/wallets/phantom-logo.svg": {
+      "checksum": "ff77552e948c08d94e6ee04e70db9b41",
+      "size": 1134,
+      "priority": "important"
+    },
+    "/img/wallets/phantom.svg": {
+      "checksum": "c93ce1216ab2e6ea877e2e55d4a2274a",
+      "size": 383,
+      "priority": "important"
+    },
+    "/img/wallets/trust.svg": {
+      "checksum": "cd66e6fa039cdc560fe0b11a7921383e",
+      "size": 363,
+      "priority": "important"
+    },
+    "/img/wallets/walletconnect.svg": {
+      "checksum": "5740d34ff67b77f017d12a78e945c656",
+      "size": 441,
+      "priority": "important"
+    },
+    "/img/wav-file-type-svgrepo-com.svg": {
+      "checksum": "6941433f291e8d4263bad8f5c8571100",
+      "size": 1552,
+      "priority": "important"
+    },
+    "/img/word-file-type-svgrepo-com.svg": {
+      "checksum": "442055744681d382526a20c60be69cdd",
+      "size": 2240,
+      "priority": "important"
+    },
+    "/img/zip-file-type-svgrepo-com.svg": {
+      "checksum": "e79c3c0ded94605b92bc4bf522615b9b",
+      "size": 1581,
+      "priority": "important"
+    },
+    "/js/appvue.js": {
+      "checksum": "b10fc31c6505c6008635c0c001c15c37",
+      "size": 45982,
+      "priority": "important"
+    },
+    "/js/assets-min.js": {
+      "checksum": "3daf5f9673debad301f5233205bd9dbe",
+      "size": 11250,
+      "priority": "important"
+    },
+    "/js/assets.js": {
+      "checksum": "a3a16504774a19c7381c88f97917e2fc",
+      "size": 22039,
+      "priority": "important"
+    },
+    "/js/bennies.js": {
+      "checksum": "67ba4fe44747b4c2aac6b80ccf227de4",
+      "size": 8208,
+      "priority": "important"
+    },
+    "/js/blockvue.js": {
+      "checksum": "30d1b55966ab14956f7c6486887ca857",
+      "size": 47346,
+      "priority": "important"
+    },
+    "/js/buffer.js": {
+      "checksum": "e225d02cdfe4a776207cebd5e36052b0",
+      "size": 50387,
+      "priority": "important"
+    },
+    "/js/cardvue.js": {
+      "checksum": "39423715a5e7011068eb2b0511d59e2b",
+      "size": 35865,
+      "priority": "important"
+    },
+    "/js/chartjs-adapter-date-fns.local.js": {
+      "checksum": "cf877b480725fbeb84e0933dc9d1e969",
+      "size": 104968,
+      "priority": "important"
+    },
+    "/js/choices-vue.js": {
+      "checksum": "78be8b37388c4e7fe3905d813e1f75eb",
+      "size": 17670,
+      "priority": "important"
+    },
+    "/js/chrtjscf.js": {
+      "checksum": "fc12ff5661845deb93892ad728434bbd",
+      "size": 27624,
+      "priority": "important"
+    },
+    "/js/codemirror-xml.min.js": {
+      "checksum": "8d67b4230709b35c843970bd30695ab2",
+      "size": 6042,
+      "priority": "important"
+    },
+    "/js/codemirror.min.js": {
+      "checksum": "2263911552d33d0cf4e43b1ea01413bb",
+      "size": 170531,
+      "priority": "important"
+    },
+    "/js/collaboration.bundle.js": {
+      "checksum": "2dfd2f09c691a846d1539d06436db3d4",
+      "size": 1386968,
+      "priority": "important"
+    },
+    "/js/components/360-asset-manager-iframe-adapter.js": {
+      "checksum": "1636668b2dafe7f9f1a54d7cc8341088",
+      "size": 5904,
+      "priority": "important"
+    },
+    "/js/components/360-asset-manager.js": {
+      "checksum": "c6b835480fb83c68d14014529a6622e0",
+      "size": 71907,
+      "priority": "important"
+    },
+    "/js/components/dapp-manager.js": {
+      "checksum": "faf34fb21fa2fd64f851e47227085b74",
+      "size": 57377,
+      "priority": "important"
+    },
+    "/js/components/remix-dapp-manager.js": {
+      "checksum": "834602dc070c1009843a5ec77301a40b",
+      "size": 67874,
+      "priority": "important"
+    },
+    "/js/contract-modal.js": {
+      "checksum": "a5d47779bc8059c6ca334f1a9fabf4c0",
+      "size": 18154,
+      "priority": "important"
+    },
+    "/js/contracts-vue.js": {
+      "checksum": "e22730d638861562df6be63a3d36ac75",
+      "size": 109055,
+      "priority": "important"
+    },
+    "/js/cryptojs.min.js": {
+      "checksum": "d9c6de0df2bf028d93924aff92487904",
+      "size": 60819,
+      "priority": "important"
+    },
+    "/js/cycler.js": {
+      "checksum": "f664b76697d2f4b76bf776284f491c4e",
+      "size": 1118,
+      "priority": "important"
+    },
+    "/js/dataCommon.js": {
+      "checksum": "f38ec95a53d917b4e2d7fe983646d5ea",
+      "size": 229,
+      "priority": "important"
+    },
+    "/js/dd.js": {
+      "checksum": "359b73a60da7efe421181249ece6f7d2",
+      "size": 9257,
+      "priority": "important"
+    },
+    "/js/detailvue.js": {
+      "checksum": "4d1e95d8295a45a9a35de8dbb0e3efa2",
+      "size": 52396,
+      "priority": "important"
+    },
+    "/js/dexvue.js": {
+      "checksum": "0a2809aeee5eb1af609bf1bbc84a48bc",
+      "size": 50115,
+      "priority": "important"
+    },
+    "/js/diff.js": {
+      "checksum": "e771e221748d27a961486d5df12b2471",
+      "size": 81155,
+      "priority": "important"
+    },
+    "/js/dlux-wallet.js": {
+      "checksum": "26c8861b0cb33027adf92f000c63ad0e",
+      "size": 72062,
+      "priority": "important"
+    },
+    "/js/drag-drop.js": {
+      "checksum": "0ec92c44489e6ffbf6ec1234caf84942",
+      "size": 13295,
+      "priority": "important"
+    },
+    "/js/drag-sort.js": {
+      "checksum": "836d807e5e29d1b90376b008e55ceaa5",
+      "size": 2360,
+      "priority": "important"
+    },
+    "/js/election-modal.js": {
+      "checksum": "0c3689e8d2efdfd9c11d836bada0d1c8",
+      "size": 7480,
+      "priority": "important"
+    },
+    "/js/extend-modal.js": {
+      "checksum": "ba61609ef1242c095935a6d60bec203d",
+      "size": 6111,
+      "priority": "important"
+    },
+    "/js/extensionvue.js": {
+      "checksum": "8676c44fc4a602732ea7e3a0c036a879",
+      "size": 18652,
+      "priority": "important"
+    },
+    "/js/filesvue-dd.js": {
+      "checksum": "751961f99cec8c4c66d9bb2f65b76d5e",
+      "size": 312746,
+      "priority": "important"
+    },
+    "/js/filesvue.js": {
+      "checksum": "ad5f3e0cdcf7e68466df43ee9019324d",
+      "size": 91094,
+      "priority": "important"
+    },
+    "/js/footvue.js": {
+      "checksum": "bfbf2e784a2d1ca7f149a08398bc474c",
+      "size": 1333,
+      "priority": "important"
+    },
+    "/js/fttransfer.js": {
+      "checksum": "ff5ac6045a4c04aafa46864a8edd4ab2",
+      "size": 73613,
+      "priority": "important"
+    },
+    "/js/generative-nft-builder.js": {
+      "checksum": "b332a09c82a2324a9628e23ff5413e03",
+      "size": 37740,
+      "priority": "important"
+    },
+    "/js/hive-modal.js": {
+      "checksum": "ea94f917f11b19610b6f01efd2935717",
+      "size": 32362,
+      "priority": "important"
+    },
+    "/js/iframe-customjson-integration.js": {
+      "checksum": "9a927323a2c6f637dd0da274a29fdda1",
+      "size": 10640,
+      "priority": "important"
+    },
+    "/js/img-ipfs.js": {
+      "checksum": "c29daa440ebbab74b34d47cbbdcd59f1",
+      "size": 2340,
+      "priority": "important"
+    },
+    "/js/indexvue.js": {
+      "checksum": "361f81aaa9cf5523af1a4e8a03e53267",
+      "size": 28461,
+      "priority": "important"
+    },
+    "/js/ipfs-video-init.js": {
+      "checksum": "c75d1369a0ad094a5fbda2cc3471c8f0",
+      "size": 847,
+      "priority": "important"
+    },
+    "/js/json-editor.js": {
+      "checksum": "1f85d13cb661dac03fbc3453e96fa16d",
+      "size": 14873,
+      "priority": "important"
+    },
+    "/js/marker.js": {
+      "checksum": "5a8adecc4653aa9e8dd1849c1a620e17",
+      "size": 8407,
+      "priority": "important"
+    },
+    "/js/mde.js": {
+      "checksum": "53b8c9f226da2c3a3a3b3b2ffa21abac",
+      "size": 999,
+      "priority": "important"
+    },
+    "/js/methods-common.js": {
+      "checksum": "528a0932ec22d0a4f51e2ec4b075716a",
+      "size": 45381,
+      "priority": "important"
+    },
+    "/js/methods-modals.js": {
+      "checksum": "f08a459f5f5c673932b1c1cd51540e0b",
+      "size": 1066,
+      "priority": "important"
+    },
+    "/js/methods-spk.js": {
+      "checksum": "e434298a33d0318e41336bcdf551e567",
+      "size": 7542,
+      "priority": "important"
+    },
+    "/js/mfi-vue.js": {
+      "checksum": "7fbd69d4f3b44ab70507017b7cb61e94",
+      "size": 15064,
+      "priority": "important"
+    },
+    "/js/modal-manager.js": {
+      "checksum": "051b4cf0394772b91ff1ff0a8a507de0",
+      "size": 5286,
+      "priority": "important"
+    },
+    "/js/modalvue.js": {
+      "checksum": "e94da9d51e347d514b9d6182e5f52dda",
+      "size": 42661,
+      "priority": "important"
+    },
+    "/js/model-viewer.min.js": {
+      "checksum": "dd677b435b16f44e4ca08a9f354bac24",
+      "size": 955555,
+      "priority": "important"
+    },
+    "/js/nav.js": {
+      "checksum": "7ec38d3ee084cc52ed87ba82bad4d563",
+      "size": 27637,
+      "priority": "important"
+    },
+    "/js/navue.js": {
+      "checksum": "cc57a50722e2c1b2c3c5a19383b79e16",
+      "size": 47919,
+      "priority": "important"
+    },
+    "/js/nft-script-executor.js": {
+      "checksum": "76d7c34dc059e1b6b7eff3007c59720d",
+      "size": 10534,
+      "priority": "important"
+    },
+    "/js/nftcard.js": {
+      "checksum": "eab916cf74635206cdd5cd2d9f7382ca",
+      "size": 18323,
+      "priority": "important"
+    },
+    "/js/nftdetail.js": {
+      "checksum": "eaf16d707930e3782ac391a903240751",
+      "size": 90543,
+      "priority": "important"
+    },
+    "/js/nftsvue.js": {
+      "checksum": "395599cbe864c4640b9764fe2a7e5d4e",
+      "size": 98152,
+      "priority": "important"
+    },
+    "/js/onlyhash.js": {
+      "checksum": "ce57237fd9402179b8dfd8ef7aa1e1be",
+      "size": 707437,
+      "priority": "important"
+    },
+    "/js/pop-frame.js": {
+      "checksum": "679aed3281bcee07fb3942a985e7dbbe",
+      "size": 904,
+      "priority": "important"
+    },
+    "/js/pop.js": {
+      "checksum": "679aed3281bcee07fb3942a985e7dbbe",
+      "size": 904,
+      "priority": "important"
+    },
+    "/js/popover.js": {
+      "checksum": "9a6e9b572a734e9c6708d3359e287222",
+      "size": 1842,
+      "priority": "important"
+    },
+    "/js/postvue.js": {
+      "checksum": "b1445a2922aa1c57172fb989dd2d5481",
+      "size": 17189,
+      "priority": "important"
+    },
+    "/js/purify.min.js": {
+      "checksum": "6d6eab0b233005b7be97072e5b9e1011",
+      "size": 21490,
+      "priority": "important"
+    },
+    "/js/ratings.js": {
+      "checksum": "4f26b88271c105408b4864bf8a2f41fc",
+      "size": 1651,
+      "priority": "important"
+    },
+    "/js/replies.js": {
+      "checksum": "ef6d3545734c869fb2fea7d55be711e8",
+      "size": 12430,
+      "priority": "important"
+    },
+    "/js/scene.js": {
+      "checksum": "aaed69b3bd0a5b44f45e4b3b3f773510",
+      "size": 53733,
+      "priority": "important"
+    },
+    "/js/services/ffmpeg-manager.js": {
+      "checksum": "2813a5b49ec1701bac900e54649add8b",
+      "size": 10683,
+      "priority": "important"
+    },
+    "/js/services/ipfs-hls-player.js": {
+      "checksum": "4eb6135c7e565a1193efaf56c0aad4b6",
+      "size": 12002,
+      "priority": "important"
+    },
+    "/js/services/mention-suggestion.js": {
+      "checksum": "eb351bba70b689d46a1802eec9def78d",
+      "size": 6460,
+      "priority": "important"
+    },
+    "/js/services/playlist-processor.js": {
+      "checksum": "fee9c838cf2342610ca9616bfcf6a61f",
+      "size": 10449,
+      "priority": "important"
+    },
+    "/js/services/thumbnail-service.js": {
+      "checksum": "b23b399f0e55441dbe8b0f1d09570eb1",
+      "size": 21903,
+      "priority": "important"
+    },
+    "/js/session.js": {
+      "checksum": "19fe354a509a25a48a47ae622f4c998e",
+      "size": 48412,
+      "priority": "important"
+    },
+    "/js/setcard.js": {
+      "checksum": "a2f10e9bed812046f0d49a8a6a339d6f",
+      "size": 2890,
+      "priority": "important"
+    },
+    "/js/showdown.js": {
+      "checksum": "c619f8b780850eff22845d1091cfa776",
+      "size": 3760,
+      "priority": "important"
+    },
+    "/js/simple-field-editor.js": {
+      "checksum": "68b87c94d41b38740f445068e1188c2f",
+      "size": 6226,
+      "priority": "important"
+    },
+    "/js/spk-drop-lite.js": {
+      "checksum": "c0a1375f72464b64bb7b08ac70717902",
+      "size": 8574,
+      "priority": "important"
+    },
+    "/js/spk-js.js": {
+      "checksum": "f5907a46fadd42a17504c9aa6a4978b8",
+      "size": 564485,
+      "priority": "important"
+    },
+    "/js/spk-wallet.js": {
+      "checksum": "df8d471e90bfebcb26298de1553f6417",
+      "size": 70838,
+      "priority": "important"
+    },
+    "/js/spkdrive.js": {
+      "checksum": "34e8cf95fda6cc5c3f5865b8b6752657",
+      "size": 85696,
+      "priority": "important"
+    },
+    "/js/spkvue.js": {
+      "checksum": "99073aee13e303e83415618eaa6dfbdb",
+      "size": 92106,
+      "priority": "important"
+    },
+    "/js/standard-modal.js": {
+      "checksum": "5293322d7f75e2e2f70eb203c644230d",
+      "size": 7356,
+      "priority": "important"
+    },
+    "/js/stwidget.js": {
+      "checksum": "0b8f564f8fc83e2587d7cdd557330753",
+      "size": 25863,
+      "priority": "important"
+    },
+    "/js/sw-monitor.js": {
+      "checksum": "b6a70f0b0445b70b63ee9e81dabd9b28",
+      "size": 36523,
+      "priority": "important"
+    },
+    "/js/tagify.min.js": {
+      "checksum": "245e4e1b9c956dbebd6b52a595eabd79",
+      "size": 59697,
+      "priority": "important"
+    },
+    "/js/tagifyvue.js": {
+      "checksum": "8c083377956e9a936f47a35f45afc951",
+      "size": 1127,
+      "priority": "important"
+    },
+    "/js/tiptap-editor-modular.js": {
+      "checksum": "1e4845d9aa0c99992f86ac9027e22449",
+      "size": 1099044,
+      "priority": "important"
+    },
+    "/js/toastvue.js": {
+      "checksum": "15a042f49546393a84afe492cbe516d3",
+      "size": 2374,
+      "priority": "important"
+    },
+    "/js/trading-vue.min.js": {
+      "checksum": "6e6bb2f8dd6f94e2c8656759eafc1a26",
+      "size": 264037,
+      "priority": "important"
+    },
+    "/js/upload-everywhere.js": {
+      "checksum": "a36246a6149c569f08b4cd7a286c843b",
+      "size": 62355,
+      "priority": "important"
+    },
+    "/js/uploadvue-dd.js": {
+      "checksum": "15f9d245846ef2bfc53bc9eb8bdfb3a9",
+      "size": 143763,
+      "priority": "important"
+    },
+    "/js/uploadvue.js": {
+      "checksum": "a24c372511a3865e52d1194b8af5bfac",
+      "size": 63528,
+      "priority": "important"
+    },
+    "/js/utils/hls-quality-selector.js": {
+      "checksum": "53e13403519d393b1be94c150e5d2ba9",
+      "size": 13085,
+      "priority": "important"
+    },
+    "/js/utils/processed-file.js": {
+      "checksum": "cc15a1802034026aa8ca8617fea5232c",
+      "size": 1896,
+      "priority": "important"
+    },
+    "/js/utils/url-processor.js": {
+      "checksum": "ab5c2d6c38a325907ee19b2613ea2878",
+      "size": 3780,
+      "priority": "important"
+    },
+    "/js/uuidv.js": {
+      "checksum": "e64fbbb49c9b48c9fb15e778de8d86ad",
+      "size": 1105,
+      "priority": "important"
+    },
+    "/js/v3-app.js": {
+      "checksum": "4d7919c210198f0ac40a9f92a69e42d4",
+      "size": 46537,
+      "priority": "important"
+    },
+    "/js/v3-dex.js": {
+      "checksum": "e4615048077bf0346e5be62a65600d20",
+      "size": 49482,
+      "priority": "important"
+    },
+    "/js/v3-honeyblocks.js": {
+      "checksum": "e4615048077bf0346e5be62a65600d20",
+      "size": 49482,
+      "priority": "important"
+    },
+    "/js/v3-hub.js": {
+      "checksum": "f47a413f713e91899f9384c02767f2e1",
+      "size": 88675,
+      "priority": "important"
+    },
+    "/js/v3-index.js": {
+      "checksum": "1e7ee27dde2b53c3c0596e8ed6d9f987",
+      "size": 191632,
+      "priority": "important"
+    },
+    "/js/v3-nfts.js": {
+      "checksum": "af303885b3fea57983518ccffca8c8c4",
+      "size": 127852,
+      "priority": "important"
+    },
+    "/js/v3-qr.js": {
+      "checksum": "aec5b99676cc179e60c428c84a8661db",
+      "size": 132657,
+      "priority": "important"
+    },
+    "/js/v3-scp.js": {
+      "checksum": "ed22926d15923cfe8d8c99aad4dbe54f",
+      "size": 14434,
+      "priority": "important"
+    },
+    "/js/v3-user.js": {
+      "checksum": "eb528a2e379ccf985e42baca5a332061",
+      "size": 290325,
+      "priority": "important"
+    },
+    "/js/video-choice-modal.js": {
+      "checksum": "60d70daf0b10b5dded76dde022f426e9",
+      "size": 4483,
+      "priority": "important"
+    },
+    "/js/video-transcoder.js": {
+      "checksum": "6b62a25323f1aeef1f0a37303e592321",
+      "size": 87186,
+      "priority": "important"
+    },
+    "/js/videoPlayer.bundle.js": {
+      "checksum": "c29c70e028ee203ad8b14fbd7280c183",
+      "size": 776612,
+      "priority": "important"
+    },
+    "/js/vote.js": {
+      "checksum": "951ba298f73aa36777cb938de3081334",
+      "size": 6129,
+      "priority": "important"
+    },
+    "/js/voting-modal.js": {
+      "checksum": "10fae48422e8e57ca87422eeeae572e2",
+      "size": 7220,
+      "priority": "important"
+    },
+    "/js/vr-presence.js": {
+      "checksum": "1993bb41305967a74be8f0ca9727e427",
+      "size": 44613,
+      "priority": "important"
+    },
+    "/js/vrvue.js": {
+      "checksum": "31e8b69c9bee400abf4603e754e600e3",
+      "size": 44273,
+      "priority": "important"
+    },
+    "/js/vueme.js": {
+      "checksum": "17b7a8148f0850d12a53f1c587e6451d",
+      "size": 149535,
+      "priority": "important"
+    },
+    "/js/vueqr.js": {
+      "checksum": "e5e2b75ee9fdc510a95b5d6de0c3e415",
+      "size": 18813,
+      "priority": "important"
+    },
+    "/js/watchers-common.js": {
+      "checksum": "44cc578056cb32138f1a99d613a12633",
+      "size": 407,
+      "priority": "important"
+    },
+    "/lang/en.js": {
+      "checksum": "a613800bae0e1b2e73add8f719340272",
+      "size": 5689,
+      "priority": "important"
+    },
+    "/mint/index.html": {
+      "checksum": "6af3134b0368a9ac54dacdf2ab491d9f",
+      "size": 4255,
+      "priority": "important"
+    },
+    "/new/360-gallery/index-expanded.html": {
+      "checksum": "b679848cec470474e4bc5aa63340b93d",
+      "size": 16655,
+      "priority": "important"
+    },
+    "/new/360-gallery/index.html": {
+      "checksum": "bb0a1558c7cf973b389ea1b22f0e3f49",
+      "size": 10245,
+      "priority": "important"
+    },
+    "/new/advanced/index.html": {
+      "checksum": "ce30ccec87a967de6103af2d3e583464",
+      "size": 34006,
+      "priority": "important"
+    },
+    "/new/index.html": {
+      "checksum": "4e64e879c9cdc45ddab258da3b7dcd25",
+      "size": 124703,
+      "priority": "important"
+    },
+    "/new/token/index.html": {
+      "checksum": "a687fbc86f8674d8b8bbdae0d25902c7",
+      "size": 45307,
+      "priority": "important"
+    },
+    "/nfts/create/example1.html": {
+      "checksum": "edb083626d86e8b1bc69d38ca24915a8",
+      "size": 2471,
+      "priority": "important"
+    },
+    "/nfts/create/example2.html": {
+      "checksum": "de98570a80f08f2c0260f72f002d0d9b",
+      "size": 7898,
+      "priority": "important"
+    },
+    "/nfts/create/index.html": {
+      "checksum": "e2b47a24a25d77dcafc5a718e8990039",
+      "size": 76931,
+      "priority": "important"
+    },
+    "/nfts/index.html": {
+      "checksum": "4e9b3045398f83dd32ba0e35e6883ca6",
+      "size": 59238,
+      "priority": "important"
+    },
+    "/nfts/old.html": {
+      "checksum": "aeec88d5f54b6d086e6a850672349713",
+      "size": 120053,
+      "priority": "important"
+    },
+    "/nfts/set/index.html": {
+      "checksum": "010a87a8d872fe7dfea46365944fe25f",
+      "size": 43222,
+      "priority": "important"
+    },
+    "/nfts/sets/index.html": {
+      "checksum": "0ed6d641afeddcb51502a0ac02942c79",
+      "size": 10027,
+      "priority": "important"
+    },
+    "/node/index.html": {
+      "checksum": "1201263dae69cc6be1dbe6873c17b66e",
+      "size": 12978,
+      "priority": "important"
+    },
+    "/open.html": {
+      "checksum": "902b0c3c4b34e27f0df076329353b481",
+      "size": 5699,
+      "priority": "important"
+    },
+    "/open/index.html": {
+      "checksum": "14f053cf793e6b6d9a08ab1ccc8b41d4",
+      "size": 5426,
+      "priority": "important"
+    },
+    "/proposals/index.html": {
+      "checksum": "0a4549e65ccb116c3bcaafd06b61019e",
+      "size": 106542,
+      "priority": "important"
+    },
+    "/qr/index.html": {
+      "checksum": "fb6b6d6ec2036bc1dd3859c46fee1499",
+      "size": 70757,
+      "priority": "important"
+    },
+    "/reg-sw.js": {
+      "checksum": "4eecc231fc07eb6bd3f5814a3af9a1a2",
+      "size": 7299,
+      "priority": "important"
+    },
+    "/src/collaboration-bundle.js": {
+      "checksum": "ff4a7c3a5a75e938df9ed9633331d425",
+      "size": 79932,
+      "priority": "important"
+    },
+    "/src/video-player-bundle.js": {
+      "checksum": "1d2828d31ed672ebd1f9471584d1acfb",
+      "size": 7520,
+      "priority": "important"
+    },
+    "/storage/index.html": {
+      "checksum": "f815c9c160305a0e993f937a4bd22e4a",
+      "size": 12414,
+      "priority": "important"
+    },
+    "/update.html": {
+      "checksum": "95bad8ba0857205117ee5e96b08374d9",
+      "size": 11375,
+      "priority": "important"
+    },
+    "/update/index.html": {
+      "checksum": "042f265f155fa2cf37f5a2cc888dcd15",
+      "size": 30802,
+      "priority": "important"
+    },
+    "/user/detailmodal.html": {
+      "checksum": "262ab96e38f539f099642c426038e677",
+      "size": 88809,
+      "priority": "important"
+    },
+    "/user/index.html": {
+      "checksum": "6d63871f4c94a02ca890982324434892",
+      "size": 308762,
+      "priority": "important"
+    },
+    "/vid/stills/blue_dust.jpg": {
+      "checksum": "9048079c05ff24442ab88599d7e8920f",
+      "size": 63175,
+      "priority": "important"
+    },
+    "/vid/stills/connected_dots.jpg": {
+      "checksum": "48953804461101ec1d484b86193d9463",
+      "size": 627998,
+      "priority": "important"
+    },
+    "/vid/stills/data_lake.jpg": {
+      "checksum": "9330f312da73d45ae0c6d503ebaa35aa",
+      "size": 452432,
+      "priority": "important"
+    },
+    "/vid/stills/floating_abstract.jpg": {
+      "checksum": "b57ba5c015102610c3f1844c79d432e3",
+      "size": 274779,
+      "priority": "important"
+    },
+    "/vid/stills/glowing_hexagon.jpg": {
+      "checksum": "c4c67dd6fe719ebd2b56cc2d6a66157e",
+      "size": 260964,
+      "priority": "important"
+    },
+    "/vid/stills/gold_wave.jpg": {
+      "checksum": "1b610f7ec6798a0c2ef1215791f49f88",
+      "size": 521372,
+      "priority": "important"
+    },
+    "/vid/stills/orange_cube.jpg": {
+      "checksum": "3917fc5c39d416fc084c46d06c480a4b",
+      "size": 631596,
+      "priority": "important"
+    },
+    "/vr/index.html": {
+      "checksum": "af23926e6aa73e55a7d853f014dde3d3",
+      "size": 89688,
+      "priority": "important"
+    },
+    "/vr/vue.html": {
+      "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
+      "size": 1218,
+      "priority": "important"
+    },
+    "/wallet-example.html": {
+      "checksum": "86d0014930a60bba3bb4007f63c3a5a6",
+      "size": 26417,
+      "priority": "important"
+    },
+    "/webpack.config.js": {
+      "checksum": "10ce408fd3f716a61e3e56820200edd0",
+      "size": 1385,
+      "priority": "important"
+    },
+    "/witnesses/index.html": {
+      "checksum": "9677a29e3bb01e068de8366d8e23be55",
+      "size": 38285,
+      "priority": "important"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/coffee/coffee.js": {
+      "checksum": "ee43b06a88944314a46e45244f3c99d6",
+      "size": 4417,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
+      "checksum": "6f3f1a6ac757a431a43447cbd50dd358",
+      "size": 6121,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
+      "checksum": "cf499fdad78353da0b922b0c8568cbb2",
+      "size": 5351,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
+      "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
+      "size": 2240,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
+      "checksum": "b2fd45e97b30ceda399df4308236204e",
+      "size": 5331,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
+      "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
+      "size": 4212,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
+      "checksum": "38967df16d830aacc5894c0b112b6592",
+      "size": 5073,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
+      "checksum": "b5c785d2bfcdf77920f75f2586899a11",
+      "size": 2704,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ecl/ecl.js": {
+      "checksum": "1965d86914bfbb2b793414e7eaffbbdb",
+      "size": 6163,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/elixir/elixir.js": {
+      "checksum": "d692c71c942192ec653670dd8fe078d2",
+      "size": 11084,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
+      "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
+      "size": 2635,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
+      "checksum": "2772f4aba5601734b07dfd600a7ce23a",
+      "size": 17149,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/fsharp/fsharp.js": {
+      "checksum": "4a10f3fbf8c213d1b471e7b162ff6180",
+      "size": 3810,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/go/go.js": {
+      "checksum": "e2cac655f7d9c01be7b0737335e2648a",
+      "size": 3476,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/graphql/graphql.js": {
+      "checksum": "f441189b06ba23ed43103b8cee0318bd",
+      "size": 3089,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
+      "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
+      "size": 7827,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
+      "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
+      "size": 4411,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
+      "checksum": "c29141ad1c095b7e14e1a37fd4570191",
+      "size": 6055,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
+      "checksum": "13b7f142b621006b63c6061711be4ec1",
+      "size": 1922,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
+      "checksum": "4458f51c0a0084ac4d53ccaca469472b",
+      "size": 4044,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
+      "checksum": "8f2950e482448ab0487d9a1ebd309eef",
+      "size": 7137,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
+      "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
+      "size": 8052,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
+      "checksum": "29b986d5bcd6489356dc6ae20169d520",
+      "size": 4266,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
+      "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
+      "size": 4721,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
+      "checksum": "84e5717bbd776f7141b79675d92a115d",
+      "size": 3262,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
+      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
+      "size": 5005,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
+      "checksum": "f84ef485240448f04f47ae177e7c66f7",
+      "size": 2944,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
+      "checksum": "c34c934e8f69865c733a040288167bca",
+      "size": 3636,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
+      "checksum": "e19ba42ced633c14b87715c3bdf66316",
+      "size": 4619,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
+      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
+      "size": 5916,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
+      "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
+      "size": 3402,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
+      "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
+      "size": 5737,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mysql/mysql.js": {
+      "checksum": "1a8ad678a818b45c28bfec17a122e2d9",
+      "size": 12099,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/objective-c/objective-c.js": {
+      "checksum": "5be9639901ce038cc52633b35437bd0b",
+      "size": 3239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
+      "checksum": "22cc9e523acf30fb92bc43518faff779",
+      "size": 3822,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascaligo/pascaligo.js": {
+      "checksum": "81770539db995e23e17c8ba2b76ff89a",
+      "size": 2833,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/perl/perl.js": {
+      "checksum": "972e976ac4fce38ff54f70755ec1bc65",
+      "size": 9078,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pgsql/pgsql.js": {
+      "checksum": "e2f88dd2221ad3450c2d14948a6f728f",
+      "size": 14289,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/php/php.js": {
+      "checksum": "5d10d6fa26a64b6d666798f7e95f1e2f",
+      "size": 8848,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pla/pla.js": {
+      "checksum": "c9ef8f4e89f51be4b77219f181e4ffbd",
+      "size": 2504,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/postiats/postiats.js": {
+      "checksum": "afb4a398865589aeb02db737b6a840fb",
+      "size": 8687,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powerquery/powerquery.js": {
+      "checksum": "1e1a65ee29ff625295c12f842e779f28",
+      "size": 17774,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powershell/powershell.js": {
+      "checksum": "d42611b54a1b94947c98c575d6dcafed",
+      "size": 4104,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/protobuf/protobuf.js": {
+      "checksum": "8f1f4302b1de0c4a28c7cc1a9fb276c8",
+      "size": 9877,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pug/pug.js": {
+      "checksum": "3bd8dbdb32e51a7a509cdf31a50cf8f7",
+      "size": 5649,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/python/python.js": {
+      "checksum": "6ae01d191e98c27707c061d19695a8eb",
+      "size": 5239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/qsharp/qsharp.js": {
+      "checksum": "ecb49d55a198a1f00ed77b679d7b70d6",
+      "size": 4016,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/r/r.js": {
+      "checksum": "09fe02fe5fd03fec9fa66c9817c82c4d",
+      "size": 3948,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/razor/razor.js": {
+      "checksum": "a2ff1de1f62eef1d8f866e9cd3bc6eb0",
+      "size": 9821,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redis/redis.js": {
+      "checksum": "63714d6db70b460ad0e42aa47b94461f",
+      "size": 4381,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redshift/redshift.js": {
+      "checksum": "9dbf5cfd3b6a45de216fc0c16110b5cd",
+      "size": 12631,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/restructuredtext/restructuredtext.js": {
+      "checksum": "13813b441b00308b856527ceb88289db",
+      "size": 4740,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ruby/ruby.js": {
+      "checksum": "d031fc67fbf7405bc02fb9a785be3683",
+      "size": 9327,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/rust/rust.js": {
+      "checksum": "136827115195f8766e6bd28569c5d50d",
+      "size": 4983,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sb/sb.js": {
+      "checksum": "492ef5b10e9c1e75aed0d11d0b5010e2",
+      "size": 2648,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scala/scala.js": {
+      "checksum": "e33d235fff5d6bec204fdaf45d611b3f",
+      "size": 8143,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scheme/scheme.js": {
+      "checksum": "8459a684a953f7b5bd65752606f700ce",
+      "size": 2594,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scss/scss.js": {
+      "checksum": "3c3637405e97f0f06e042c840458359d",
+      "size": 7232,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/shell/shell.js": {
+      "checksum": "e36a3dc8ecd853ce86ef6d47130db580",
+      "size": 3898,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/solidity/solidity.js": {
+      "checksum": "bfdd1ec8b7391d0dcb81b9635d251f5e",
+      "size": 19428,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
+      "checksum": "122424f290eebd8629588833320d7b50",
+      "size": 3591,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sparql/sparql.js": {
+      "checksum": "b4fbde148a69c3fca7c0690ca3bc84d0",
+      "size": 3379,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sql/sql.js": {
+      "checksum": "702278cfb52c5545c2ad56e8e90870a4",
+      "size": 11118,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/st/st.js": {
+      "checksum": "d809dd5b6e4a1c7212861e3341738836",
+      "size": 8222,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/swift/swift.js": {
+      "checksum": "076c5207d2316b08adde022e0d5f0273",
+      "size": 5997,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/systemverilog/systemverilog.js": {
+      "checksum": "8321b50b1bdb4ade6e6b04f38f6f06ce",
+      "size": 8444,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/tcl/tcl.js": {
+      "checksum": "338956439f15f093079f1e021fb5f775",
+      "size": 4392,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/twig/twig.js": {
+      "checksum": "d137c03322f5585a021df82c3457adb9",
+      "size": 6796,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typescript/typescript.js": {
+      "checksum": "2928d1f58d63f1ca29dfe4e0eb116dd2",
+      "size": 6460,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typespec/typespec.js": {
+      "checksum": "3ea4220c40ac4d11038a4343895f42c5",
+      "size": 3627,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/vb/vb.js": {
+      "checksum": "954c16b916d419d910d6e0d04a77c8fb",
+      "size": 6610,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/wgsl/wgsl.js": {
+      "checksum": "30446e49687b9c62da94e0d7fd9e8a6d",
+      "size": 8146,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/xml/xml.js": {
+      "checksum": "17d082989dab3222da1b3c268c5d9cc8",
+      "size": 3452,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/yaml/yaml.js": {
+      "checksum": "5e1913f1f8de1694eeb42e7ba2323eaf",
+      "size": 5056,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.css": {
+      "checksum": "77292b9ceb0cf21d9c34fdcf95b9b356",
+      "size": 131858,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.js": {
+      "checksum": "8216718a32af36c4cb9484476d428d08",
+      "size": 3766654,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssMode.js": {
+      "checksum": "c116d50b0b63ce239bac1f764f38c7f8",
+      "size": 33094,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssWorker.js": {
+      "checksum": "0f28cabc4e103f7f5011048887c0aa28",
+      "size": 778035,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlMode.js": {
+      "checksum": "c8d05bfbd0ee3e74b9377afc77413d14",
+      "size": 33634,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlWorker.js": {
+      "checksum": "2b4df49b1af87a53c554d7a0ee99ed3e",
+      "size": 449070,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonMode.js": {
+      "checksum": "e4b39dc9f8ce3da292bc86121b9cb804",
+      "size": 42545,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonWorker.js": {
+      "checksum": "967a0435896e2a1ef60866f159cf3002",
+      "size": 131177,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
+      "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
+      "size": 23919,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
+      "checksum": "8ad7f367030861562122593f237c8ce2",
+      "size": 5749518,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/loader.js": {
+      "checksum": "bb6e6a026f04f24eab30a3924c8ccd30",
+      "size": 30051,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.de.js": {
+      "checksum": "cd01fdaf9e23b2da4de6c7628b06e6b3",
+      "size": 119967,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.es.js": {
+      "checksum": "e55051c17fde8e3a33086d9cf68e5be1",
+      "size": 120624,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.fr.js": {
+      "checksum": "1cf35e528d2a195c0e2a1eb91513a5bb",
+      "size": 133124,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.it.js": {
+      "checksum": "98ef8649994cd402d6d53bc4a63febb5",
+      "size": 122202,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ja.js": {
+      "checksum": "98f4b971bbb23837904e3bc9abed163f",
+      "size": 256463,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ko.js": {
+      "checksum": "4b68407fd9261ca0a0d9bc946ee0e5e1",
+      "size": 210086,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ru.js": {
+      "checksum": "0f19eddfec0719f5f559c68e0f17319f",
+      "size": 538578,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
+      "checksum": "73423967cc7656f344cf497626de181f",
+      "size": 157372,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
+      "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
+      "size": 161126,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-proxy.js": {
+      "checksum": "412e79a5731df84cd19fb52ba8d5d1b0",
+      "size": 1741,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test-simple.html": {
+      "checksum": "ba71f9da3bb13e1af2b417758efcb501",
+      "size": 5495,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test.html": {
+      "checksum": "de4d36aa4bd6e4c88edcc0788f2544df",
+      "size": 5544,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-worker-setup.js": {
+      "checksum": "39b0f159b48d4e97940a76342e32fddc",
+      "size": 1291,
+      "priority": "page-specific"
+    },
+    "/naf-playground/scene-test.html": {
+      "checksum": "f556898bea2ca823bca83978ce8f04b8",
+      "size": 2353,
+      "priority": "page-specific"
+    },
+    "/naf-playground/test-video.html": {
+      "checksum": "1ba32579515f864ae6bdf65ba09b3384",
+      "size": 2292,
+      "priority": "page-specific"
+    },
+    "/playground/copy.html": {
+      "checksum": "eaa6a972fcae4bb48121274d44b29367",
+      "size": 2450,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/arches.png": {
+      "checksum": "459b3df0b2d88977b2358145393e6055",
+      "size": 208709,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/checkerboard.png": {
+      "checksum": "1473de04fe511fef22cd990f317b5201",
+      "size": 106971,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/contact.png": {
+      "checksum": "7901857a96f276920a9acc64d6a575fc",
+      "size": 134045,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/default.png": {
+      "checksum": "0b47acc6325bdbae72559e198f6169a8",
+      "size": 117008,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/dream.png": {
+      "checksum": "632127c42e2c92db1bce11add6499e41",
+      "size": 113290,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/egypt.png": {
+      "checksum": "e6c56b2e49a158fecd2a614e063596a0",
+      "size": 142240,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/forest.png": {
+      "checksum": "2b53f99d17a713efa0d95a5eef2df8e5",
+      "size": 140445,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goaland.png": {
+      "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
+      "size": 132405,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goldmine.png": {
+      "checksum": "45fe056e75d02ac5de7b498c380477d5",
+      "size": 85126,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/japan.png": {
+      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
+      "size": 132145,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/moon.png": {
+      "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
+      "size": 211072,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/none.png": {
+      "checksum": "f5dee31316fd9060eea8f8134918c28f",
+      "size": 35892,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/osiris.png": {
+      "checksum": "6e6d7f2537262ae090f61f1f967a8ee5",
+      "size": 147567,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/poison.png": {
+      "checksum": "7c827e4377e8848cbb2ad07162169409",
+      "size": 49060,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/starry.png": {
+      "checksum": "91e683aa6abe9825904483052a0f2d69",
+      "size": 213614,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/threetowers.png": {
+      "checksum": "c24c3d56a600787acda2af591ea761af",
+      "size": 147229,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/tron.png": {
+      "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
+      "size": 129691,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/volcano.png": {
+      "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
+      "size": 141300,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/yavapai.png": {
+      "checksum": "2da358421be2ed384564de674057084a",
+      "size": 163708,
+      "priority": "page-specific"
+    },
+    "/playground/fogworking.html": {
+      "checksum": "b67f8e095072c32c5b59c9f0a66b2adb",
+      "size": 166798,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco-fixed.html": {
+      "checksum": "acedc1f1736c5e3124b1c6db6438a5c9",
+      "size": 126951,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco.html": {
+      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
+      "size": 69233,
+      "priority": "page-specific"
+    },
+    "/playground/index.html": {
+      "checksum": "575f56ba019b1780f56f116799e7648f",
+      "size": 48598,
+      "priority": "page-specific"
+    },
+    "/playground/last-try.html": {
+      "checksum": "a64809066d4ff41d60aebe9a57d17b72",
+      "size": 7021,
+      "priority": "page-specific"
+    },
+    "/playground/new.html": {
+      "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
+      "size": 21317,
+      "priority": "page-specific"
+    },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    }
+  }
+}
+;
