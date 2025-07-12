@@ -787,8 +787,6 @@ methods: {
             txid: "vote",
         };
         
-        console.log('DetailVue vote operation created:', voteOp);
-        
         // Send through signing system
         this.handleReplySigning(voteOp);
         

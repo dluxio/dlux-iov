@@ -466,7 +466,7 @@ export default {
       }
     },
     op(op, oldOp) {
-      if (op.txid) {
+      if (op && op.txid) {
         op.time = new Date().getTime();
         op.status = "Pending your approval";
         op.delay = 5000;
@@ -2546,7 +2546,6 @@ export default {
     },
     
     broadcastTransaction(op, statusObj = null) {
-      
       // Create a key for this transaction based on operations
       const opKey = JSON.stringify(op[1]);
       
@@ -2615,7 +2614,16 @@ export default {
         ],
         "posting",
       ];
-      this.broadcastTransaction(op, obj);
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+        })
+        .catch((e) => {
+          console.error("Vote broadcast error:", e);
+          if (obj) {
+            this.statusFinder({ error: e.message || e }, obj);
+          }
+        });
     },
     broadcastComment(obj) {
       var op = [
@@ -2634,9 +2642,18 @@ export default {
             },
           ],
         ],
-        "active",
+        "posting",
       ];
-      this.broadcastTransaction(op, obj);
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+        })
+        .catch((e) => {
+          console.error("Comment broadcast error:", e);
+          if (obj) {
+            this.statusFinder({ error: e.message || e }, obj);
+          }
+        });
     },
     sign(op) {
       return new Promise(async (resolve, reject) => {
@@ -2651,7 +2668,6 @@ export default {
             // Fall through to local signing methods
           }
         }
-
         // Local signing methods
         if (this.HKC) {
           // Check for specific witness operations and broadcast them
