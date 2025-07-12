@@ -1,8 +1,4 @@
 this.version = "2025.07.12.6";
-this.version = "2025.07.11.7";
-=======
-this.version = "2025.07.11.2";
->>>>>>> parent of 4e4b1a30 (2025.07.11.3)
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
