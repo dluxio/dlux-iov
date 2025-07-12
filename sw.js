@@ -1,18 +1,13 @@
-this.version = "2025.07.12.14";
+this.version = "2025.07.12.15";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.12.13",
-  "generated": "2025-07-12T21:22:07Z",
+  "version": "2025.07.12.15",
+  "generated": "2025-07-12T21:23:44Z",
   "files": {
-    "/img/gallery-vr-comp.jpg": {
-      "checksum": "df3fae44de67c8af269891561242f6d5",
-      "size": 178796,
-      "priority": "important"
-    },
     "/img/hbd_green.svg": {
       "checksum": "4cdd7402ddcbd06d7145d437da14c670",
       "size": 999,
@@ -5438,6 +5433,611 @@ self.cacheManifest =
       "size": 38285,
       "priority": "important"
     },
+    "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
+      "checksum": "38967df16d830aacc5894c0b112b6592",
+      "size": 5073,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
+      "checksum": "b5c785d2bfcdf77920f75f2586899a11",
+      "size": 2704,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ecl/ecl.js": {
+      "checksum": "1965d86914bfbb2b793414e7eaffbbdb",
+      "size": 6163,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/elixir/elixir.js": {
+      "checksum": "d692c71c942192ec653670dd8fe078d2",
+      "size": 11084,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
+      "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
+      "size": 2635,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
+      "checksum": "2772f4aba5601734b07dfd600a7ce23a",
+      "size": 17149,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/fsharp/fsharp.js": {
+      "checksum": "4a10f3fbf8c213d1b471e7b162ff6180",
+      "size": 3810,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/go/go.js": {
+      "checksum": "e2cac655f7d9c01be7b0737335e2648a",
+      "size": 3476,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/graphql/graphql.js": {
+      "checksum": "f441189b06ba23ed43103b8cee0318bd",
+      "size": 3089,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
+      "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
+      "size": 7827,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
+      "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
+      "size": 4411,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
+      "checksum": "c29141ad1c095b7e14e1a37fd4570191",
+      "size": 6055,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
+      "checksum": "13b7f142b621006b63c6061711be4ec1",
+      "size": 1922,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
+      "checksum": "4458f51c0a0084ac4d53ccaca469472b",
+      "size": 4044,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
+      "checksum": "8f2950e482448ab0487d9a1ebd309eef",
+      "size": 7137,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
+      "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
+      "size": 8052,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
+      "checksum": "29b986d5bcd6489356dc6ae20169d520",
+      "size": 4266,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
+      "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
+      "size": 4721,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
+      "checksum": "84e5717bbd776f7141b79675d92a115d",
+      "size": 3262,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
+      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
+      "size": 5005,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
+      "checksum": "f84ef485240448f04f47ae177e7c66f7",
+      "size": 2944,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
+      "checksum": "c34c934e8f69865c733a040288167bca",
+      "size": 3636,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
+      "checksum": "e19ba42ced633c14b87715c3bdf66316",
+      "size": 4619,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
+      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
+      "size": 5916,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
+      "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
+      "size": 3402,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
+      "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
+      "size": 5737,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/mysql/mysql.js": {
+      "checksum": "1a8ad678a818b45c28bfec17a122e2d9",
+      "size": 12099,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/objective-c/objective-c.js": {
+      "checksum": "5be9639901ce038cc52633b35437bd0b",
+      "size": 3239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
+      "checksum": "22cc9e523acf30fb92bc43518faff779",
+      "size": 3822,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pascaligo/pascaligo.js": {
+      "checksum": "81770539db995e23e17c8ba2b76ff89a",
+      "size": 2833,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/perl/perl.js": {
+      "checksum": "972e976ac4fce38ff54f70755ec1bc65",
+      "size": 9078,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pgsql/pgsql.js": {
+      "checksum": "e2f88dd2221ad3450c2d14948a6f728f",
+      "size": 14289,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/php/php.js": {
+      "checksum": "5d10d6fa26a64b6d666798f7e95f1e2f",
+      "size": 8848,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pla/pla.js": {
+      "checksum": "c9ef8f4e89f51be4b77219f181e4ffbd",
+      "size": 2504,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/postiats/postiats.js": {
+      "checksum": "afb4a398865589aeb02db737b6a840fb",
+      "size": 8687,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powerquery/powerquery.js": {
+      "checksum": "1e1a65ee29ff625295c12f842e779f28",
+      "size": 17774,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/powershell/powershell.js": {
+      "checksum": "d42611b54a1b94947c98c575d6dcafed",
+      "size": 4104,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/protobuf/protobuf.js": {
+      "checksum": "8f1f4302b1de0c4a28c7cc1a9fb276c8",
+      "size": 9877,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/pug/pug.js": {
+      "checksum": "3bd8dbdb32e51a7a509cdf31a50cf8f7",
+      "size": 5649,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/python/python.js": {
+      "checksum": "6ae01d191e98c27707c061d19695a8eb",
+      "size": 5239,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/qsharp/qsharp.js": {
+      "checksum": "ecb49d55a198a1f00ed77b679d7b70d6",
+      "size": 4016,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/r/r.js": {
+      "checksum": "09fe02fe5fd03fec9fa66c9817c82c4d",
+      "size": 3948,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/razor/razor.js": {
+      "checksum": "a2ff1de1f62eef1d8f866e9cd3bc6eb0",
+      "size": 9821,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redis/redis.js": {
+      "checksum": "63714d6db70b460ad0e42aa47b94461f",
+      "size": 4381,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/redshift/redshift.js": {
+      "checksum": "9dbf5cfd3b6a45de216fc0c16110b5cd",
+      "size": 12631,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/restructuredtext/restructuredtext.js": {
+      "checksum": "13813b441b00308b856527ceb88289db",
+      "size": 4740,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/ruby/ruby.js": {
+      "checksum": "d031fc67fbf7405bc02fb9a785be3683",
+      "size": 9327,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/rust/rust.js": {
+      "checksum": "136827115195f8766e6bd28569c5d50d",
+      "size": 4983,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sb/sb.js": {
+      "checksum": "492ef5b10e9c1e75aed0d11d0b5010e2",
+      "size": 2648,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scala/scala.js": {
+      "checksum": "e33d235fff5d6bec204fdaf45d611b3f",
+      "size": 8143,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scheme/scheme.js": {
+      "checksum": "8459a684a953f7b5bd65752606f700ce",
+      "size": 2594,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/scss/scss.js": {
+      "checksum": "3c3637405e97f0f06e042c840458359d",
+      "size": 7232,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/shell/shell.js": {
+      "checksum": "e36a3dc8ecd853ce86ef6d47130db580",
+      "size": 3898,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/solidity/solidity.js": {
+      "checksum": "bfdd1ec8b7391d0dcb81b9635d251f5e",
+      "size": 19428,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
+      "checksum": "122424f290eebd8629588833320d7b50",
+      "size": 3591,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sparql/sparql.js": {
+      "checksum": "b4fbde148a69c3fca7c0690ca3bc84d0",
+      "size": 3379,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/sql/sql.js": {
+      "checksum": "702278cfb52c5545c2ad56e8e90870a4",
+      "size": 11118,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/st/st.js": {
+      "checksum": "d809dd5b6e4a1c7212861e3341738836",
+      "size": 8222,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/swift/swift.js": {
+      "checksum": "076c5207d2316b08adde022e0d5f0273",
+      "size": 5997,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/systemverilog/systemverilog.js": {
+      "checksum": "8321b50b1bdb4ade6e6b04f38f6f06ce",
+      "size": 8444,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/tcl/tcl.js": {
+      "checksum": "338956439f15f093079f1e021fb5f775",
+      "size": 4392,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/twig/twig.js": {
+      "checksum": "d137c03322f5585a021df82c3457adb9",
+      "size": 6796,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typescript/typescript.js": {
+      "checksum": "2928d1f58d63f1ca29dfe4e0eb116dd2",
+      "size": 6460,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/typespec/typespec.js": {
+      "checksum": "3ea4220c40ac4d11038a4343895f42c5",
+      "size": 3627,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/vb/vb.js": {
+      "checksum": "954c16b916d419d910d6e0d04a77c8fb",
+      "size": 6610,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/wgsl/wgsl.js": {
+      "checksum": "30446e49687b9c62da94e0d7fd9e8a6d",
+      "size": 8146,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/xml/xml.js": {
+      "checksum": "17d082989dab3222da1b3c268c5d9cc8",
+      "size": 3452,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/yaml/yaml.js": {
+      "checksum": "5e1913f1f8de1694eeb42e7ba2323eaf",
+      "size": 5056,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.css": {
+      "checksum": "77292b9ceb0cf21d9c34fdcf95b9b356",
+      "size": 131858,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/editor/editor.main.js": {
+      "checksum": "8216718a32af36c4cb9484476d428d08",
+      "size": 3766654,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssMode.js": {
+      "checksum": "c116d50b0b63ce239bac1f764f38c7f8",
+      "size": 33094,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/css/cssWorker.js": {
+      "checksum": "0f28cabc4e103f7f5011048887c0aa28",
+      "size": 778035,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlMode.js": {
+      "checksum": "c8d05bfbd0ee3e74b9377afc77413d14",
+      "size": 33634,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/html/htmlWorker.js": {
+      "checksum": "2b4df49b1af87a53c554d7a0ee99ed3e",
+      "size": 449070,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonMode.js": {
+      "checksum": "e4b39dc9f8ce3da292bc86121b9cb804",
+      "size": 42545,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/json/jsonWorker.js": {
+      "checksum": "967a0435896e2a1ef60866f159cf3002",
+      "size": 131177,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
+      "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
+      "size": 23919,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
+      "checksum": "8ad7f367030861562122593f237c8ce2",
+      "size": 5749518,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/loader.js": {
+      "checksum": "bb6e6a026f04f24eab30a3924c8ccd30",
+      "size": 30051,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.de.js": {
+      "checksum": "cd01fdaf9e23b2da4de6c7628b06e6b3",
+      "size": 119967,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.es.js": {
+      "checksum": "e55051c17fde8e3a33086d9cf68e5be1",
+      "size": 120624,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.fr.js": {
+      "checksum": "1cf35e528d2a195c0e2a1eb91513a5bb",
+      "size": 133124,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.it.js": {
+      "checksum": "98ef8649994cd402d6d53bc4a63febb5",
+      "size": 122202,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ja.js": {
+      "checksum": "98f4b971bbb23837904e3bc9abed163f",
+      "size": 256463,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ko.js": {
+      "checksum": "4b68407fd9261ca0a0d9bc946ee0e5e1",
+      "size": 210086,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.ru.js": {
+      "checksum": "0f19eddfec0719f5f559c68e0f17319f",
+      "size": 538578,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
+      "checksum": "73423967cc7656f344cf497626de181f",
+      "size": 157372,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
+      "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
+      "size": 161126,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-proxy.js": {
+      "checksum": "412e79a5731df84cd19fb52ba8d5d1b0",
+      "size": 1741,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test-simple.html": {
+      "checksum": "ba71f9da3bb13e1af2b417758efcb501",
+      "size": 5495,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-test.html": {
+      "checksum": "de4d36aa4bd6e4c88edcc0788f2544df",
+      "size": 5544,
+      "priority": "page-specific"
+    },
+    "/naf-playground/monaco-worker-setup.js": {
+      "checksum": "39b0f159b48d4e97940a76342e32fddc",
+      "size": 1291,
+      "priority": "page-specific"
+    },
+    "/naf-playground/scene-test.html": {
+      "checksum": "f556898bea2ca823bca83978ce8f04b8",
+      "size": 2353,
+      "priority": "page-specific"
+    },
+    "/naf-playground/test-video.html": {
+      "checksum": "1ba32579515f864ae6bdf65ba09b3384",
+      "size": 2292,
+      "priority": "page-specific"
+    },
+    "/playground/copy.html": {
+      "checksum": "eaa6a972fcae4bb48121274d44b29367",
+      "size": 2450,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/arches.png": {
+      "checksum": "459b3df0b2d88977b2358145393e6055",
+      "size": 208709,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/checkerboard.png": {
+      "checksum": "1473de04fe511fef22cd990f317b5201",
+      "size": 106971,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/contact.png": {
+      "checksum": "7901857a96f276920a9acc64d6a575fc",
+      "size": 134045,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/default.png": {
+      "checksum": "0b47acc6325bdbae72559e198f6169a8",
+      "size": 117008,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/dream.png": {
+      "checksum": "632127c42e2c92db1bce11add6499e41",
+      "size": 113290,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/egypt.png": {
+      "checksum": "e6c56b2e49a158fecd2a614e063596a0",
+      "size": 142240,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/forest.png": {
+      "checksum": "2b53f99d17a713efa0d95a5eef2df8e5",
+      "size": 140445,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goaland.png": {
+      "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
+      "size": 132405,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/goldmine.png": {
+      "checksum": "45fe056e75d02ac5de7b498c380477d5",
+      "size": 85126,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/japan.png": {
+      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
+      "size": 132145,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/moon.png": {
+      "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
+      "size": 211072,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/none.png": {
+      "checksum": "f5dee31316fd9060eea8f8134918c28f",
+      "size": 35892,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/osiris.png": {
+      "checksum": "6e6d7f2537262ae090f61f1f967a8ee5",
+      "size": 147567,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/poison.png": {
+      "checksum": "7c827e4377e8848cbb2ad07162169409",
+      "size": 49060,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/starry.png": {
+      "checksum": "91e683aa6abe9825904483052a0f2d69",
+      "size": 213614,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/threetowers.png": {
+      "checksum": "c24c3d56a600787acda2af591ea761af",
+      "size": 147229,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/tron.png": {
+      "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
+      "size": 129691,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/volcano.png": {
+      "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
+      "size": 141300,
+      "priority": "page-specific"
+    },
+    "/playground/env_thumbs/yavapai.png": {
+      "checksum": "2da358421be2ed384564de674057084a",
+      "size": 163708,
+      "priority": "page-specific"
+    },
+    "/playground/fogworking.html": {
+      "checksum": "b67f8e095072c32c5b59c9f0a66b2adb",
+      "size": 166798,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco-fixed.html": {
+      "checksum": "acedc1f1736c5e3124b1c6db6438a5c9",
+      "size": 126951,
+      "priority": "page-specific"
+    },
+    "/playground/index-monaco.html": {
+      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
+      "size": 69233,
+      "priority": "page-specific"
+    },
+    "/playground/index.html": {
+      "checksum": "575f56ba019b1780f56f116799e7648f",
+      "size": 48598,
+      "priority": "page-specific"
+    },
+    "/playground/last-try.html": {
+      "checksum": "a64809066d4ff41d60aebe9a57d17b72",
+      "size": 7021,
+      "priority": "page-specific"
+    },
+    "/playground/new.html": {
+      "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
+      "size": 21317,
+      "priority": "page-specific"
+    },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
     "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
       "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
       "size": 4212,
@@ -6047,626 +6647,6 @@ self.cacheManifest =
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
-      "checksum": "b2fd45e97b30ceda399df4308236204e",
-      "size": 5331,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
-      "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
-      "size": 4212,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
-      "checksum": "38967df16d830aacc5894c0b112b6592",
-      "size": 5073,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
-      "checksum": "b5c785d2bfcdf77920f75f2586899a11",
-      "size": 2704,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/ecl/ecl.js": {
-      "checksum": "1965d86914bfbb2b793414e7eaffbbdb",
-      "size": 6163,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/elixir/elixir.js": {
-      "checksum": "d692c71c942192ec653670dd8fe078d2",
-      "size": 11084,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
-      "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
-      "size": 2635,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
-      "checksum": "2772f4aba5601734b07dfd600a7ce23a",
-      "size": 17149,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/fsharp/fsharp.js": {
-      "checksum": "4a10f3fbf8c213d1b471e7b162ff6180",
-      "size": 3810,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/go/go.js": {
-      "checksum": "e2cac655f7d9c01be7b0737335e2648a",
-      "size": 3476,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/graphql/graphql.js": {
-      "checksum": "f441189b06ba23ed43103b8cee0318bd",
-      "size": 3089,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
-      "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
-      "size": 7827,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
-      "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
-      "size": 4411,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
-      "checksum": "c29141ad1c095b7e14e1a37fd4570191",
-      "size": 6055,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
-      "checksum": "13b7f142b621006b63c6061711be4ec1",
-      "size": 1922,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
-      "checksum": "4458f51c0a0084ac4d53ccaca469472b",
-      "size": 4044,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
-      "checksum": "8f2950e482448ab0487d9a1ebd309eef",
-      "size": 7137,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
-      "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
-      "size": 8052,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
-      "checksum": "29b986d5bcd6489356dc6ae20169d520",
-      "size": 4266,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
-      "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
-      "size": 4721,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
-      "checksum": "84e5717bbd776f7141b79675d92a115d",
-      "size": 3262,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
-      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
-      "size": 5005,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
-      "checksum": "f84ef485240448f04f47ae177e7c66f7",
-      "size": 2944,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
-      "checksum": "c34c934e8f69865c733a040288167bca",
-      "size": 3636,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
-      "checksum": "e19ba42ced633c14b87715c3bdf66316",
-      "size": 4619,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
-      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
-      "size": 5916,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
-      "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
-      "size": 3402,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
-      "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
-      "size": 5737,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mysql/mysql.js": {
-      "checksum": "1a8ad678a818b45c28bfec17a122e2d9",
-      "size": 12099,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/objective-c/objective-c.js": {
-      "checksum": "5be9639901ce038cc52633b35437bd0b",
-      "size": 3239,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
-      "checksum": "22cc9e523acf30fb92bc43518faff779",
-      "size": 3822,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pascaligo/pascaligo.js": {
-      "checksum": "81770539db995e23e17c8ba2b76ff89a",
-      "size": 2833,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/perl/perl.js": {
-      "checksum": "972e976ac4fce38ff54f70755ec1bc65",
-      "size": 9078,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pgsql/pgsql.js": {
-      "checksum": "e2f88dd2221ad3450c2d14948a6f728f",
-      "size": 14289,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/php/php.js": {
-      "checksum": "5d10d6fa26a64b6d666798f7e95f1e2f",
-      "size": 8848,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pla/pla.js": {
-      "checksum": "c9ef8f4e89f51be4b77219f181e4ffbd",
-      "size": 2504,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/postiats/postiats.js": {
-      "checksum": "afb4a398865589aeb02db737b6a840fb",
-      "size": 8687,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/powerquery/powerquery.js": {
-      "checksum": "1e1a65ee29ff625295c12f842e779f28",
-      "size": 17774,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/powershell/powershell.js": {
-      "checksum": "d42611b54a1b94947c98c575d6dcafed",
-      "size": 4104,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/protobuf/protobuf.js": {
-      "checksum": "8f1f4302b1de0c4a28c7cc1a9fb276c8",
-      "size": 9877,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pug/pug.js": {
-      "checksum": "3bd8dbdb32e51a7a509cdf31a50cf8f7",
-      "size": 5649,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/python/python.js": {
-      "checksum": "6ae01d191e98c27707c061d19695a8eb",
-      "size": 5239,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/qsharp/qsharp.js": {
-      "checksum": "ecb49d55a198a1f00ed77b679d7b70d6",
-      "size": 4016,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/r/r.js": {
-      "checksum": "09fe02fe5fd03fec9fa66c9817c82c4d",
-      "size": 3948,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/razor/razor.js": {
-      "checksum": "a2ff1de1f62eef1d8f866e9cd3bc6eb0",
-      "size": 9821,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/redis/redis.js": {
-      "checksum": "63714d6db70b460ad0e42aa47b94461f",
-      "size": 4381,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/redshift/redshift.js": {
-      "checksum": "9dbf5cfd3b6a45de216fc0c16110b5cd",
-      "size": 12631,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/restructuredtext/restructuredtext.js": {
-      "checksum": "13813b441b00308b856527ceb88289db",
-      "size": 4740,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/ruby/ruby.js": {
-      "checksum": "d031fc67fbf7405bc02fb9a785be3683",
-      "size": 9327,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/rust/rust.js": {
-      "checksum": "136827115195f8766e6bd28569c5d50d",
-      "size": 4983,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/sb/sb.js": {
-      "checksum": "492ef5b10e9c1e75aed0d11d0b5010e2",
-      "size": 2648,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/scala/scala.js": {
-      "checksum": "e33d235fff5d6bec204fdaf45d611b3f",
-      "size": 8143,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/scheme/scheme.js": {
-      "checksum": "8459a684a953f7b5bd65752606f700ce",
-      "size": 2594,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/scss/scss.js": {
-      "checksum": "3c3637405e97f0f06e042c840458359d",
-      "size": 7232,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/shell/shell.js": {
-      "checksum": "e36a3dc8ecd853ce86ef6d47130db580",
-      "size": 3898,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/solidity/solidity.js": {
-      "checksum": "bfdd1ec8b7391d0dcb81b9635d251f5e",
-      "size": 19428,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
-      "checksum": "122424f290eebd8629588833320d7b50",
-      "size": 3591,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/sparql/sparql.js": {
-      "checksum": "b4fbde148a69c3fca7c0690ca3bc84d0",
-      "size": 3379,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/sql/sql.js": {
-      "checksum": "702278cfb52c5545c2ad56e8e90870a4",
-      "size": 11118,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/st/st.js": {
-      "checksum": "d809dd5b6e4a1c7212861e3341738836",
-      "size": 8222,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/swift/swift.js": {
-      "checksum": "076c5207d2316b08adde022e0d5f0273",
-      "size": 5997,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/systemverilog/systemverilog.js": {
-      "checksum": "8321b50b1bdb4ade6e6b04f38f6f06ce",
-      "size": 8444,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/tcl/tcl.js": {
-      "checksum": "338956439f15f093079f1e021fb5f775",
-      "size": 4392,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/twig/twig.js": {
-      "checksum": "d137c03322f5585a021df82c3457adb9",
-      "size": 6796,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/typescript/typescript.js": {
-      "checksum": "2928d1f58d63f1ca29dfe4e0eb116dd2",
-      "size": 6460,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/typespec/typespec.js": {
-      "checksum": "3ea4220c40ac4d11038a4343895f42c5",
-      "size": 3627,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/vb/vb.js": {
-      "checksum": "954c16b916d419d910d6e0d04a77c8fb",
-      "size": 6610,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/wgsl/wgsl.js": {
-      "checksum": "30446e49687b9c62da94e0d7fd9e8a6d",
-      "size": 8146,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/xml/xml.js": {
-      "checksum": "17d082989dab3222da1b3c268c5d9cc8",
-      "size": 3452,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/yaml/yaml.js": {
-      "checksum": "5e1913f1f8de1694eeb42e7ba2323eaf",
-      "size": 5056,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/editor/editor.main.css": {
-      "checksum": "77292b9ceb0cf21d9c34fdcf95b9b356",
-      "size": 131858,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/editor/editor.main.js": {
-      "checksum": "8216718a32af36c4cb9484476d428d08",
-      "size": 3766654,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/css/cssMode.js": {
-      "checksum": "c116d50b0b63ce239bac1f764f38c7f8",
-      "size": 33094,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/css/cssWorker.js": {
-      "checksum": "0f28cabc4e103f7f5011048887c0aa28",
-      "size": 778035,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/html/htmlMode.js": {
-      "checksum": "c8d05bfbd0ee3e74b9377afc77413d14",
-      "size": 33634,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/html/htmlWorker.js": {
-      "checksum": "2b4df49b1af87a53c554d7a0ee99ed3e",
-      "size": 449070,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/json/jsonMode.js": {
-      "checksum": "e4b39dc9f8ce3da292bc86121b9cb804",
-      "size": 42545,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/json/jsonWorker.js": {
-      "checksum": "967a0435896e2a1ef60866f159cf3002",
-      "size": 131177,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
-      "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
-      "size": 23919,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
-      "checksum": "8ad7f367030861562122593f237c8ce2",
-      "size": 5749518,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/loader.js": {
-      "checksum": "bb6e6a026f04f24eab30a3924c8ccd30",
-      "size": 30051,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.de.js": {
-      "checksum": "cd01fdaf9e23b2da4de6c7628b06e6b3",
-      "size": 119967,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.es.js": {
-      "checksum": "e55051c17fde8e3a33086d9cf68e5be1",
-      "size": 120624,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.fr.js": {
-      "checksum": "1cf35e528d2a195c0e2a1eb91513a5bb",
-      "size": 133124,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.it.js": {
-      "checksum": "98ef8649994cd402d6d53bc4a63febb5",
-      "size": 122202,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.ja.js": {
-      "checksum": "98f4b971bbb23837904e3bc9abed163f",
-      "size": 256463,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.ko.js": {
-      "checksum": "4b68407fd9261ca0a0d9bc946ee0e5e1",
-      "size": 210086,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.ru.js": {
-      "checksum": "0f19eddfec0719f5f559c68e0f17319f",
-      "size": 538578,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
-      "checksum": "73423967cc7656f344cf497626de181f",
-      "size": 157372,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
-      "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
-      "size": 161126,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-proxy.js": {
-      "checksum": "412e79a5731df84cd19fb52ba8d5d1b0",
-      "size": 1741,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-test-simple.html": {
-      "checksum": "ba71f9da3bb13e1af2b417758efcb501",
-      "size": 5495,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-test.html": {
-      "checksum": "de4d36aa4bd6e4c88edcc0788f2544df",
-      "size": 5544,
-      "priority": "page-specific"
-    },
-    "/naf-playground/monaco-worker-setup.js": {
-      "checksum": "39b0f159b48d4e97940a76342e32fddc",
-      "size": 1291,
-      "priority": "page-specific"
-    },
-    "/naf-playground/scene-test.html": {
-      "checksum": "f556898bea2ca823bca83978ce8f04b8",
-      "size": 2353,
-      "priority": "page-specific"
-    },
-    "/naf-playground/test-video.html": {
-      "checksum": "1ba32579515f864ae6bdf65ba09b3384",
-      "size": 2292,
-      "priority": "page-specific"
-    },
-    "/playground/copy.html": {
-      "checksum": "eaa6a972fcae4bb48121274d44b29367",
-      "size": 2450,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/arches.png": {
-      "checksum": "459b3df0b2d88977b2358145393e6055",
-      "size": 208709,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/checkerboard.png": {
-      "checksum": "1473de04fe511fef22cd990f317b5201",
-      "size": 106971,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/contact.png": {
-      "checksum": "7901857a96f276920a9acc64d6a575fc",
-      "size": 134045,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/default.png": {
-      "checksum": "0b47acc6325bdbae72559e198f6169a8",
-      "size": 117008,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/dream.png": {
-      "checksum": "632127c42e2c92db1bce11add6499e41",
-      "size": 113290,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/egypt.png": {
-      "checksum": "e6c56b2e49a158fecd2a614e063596a0",
-      "size": 142240,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/forest.png": {
-      "checksum": "2b53f99d17a713efa0d95a5eef2df8e5",
-      "size": 140445,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/goaland.png": {
-      "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
-      "size": 132405,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/goldmine.png": {
-      "checksum": "45fe056e75d02ac5de7b498c380477d5",
-      "size": 85126,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/japan.png": {
-      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
-      "size": 132145,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/moon.png": {
-      "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
-      "size": 211072,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/none.png": {
-      "checksum": "f5dee31316fd9060eea8f8134918c28f",
-      "size": 35892,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/osiris.png": {
-      "checksum": "6e6d7f2537262ae090f61f1f967a8ee5",
-      "size": 147567,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/poison.png": {
-      "checksum": "7c827e4377e8848cbb2ad07162169409",
-      "size": 49060,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/starry.png": {
-      "checksum": "91e683aa6abe9825904483052a0f2d69",
-      "size": 213614,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/threetowers.png": {
-      "checksum": "c24c3d56a600787acda2af591ea761af",
-      "size": 147229,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/tron.png": {
-      "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
-      "size": 129691,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/volcano.png": {
-      "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
-      "size": 141300,
-      "priority": "page-specific"
-    },
-    "/playground/env_thumbs/yavapai.png": {
-      "checksum": "2da358421be2ed384564de674057084a",
-      "size": 163708,
-      "priority": "page-specific"
-    },
-    "/playground/fogworking.html": {
-      "checksum": "b67f8e095072c32c5b59c9f0a66b2adb",
-      "size": 166798,
-      "priority": "page-specific"
-    },
-    "/playground/index-monaco-fixed.html": {
-      "checksum": "acedc1f1736c5e3124b1c6db6438a5c9",
-      "size": 126951,
-      "priority": "page-specific"
-    },
-    "/playground/index-monaco.html": {
-      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
-      "size": 69233,
-      "priority": "page-specific"
-    },
-    "/playground/index.html": {
-      "checksum": "575f56ba019b1780f56f116799e7648f",
-      "size": 48598,
-      "priority": "page-specific"
-    },
-    "/playground/last-try.html": {
-      "checksum": "a64809066d4ff41d60aebe9a57d17b72",
-      "size": 7021,
-      "priority": "page-specific"
-    },
-    "/playground/new.html": {
-      "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
-      "size": 21317,
-      "priority": "page-specific"
-    },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
-      "priority": "lazy"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
-      "checksum": "cf499fdad78353da0b922b0c8568cbb2",
-      "size": 5351,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
       "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
@@ -7288,11 +7268,6 @@ self.cacheManifest =
       "size": 0,
       "priority": "lazy"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
-      "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
-      "size": 2240,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
       "checksum": "b2fd45e97b30ceda399df4308236204e",
       "size": 5331,
@@ -7907,11 +7882,6 @@ self.cacheManifest =
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
-      "checksum": "6f3f1a6ac757a431a43447cbd50dd358",
-      "size": 6121,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
       "checksum": "cf499fdad78353da0b922b0c8568cbb2",
@@ -8533,9 +8503,24 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
+    "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
+      "checksum": "b2fd45e97b30ceda399df4308236204e",
+      "size": 5331,
+      "priority": "lazy"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
+      "checksum": "cf499fdad78353da0b922b0c8568cbb2",
+      "size": 5351,
+      "priority": "lazy"
+    },
     "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
       "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
       "size": 2240,
+      "priority": "lazy"
+    },
+    "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
+      "checksum": "6f3f1a6ac757a431a43447cbd50dd358",
+      "size": 6121,
       "priority": "lazy"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
@@ -8565,6 +8550,9 @@ self.cacheManifest =
     }
   }
 }
+;
+
+
 ;
 
 
