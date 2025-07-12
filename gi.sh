@@ -50,6 +50,10 @@ if [ -f "$file" ]; then
         else
             new_version="$current_day.1"
         fi
+
+        # Update the version in sw.js (same as gs.sh)
+        sed -i "${line_number}s/^.*$/this.version = \"$new_version\";/" "$file"
+        echo "Line $line_number of $file updated to: $new_version"
     fi
 fi
 
