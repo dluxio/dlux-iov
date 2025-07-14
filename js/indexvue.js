@@ -37,7 +37,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 console.log({
   lapi,
 });
@@ -229,17 +229,17 @@ var app = new Vue({
         const bidRate = ENV.BIDRATE || 2500 //
         
         //HIVE CONFIGS
-        var startURL = ENV.STARTURL || "https://hive-api.dlux.io/";
-        var clientURL = ENV.APIURL || "https://hive-api.dlux.io/";
+        var startURL = ENV.STARTURL || "https://api.hive.blog/";
+        var clientURL = ENV.APIURL || "https://api.hive.blog/";
         const clients = ENV.clients
           ? ENV.clients.split(" ")
           : [
               "https://api.deathwing.me/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
               "https://rpc.ecency.com/",
               "https://hived.emre.sh/",
               "https://rpc.ausbit.dev/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
             ];
         
         //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
@@ -788,7 +788,7 @@ var app = new Vue({
   },
   methods: {
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -858,7 +858,7 @@ var app = new Vue({
       }
     },
     getHiveStats() {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

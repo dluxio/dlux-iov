@@ -74,7 +74,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
 // var app = new Vue({
 // vue 2
@@ -286,17 +286,17 @@ PORT=3000
         const bidRate = ENV.BIDRATE || 2500 //
         
         //HIVE CONFIGS
-        var startURL = ENV.STARTURL || "https://hive-api.dlux.io/";
-        var clientURL = ENV.APIURL || "https://hive-api.dlux.io/";
+        var startURL = ENV.STARTURL || "https://api.hive.blog/";
+        var clientURL = ENV.APIURL || "https://api.hive.blog/";
         const clients = ENV.clients
           ? ENV.clients.split(" ")
           : [
               "https://api.deathwing.me/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
               "https://rpc.ecency.com/",
               "https://hived.emre.sh/",
               "https://rpc.ausbit.dev/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
             ];
         
         //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
@@ -2077,7 +2077,7 @@ PORT=3000
       this.validateHeaders(this.account + this.newAccount.name).then(res => {
         this.newAccount.password = res
         this.newAccount.msg = 'Password Generated'
-        fetch("https://hive-api.dlux.io", {
+        fetch("https://api.hive.blog", {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -3113,7 +3113,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -3170,7 +3170,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -3188,7 +3188,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     checkAccount(name, key) {
       console.log('Checking:', name)
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${key == 'newAccountDeets' ? name : this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -3420,7 +3420,7 @@ function buyNFT(setname, uid, price, type, callback){
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch("https://hive-api.dlux.io", {
+        fetch("https://api.hive.blog", {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
             }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
             }], "id":1}`,
@@ -3487,7 +3487,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",

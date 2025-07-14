@@ -37,7 +37,7 @@ import RemixDappManager from "/js/components/remix-dapp-manager.js";
 import MCommon from '/js/methods-common.js'
 
 // API Constants
-const HIVE_API = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+const HIVE_API = localStorage.getItem("hapi") || "https://api.hive.blog";
 const LARYNX_API = "https://spkinstant.hivehoneycomb.com";
 const DUAT_API = "https://duat.hivehoneycomb.com";
 const DLUX_TOKEN_API = "https://token.dlux.io";

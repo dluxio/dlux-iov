@@ -36,7 +36,7 @@ if (!lapi) {
 }
 
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
 createApp({
   components: {

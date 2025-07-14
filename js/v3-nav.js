@@ -7,7 +7,7 @@ import Mcommon from "/js/methods-common.js";
 // VR Presence component for managing VR spaces
 import VRPresence from '/js/vr-presence.js';
 
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
 export default {
   data() {
@@ -2451,7 +2451,7 @@ export default {
         let pubKey = signResult.pubKey;
         if (!pubKey) {
           // Try to get from stored account info or current user data
-          const userDataResponse = await fetch(`https://hive-api.dlux.io`, {
+          const userDataResponse = await fetch(`https://api.hive.blog`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${this.user}"]], "id":1}`
@@ -3565,7 +3565,7 @@ export default {
     // Handle account creation request actions
     async createAccountForFriend(request, useACT = true) {
       if(!request.status == 'done') return
-      fetch('https://hive-api.dlux.io', {
+      fetch('https://api.hive.blog', {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -3812,7 +3812,7 @@ export default {
     },
     async queueUser() {
       try {
-        const response = await fetch("https://hive-api.dlux.io", {
+        const response = await fetch("https://api.hive.blog", {
           method: "POST",
           body: JSON.stringify([
             "get_accounts",

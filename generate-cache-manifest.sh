@@ -106,10 +106,16 @@ echo "   ⚡ Important files: ${#IMPORTANT_FILES[@]}"
 echo "   🎯 Page-specific files: ${#PAGE_SPECIFIC_FILES[@]}"
 echo "   🐌 Skipped files (will be lazy): ${#SKIPPED_FILES[@]}"
 
-# Validate extraction and handle auto-categorization
+# Validate extraction and handle auto-categorization - prevent massive manifests
+TOTAL_EXTRACTED=$((${#CRITICAL_FILES[@]} + ${#IMPORTANT_FILES[@]} + ${#PAGE_SPECIFIC_FILES[@]} + ${#SKIPPED_FILES[@]}))
+
 if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
     echo "❌ Error: No files extracted from service worker!"
     echo "   Using fallback file list..."
+elif [ "$TOTAL_EXTRACTED" -gt 200 ]; then
+    echo "⚠️  Warning: Extracted $TOTAL_EXTRACTED files - this may create an oversized service worker!"
+    echo "   Service workers larger than ~50KB may fail to register."
+    echo "   Resetting to essential files only..."
     
     CRITICAL_FILES=(
         "index.html"
@@ -119,8 +125,13 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
         "sw.js"
     )
     
+    # Reset other arrays to keep manifest small
+    IMPORTANT_FILES=()
+    PAGE_SPECIFIC_FILES=()
+    SKIPPED_FILES=()
+    
     if [ "$AUTO_IMPORTANT" = true ]; then
-        echo "🤖 Auto-categorizing all cacheable files for GitHub Actions..."
+        echo "🤖 Skipping auto-categorization due to service worker size limits..."
         
         ALL_FILES=($(git ls-files -- '*.html' '*.css' '*.js' '*.png' '*.jpg' '*.svg' '*.ico' '*.woff' '*.woff2' '*.ttf' '*.eot' | \
                     grep -vE '(.*/test/.*|.*/tests/.*|node_modules/.*|\.git/.*)'))

@@ -589,7 +589,7 @@ methods: {
     async getModalAuthorReputation() {
         if (this.post.author && !this.modalAuthorInfo) {
             try {
-                const response = await fetch("https://hive-api.dlux.io", {
+                const response = await fetch("https://api.hive.blog", {
                     body: JSON.stringify({
                         "jsonrpc": "2.0", 
                         "method": "condenser_api.get_accounts", 
@@ -833,7 +833,7 @@ methods: {
             key: `posting`,
             msg: `Updating...`,
             ops: ["checkAccount"],
-            api: "https://hive-api.dlux.io",
+            api: "https://api.hive.blog",
             txid: `Updating @${post.author}/${post.permlink}`,
           }
           this.$emit('tosign', toSign)
@@ -1039,7 +1039,7 @@ methods: {
         if (!this.isReply) return;
         
         try {
-            const response = await fetch("https://hive-api.dlux.io", {
+            const response = await fetch("https://api.hive.blog", {
                 body: JSON.stringify({
                     "jsonrpc": "2.0",
                     "method": "condenser_api.get_content",
@@ -1070,7 +1070,7 @@ methods: {
         if (!this.parentPost || !this.parentPost.parent_author || !this.parentPost.parent_permlink) return;
         
         try {
-            const response = await fetch("https://hive-api.dlux.io", {
+            const response = await fetch("https://api.hive.blog", {
                 body: JSON.stringify({
                     "jsonrpc": "2.0",
                     "method": "condenser_api.get_content",

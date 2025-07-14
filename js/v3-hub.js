@@ -17,7 +17,7 @@ import PostVue from "/js/postvue.js";
 import DetailVue from "/js/detailvue.js";
 import MCommon from '/js/methods-common.js';
 
-const HIVE_API = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+const HIVE_API = localStorage.getItem("hapi") || "https://api.hive.blog";
 const LARYNX_API = "https://spkinstant.hivehoneycomb.com";
 const DUAT_API = "https://duat.hivehoneycomb.com";
 const DLUX_TOKEN_API = "https://token.dlux.io";
@@ -37,7 +37,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-// let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io"; // Use constant HIVE_API
+// let hapi = localStorage.getItem("hapi") || "https://api.hive.blog"; // Use constant HIVE_API
 
 createApp({
   directives: {

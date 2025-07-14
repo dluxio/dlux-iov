@@ -647,7 +647,7 @@ export default {
         },
         getReplies(a,p,k){
           return new Promise((resolve, reject) => {
-            fetch('https://hive-api.dlux.io', {
+            fetch('https://api.hive.blog', {
               body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -695,7 +695,7 @@ export default {
           }
         },
         checkAccount(name, key) {
-          fetch("https://hive-api.dlux.io", {
+          fetch("https://api.hive.blog", {
             body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
@@ -980,7 +980,7 @@ export default {
         },
         getContent(a, p, modal) {
           if (a && p) {
-            fetch('https://hive-api.dlux.io', {
+            fetch('https://api.hive.blog', {
               body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
               headers: {
                 "Content-Type": "application/x-www-form-urlencoded",

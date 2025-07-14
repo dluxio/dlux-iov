@@ -38,7 +38,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 console.log({
   lapi,
 });
@@ -307,7 +307,7 @@ createApp({ // vue 3
         });
     },
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -2653,7 +2653,7 @@ createApp({ // vue 3
         };
         
         // Get chain properties to determine if we can use ACT
-        const response = await fetch('https://hive-api.dlux.io', {
+        const response = await fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${this.account}"]], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -2674,7 +2674,7 @@ createApp({ // vue 3
         const hiveBalance = parseFloat(userAccount.balance.split(' ')[0]);
         
         // Get account creation fee
-        const propsResponse = await fetch('https://hive-api.dlux.io', {
+        const propsResponse = await fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",

@@ -47,7 +47,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 console.log({
   lapi,
 });
@@ -353,17 +353,17 @@ const app = createApp({
         const bidRate = ENV.BIDRATE || 2500 //
         
         //HIVE CONFIGS
-        var startURL = ENV.STARTURL || "https://hive-api.dlux.io/";
-        var clientURL = ENV.APIURL || "https://hive-api.dlux.io/";
+        var startURL = ENV.STARTURL || "https://api.hive.blog/";
+        var clientURL = ENV.APIURL || "https://api.hive.blog/";
         const clients = ENV.clients
           ? ENV.clients.split(" ")
           : [
               "https://api.deathwing.me/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
               "https://rpc.ecency.com/",
               "https://hived.emre.sh/",
               "https://rpc.ausbit.dev/",
-              "https://hive-api.dlux.io/",
+              "https://api.hive.blog/",
             ];
         
         //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
@@ -1374,7 +1374,7 @@ const app = createApp({
         key: "active",
         msg: `${approve ? 'Supporting' : 'Removing support for'} Proposal #${proposalId}`,
         txid: `update_proposal_votes_${proposalId}_${Date.now()}`,
-        api: "https://hive-api.dlux.io",
+        api: "https://api.hive.blog",
         delay: 250,
         ops: ["fetchUserVotes", "resetVotingState"]
       };
@@ -2188,7 +2188,7 @@ const app = createApp({
         key: "active",
         msg: `Creating proposal: ${this.createProposalForm.subject}`,
         txid: `create_proposal_${Date.now()}`,
-        api: "https://hive-api.dlux.io",
+        api: "https://api.hive.blog",
         delay: 250,
         ops: ["loadProposals", "resetCreateProposalState"]
       };
@@ -2226,7 +2226,7 @@ const app = createApp({
         key: "active",
         msg: `Updating proposal #${this.updateProposalForm.id}: ${this.updateProposalForm.subject}`,
         txid: `update_proposal_${this.updateProposalForm.id}_${Date.now()}`,
-        api: "https://hive-api.dlux.io",
+        api: "https://api.hive.blog",
         delay: 250,
         ops: ["loadProposals", "resetUpdateProposalState"]
       };
@@ -2262,7 +2262,7 @@ const app = createApp({
         key: "active",
         msg: `Canceling proposal #${proposalId}`,
         txid: `remove_proposal_${proposalId}_${Date.now()}`,
-        api: "https://hive-api.dlux.io",
+        api: "https://api.hive.blog",
         delay: 250,
         ops: ["loadProposals", "resetRemoveProposalState"]
       };
@@ -4068,7 +4068,7 @@ const app = createApp({
       qrcode.makeCode(link);
     },
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -4138,7 +4138,7 @@ const app = createApp({
       }
     },
     getHiveStats() {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

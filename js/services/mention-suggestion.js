@@ -11,7 +11,7 @@ export function createMentionSuggestion() {
             }
             
             try {
-                const response = await fetch("https://hive-api.dlux.io", {
+                const response = await fetch("https://api.hive.blog", {
                     body: JSON.stringify({
                         jsonrpc: "2.0",
                         method: "condenser_api.lookup_accounts",

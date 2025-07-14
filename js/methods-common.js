@@ -13,7 +13,7 @@ export default {
         return;
       }
       
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: JSON.stringify({
           jsonrpc: "2.0",
           method: "condenser_api.lookup_accounts",
@@ -42,7 +42,7 @@ export default {
   
   accountCheck(a) {
     return new Promise((resolve, e) => {
-      fetch("https://hive-api.dlux.io", {
+      fetch("https://api.hive.blog", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${a}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
