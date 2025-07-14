@@ -1,39 +1,49 @@
-const version = "2025.07.14.1";
+this.version = "2025.07.14.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
-// Minimal cache manifest for testing
-self.cacheManifest = {
-  "version": "2025.07.12.21",
-  "generated": "2025-07-12T21:58:00Z",
+// Cache manifest with checksums - auto-generated
+self.cacheManifest = 
+{
+  "version": "2025.07.14.2",
+  "generated": "2025-07-14T19:19:57Z",
   "files": {
-    "/index.html": {
-      "checksum": "placeholder",
-      "size": 1000,
-      "priority": "critical"
-    },
     "/css/custom.css": {
-      "checksum": "placeholder",
-      "size": 1000,
+      "checksum": "fe581072f244e04c6aada1963a5ee514",
+      "size": 347238,
       "priority": "critical"
     },
     "/js/vue.esm-browser.js": {
-      "checksum": "placeholder",
-      "size": 1000,
+      "checksum": "232af68f6551a87a4732981749dd5265",
+      "size": 531704,
       "priority": "critical"
     },
     "/js/v3-nav.js": {
-      "checksum": "placeholder",
-      "size": 1000,
+      "checksum": "a0385f32f9414dc01f748d13c60fdec0",
+      "size": 255675,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "placeholder",
-      "size": 1000,
+      "checksum": "21bb3d0bd05a000b456a28f1e1275866",
+      "size": 2211,
       "priority": "critical"
+    },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
     }
   }
-};
+}
+;
+
+
+// Minimal cache manifest for testing
 
 // Essential service worker functionality
 self.addEventListener("install", function (event) {
