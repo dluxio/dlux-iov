@@ -45,8 +45,12 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
     <script>
-    // Disable auto-enhancement to prevent conflicts with methods-common.js video processing
-    window.dluxVideoPlayerConfig = { autoEnhance: false };
+    // Vue app - disable static enhancement, Vue components handle their own videos  
+    window.dluxVideoPlayerConfig = { 
+        enableStaticEnhancement: false,  // Vue handles video enhancement
+        debug: false 
+    };
+    document.documentElement.setAttribute('data-vue-app', 'true');
     </script>
     <script src="/js/videoPlayer.bundle.js"></script>
     <script type="module" src="/js/v3-app.js"></script>

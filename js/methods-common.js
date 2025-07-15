@@ -1240,15 +1240,28 @@ export default {
       });
     });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['src', 'type', 'data-type']
-    });
+    // Only start MutationObserver on static pages, not Vue/React apps
+    const isFrameworkApp = document.querySelector('[data-vue-app], [data-react-app], .react-app');
+    
+    if (!isFrameworkApp) {
+      console.log('📄 Static page detected - starting MutationObserver for video enhancement');
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src', 'type', 'data-type']
+      });
+    } else {
+      console.log('⚡ Framework app detected - skipping MutationObserver (Vue/React handles videos)');
+    }
 
-    // Setup existing video elements
-    document.querySelectorAll('video').forEach(video => processVideo(video));
+    // Setup existing video elements (only on static pages)
+    if (!isFrameworkApp) {
+      console.log('📄 Processing existing videos on static page');
+      document.querySelectorAll('video').forEach(video => processVideo(video));
+    } else {
+      console.log('⚡ Skipping existing video processing (framework app handles its own videos)');
+    }
 
     return observer;
   },

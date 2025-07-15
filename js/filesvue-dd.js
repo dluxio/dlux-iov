@@ -8,8 +8,10 @@ import spk from './methods-spk.js';
 import watchers from './watchers-common.js';
 import debugLogger from './utils/debug-logger.js';
 import hlsDebug from './utils/hls-debug.js';
+import VideoEnhancementMixin from './video-enhancement-mixin.js';
 
 export default {
+    mixins: [VideoEnhancementMixin],
     components: {
         "pop-vue": Pop,
         "choices-vue": ChoicesVue,
@@ -6007,6 +6009,18 @@ export default {
     },
     watch: {
         ...watchers,
+        // Watch for modal opening to enhance videos
+        'previewModal.show': {
+            handler(newValue) {
+                if (newValue && this.previewModal.file && this.isVideoFile(this.previewModal.file.type)) {
+                    // Modal opened with video file - enhance videos after DOM update
+                    this.$nextTick(() => {
+                        this.enhanceVideosManually();
+                    });
+                }
+            },
+            immediate: false
+        },
         'contracts': {
 
             handler(newValue, oldValue) {

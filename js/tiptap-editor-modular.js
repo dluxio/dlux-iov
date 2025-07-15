@@ -1859,7 +1859,6 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
         const CustomTextAlign = tiptapBundle.CustomTextAlign;
-        const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
         const Mention = tiptapBundle.Mention;
@@ -1894,7 +1893,6 @@ class EditorFactory {
             Placeholder: !!Placeholder,
             BubbleMenu: !!BubbleMenu,
             CustomTextAlign: !!CustomTextAlign,
-            SpkVideo: !!SpkVideo,
             DluxVideo: !!DluxVideo,
             CustomImage: !!CustomImage,
             CustomDropcursor: !!CustomDropcursor,
@@ -1966,12 +1964,6 @@ class EditorFactory {
             CustomTextAlign.configure({
                 types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
-            }),
-            SpkVideo.configure({
-                onVideoClick: (pos, attrs) => {
-                    // TipTap best practice: Use callback passed to extension
-                    this.component.editVideo(pos, attrs);
-                }
             }),
             DluxVideo,
             CustomImage.configure({
@@ -2575,7 +2567,6 @@ class EditorFactory {
         const BubbleMenu = tiptapBundle.BubbleMenu;
         const FloatingMenu = tiptapBundle.FloatingMenu;
         const CustomTextAlign = tiptapBundle.CustomTextAlign;
-        const SpkVideo = tiptapBundle.SpkVideo;
         const DluxVideo = tiptapBundle.DluxVideo;
         const CustomImage = tiptapBundle.CustomImage; // Use CustomImage from bundle
         const Mention = tiptapBundle.Mention;
@@ -2627,12 +2618,6 @@ class EditorFactory {
             CustomTextAlign.configure({
                 types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 alignments: ['left', 'center', 'right', 'justify'],
-            }),
-            SpkVideo.configure({
-                onVideoClick: (pos, attrs) => {
-                    // TipTap best practice: Use callback passed to extension
-                    this.component.editVideo(pos, attrs);
-                }
             }),
             DluxVideo,
             CustomImage.configure({
@@ -7882,7 +7867,7 @@ export default {
 
         // ✅ COMPLIANCE: Debug collaboration endpoints code removed
         
-        // Make methodsCommon available globally for SpkVideo nodeView
+        // Make methodsCommon available globally for video nodeViews
         window.methodsCommon = methodsCommon;
         
         // ✅ Log TipTap component availability
@@ -14388,7 +14373,6 @@ export default {
                     CustomImage,
                     CodeBlock,
                     CustomTextAlign,
-                    SpkVideo,
                     DluxVideo,
                     Mention,
                     TableKit,
@@ -14437,7 +14421,6 @@ export default {
                     Link,
                     CustomImage, // Use CustomImage for consistency
                     CodeBlock,
-                    SpkVideo,
                     DluxVideo,
                     Mention,
                     TableKit && TableKit.configure({

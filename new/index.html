@@ -1865,8 +1865,12 @@
     </script>
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
     <script>
-    // Disable auto-enhancement to prevent conflicts with TipTap DluxVideo extension
-    window.dluxVideoPlayerConfig = { autoEnhance: false };
+    // Vue app with TipTap - disable static enhancement, Vue components handle their own videos
+    window.dluxVideoPlayerConfig = { 
+        enableStaticEnhancement: false,  // Vue handles video enhancement
+        debug: false 
+    };
+    document.documentElement.setAttribute('data-vue-app', 'true');
     </script>
     <script src="/js/videoPlayer.bundle.js"></script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->

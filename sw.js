@@ -5,14 +5,9 @@ const CACHE_NAME = "sw-cache-v" + version;
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.07.14.2",
-  "generated": "2025-07-14T19:19:57Z",
+  "version": "2025.07.15.13",
+  "generated": "2025-07-15T20:13:34Z",
   "files": {
-    "/css/custom.css": {
-      "checksum": "fe581072f244e04c6aada1963a5ee514",
-      "size": 347238,
-      "priority": "critical"
-    },
     "/js/vue.esm-browser.js": {
       "checksum": "232af68f6551a87a4732981749dd5265",
       "size": 531704,
@@ -24,22 +19,25 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "21bb3d0bd05a000b456a28f1e1275866",
-      "size": 2211,
+      "checksum": "11403ce8578a79a126486e5c05c57c90",
+      "size": 2533,
       "priority": "critical"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     }
   }
 }
+;
+
+
 ;
 
 
