@@ -13,7 +13,7 @@ The DLUX Video Player is a site-wide video playback solution built on Video.js t
 
 ### Bundle Structure
 ```
-/js/videoPlayer.bundle.js      # Main video player bundle (752 KB)
+/js/videoPlayer.bundle.js      # Main video player bundle (763 KB)
 /css/dlux-video-player.css     # Global styles and theme
 /src/video-player-bundle.js    # Source code
 ```
@@ -23,6 +23,29 @@ The DLUX Video Player is a site-wide video playback solution built on Video.js t
 window.DluxVideoPlayer         # Main service class
 window.videojs                 # Video.js library
 window.VideoPlayerBundle       # Full bundle export
+```
+
+## Architecture Overview
+
+### Universal Video Enhancement System
+
+The DLUX Video Player uses a **universal architecture** that automatically handles videos across all contexts:
+
+- **🌍 Global Document Search**: Finds videos anywhere in the document (components, modals, teleported content)
+- **⚡ Vue Integration**: Reactive lifecycle hooks trigger video enhancement
+- **📝 TipTap Self-Contained**: Editor videos initialize independently  
+- **📄 Static Page Support**: MutationObserver for progressive enhancement
+
+### Framework Detection
+
+The system automatically detects the page type and uses appropriate enhancement strategies:
+
+```javascript
+// Vue Apps: Global search triggered by component lifecycle
+document.setAttribute('data-vue-app', 'true');
+
+// Static Pages: MutationObserver for progressive enhancement  
+// (No framework markers)
 ```
 
 ## Installation
@@ -106,6 +129,81 @@ window.DluxVideoPlayer.destroyPlayer(videoElement);
 // Method 2: Using the player instance
 player.dispose();
 ```
+
+## Vue Integration
+
+### Vue Video Enhancement Mixin
+
+For Vue components, use the **Video Enhancement Mixin** for automatic video enhancement:
+
+#### Installation
+```javascript
+import VideoEnhancementMixin from '/js/video-enhancement-mixin.js';
+
+export default {
+  mixins: [VideoEnhancementMixin],
+  // ... rest of component
+}
+```
+
+#### What the Mixin Provides
+
+**Automatic Enhancement:**
+- Runs on `mounted()` and `updated()` lifecycle hooks
+- Uses global document search to find all unenhanced videos
+- Handles teleported modals and dynamic content automatically
+
+**Manual Enhancement:**
+```javascript
+// Trigger enhancement manually (e.g., when modal opens)
+this.enhanceVideosManually();
+```
+
+**Automatic Cleanup:**
+- Cleans up video players on `beforeUnmount()`
+- Conservative approach to avoid interfering with other components
+
+#### Example Usage
+
+**Basic Component:**
+```javascript
+import VideoEnhancementMixin from '/js/video-enhancement-mixin.js';
+
+export default {
+  mixins: [VideoEnhancementMixin],
+  template: `
+    <div>
+      <video src="video.mp4" controls></video>
+      <!-- Automatically enhanced on mount/update -->
+    </div>
+  `
+}
+```
+
+**With Modal Watcher:**
+```javascript
+export default {
+  mixins: [VideoEnhancementMixin],
+  watch: {
+    'modal.show': {
+      handler(newValue) {
+        if (newValue) {
+          this.$nextTick(() => {
+            this.enhanceVideosManually(); // Enhance modal videos
+          });
+        }
+      }
+    }
+  }
+}
+```
+
+### Vue Best Practices
+
+1. **Import the Mixin**: Add to any component that might contain videos
+2. **Modal Support**: Use watchers to trigger manual enhancement when modals open  
+3. **Teleported Content**: Mixin automatically handles `<teleport to="body">`
+4. **No Conflicts**: TipTap videos are automatically skipped to prevent double processing
 
 ## Advanced Usage
 
@@ -482,7 +580,7 @@ Common extension points:
 
 - [Video.js Documentation](https://videojs.com/guides/)
 - [HLS.js Documentation](https://github.com/video-dev/hls.js/)
-- [DLUX Editor Documentation](./CLAUDE.md)
+- [DLUX Editor Documentation](../CLAUDE.md)
 - [HLS Implementation Guide](./HLS_COMPREHENSIVE_GUIDE.md)
 
 ---

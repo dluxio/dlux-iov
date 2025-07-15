@@ -1,5 +1,5 @@
 # HLS Implementation & Playback Guide - DLUX IOV
-*Last Updated: 2025-06-30*
+*Last Updated: 2025-07-15*
 
 ## Table of Contents
 1. [Critical IPFS Requirements](#critical-ipfs-requirements)
@@ -354,7 +354,37 @@ this.unsubscribeProgress = ffmpegManager.onProgress(({ progress, time }) => {
 });
 ```
 
-### Issue 7: Vue 3 Reactivity Issues
+### Issue 7: Queue Management for FFmpeg Singleton
+**Problem:** Multiple videos can't be transcoded simultaneously due to FFmpeg.wasm singleton limitation
+**Root Cause:** FFmpeg.wasm can only process one file at a time
+**Solution:** Implement proper queue management:
+```javascript
+// Queue management pattern
+class TranscodingQueue {
+    constructor() {
+        this.queue = [];
+        this.processing = false;
+    }
+    
+    async addToQueue(transcoderInstance) {
+        this.queue.push(transcoderInstance);
+        if (!this.processing) {
+            await this.processQueue();
+        }
+    }
+    
+    async processQueue() {
+        this.processing = true;
+        while (this.queue.length > 0) {
+            const instance = this.queue.shift();
+            await instance.processVideo();
+        }
+        this.processing = false;
+    }
+}
+```
+
+### Issue 8: Vue 3 Reactivity Issues
 **Problem:** `this.$set is not a function` error when updating progress
 **Solution:** Remove Vue 2 API calls, rely on Vue 3's automatic reactivity:
 ```javascript
@@ -434,6 +464,140 @@ startProcess() {
         }
         // Handle progress for this session only
     });
+}
+```
+
+## Video Transcoding Queue Management
+
+### The FFmpeg Singleton Challenge
+
+FFmpeg.wasm operates as a singleton instance with specific limitations:
+- Only one video can be transcoded at a time
+- All video transcoder component instances receive the same progress events
+- Without proper routing, all progress bars update with the same values
+
+### Technical Implementation
+
+**Global Session Tracking:**
+```javascript
+// Track which video is currently transcoding
+let activeTranscodingSession = null;
+
+// Each transcoder instance gets unique session ID
+this.sessionId = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+```
+
+**Progress Subscription Timing:**
+```javascript
+// Subscribe AFTER session ID is created, not during init
+startProcess() {
+    // Create session ID first
+    this.sessionId = generateSessionId();
+    
+    // Set as active session
+    activeTranscodingSession = this.sessionId;
+    
+    // Subscribe to progress with filtering
+    this.unsubscribeProgress = ffmpegManager.onProgress((event) => {
+        if (this.sessionId !== activeTranscodingSession) {
+            return; // Ignore events for inactive sessions
+        }
+        this.updateProgress(event);
+    });
+}
+```
+
+**Cleanup on Completion:**
+```javascript
+// Always clean up session when done
+finishTranscoding() {
+    if (activeTranscodingSession === this.sessionId) {
+        activeTranscodingSession = null;
+    }
+    
+    // Unsubscribe from progress events
+    if (this.unsubscribeProgress) {
+        this.unsubscribeProgress();
+    }
+}
+```
+
+### Queue Management Patterns
+
+**Sequential Processing:**
+```javascript
+class TranscodingManager {
+    constructor() {
+        this.queue = [];
+        this.processing = false;
+    }
+    
+    async enqueue(videoFile) {
+        return new Promise((resolve, reject) => {
+            this.queue.push({ videoFile, resolve, reject });
+            this.processNext();
+        });
+    }
+    
+    async processNext() {
+        if (this.processing || this.queue.length === 0) {
+            return;
+        }
+        
+        this.processing = true;
+        const { videoFile, resolve, reject } = this.queue.shift();
+        
+        try {
+            const result = await this.transcodeVideo(videoFile);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        } finally {
+            this.processing = false;
+            this.processNext(); // Process next in queue
+        }
+    }
+}
+```
+
+### Common Queue Issues & Solutions
+
+**Problem:** Multiple components try to start transcoding simultaneously
+**Solution:** Check active session before starting:
+```javascript
+startTranscoding() {
+    if (activeTranscodingSession && activeTranscodingSession !== this.sessionId) {
+        console.warn('Another transcoding session is active, queueing...');
+        // Add to queue or show user feedback
+        return;
+    }
+    // Proceed with transcoding
+}
+```
+
+**Problem:** Progress events update wrong component
+**Solution:** Filter events by session ID:
+```javascript
+onProgress(event) {
+    if (this.sessionId !== activeTranscodingSession) {
+        return; // Not our event
+    }
+    this.progress = event.progress;
+}
+```
+
+**Problem:** Memory leaks from uncleared subscriptions
+**Solution:** Always cleanup subscriptions:
+```javascript
+beforeUnmount() {
+    if (this.unsubscribeProgress) {
+        this.unsubscribeProgress();
+    }
+    
+    // Clear active session if this component was processing
+    if (activeTranscodingSession === this.sessionId) {
+        activeTranscodingSession = null;
+    }
 }
 ```
 

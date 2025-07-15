@@ -144,8 +144,7 @@ const DEBUG = false;
  * 6. LifecycleManager - Proper TipTap cleanup patterns
  * 7. SyncManager - Content synchronization (TipTap ↔ Vue only)
  * 
- * @see TIPTAP_CORRECTED_MODULAR_PROPOSAL.md
- * @see TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md
+ * @see documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md
  */
 
 // ==================== MANAGER CLASSES ====================

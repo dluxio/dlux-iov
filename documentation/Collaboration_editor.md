@@ -93,7 +93,7 @@ GET /api/collaboration/documents
 ### 4. Create Document
 
 ```http
-POST /collaboration/documents
+POST /api/collaboration/documents
 ```
 
 **Request Body:**
@@ -130,7 +130,7 @@ POST /collaboration/documents
 ### 5. Update Document Name
 
 ```http
-PATCH /collaboration/documents/{owner}/{permlink}/name
+PATCH /api/collaboration/documents/{owner}/{permlink}/name
 ```
 
 **Request Body:**
@@ -594,6 +594,42 @@ Common error codes:
 - `403`: Forbidden (insufficient permissions)
 - `404`: Not Found (document/resource doesn't exist)
 - `500`: Internal Server Error
+
+## System Endpoints
+
+### System Versions
+
+```http
+GET /api/system/versions
+```
+
+**Description:**
+Returns version information for system features and capabilities. Used by the client to determine available functionality and compatibility.
+
+**Authentication:**
+Requires standard Hive authentication headers.
+
+**Response:**
+```json
+{
+  "success": true,
+  "versions": {
+    "api": "2.1.0",
+    "websocket": "1.3.0",
+    "collaboration": "3.0.0",
+    "features": {
+      "permissions_broadcast": "1.0.0",
+      "document_cleanup": "1.1.0",
+      "activity_logging": "2.0.0"
+    }
+  }
+}
+```
+
+**Usage:**
+- Client uses this to check feature compatibility
+- Enables progressive enhancement based on server capabilities
+- Used during application initialization
 
 ## Document Cleanup Strategy
 

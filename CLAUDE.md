@@ -5,11 +5,11 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 
 ## Quick Reference
 - **Main implementation**: `js/tiptap-editor-modular.js`
-- **Architecture guide**: `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` (comprehensive implementation details)
-- **Schema guide**: `TIPTAP_COLLABORATIVE_SCHEMA.md` (aspirational design) / `TIPTAP_YIJS_SCHEMA_ACTUAL.md` (actual implementation)
-- **Schema enforcement**: `TIPTAP_SCHEMA_ENFORCEMENT.md` (content restriction system)
-- **Markdown export**: `TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md` (export pipeline)
-- **API Documentation**: `Collaboration_editor.md`
+- **Architecture guide**: `documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` (comprehensive implementation details)
+- **Schema guide**: `documentation/TIPTAP_COLLABORATIVE_SCHEMA.md` (aspirational design) / `documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md` (actual implementation)
+- **Schema enforcement**: `documentation/TIPTAP_SCHEMA_ENFORCEMENT.md` (content restriction system)
+- **Markdown export**: `documentation/TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md` (export pipeline)
+- **API Documentation**: `documentation/Collaboration_editor.md`
 - **Testing commands**: `npm run lint && npm run typecheck`
 
 ## Core Technologies
@@ -31,7 +31,7 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 
 ## Y.js Document Structure
 
-> **Note**: For the complete Y.js schema implementation, see [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md).
+> **Note**: For the complete Y.js schema implementation, see [`documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md).
 
 The editor uses a simplified Y.js structure with:
 - **3 Y.js Maps**: `config`, `metadata`, `permissions`
@@ -45,7 +45,7 @@ The system uses two dedicated Y.js observers for clean separation of concerns:
 - **CONFIG OBSERVER**: Document management metadata (documentName, owner, lastModified)
 - **METADATA OBSERVER**: Publishing metadata (title, tags, beneficiaries, permlink, comment options, customJson)
 
-For detailed implementation, see [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md).
+For detailed implementation, see [`documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md).
 
 ## API Endpoints
 
@@ -123,7 +123,7 @@ this.canManagePermissions   // Permission management (owner only)
 
 ### Modular Drag & Drop System
 
-> **See [`TIPTAP_SCHEMA_ENFORCEMENT.md`](./TIPTAP_SCHEMA_ENFORCEMENT.md) for complete documentation.**
+> **See [`documentation/TIPTAP_SCHEMA_ENFORCEMENT.md`](./documentation/TIPTAP_SCHEMA_ENFORCEMENT.md) for complete documentation.**
 
 The editor uses a registry-based system to control what content can be dropped into specific nodes:
 
@@ -135,20 +135,28 @@ const nodeBlockLists = {
 };
 ```
 
+## Video Player System
+- **Main Bundle**: `/js/videoPlayer.bundle.js` (763 KB) + `/css/dlux-video-player.css`
+- **Vue Integration**: Use `VideoEnhancementMixin` for automatic video enhancement
+- **TipTap Integration**: Self-contained DluxVideo extension with global service
+- **Universal Architecture**: Global document search handles all contexts (modals, teleported content)
+- **Documentation**: [`documentation/DLUX_VIDEO_PLAYER_DOCUMENTATION.md`](./documentation/DLUX_VIDEO_PLAYER_DOCUMENTATION.md)
+- **HLS Implementation**: [`documentation/HLS_COMPREHENSIVE_GUIDE.md`](./documentation/HLS_COMPREHENSIVE_GUIDE.md)
+
 ## Documentation Index
 
 ### Core Documentation
-- **Y.js Schema**: [`TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./TIPTAP_YIJS_SCHEMA_ACTUAL.md) - Complete Y.js structure
-- **Collaboration Architecture**: [`TIPTAP_COLLABORATIVE_SCHEMA.md`](./TIPTAP_COLLABORATIVE_SCHEMA.md) - High-level design
-- **Best Practices**: [`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md) - Implementation patterns
-- **Schema Enforcement**: [`TIPTAP_SCHEMA_ENFORCEMENT.md`](./TIPTAP_SCHEMA_ENFORCEMENT.md) - Content restrictions
-- **Markdown Export**: [`TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md`](./TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md) - Export system
-- **API Documentation**: [`Collaboration_editor.md`](./Collaboration_editor.md) - Hive API reference
+- **Y.js Schema**: [`documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md) - Complete Y.js structure
+- **Collaboration Architecture**: [`documentation/TIPTAP_COLLABORATIVE_SCHEMA.md`](./documentation/TIPTAP_COLLABORATIVE_SCHEMA.md) - High-level design
+- **Best Practices**: [`documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md) - Implementation patterns
+- **Schema Enforcement**: [`documentation/TIPTAP_SCHEMA_ENFORCEMENT.md`](./documentation/TIPTAP_SCHEMA_ENFORCEMENT.md) - Content restrictions
+- **Markdown Export**: [`documentation/TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md`](./documentation/TIPTAP_MARKDOWN_EXPORT_ARCHITECTURE.md) - Export system
+- **API Documentation**: [`documentation/Collaboration_editor.md`](./documentation/Collaboration_editor.md) - Hive API reference
 
 ### Feature Documentation
-- **SPK Drive Integration**: [`TIPTAP_SPK_DRIVE_INTEGRATION.md`](./TIPTAP_SPK_DRIVE_INTEGRATION.md) - Media insertion
-- **UI Features**: [`TIPTAP_FEATURES.md`](./TIPTAP_FEATURES.md) - BubbleMenu, table toolbar, etc.
-- **Troubleshooting**: [`TIPTAP_TROUBLESHOOTING.md`](./TIPTAP_TROUBLESHOOTING.md) - Common issues & fixes
+- **SPK Drive Integration**: [`documentation/TIPTAP_SPK_DRIVE_INTEGRATION.md`](./documentation/TIPTAP_SPK_DRIVE_INTEGRATION.md) - Media insertion
+- **UI Features**: [`documentation/TIPTAP_FEATURES.md`](./documentation/TIPTAP_FEATURES.md) - BubbleMenu, table toolbar, etc.
+- **Troubleshooting**: [`documentation/TIPTAP_TROUBLESHOOTING.md`](./documentation/TIPTAP_TROUBLESHOOTING.md) - Common issues & fixes
 
 ### Official TipTap Documentation
 - **TipTap v3 Docs**: https://next.tiptap.dev/docs
@@ -218,9 +226,9 @@ When extending always import standalone extension, do not import from kits like 
 
 ## Common Issues & Solutions
 
-For comprehensive troubleshooting, see [`TIPTAP_TROUBLESHOOTING.md`](./TIPTAP_TROUBLESHOOTING.md).
+For comprehensive troubleshooting, see [`documentation/TIPTAP_TROUBLESHOOTING.md`](./documentation/TIPTAP_TROUBLESHOOTING.md).
 
-For implementation patterns and best practices, see [`TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md).
+For implementation patterns and best practices, see [`documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md).
 
 ## TipTap v3 Compliance Status (Audited 2025.06.25)
 
@@ -299,7 +307,7 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 - Proper cleanup on provider destroy and component unmount
 
 ## Development Workflow
-1. Check `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` for patterns
+1. Check `documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` for patterns
 2. Follow Y.js transaction patterns with origin tags
 3. Test with `npm run lint && npm run typecheck`
 4. Use proper cleanup order: observers → editors → providers → Y.js
