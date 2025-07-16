@@ -129,7 +129,11 @@ class DluxVideoPlayer {
     
     // Context validation - TipTap videos should not be externally enhanced
     if (video.hasAttribute('data-tiptap-video')) {
-      throw new Error('TipTap videos should not be externally enhanced');
+      const config = window.dluxVideoPlayerConfig || {};
+      if (config.debug) {
+        console.log('DluxVideoPlayer: Skipping TipTap video enhancement (handled by editor):', video.id || 'no-id');
+      }
+      return null; // TipTap handles its own videos
     }
     
     try {

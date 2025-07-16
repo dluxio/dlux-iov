@@ -10189,7 +10189,10 @@ export default {
                 const headers = this.isAuthenticated && !this.isAuthExpired ? this.authHeaders : {};
 
                 const response = await fetch(`https://data.dlux.io/api/collaboration/info/${owner}/${permlink}`, {
-                    headers: headers
+                    headers: {
+                        ...headers,
+                        'Connection': 'close'  // Prevent connection reuse to avoid ERR_CONNECTION_CLOSED
+                    }
                 });
 
                 if (response.ok) {
@@ -11281,7 +11284,10 @@ export default {
 
             try {
                 const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
-                    headers: this.authHeaders,
+                    headers: {
+                        ...this.authHeaders,
+                        'Connection': 'close'  // Prevent connection reuse to avoid ERR_CONNECTION_CLOSED
+                    },
                     signal: this.loadCollaborativeDocsController.signal
                 });
 
@@ -11523,8 +11529,10 @@ export default {
 
                     if (response.status === 401) {
                         this.serverAuthFailed = true;
+                        // Clear cache only for authentication errors
+                        this.collaborativeDocs = [];
                     }
-                    this.collaborativeDocs = [];
+                    // For other HTTP errors (403, 404, 500), preserve cached data
                 }
             } catch (error) {
                 // ✅ PERFORMANCE: Handle request cancellation gracefully
@@ -11533,12 +11541,29 @@ export default {
                     return; // Don't set error states for cancelled requests
                 }
 
-                console.error('❌ COLLAB DOCS: Error loading collaborative documents:', {
-                    error: error.message,
-                    stack: error.stack,
-                    user: this.username
-                });
-                this.collaborativeDocs = [];
+                // Classify error type for appropriate handling
+                const isConnectionError = error.message.includes('Failed to fetch') || 
+                                        error.message.includes('ERR_CONNECTION_CLOSED') ||
+                                        error.message.includes('NetworkError') ||
+                                        error.message.includes('connection was closed');
+
+                if (isConnectionError) {
+                    // For connection errors, preserve cached data and log as warning
+                    console.warn('⚠️ COLLAB DOCS: Connection error during background refresh (cached data preserved):', {
+                        error: error.message,
+                        user: this.username,
+                        cachedDocsCount: this.collaborativeDocs.length
+                    });
+                    // Keep existing collaborativeDocs data
+                } else {
+                    // For other errors (parsing, unexpected), log as error but still preserve cache
+                    console.error('❌ COLLAB DOCS: Unexpected error loading collaborative documents:', {
+                        error: error.message,
+                        stack: error.stack,
+                        user: this.username
+                    });
+                    // Could consider clearing cache here for non-connection errors if needed
+                }
             } finally {
                 this.loadingDocs = false;
                 // ✅ PERFORMANCE: Clean up AbortController
@@ -19276,7 +19301,7 @@ export default {
                     description: 'Full control - can edit, share, and delete'
                 },
                 'postable': {
-                    label: 'Full Editor',
+                    label: 'Publisher',
                     icon: 'fas fa-edit',
                     color: 'success',
                     description: 'Can edit content and publish to Hive'
@@ -19412,7 +19437,10 @@ export default {
                     try {
                         // Try to fetch from server
                         const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${owner}/${permlink}`, {
-                            headers: this.authHeaders
+                            headers: {
+                                ...this.authHeaders,
+                                'Connection': 'close'  // Prevent connection reuse to avoid ERR_CONNECTION_CLOSED
+                            }
                         });
                         
                         if (response.ok) {
