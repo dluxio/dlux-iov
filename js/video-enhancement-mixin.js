@@ -48,8 +48,8 @@ export default {
         const videos = document.querySelectorAll('video:not([data-ipfs-enhanced])');
         
         videos.forEach((video) => {
-          // Skip TipTap videos to prevent double processing (but only if already enhanced)
-          if (isTipTapVideo(video) && video.hasAttribute('data-ipfs-enhanced')) {
+          // Skip TipTap videos - they manage their own enhancement
+          if (isTipTapVideo(video)) {
             return;
           }
           

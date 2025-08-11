@@ -933,7 +933,7 @@ export default {
                     <div class="col-md-6 mb-3">
                         <h6>File Information</h6>
                         <ul class="list-unstyled small">
-                            <li><strong>CID:</strong> <code class="text-break">{{ detailsData.file.cid }}</code> <i
+                            <li><strong>CID: </strong> <code class="text-break">{{ detailsData.file.cid }}</code> <i
                                     class="fa-regular fa-copy fa-fw ms-1" role="button"
                                     @click="copyText(detailsData.file.cid)"></i></li>
                             <li><strong>Owner:</strong> @{{ detailsData.file.owner }}</li>
@@ -946,7 +946,7 @@ export default {
                             <li><strong>Review/Expire:</strong>{{ detailsData.file.expirationTime }} (Block {{
                                 detailsData.file.expirationBlock }})</li>
                             <li><span class="text-muted">...Empties Trash</span></li>
-                            <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID:</strong> <code
+                            <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID: </strong> <code
                                     class="text-break">{{ detailsData.file.thumbCid }}</code> <i
                                     class="fa-regular fa-copy fa-fw ms-1" role="button"
                                     @click="copyText(detailsData.file.thumbCid)"></i></li>
@@ -1064,7 +1064,7 @@ export default {
         <!-- Modal -->
         <transition name="modal">
             <div v-if="previewModal.show" 
-                 class="modal fade show d-block"
+                 class="modal fade show d-block spk-drive-preview-modal"
                  tabindex="-1"
                  role="dialog"
                  @keyup.esc="closeFilePreview">
@@ -1078,13 +1078,12 @@ export default {
                 </div>
                 
                 <!-- Modal Body -->
-                <div class="modal-body p-0" style="min-height: 400px; max-height: calc(90vh - 120px); overflow: auto; position: relative;">
+                <div class="modal-body p-0">
                     
                     <!-- Loading Spinner (Non-blocking) -->
                     <div v-if="previewModal.loading" 
-                         class="position-absolute top-0 end-0 m-3"
-                         style="z-index: 10;">
-                        <div class="spinner-border text-light" role="status" style="width: 2rem; height: 2rem;">
+                         class="position-absolute top-0 end-0 m-3 z-1">
+                        <div class="spinner-border text-light" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
@@ -1096,8 +1095,7 @@ export default {
                              :alt="previewModal.file.name"
                              @load="previewModal.loading = false"
                              @error="previewModal.loading = false"
-                             class="img-fluid rounded"
-                             style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+                             class="img-fluid">
                     </div>
                     
                     <!-- Video Preview -->
@@ -1106,7 +1104,7 @@ export default {
                         <video :src="getFileUrlWithType(previewModal.file)" 
                                :type="getVideoMimeType(previewModal.file)"
                                controls 
-                               class="w-100 rounded">
+                               class="w-100">
                             Your browser does not support the video tag.
                         </video>
                     </div>
@@ -1140,18 +1138,23 @@ export default {
                 <!-- Modal Footer -->
                 <div class="modal-footer border-top border-secondary p-3">
                     <div class="d-flex justify-content-between align-items-center w-100">
-                        <div class="text-muted small">
-                            <strong>CID:</strong> {{ previewModal.file?.cid }}
+                        <div class="text-muted small text-break me-2">
+                            <strong>CID: </strong> 
+                            <a :href="'https://ipfs.dlux.io/ipfs/' + previewModal.file?.cid" 
+                               target="_blank" 
+                               class="text-info text-decoration-none">
+                                {{ previewModal.file?.cid }}
+                            </a>
                         </div>
                         <div>
                             <button type="button" 
-                                    class="btn btn-outline-light btn-sm me-2"
+                                    class="btn btn-outline-light btn-sm me-2 d-none"
                                     @click="window.open(previewModal.file?.url, '_blank')">
                                 <i class="fa-solid fa-external-link-alt me-1"></i>
                                 Open in New Tab
                             </button>
                             <button type="button" 
-                                    class="btn btn-primary btn-sm"
+                                    class="btn btn-primary btn-sm text-nowrap"
                                     @click="downloadFile({f: previewModal.file?.cid, i: Object.keys(newMeta).find(id => newMeta[id][previewModal.file?.cid])})">
                                 <i class="fa-solid fa-download me-1"></i>
                                 Download

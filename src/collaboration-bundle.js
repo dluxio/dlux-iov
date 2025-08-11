@@ -52,9 +52,6 @@ import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
-// Video player for TipTap videos
-import IPFSHLSPlayerBundle from './ipfs-hls-player';
-const { IPFSHLSPlayer } = IPFSHLSPlayerBundle;
 
 // These may still be individual packages
 import Document from '@tiptap/extension-document';
@@ -899,8 +896,14 @@ const IPFSVideo = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    // Clean up attributes
+    // Clean up attributes - remove only runtime state
     const attrs = { ...HTMLAttributes };
+    
+    // Remove ONLY runtime/enhancement attributes that shouldn't be persisted
+    delete attrs['data-ipfs-enhanced'];
+    delete attrs['data-tiptap-video'];
+    delete attrs['class']; // Remove Video.js classes
+    // Do NOT delete 'type' - it's critical for m3u8/HLS videos!
     
     // Ensure controls attribute is properly formatted
     if (attrs.controls === true || attrs.controls === 'true') {
@@ -941,7 +944,7 @@ const IPFSVideo = Node.create({
       
       // Create video element for Video.js
       const video = document.createElement('video');
-      video.className = 'video-js vjs-default-skin vjs-big-play-centered vjs-fluid';
+      // Let IPFSHLSPlayer handle Video.js classes
       video.setAttribute('data-tiptap-video', 'true');
       // Note: Don't set data-ipfs-enhanced until after initialization
       
@@ -952,11 +955,22 @@ const IPFSVideo = Node.create({
       
       // Self-contained initialization - TipTap DOM is stable
       const initializePlayer = async () => {
+        console.log('[VIDEO-DEBUG] TipTap: initializePlayer called', {
+          videoId: video.id,
+          hasPlayer: !!wrapper._ipfsHLSPlayer,
+          isInitialized: !!video._ipfsInitialized,
+          dataEnhanced: video.dataset.ipfsEnhanced,
+          videoElement: video,
+          timestamp: Date.now()
+        });
+        
         try {
           if (!window.IPFSHLSPlayer) {
-            console.error('🚨 TipTap IPFSVideo: IPFSHLSPlayer not available. Make sure ipfs-hls-player.min.js is loaded.');
+            console.error('[VIDEO-DEBUG] TipTap: IPFSHLSPlayer not available');
             return;
           }
+          
+          console.log('[VIDEO-DEBUG] TipTap: Calling IPFSHLSPlayer.initializePlayer');
           
           // Initialize immediately - TipTap nodeView DOM is stable
           player = await window.IPFSHLSPlayer.initializePlayer(video, {
@@ -968,6 +982,8 @@ const IPFSVideo = Node.create({
             muted: node.attrs.muted
           });
           
+          console.log('[VIDEO-DEBUG] TipTap: Player initialized', { player, videoId: video.id });
+          
           // Store player reference for cleanup
           wrapper._ipfsHLSPlayer = player;
           video._ipfsInitialized = true;
@@ -976,9 +992,15 @@ const IPFSVideo = Node.create({
           video.setAttribute('data-ipfs-enhanced', 'true');
           
         } catch (error) {
-          console.error('🚨 TipTap IPFSVideo initialization failed:', error);
+          console.error('[VIDEO-DEBUG] TipTap: Initialization failed', error);
         }
       };
+      
+      // Log the setTimeout call
+      console.log('[VIDEO-DEBUG] TipTap: NodeView created, scheduling init', {
+        src: node.attrs.src,
+        timestamp: Date.now()
+      });
       
       // Small delay to ensure Video.js CSS is loaded
       setTimeout(initializePlayer, 50);
@@ -988,6 +1010,13 @@ const IPFSVideo = Node.create({
         contentDOM: null,
         
         update(updatedNode) {
+          console.log('[VIDEO-DEBUG] TipTap: Node update', {
+            typeMatch: updatedNode.type === node.type,
+            srcChanged: updatedNode.attrs.src !== node.attrs.src,
+            oldSrc: node.attrs.src,
+            newSrc: updatedNode.attrs.src
+          });
+          
           // Check if it's still a video node
           if (updatedNode.type !== node.type) {
             return false;
@@ -1007,6 +1036,10 @@ const IPFSVideo = Node.create({
         },
         
         destroy() {
+          console.log('[VIDEO-DEBUG] TipTap: Destroying node view', {
+            hasPlayer: !!wrapper._ipfsHLSPlayer
+          });
+          
           // Clean up using IPFSHLSPlayer service
           if (wrapper._ipfsHLSPlayer && window.IPFSHLSPlayer) {
             window.IPFSHLSPlayer.destroyPlayer(video);
@@ -1969,7 +2002,7 @@ if (typeof window !== 'undefined') {
   window.TiptapCollaboration = TiptapCollaboration;
   window.HocuspocusProvider = HocuspocusProvider;
   window.Y = Y;
-  window.IPFSHLSPlayer = IPFSHLSPlayer; // Make player available globally for TipTap videos
+  // IPFSHLSPlayer is already set globally by the ipfs-hls-player module itself
   
   // Bundle loaded successfully
 }

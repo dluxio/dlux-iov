@@ -3786,19 +3786,46 @@ pre {
   flex-direction: column;
 }
 
-/* SPK Drive preview modal video styles */
-.modal .hls-video-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  
-  .ipfs-video-container {
-    width: 100%;
-    max-height: inherit;
+/* SPK Drive Preview Modal - Responsive Constrained Content */
+.spk-drive-preview-modal {
+  .modal-dialog {
+    height: 90vh;
+    display: flex;
+    align-items: center;
   }
   
-  .video-js {
-    max-height: calc(70vh - 2rem); /* Account for padding */
+  .modal-content {
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-header,
+  .modal-footer {
+    flex-shrink: 0;
+  }
+  
+  .modal-body {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+  }
+  
+  /* Content constraints */
+  img, video, .ipfs-video-container {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  
+  .hls-video-wrapper {
     width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }

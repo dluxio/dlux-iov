@@ -1872,7 +1872,9 @@
     };
     document.documentElement.setAttribute('data-vue-app', 'true');
     </script>
-    <!-- TipTap Collaboration Bundle (includes Y.js, HocuspocusProvider, and IPFSHLSPlayer) -->
+    <!-- IPFS HLS Player - loaded separately for TipTap videos -->
+    <script src="/js/ipfs-hls-player.min.js"></script>
+    <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
     <script src="/js/collaboration.bundle.js"></script>
     <script>
         // Verify that the TipTap collaboration bundle is loaded
