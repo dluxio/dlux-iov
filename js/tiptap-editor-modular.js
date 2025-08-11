@@ -24545,7 +24545,7 @@ export default {
           <!-- Test Button: Clear Auth Headers -->
           <button v-if="isAuthenticated && currentFile?.type === 'collaborative'" 
                   @click="clearAuthHeadersForTesting" 
-                  class="btn btn-warning btn-sm me-2"
+                  class="d-none btn btn-warning btn-sm me-2"
                   title="Clear auth headers for testing offline cache">
             <i class="fas fa-user-slash me-1"></i>Clear Auth
           </button>
