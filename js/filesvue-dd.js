@@ -1068,7 +1068,7 @@ export default {
                  tabindex="-1"
                  role="dialog"
                  @keyup.esc="closeFilePreview">
-                <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content bg-dark text-white">
                 
                 <!-- Modal Header -->
@@ -1106,8 +1106,7 @@ export default {
                         <video :src="getFileUrlWithType(previewModal.file)" 
                                :type="getVideoMimeType(previewModal.file)"
                                controls 
-                               class="w-100 rounded"
-                               style="max-height: 70vh;">
+                               class="w-100 rounded">
                             Your browser does not support the video tag.
                         </video>
                     </div>

@@ -3785,3 +3785,20 @@ pre {
   display: flex;
   flex-direction: column;
 }
+
+/* SPK Drive preview modal video styles */
+.modal .hls-video-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  .ipfs-video-container {
+    width: 100%;
+    max-height: inherit;
+  }
+  
+  .video-js {
+    max-height: calc(70vh - 2rem); /* Account for padding */
+    width: 100%;
+  }
+}
