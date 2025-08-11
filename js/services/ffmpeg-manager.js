@@ -12,11 +12,11 @@ class FFmpegManager {
         this.isMultiThreaded = false;
         this.supportsSharedArrayBuffer = this.checkSharedArrayBufferSupport();
     }
-    
+
     // Check SharedArrayBuffer support for multithreading
     checkSharedArrayBufferSupport() {
         try {
-            return typeof SharedArrayBuffer !== 'undefined' && 
+            return typeof SharedArrayBuffer !== 'undefined' &&
                    typeof Atomics !== 'undefined' &&
                    self.crossOriginIsolated !== false;
         } catch (e) {
@@ -31,7 +31,7 @@ class FFmpegManager {
         }
         return FFmpegManager.instance;
     }
-    
+
     // Load FFmpeg (idempotent - safe to call multiple times)
     async load(useMultiThreaded = null) {
         // If already loaded with different threading mode, warn but return existing
@@ -42,19 +42,19 @@ class FFmpegManager {
             }
             return this.ffmpeg;
         }
-        
+
         // If currently loading, return the existing promise
         if (this.loading && this.loadPromise) {
             return this.loadPromise;
         }
-        
+
         // Always use multi-threaded version if supported
         this.isMultiThreaded = this.supportsSharedArrayBuffer;
-        
+
         // Start loading
         this.loading = true;
         this.loadPromise = this._performLoad();
-        
+
         try {
             await this.loadPromise;
             return this.ffmpeg;
@@ -64,7 +64,7 @@ class FFmpegManager {
             throw error;
         }
     }
-    
+
     // Private method to actually load FFmpeg
     async _performLoad() {
         try {
@@ -73,14 +73,14 @@ class FFmpegManager {
                 // Load the required scripts
                 await this._loadScripts();
             }
-            
+
             // Create FFmpeg instance
             const { FFmpeg } = window.FFmpegWASM;
             this.ffmpeg = new FFmpeg();
-            
+
             // Load FFmpeg core with multithreading support
             let coreURL, loadOptions;
-            
+
             if (this.isMultiThreaded) {
                 coreURL = '/packages/core-mt/package/dist/umd';
                 loadOptions = {
@@ -97,28 +97,28 @@ class FFmpegManager {
                 };
                 console.log('FFmpeg Manager: Loading in single-threaded mode');
             }
-            
+
             await this.ffmpeg.load(loadOptions);
-            
+
             // Try to set up event handlers
             this._setupEventHandlers();
-            
+
             this.loaded = true;
             this.loading = false;
-            
+
             console.log('FFmpeg Manager: FFmpeg loaded successfully');
             return this.ffmpeg;
-            
+
         } catch (error) {
             console.error('FFmpeg Manager: Failed to load FFmpeg', error);
             throw error;
         }
     }
-    
+
     // Load required scripts with multithreading support
     async _loadScripts() {
         let scripts;
-        
+
         if (this.supportsSharedArrayBuffer) {
             console.log('FFmpeg Manager: SharedArrayBuffer supported, loading multithreaded core');
             scripts = [
@@ -136,12 +136,12 @@ class FFmpegManager {
             ];
             this.isMultiThreaded = false;
         }
-        
+
         for (const src of scripts) {
             await this._loadScript(src);
         }
     }
-    
+
     // Load a single script
     async _loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -151,7 +151,7 @@ class FFmpegManager {
                 resolve();
                 return;
             }
-            
+
             const script = document.createElement('script');
             script.src = src;
             script.onload = resolve;
@@ -159,7 +159,7 @@ class FFmpegManager {
             document.head.appendChild(script);
         });
     }
-    
+
     // Set up event handlers (with error handling)
     _setupEventHandlers() {
         try {
@@ -173,7 +173,7 @@ class FFmpegManager {
                     }
                 });
             });
-            
+
             // Set up log handler
             this.ffmpeg.on('log', (event) => {
                 this.logCallbacks.forEach(callback => {
@@ -184,39 +184,39 @@ class FFmpegManager {
                     }
                 });
             });
-            
+
             console.log('FFmpeg Manager: Event handlers set up successfully');
         } catch (error) {
             console.warn('FFmpeg Manager: Could not set up event handlers, progress tracking may not work', error);
         }
     }
-    
+
     // Register a progress callback
     onProgress(callback) {
         this.progressCallbacks.add(callback);
-        
+
         // Return unsubscribe function
         return () => {
             this.progressCallbacks.delete(callback);
         };
     }
-    
+
     // Register a log callback
     onLog(callback) {
         this.logCallbacks.add(callback);
-        
+
         // Return unsubscribe function
         return () => {
             this.logCallbacks.delete(callback);
         };
     }
-    
+
     // Execute FFmpeg command
     async exec(args, timeout = -1) {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         try {
             return await this.ffmpeg.exec(args, timeout);
         } catch (error) {
@@ -225,31 +225,31 @@ class FFmpegManager {
             throw error;
         }
     }
-    
+
     // Write file to FFmpeg file system
     async writeFile(path, data) {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         return this.ffmpeg.writeFile(path, data);
     }
-    
+
     // Read file from FFmpeg file system
     async readFile(path) {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         return this.ffmpeg.readFile(path);
     }
-    
+
     // Delete file from FFmpeg file system
     async deleteFile(path) {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         try {
             return await this.ffmpeg.deleteFile(path);
         } catch (error) {
@@ -262,26 +262,26 @@ class FFmpegManager {
             throw error;
         }
     }
-    
+
     // List directory contents
     async listDir(path) {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         return this.ffmpeg.listDir(path);
     }
-    
+
     // Check if FFmpeg is loaded
     isLoaded() {
         return this.loaded;
     }
-    
+
     // Check if multithreading is enabled
     isMultiThreadingEnabled() {
         return this.isMultiThreaded && this.loaded;
     }
-    
+
     // Get performance info
     getPerformanceInfo() {
         return {
@@ -291,29 +291,29 @@ class FFmpegManager {
             estimatedSpeedMultiplier: this.isMultiThreaded ? 2.0 : 1.0
         };
     }
-    
+
     // Get FFmpeg instance (for advanced use)
     getInstance() {
         if (!this.loaded) {
             throw new Error('FFmpeg not loaded. Call load() first.');
         }
-        
+
         return this.ffmpeg;
     }
-    
+
     // Terminate FFmpeg (use with caution - affects all users of the singleton)
     terminate() {
         if (this.ffmpeg) {
             this.ffmpeg.terminate();
         }
-        
+
         this.ffmpeg = null;
         this.loaded = false;
         this.loading = false;
         this.loadPromise = null;
         this.progressCallbacks.clear();
         this.logCallbacks.clear();
-        
+
         // Clear the singleton instance
         FFmpegManager.instance = null;
     }

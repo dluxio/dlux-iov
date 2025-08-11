@@ -24,12 +24,12 @@ const DappManager = {
                 assets: [], // Static assets (images, fonts, etc.)
                 remixer: null // Base HTML file to remix from existing dApp
             },
-            
+
             // dApp metadata
             selectedDAppType: 'APP', // Default to APP type
             dappCID: '', // Entry point CID
             attribution: [], // Attribution array for referenced works
-            
+
             // PWA Configuration
             pwaConfig: {
                 enabled: true, // Enable PWA features
@@ -40,26 +40,26 @@ const DappManager = {
                 backgroundColor: '#111222', // Background color
                 displayMode: 'standalone', // Display mode: standalone, fullscreen, minimal-ui, browser
                 appIcons: [
-                    { "src": "https://dlux.io/img/dlux-hive-logo-alpha.svg", "sizes": "192x192", "type": "image/svg+xml" },
-                    { "src": "https://dlux.io/img/dlux-logo-icon.png", "sizes": "695x695", "type": "image/png", "purpose": "any" },
-                    { "src": "https://dlux.io/img/dlux-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+                    { 'src': 'https://dlux.io/img/dlux-hive-logo-alpha.svg', 'sizes': '192x192', 'type': 'image/svg+xml' },
+                    { 'src': 'https://dlux.io/img/dlux-logo-icon.png', 'sizes': '695x695', 'type': 'image/png', 'purpose': 'any' },
+                    { 'src': 'https://dlux.io/img/dlux-icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable' }
                 ],
                 morePrecacheUrls: [], // Additional URLs to precache in service worker
                 customServiceWorker: '', // Optional: CID of custom service worker file
                 enableServiceWorker: true // Enable automatic service worker generation
             },
-            
+
             // Custom JSON editor
             customJsonString: '',
             customJsonError: '',
             isJsonEditorLocked: true,
-            
+
             // Licensing
             selectedLicense: '1', // Default to CC BY
-            
+
             // Upload progress
             uploadProgress: {},
-            
+
             // File type mappings
             fileTypeMapping: {
                 'html': 'entry', // HTML files for entry point
@@ -90,7 +90,7 @@ const DappManager = {
                 'yaml': 'assets',
                 'yml': 'assets'
             },
-            
+
             // Available dApp types (from hub postSelect.types)
             dappTypes: {
                 'VR': { name: 'VR Experience', icon: 'fa-solid fa-vr-cardboard' },
@@ -102,83 +102,83 @@ const DappManager = {
                 'Audio': { name: 'Audio Experience', icon: 'fa-solid fa-music' },
                 'Video': { name: 'Video Experience', icon: 'fa-solid fa-film' }
             },
-            
+
             // Available licenses (from existing codebase)
             licenses: {
-                "1": {
+                '1': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' }
                     ],
-                    name: "CC BY",
+                    name: 'CC BY',
                     allowsDerivatives: true,
                     commercial: true
                 },
-                "2": {
+                '2': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-sa", l: "Share Alike" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-sa', l: 'Share Alike' }
                     ],
-                    name: "CC BY-SA",
+                    name: 'CC BY-SA',
                     allowsDerivatives: true,
                     commercial: true,
                     requiresSameShare: true
                 },
-                "3": {
+                '3': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nd", l: "No Derivatives" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nd', l: 'No Derivatives' }
                     ],
-                    name: "CC BY-ND",
+                    name: 'CC BY-ND',
                     allowsDerivatives: false,
                     commercial: true
                 },
-                "4": {
+                '4': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nc", l: "Non-Commercial" },
-                        { fa: "fa-brands fa-creative-commons-nd", l: "No Derivatives" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nc', l: 'Non-Commercial' },
+                        { fa: 'fa-brands fa-creative-commons-nd', l: 'No Derivatives' }
                     ],
-                    name: "CC BY-NC-ND",
+                    name: 'CC BY-NC-ND',
                     allowsDerivatives: false,
                     commercial: false
                 },
-                "5": {
+                '5': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nc", l: "Non-Commercial" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nc', l: 'Non-Commercial' }
                     ],
-                    name: "CC BY-NC",
+                    name: 'CC BY-NC',
                     allowsDerivatives: true,
                     commercial: false
                 },
-                "6": {
+                '6': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nc", l: "Non-Commercial" },
-                        { fa: "fa-brands fa-creative-commons-sa", l: "Share Alike" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nc', l: 'Non-Commercial' },
+                        { fa: 'fa-brands fa-creative-commons-sa', l: 'Share Alike' }
                     ],
-                    name: "CC BY-NC-SA",
+                    name: 'CC BY-NC-SA',
                     allowsDerivatives: true,
                     commercial: false,
                     requiresSameShare: true
                 },
-                "7": {
+                '7': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons-zero", l: "CC0: Public Domain" }
+                        { fa: 'fa-brands fa-creative-commons-zero', l: 'CC0: Public Domain' }
                     ],
-                    name: "CC0",
+                    name: 'CC0',
                     allowsDerivatives: true,
                     commercial: true,
                     public: true
                 }
             }
-        }
+        };
     },
     computed: {
         totalFiles() {
@@ -188,15 +188,15 @@ const DappManager = {
             count += this.dappStructure.assets.length;
             return count;
         },
-        
+
         hasEntryFile() {
             return this.dappStructure.entry !== null;
         },
-        
+
         hasRemixerFile() {
             return this.dappStructure.remixer !== null;
         },
-        
+
         customJsonData() {
             try {
                 return this.customJsonString ? JSON.parse(this.customJsonString) : {};
@@ -204,7 +204,7 @@ const DappManager = {
                 return {};
             }
         },
-        
+
         isValidJson() {
             try {
                 if (!this.customJsonString.trim()) return true;
@@ -214,16 +214,16 @@ const DappManager = {
                 return false;
             }
         },
-        
+
         // Generate contracts array from file structure
         contractsArray() {
             const contracts = [];
-            
+
             // Add entry point contract
             if (this.dappStructure.entry && this.dappStructure.entry.contractId) {
                 contracts.push(this.dappStructure.entry.contractId);
             }
-            
+
             // Add all asset contracts
             Object.values(this.dappStructure).forEach(category => {
                 if (Array.isArray(category)) {
@@ -234,10 +234,10 @@ const DappManager = {
                     });
                 }
             });
-            
+
             return contracts;
         },
-        
+
         // Generate assets array for compatibility
         assetsArray() {
             const assets = [];
@@ -248,21 +248,21 @@ const DappManager = {
             });
             return assets;
         },
-        
+
         combinedDappData() {
             // Build the complete JSON structure as requested
             const customJsonStructure = {
-                app: "dlux/1.0.0b",
+                app: 'dlux/1.0.0b',
                 dAppType: this.selectedDAppType,
-                format: "markdown",
+                format: 'markdown',
                 assets: this.assetsArray,
                 contracts: this.contractsArray,
-                tags: ["dlux"],
-                dappCID: this.dappCID || (this.dappStructure.entry ? this.dappStructure.entry.cid : ""),
-                license: this.licenses[this.selectedLicense]?.name || "CC BY",
+                tags: ['dlux'],
+                dappCID: this.dappCID || (this.dappStructure.entry ? this.dappStructure.entry.cid : ''),
+                license: this.licenses[this.selectedLicense]?.name || 'CC BY',
                 attribution: this.attribution
             };
-            
+
             // Add PWA configuration if enabled
             if (this.pwaConfig.enabled) {
                 if (this.pwaConfig.appIcons.length > 0) {
@@ -286,7 +286,7 @@ const DappManager = {
                 customJsonStructure.displayMode = this.pwaConfig.displayMode;
                 customJsonStructure.enableServiceWorker = this.pwaConfig.enableServiceWorker;
             }
-            
+
             // Merge with any additional custom JSON data, but prioritize our structure
             return { ...this.customJsonData, ...customJsonStructure };
         }
@@ -301,7 +301,7 @@ const DappManager = {
             },
             immediate: false
         },
-        
+
         dappStructure: {
             handler() {
                 this.updateDappCID();
@@ -309,29 +309,29 @@ const DappManager = {
             },
             deep: true
         },
-        
+
         selectedLicense() {
             this.emitDataUpdate();
         },
-        
+
         selectedDAppType() {
             this.emitDataUpdate();
         },
-        
+
         attribution: {
             handler() {
                 this.emitDataUpdate();
             },
             deep: true
         },
-        
+
         pwaConfig: {
             handler() {
                 this.emitDataUpdate();
             },
             deep: true
         },
-        
+
         customJsonString() {
             if (this.isValidJson) {
                 this.customJsonError = '';
@@ -349,24 +349,24 @@ const DappManager = {
         initializeFromProps() {
             if (Object.keys(this.initialCustomJson).length > 0) {
                 this.customJsonString = JSON.stringify(this.initialCustomJson, null, 2);
-                
+
                 // Load existing dApp structure if present
                 if (this.initialCustomJson.dappStructure) {
                     this.dappStructure = { ...this.dappStructure, ...this.initialCustomJson.dappStructure };
                 }
-                
+
                 if (this.initialCustomJson.dAppType) {
                     this.selectedDAppType = this.initialCustomJson.dAppType;
                 }
-                
+
                 if (this.initialCustomJson.dappCID) {
                     this.dappCID = this.initialCustomJson.dappCID;
                 }
-                
+
                 if (this.initialCustomJson.attribution) {
                     this.attribution = this.initialCustomJson.attribution;
                 }
-                
+
                 // Load PWA configuration
                 if (this.initialCustomJson.appIcons) {
                     this.pwaConfig.appIcons = this.initialCustomJson.appIcons;
@@ -398,10 +398,10 @@ const DappManager = {
                 if (this.initialCustomJson.enableServiceWorker !== undefined) {
                     this.pwaConfig.enableServiceWorker = this.initialCustomJson.enableServiceWorker;
                 }
-                
+
                 // Convert license from name back to ID for internal use
                 if (this.initialCustomJson.license) {
-                    const licenseEntry = Object.entries(this.licenses).find(([id, license]) => 
+                    const licenseEntry = Object.entries(this.licenses).find(([id, license]) =>
                         license.name === this.initialCustomJson.license
                     );
                     if (licenseEntry) {
@@ -410,13 +410,13 @@ const DappManager = {
                 }
             }
         },
-        
+
         // File management
         addFileToStructure(fileData) {
             const fileName = fileData.fileName || fileData.name || fileData.filename || 'unknown';
             const fileType = this.getFileType(fileName);
             const category = this.getCategoryForFile(fileName, fileType);
-            
+
             const fileObject = {
                 cid: fileData.cid || fileData.hash || fileData.url,
                 name: fileName,
@@ -425,9 +425,9 @@ const DappManager = {
                 size: fileData.size || 0,
                 description: fileData.description || ''
             };
-            
+
             console.log(`📎 Adding file to category "${category}":`, fileObject);
-            
+
             if (category === 'entry') {
                 this.dappStructure.entry = fileObject;
                 this.dappCID = fileObject.cid; // Set dappCID when entry is added
@@ -439,35 +439,35 @@ const DappManager = {
                 }
                 this.dappStructure[category].push(fileObject);
             }
-            
+
             this.emitDataUpdate();
         },
-        
+
         updateDappCID() {
             if (this.dappStructure.entry && this.dappStructure.entry.cid) {
                 this.dappCID = this.dappStructure.entry.cid;
             }
         },
-        
+
         getFileType(fileName) {
             const extension = fileName.split('.').pop()?.toLowerCase();
             return extension || 'unknown';
         },
-        
+
         getCategoryForFile(fileName, fileType) {
             const mapping = this.fileTypeMapping[fileType];
             if (mapping) return mapping;
-            
+
             // Special logic for entry files - only HTML allowed
             if (fileName.toLowerCase().includes('index') || fileName.toLowerCase().includes('main')) {
                 if (['html', 'htm'].includes(fileType)) {
                     return 'entry';
                 }
             }
-            
+
             return 'assets';
         },
-        
+
         removeFile(category, index = null) {
             if (category === 'entry') {
                 this.dappStructure.entry = null;
@@ -479,10 +479,10 @@ const DappManager = {
             }
             this.emitDataUpdate();
         },
-        
+
         moveFile(fromCategory, toCategory, fileIndex = null) {
             let file;
-            
+
             if (fromCategory === 'entry') {
                 file = this.dappStructure.entry;
                 this.dappStructure.entry = null;
@@ -494,7 +494,7 @@ const DappManager = {
                 file = this.dappStructure[fromCategory][fileIndex];
                 this.dappStructure[fromCategory].splice(fileIndex, 1);
             }
-            
+
             if (toCategory === 'entry') {
                 this.dappStructure.entry = file;
                 this.dappCID = file.cid;
@@ -506,19 +506,19 @@ const DappManager = {
                 }
                 this.dappStructure[toCategory].push(file);
             }
-            
+
             this.emitDataUpdate();
         },
-        
+
         // Attribution management
         addAttribution() {
             this.attribution.push('');
         },
-        
+
         removeAttribution(index) {
             this.attribution.splice(index, 1);
         },
-        
+
         // PWA Configuration Management
         addAppIcon() {
             this.pwaConfig.appIcons.push({
@@ -528,60 +528,60 @@ const DappManager = {
                 purpose: 'any'
             });
         },
-        
+
         removeAppIcon(index) {
             this.pwaConfig.appIcons.splice(index, 1);
         },
-        
+
         addPrecacheUrl() {
             this.pwaConfig.morePrecacheUrls.push('');
         },
-        
+
         removePrecacheUrl(index) {
             this.pwaConfig.morePrecacheUrls.splice(index, 1);
         },
-        
+
         resetToDefaultIcons() {
             this.pwaConfig.appIcons = [
-                { "src": "https://dlux.io/img/dlux-hive-logo-alpha.svg", "sizes": "192x192", "type": "image/svg+xml" },
-                { "src": "https://dlux.io/img/dlux-logo-icon.png", "sizes": "695x695", "type": "image/png", "purpose": "any" },
-                { "src": "https://dlux.io/img/dlux-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+                { 'src': 'https://dlux.io/img/dlux-hive-logo-alpha.svg', 'sizes': '192x192', 'type': 'image/svg+xml' },
+                { 'src': 'https://dlux.io/img/dlux-logo-icon.png', 'sizes': '695x695', 'type': 'image/png', 'purpose': 'any' },
+                { 'src': 'https://dlux.io/img/dlux-icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable' }
             ];
         },
-        
+
         // Drag and drop
         setupDragAndDrop() {
             const dropZones = this.$el.querySelectorAll('[data-drop-category]');
-            
+
             dropZones.forEach(zone => {
                 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                     zone.addEventListener(eventName, this.preventDefaults, false);
                 });
-                
+
                 ['dragenter', 'dragover'].forEach(eventName => {
                     zone.addEventListener(eventName, () => zone.classList.add('dragover'), false);
                 });
-                
+
                 ['dragleave', 'drop'].forEach(eventName => {
                     zone.addEventListener(eventName, () => zone.classList.remove('dragover'), false);
                 });
-                
+
                 zone.addEventListener('drop', (e) => this.handleDrop(e, zone.dataset.dropCategory), false);
             });
         },
-        
+
         preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         },
-        
+
         handleDrop(e, category) {
             this.preventDefaults(e);
-            
+
             // Check if this is a drag from SPK Drive
-            const itemIds = e.dataTransfer.getData("itemids");
-            const contractId = e.dataTransfer.getData("contractid");
-            
+            const itemIds = e.dataTransfer.getData('itemids');
+            const contractId = e.dataTransfer.getData('contractid');
+
             if (itemIds && contractId) {
                 try {
                     const parsedIds = JSON.parse(itemIds);
@@ -597,7 +597,7 @@ const DappManager = {
                                 fromDragDrop: true,
                                 targetCategory: category
                             };
-                            
+
                             // For entry and remixer, only allow HTML files
                             if ((category === 'entry' || category === 'remixer')) {
                                 const fileType = this.getFileType(fileId);
@@ -606,7 +606,7 @@ const DappManager = {
                                     return;
                                 }
                             }
-                            
+
                             console.log('🎯 Processing dropped SPK file for category:', category, spkFileData);
                             this.addFileToStructure(spkFileData);
                         }
@@ -616,45 +616,45 @@ const DappManager = {
                 }
                 return;
             }
-            
+
             // Handle regular file drops
             const files = Array.from(e.dataTransfer.files);
             // TODO: Implement file upload to SPK
             console.log('Regular files dropped:', files);
         },
-        
+
         // Custom JSON management
         toggleJsonEditor() {
             this.isJsonEditorLocked = !this.isJsonEditorLocked;
         },
-        
+
         formatJson() {
             if (this.isValidJson && this.customJsonString.trim()) {
                 const parsed = JSON.parse(this.customJsonString);
                 this.customJsonString = JSON.stringify(parsed, null, 2);
             }
         },
-        
+
         minifyJson() {
             if (this.isValidJson && this.customJsonString.trim()) {
                 const parsed = JSON.parse(this.customJsonString);
                 this.customJsonString = JSON.stringify(parsed);
             }
         },
-        
+
         // Licensing management
         isLicenseCompatible(licenseId) {
             const license = this.licenses[licenseId];
             return license && license.allowsDerivatives;
         },
-        
+
         // Data emission
         emitDataUpdate() {
             // Update the custom JSON string to reflect current structure
             this.customJsonString = JSON.stringify(this.combinedDappData, null, 2);
             this.$emit('dapp-updated', this.combinedDappData);
         },
-        
+
         // Utility methods
         getFileIcon(fileType) {
             const iconMap = {
@@ -672,31 +672,31 @@ const DappManager = {
                 'pdf': 'fa-solid fa-file-pdf',
                 'zip': 'fa-solid fa-file-archive'
             };
-            
+
             return iconMap[fileType] || 'fa-solid fa-file';
         },
-        
+
         getCategoryIcon(category) {
             const iconMap = {
                 'entry': 'fa-solid fa-home',
                 'assets': 'fa-solid fa-images',
                 'remixer': 'fa-solid fa-shuffle'
             };
-            
+
             return iconMap[category] || 'fa-solid fa-folder';
         },
-        
+
         getCategoryDescription(category) {
             const descriptions = {
                 'entry': 'Main application entry point (must be HTML file)',
                 'assets': 'Static assets like images, fonts, media files, CSS, JS, and other resources',
                 'remixer': 'Base HTML file from existing dApp to remix from (must be HTML file)'
             };
-            
+
             return descriptions[category] || 'Files';
         }
     },
-    
+
     template: `
         <div class="dapp-manager">
             <!-- Header -->
@@ -1172,4 +1172,4 @@ if (typeof window !== 'undefined') {
     window.DappManager = DappManager;
 }
 
-export default DappManager; 
+export default DappManager;

@@ -14,7 +14,7 @@ class DebugLogger {
         if (typeof localStorage !== 'undefined' && localStorage.getItem('dlux_debug') === 'true') {
             return true;
         }
-        
+
         // Check URL parameter
         if (typeof window !== 'undefined' && window.location) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -22,7 +22,7 @@ class DebugLogger {
                 return true;
             }
         }
-        
+
         return false;
     }
 

@@ -7,7 +7,7 @@ export class ProcessedFile {
         if (!file || !(file instanceof File)) {
             throw new Error('ProcessedFile requires a valid File object');
         }
-        
+
         this.file = file;
         this.isAuxiliary = metadata.isAuxiliary || false;
         this.role = metadata.role || 'file';
@@ -15,21 +15,21 @@ export class ProcessedFile {
         this.processorId = metadata.processorId || null;
         this.metadata = metadata; // Store any additional metadata
     }
-    
+
     /**
      * Get the wrapped File object
      */
     getFile() {
         return this.file;
     }
-    
+
     /**
      * Check if this is a main file (shown to users)
      */
     isMainFile() {
         return !this.isAuxiliary;
     }
-    
+
     /**
      * Get all metadata
      */
@@ -42,21 +42,21 @@ export class ProcessedFile {
             ...this.metadata
         };
     }
-    
+
     /**
      * Get file name
      */
     get name() {
         return this.file.name;
     }
-    
+
     /**
      * Get file size
      */
     get size() {
         return this.file.size;
     }
-    
+
     /**
      * Get file type
      */
@@ -72,7 +72,7 @@ export const FileRoles = {
     VIDEO: 'video',
     IMAGE: 'image',
     DOCUMENT: 'document',
-    
+
     // Auxiliary files
     SEGMENT: 'segment',
     POSTER: 'poster',

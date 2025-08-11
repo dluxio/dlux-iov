@@ -911,9 +911,9 @@ export default {
    `,
     props: {
         account: {
-            type: String,
-            default: '',
-            required: true
+            type: [String, null],
+            default: null,
+            required: false
         },
         me: {
             type: Boolean,

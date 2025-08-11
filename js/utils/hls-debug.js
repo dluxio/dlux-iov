@@ -11,7 +11,7 @@ class HLSDebugger {
     }
 
     checkEnabled() {
-        return localStorage.getItem('dlux_hls_debug') === 'true' || 
+        return localStorage.getItem('dlux_hls_debug') === 'true' ||
                new URLSearchParams(window.location.search).get('hls_debug') === 'true';
     }
 
@@ -30,10 +30,10 @@ class HLSDebugger {
     // Log only unique messages to reduce noise
     log(category, message, data = null) {
         if (!this.enabled) return;
-        
+
         // Maintain cache size
         this.maintainCache();
-        
+
         // Skip most LOADER messages - only show failures and important resolutions
         if (category === 'LOADER') {
             // Only log URL resolution failures or when fixing malformed URLs
@@ -41,7 +41,7 @@ class HLSDebugger {
                 return;
             }
         }
-        
+
         // Skip repetitive PLAYER messages
         if (category === 'PLAYER' && message.includes('Playback ready')) {
             // Only log once per session to reduce noise
@@ -49,26 +49,26 @@ class HLSDebugger {
             if (this.seenMessages.has(key)) return;
             this.seenMessages.add(key);
         }
-        
+
         // Rate limit ERROR messages
         if (category === 'ERROR') {
             const now = Date.now();
             const key = `${category}:${message}`;
             const lastLogged = this.rateLimitMap.get(key);
-            
+
             if (lastLogged && (now - lastLogged) < this.RATE_LIMIT_MS) {
                 return; // Skip - too soon
             }
-            
+
             this.rateLimitMap.set(key, now);
         }
-        
+
         // Log only once for non-error messages (except already handled above)
         const key = `${category}:${message}`;
         if (category !== 'ERROR' && category !== 'PLAYER' && this.seenMessages.has(key)) return;
-        
+
         this.seenMessages.add(key);
-        
+
         if (data) {
             console.log(`${this.prefix} [${category}]`, message, data);
         } else {
@@ -79,7 +79,7 @@ class HLSDebugger {
     // Log file detection attempts (simplified)
     fileDetection(file) {
         if (!this.enabled) return;
-        
+
         // Only log if it's actually an HLS file
         if (file.meta?.type === 'm3u8' || file.type === 'm3u8') {
             console.log(this.prefix, `HLS file detected: ${file.name}.m3u8`);
@@ -89,7 +89,7 @@ class HLSDebugger {
     // Log video element setup (simplified)
     videoSetup(videoElement, src, type) {
         if (!this.enabled) return;
-        
+
         // Only log if it's HLS content
         if (type === 'application/x-mpegURL' || src.includes('.m3u8')) {
             console.log(this.prefix, `Setting up HLS: ${src.split('/').pop()}`);
@@ -99,7 +99,7 @@ class HLSDebugger {
     // Log HLS.js initialization
     hlsInit(src, success, error = null) {
         if (!this.enabled) return;
-        
+
         if (success) {
             console.log(this.prefix, 'HLS.js initialized successfully for:', src);
         } else {

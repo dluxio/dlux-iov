@@ -1,24 +1,42 @@
-// DLUX Video Player Bundle - Site-wide video player solution
-// Provides Video.js with HLS quality selector for use across entire DLUX platform
+/**
+ * IPFS HLS Player
+ * A Video.js-based HLS player optimized for IPFS content-addressed storage
+ * 
+ * @author Mark Giles
+ * @license MIT
+ * @version 1.0.0
+ * 
+ * This player solves the fundamental incompatibility between standard HLS 
+ * (which uses relative paths) and IPFS (which requires absolute CID-based URLs).
+ * It provides pre-configured Video.js settings optimized for IPFS-hosted HLS streams.
+ */
 
 // Video.js core
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 
-// Note: qualityLevels plugin is built into video.js core (no import needed)
-// Only import the external hlsQualitySelector plugin
+// HLS Quality Selector plugin for Video.js
 import 'videojs-hls-quality-selector';
 
-// DLUX Video Player Service
-class DluxVideoPlayer {
+/**
+ * IPFS HLS Player Service
+ * Provides automatic video enhancement with IPFS-optimized settings
+ */
+class IPFSHLSPlayer {
+  /**
+   * Initialize a Video.js player with IPFS-optimized settings
+   * @param {HTMLVideoElement} element - Video element to enhance
+   * @param {Object} options - Player configuration options
+   * @returns {Promise<Player>} Video.js player instance
+   */
   static async initializePlayer(element, options = {}) {
     // Prevent double initialization
-    if (element._dluxVideoPlayer || element.dataset.dluxEnhanced === 'true') {
-      const config = window.dluxVideoPlayerConfig || {};
+    if (element._ipfsHLSPlayer || element.dataset.ipfsEnhanced === 'true') {
+      const config = window.ipfsHLSPlayerConfig || {};
       if (config.debug) {
-        console.log('DluxVideoPlayer: Video already enhanced, skipping duplicate initialization for:', element.id || 'no-id');
+        console.log('IPFSHLSPlayer: Video already enhanced, skipping duplicate initialization for:', element.id || 'no-id');
       }
-      return element._dluxVideoPlayer;
+      return element._ipfsHLSPlayer;
     }
     
     // Ensure Video.js CSS is loaded before creating player
@@ -26,7 +44,7 @@ class DluxVideoPlayer {
     
     // Ensure element has an ID for Video.js
     if (!element.id) {
-      element.id = `dlux-video-${Math.random().toString(36).substr(2, 9)}`;
+      element.id = `ipfs-video-${Math.random().toString(36).substr(2, 9)}`;
     }
     
     // Apply Video.js classes for consistent styling
@@ -35,7 +53,7 @@ class DluxVideoPlayer {
     // Ensure video has proper wrapper structure
     this.ensureVideoWrapper(element);
     
-    // Default options with DLUX preferences
+    // Default options optimized for IPFS HLS content
     const defaultOptions = {
       controls: true,
       fluid: true,
@@ -44,6 +62,8 @@ class DluxVideoPlayer {
       playbackRates: [0.5, 1, 1.5, 2],
       html5: {
         vhs: {
+          // Critical for IPFS: Force Video.js's JavaScript HLS implementation
+          // instead of native browser HLS to handle CID-based URLs properly
           overrideNative: true,
           smoothQualityChange: true,
           fastQualityChange: true
@@ -82,23 +102,37 @@ class DluxVideoPlayer {
     
     // Add error handling
     player.on('error', (error) => {
-      console.error('DluxVideoPlayer error:', error);
+      console.error('IPFSHLSPlayer error:', error);
     });
     
     // Store player reference on element for later access
-    element._dluxVideoPlayer = player;
+    element._ipfsHLSPlayer = player;
+    
+    // Mark as enhanced to prevent double initialization
+    element.dataset.ipfsEnhanced = 'true';
     
     return player;
   }
   
+  /**
+   * Destroy a player instance and clean up
+   * @param {HTMLVideoElement} element - Video element with player
+   */
   static destroyPlayer(element) {
-    const player = element._dluxVideoPlayer || (element.id && videojs.getPlayer(element.id));
+    const player = element._ipfsHLSPlayer || (element.id && videojs.getPlayer(element.id));
     if (player && typeof player.dispose === 'function') {
       player.dispose();
-      delete element._dluxVideoPlayer;
+      delete element._ipfsHLSPlayer;
+      // Clear the enhanced flag when destroying
+      delete element.dataset.ipfsEnhanced;
     }
   }
   
+  /**
+   * Detect video source type from URL
+   * @param {string} src - Video source URL
+   * @returns {string} MIME type
+   */
   static detectSourceType(src) {
     if (!src) return 'video/mp4';
     
@@ -111,6 +145,12 @@ class DluxVideoPlayer {
     return 'video/mp4'; // Default
   }
   
+  /**
+   * Enhance an existing video element with IPFS HLS Player
+   * @param {HTMLVideoElement} video - Video element to enhance
+   * @param {Object} options - Enhancement options
+   * @returns {Promise<Player>} Video.js player instance
+   */
   static async enhanceVideoElement(video, options = {}) {
     // Comprehensive DOM validation
     if (!this.isVideoReady(video)) {
@@ -119,21 +159,12 @@ class DluxVideoPlayer {
     }
     
     // Check if already enhanced
-    if (video.dataset.dluxEnhanced === 'true') {
-      const config = window.dluxVideoPlayerConfig || {};
+    if (video.dataset.ipfsEnhanced === 'true') {
+      const config = window.ipfsHLSPlayerConfig || {};
       if (config.debug) {
-        console.log('DluxVideoPlayer: Video already enhanced, returning existing player:', video.id || 'no-id');
+        console.log('IPFSHLSPlayer: Video already enhanced, returning existing player:', video.id || 'no-id');
       }
-      return video._dluxVideoPlayer;
-    }
-    
-    // Context validation - TipTap videos should not be externally enhanced
-    if (video.hasAttribute('data-tiptap-video')) {
-      const config = window.dluxVideoPlayerConfig || {};
-      if (config.debug) {
-        console.log('DluxVideoPlayer: Skipping TipTap video enhancement (handled by editor):', video.id || 'no-id');
-      }
-      return null; // TipTap handles its own videos
+      return video._ipfsHLSPlayer;
     }
     
     try {
@@ -144,7 +175,7 @@ class DluxVideoPlayer {
       // Extract options from video element
       const elementOptions = {
         src: video.src || video.currentSrc,
-        type: video.type || video.getAttribute('type'),
+        type: video.getAttribute('type') || null,
         poster: video.poster,
         autoplay: video.autoplay,
         loop: video.loop,
@@ -156,25 +187,35 @@ class DluxVideoPlayer {
       const player = await this.initializePlayer(video, elementOptions);
       
       // Mark as enhanced
-      video.dataset.dluxEnhanced = 'true';
+      video.dataset.ipfsEnhanced = 'true';
       
       return player;
       
     } catch (error) {
-      console.error('DluxVideoPlayer: Enhancement failed for video:', video.id || 'no-id', error);
+      console.error('IPFSHLSPlayer: Enhancement failed for video:', video.id || 'no-id', error);
       throw error;
     }
   }
 
+  /**
+   * Check if video element is ready for enhancement
+   * @param {HTMLVideoElement} video - Video element to check
+   * @returns {boolean} True if ready
+   */
   static isVideoReady(video) {
     return video && 
            video.nodeType === Node.ELEMENT_NODE &&
            video.tagName === 'VIDEO' &&
            document.contains(video) && 
            video.parentNode && 
-           !video.hasAttribute('data-dlux-enhanced');
+           !video.hasAttribute('data-ipfs-enhanced');
   }
   
+  /**
+   * Get diagnostic state of video element
+   * @param {HTMLVideoElement} video - Video element to analyze
+   * @returns {Object} State information
+   */
   static getVideoState(video) {
     return {
       exists: !!video,
@@ -182,12 +223,15 @@ class DluxVideoPlayer {
       isVideo: video && video.tagName === 'VIDEO',
       inDocument: video && document.contains(video),
       hasParent: video && !!video.parentNode,
-      isEnhanced: video && video.hasAttribute('data-dlux-enhanced'),
-      isTipTap: video && video.hasAttribute('data-tiptap-video'),
+      isEnhanced: video && video.hasAttribute('data-ipfs-enhanced'),
       id: video && (video.id || 'no-id')
     };
   }
 
+  /**
+   * Apply required Video.js CSS classes to video element
+   * @param {HTMLVideoElement} video - Video element
+   */
   static applyVideoJSClasses(video) {
     // Ensure video element has the essential Video.js classes
     const requiredClasses = ['video-js', 'vjs-default-skin'];
@@ -217,6 +261,11 @@ class DluxVideoPlayer {
     }
   }
 
+  /**
+   * Ensure video has proper wrapper structure for Video.js
+   * @param {HTMLVideoElement} video - Video element
+   * @returns {HTMLElement} Wrapper element
+   */
   static ensureVideoWrapper(video) {
     // Validate video has parent node before attempting wrapper creation
     if (!video.parentNode) {
@@ -224,30 +273,19 @@ class DluxVideoPlayer {
     }
     
     // Check if video already has a proper wrapper
-    const existingWrapper = video.closest('.dlux-video-container');
+    const existingWrapper = video.closest('.ipfs-video-container');
     
     if (existingWrapper) {
       // Existing wrapper found, just add player class
-      existingWrapper.classList.add('dlux-video-player');
+      existingWrapper.classList.add('ipfs-hls-player');
       return existingWrapper;
-    }
-    
-    // Check if video is already inside a TipTap-managed container
-    if (video.hasAttribute('data-tiptap-video') || video.closest('[data-tiptap-video]')) {
-      // TipTap handles its own wrappers, just add player class to parent
-      const parent = video.parentElement;
-      if (parent) {
-        parent.classList.add('dlux-video-player');
-      }
-      return parent;
     }
     
     try {
       // Create universal wrapper for standalone videos
       const wrapper = document.createElement('div');
-      wrapper.className = 'dlux-video-container dlux-video-player';
+      wrapper.className = 'ipfs-video-container ipfs-hls-player';
       wrapper.style.position = 'relative';
-      wrapper.style.marginBottom = '1rem';
       wrapper.style.width = '100%';
       
       // Safely insert wrapper before video and move video inside
@@ -255,26 +293,31 @@ class DluxVideoPlayer {
       parent.insertBefore(wrapper, video);
       wrapper.appendChild(video);
       
-      const config = window.dluxVideoPlayerConfig || {};
+      const config = window.ipfsHLSPlayerConfig || {};
       if (config.debug) {
-        console.log('DluxVideoPlayer: Created universal wrapper for standalone video:', video.id || 'no-id');
+        console.log('IPFSHLSPlayer: Created universal wrapper for standalone video:', video.id || 'no-id');
       }
       
       return wrapper;
       
     } catch (error) {
-      console.error('DluxVideoPlayer: Failed to create wrapper for video:', video.id || 'no-id', error);
+      console.error('IPFSHLSPlayer: Failed to create wrapper for video:', video.id || 'no-id', error);
       throw error;
     }
   }
   
+  /**
+   * Enhance all unenhanced videos in a container
+   * @param {HTMLElement} container - Container to search within
+   * @returns {Promise<Array>} Array of player instances
+   */
   static async enhanceStaticVideos(container = document) {
-    const config = window.dluxVideoPlayerConfig || {};
-    const videos = container.querySelectorAll('video:not([data-dlux-enhanced]):not([data-tiptap-video])');
+    const config = window.ipfsHLSPlayerConfig || {};
+    const videos = container.querySelectorAll('video:not([data-ipfs-enhanced])');
     const players = [];
     
     if (config.debug) {
-      console.log(`DluxVideoPlayer: Found ${videos.length} static videos to enhance`);
+      console.log(`IPFSHLSPlayer: Found ${videos.length} static videos to enhance`);
     }
     
     for (const video of videos) {
@@ -283,7 +326,7 @@ class DluxVideoPlayer {
         players.push(player);
         
         if (config.debug) {
-          console.log('DluxVideoPlayer: Successfully enhanced static video:', video.id || 'no-id');
+          console.log('IPFSHLSPlayer: Successfully enhanced static video:', video.id || 'no-id');
         }
       } catch (error) {
         console.error('Failed to enhance static video:', error);
@@ -293,15 +336,22 @@ class DluxVideoPlayer {
     return players;
   }
 
+  /**
+   * Ensure Video.js styles are loaded
+   * @returns {Promise} Resolves when styles are ready
+   */
   static async ensureVideoJSStyles() {
     return ensureVideoJSStyles();
   }
 
 }
 
-// Ensure Video.js CSS is loaded - enhanced fallback system for universal support
+/**
+ * Ensure Video.js CSS is loaded - enhanced fallback system for universal support
+ * @returns {Promise} Resolves when CSS is ready
+ */
 function ensureVideoJSStyles() {
-  const config = window.dluxVideoPlayerConfig || {};
+  const config = window.ipfsHLSPlayerConfig || {};
   
   return new Promise((resolve) => {
     // Check if Video.js styles are already loaded by URL or inline
@@ -310,7 +360,7 @@ function ensureVideoJSStyles() {
     
     if (existingStyleLink || existingVjsFallback) {
       if (config.debug) {
-        console.log('DluxVideoPlayer: Video.js CSS already loaded via link tag');
+        console.log('IPFSHLSPlayer: Video.js CSS already loaded via link tag');
       }
       return resolve();
     }
@@ -339,13 +389,13 @@ function ensureVideoJSStyles() {
     
     if (hasVideoJSStyles) {
       if (config.debug) {
-        console.log('DluxVideoPlayer: Video.js CSS detected via computed styles');
+        console.log('IPFSHLSPlayer: Video.js CSS detected via computed styles');
       }
       return resolve();
     }
     
     // CSS not detected - load fallback
-    console.warn('DluxVideoPlayer: Video.js CSS not detected, loading fallback');
+    console.warn('IPFSHLSPlayer: Video.js CSS not detected, loading fallback');
     
     // Try multiple fallback sources
     const fallbackSources = [
@@ -357,7 +407,7 @@ function ensureVideoJSStyles() {
     
     function tryLoadCSS(sourceIndex = 0) {
       if (sourceIndex >= fallbackSources.length) {
-        console.error('DluxVideoPlayer: All CSS fallback sources failed, proceeding without external CSS');
+        console.error('IPFSHLSPlayer: All CSS fallback sources failed, proceeding without external CSS');
         return resolve();
       }
       
@@ -369,13 +419,13 @@ function ensureVideoJSStyles() {
       
       link.onload = () => {
         if (config.debug) {
-          console.log('DluxVideoPlayer: Successfully loaded fallback CSS from:', link.href);
+          console.log('IPFSHLSPlayer: Successfully loaded fallback CSS from:', link.href);
         }
         resolve();
       };
       
       link.onerror = () => {
-        console.warn('DluxVideoPlayer: Failed to load CSS from:', link.href);
+        console.warn('IPFSHLSPlayer: Failed to load CSS from:', link.href);
         // Remove failed link and try next source
         document.head.removeChild(link);
         tryLoadCSS(sourceIndex + 1);
@@ -386,7 +436,7 @@ function ensureVideoJSStyles() {
       // Timeout fallback
       setTimeout(() => {
         if (!link.sheet) {
-          console.warn('DluxVideoPlayer: CSS load timeout for:', link.href);
+          console.warn('IPFSHLSPlayer: CSS load timeout for:', link.href);
           if (document.head.contains(link)) {
             document.head.removeChild(link);
           }
@@ -400,16 +450,16 @@ function ensureVideoJSStyles() {
 }
 
 // Export everything
-const VideoPlayerBundle = {
+const IPFSHLSPlayerBundle = {
   videojs,
-  DluxVideoPlayer
+  IPFSHLSPlayer
 };
 
 // Make globally available
 if (typeof window !== 'undefined') {
   window.videojs = videojs;
-  window.DluxVideoPlayer = DluxVideoPlayer;
-  window.VideoPlayerBundle = VideoPlayerBundle;
+  window.IPFSHLSPlayer = IPFSHLSPlayer;
+  window.IPFSHLSPlayerBundle = IPFSHLSPlayerBundle;
   
   // Ensure styles are loaded immediately
   if (document.readyState === 'loading') {
@@ -425,23 +475,23 @@ if (typeof window !== 'undefined') {
     ensureVideoJSStyles().catch(console.error);
   }, 100);
   
-  // Static enhancement for documentation and non-Vue contexts
-  const config = window.dluxVideoPlayerConfig || {};
+  // Static enhancement for documentation and non-framework contexts
+  const config = window.ipfsHLSPlayerConfig || {};
   
   if (config.enableStaticEnhancement !== false) {
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         if (config.debug) {
-          console.log('DluxVideoPlayer: Starting static page enhancement');
+          console.log('IPFSHLSPlayer: Starting static page enhancement');
         }
         
         // Only enhance if not in a Vue/React app context
         const isFrameworkApp = document.querySelector('[data-vue-app], [data-react-app], .react-app');
         
         if (!isFrameworkApp) {
-          await DluxVideoPlayer.enhanceStaticVideos();
+          await IPFSHLSPlayer.enhanceStaticVideos();
         } else if (config.debug) {
-          console.log('DluxVideoPlayer: Framework app detected, skipping static enhancement');
+          console.log('IPFSHLSPlayer: Framework app detected, skipping static enhancement');
         }
       } catch (error) {
         console.error('Static video enhancement failed:', error);
@@ -450,4 +500,4 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export default VideoPlayerBundle;
+export default IPFSHLSPlayerBundle;

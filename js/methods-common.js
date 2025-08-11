@@ -1,6 +1,5 @@
 import debugLogger from '/js/utils/debug-logger.js';
 import hlsDebug from '/js/utils/hls-debug.js';
-import IPFSHLSPlayer from '/js/services/ipfs-hls-player.js';
 
 // Debug flag to control logging - set to true to enable verbose logging
 const DEBUG = false;
@@ -1062,8 +1061,8 @@ export default {
         return true;
       }
       
-      // Method 2: Check if video is inside dlux-video-container
-      if (video.closest('.dlux-video-container')) {
+      // Method 2: Check if video is inside ipfs-video-container
+      if (video.closest('.ipfs-video-container')) {
         console.log('TipTap video detected by container:', video.id || 'no-id');
         return true;
       }
@@ -1077,8 +1076,8 @@ export default {
         return true;
       }
       
-      // Method 4: Check for dlux-video ID pattern
-      if (video.id && video.id.startsWith('dlux-video-')) {
+      // Method 4: Check for ipfs-video ID pattern
+      if (video.id && video.id.startsWith('ipfs-video-')) {
         console.log('TipTap video detected by ID pattern:', video.id);
         return true;
       }
@@ -1110,9 +1109,9 @@ export default {
         return; // Already processed this exact video element
       }
       
-      // Skip videos managed by TipTap DluxVideo extension to prevent double processing
+      // Skip videos managed by TipTap IPFSVideo extension to prevent double processing
       if (isTipTapVideo(video)) {
-        return; // TipTap DluxVideo extension handles these exclusively
+        return; // TipTap IPFSVideo extension handles these exclusively
       }
       
       // Ensure video is properly attached to DOM before processing
@@ -1187,9 +1186,9 @@ export default {
       }
       
       // Enhance with Video.js bundle if available (for proper styling)
-      if (typeof DluxVideoPlayer !== 'undefined' && DluxVideoPlayer.enhanceVideoElement) {
+      if (typeof IPFSHLSPlayer !== 'undefined' && IPFSHLSPlayer.enhanceVideoElement) {
         try {
-          DluxVideoPlayer.enhanceVideoElement(video).then(() => {
+          IPFSHLSPlayer.enhanceVideoElement(video).then(() => {
             // Video.js handles HLS automatically, so only fallback to our custom HLS if needed
             if (!video._dluxVideoPlayer && video.type === 'application/x-mpegURL') {
               setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);

@@ -39,20 +39,20 @@
     <link href="/css/font-awesome.min.css" rel="stylesheet">
     <!-- Video.js Core CSS (backup for webpack bundle) -->
     <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
-    <!-- DLUX Video Player Styles -->
-    <link href="/css/dlux-video-player.css" rel="stylesheet" />
+    <!-- IPFS HLS Player Styles -->
+    <link href="/css/ipfs-hls-player.css" rel="stylesheet" />
     <!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
+    <!-- IPFS HLS Player Bundle (Video.js with HLS quality selector) -->
     <script>
     // Vue app - disable static enhancement, Vue components handle their own videos  
-    window.dluxVideoPlayerConfig = { 
+    window.ipfsHLSPlayerConfig = { 
         enableStaticEnhancement: false,  // Vue handles video enhancement
         debug: false 
     };
     document.documentElement.setAttribute('data-vue-app', 'true');
     </script>
-    <script src="/js/videoPlayer.bundle.js"></script>
+    <script src="/js/ipfs-hls-player.min.js"></script>
     <script type="module" src="/js/v3-app.js"></script>
     <link href="/css/smde-comment.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>

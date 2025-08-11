@@ -22,7 +22,7 @@ const RemixDappManager = {
             availableDapps: [],
             selectedBaseDapp: null,
             loadingDapps: false,
-            
+
             // Current remix structure
             remixStructure: {
                 baseDapp: null, // Original dApp being remixed
@@ -30,7 +30,7 @@ const RemixDappManager = {
                 attribution: [], // Attribution chain
                 license: null // Remix license (must be compatible)
             },
-            
+
             // File organization (similar to dApp manager but focused on modifications)
             modificationFiles: {
                 entry: null,
@@ -40,12 +40,12 @@ const RemixDappManager = {
                 data: [],
                 other: []
             },
-            
+
             // dApp metadata
             selectedDAppType: 'APP', // Default to APP type
             dappCID: '', // Entry point CID
             attribution: [], // Attribution array for referenced works
-            
+
             // PWA Configuration
             pwaConfig: {
                 enabled: true, // Enable PWA features
@@ -56,28 +56,28 @@ const RemixDappManager = {
                 backgroundColor: '#111222', // Background color
                 displayMode: 'standalone', // Display mode: standalone, fullscreen, minimal-ui, browser
                 appIcons: [
-                    { "src": "https://dlux.io/img/dlux-hive-logo-alpha.svg", "sizes": "192x192", "type": "image/svg+xml" },
-                    { "src": "https://dlux.io/img/dlux-logo-icon.png", "sizes": "695x695", "type": "image/png", "purpose": "any" },
-                    { "src": "https://dlux.io/img/dlux-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+                    { 'src': 'https://dlux.io/img/dlux-hive-logo-alpha.svg', 'sizes': '192x192', 'type': 'image/svg+xml' },
+                    { 'src': 'https://dlux.io/img/dlux-logo-icon.png', 'sizes': '695x695', 'type': 'image/png', 'purpose': 'any' },
+                    { 'src': 'https://dlux.io/img/dlux-icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable' }
                 ],
                 morePrecacheUrls: [], // Additional URLs to precache in service worker
                 customServiceWorker: '', // Optional: CID of custom service worker file
                 enableServiceWorker: true // Enable automatic service worker generation
             },
-            
+
             // Custom JSON editor
             customJsonString: '',
             customJsonError: '',
             isJsonEditorLocked: true,
-            
+
             // Licensing for remixes
             selectedLicense: '1',
             licenseCompatibilityWarning: '',
-            
+
             // Search and filtering
             searchQuery: '',
             licenseFilter: 'all',
-            
+
             // Available dApp types (from hub postSelect.types)
             dappTypes: {
                 'VR': { name: 'VR Experience', icon: 'fa-solid fa-vr-cardboard' },
@@ -89,87 +89,87 @@ const RemixDappManager = {
                 'Audio': { name: 'Audio Experience', icon: 'fa-solid fa-music' },
                 'Video': { name: 'Video Experience', icon: 'fa-solid fa-film' }
             },
-            
+
             // Available licenses (inherited from dApp manager but with remix logic)
             licenses: {
-                "1": {
+                '1': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' }
                     ],
-                    name: "CC BY",
+                    name: 'CC BY',
                     allowsDerivatives: true,
                     commercial: true
                 },
-                "2": {
+                '2': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-sa", l: "Share Alike" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-sa', l: 'Share Alike' }
                     ],
-                    name: "CC BY-SA",
+                    name: 'CC BY-SA',
                     allowsDerivatives: true,
                     commercial: true,
                     requiresSameShare: true
                 },
-                "3": {
+                '3': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nd", l: "No Derivatives" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nd', l: 'No Derivatives' }
                     ],
-                    name: "CC BY-ND",
+                    name: 'CC BY-ND',
                     allowsDerivatives: false,
                     commercial: true
                 },
-                "5": {
+                '5': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nc", l: "Non-Commercial" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nc', l: 'Non-Commercial' }
                     ],
-                    name: "CC BY-NC",
+                    name: 'CC BY-NC',
                     allowsDerivatives: true,
                     commercial: false
                 },
-                "6": {
+                '6': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons", l: "Creative Commons License" },
-                        { fa: "fa-brands fa-creative-commons-by", l: "Attribution Required" },
-                        { fa: "fa-brands fa-creative-commons-nc", l: "Non-Commercial" },
-                        { fa: "fa-brands fa-creative-commons-sa", l: "Share Alike" }
+                        { fa: 'fa-brands fa-creative-commons', l: 'Creative Commons License' },
+                        { fa: 'fa-brands fa-creative-commons-by', l: 'Attribution Required' },
+                        { fa: 'fa-brands fa-creative-commons-nc', l: 'Non-Commercial' },
+                        { fa: 'fa-brands fa-creative-commons-sa', l: 'Share Alike' }
                     ],
-                    name: "CC BY-NC-SA",
+                    name: 'CC BY-NC-SA',
                     allowsDerivatives: true,
                     commercial: false,
                     requiresSameShare: true
                 },
-                "7": {
+                '7': {
                     fa: [
-                        { fa: "fa-brands fa-creative-commons-zero", l: "CC0: Public Domain" }
+                        { fa: 'fa-brands fa-creative-commons-zero', l: 'CC0: Public Domain' }
                     ],
-                    name: "CC0",
+                    name: 'CC0',
                     allowsDerivatives: true,
                     commercial: true,
                     public: true
                 }
             }
-        }
+        };
     },
     computed: {
         filteredDapps() {
             let filtered = this.availableDapps;
-            
+
             // Filter by search query
             if (this.searchQuery.trim()) {
                 const query = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(dapp => 
+                filtered = filtered.filter(dapp =>
                     dapp.title.toLowerCase().includes(query) ||
                     dapp.author.toLowerCase().includes(query) ||
                     (dapp.description && dapp.description.toLowerCase().includes(query))
                 );
             }
-            
+
             // Filter by license
             if (this.licenseFilter !== 'all') {
                 filtered = filtered.filter(dapp => {
@@ -180,27 +180,27 @@ const RemixDappManager = {
                     return dapp.license === this.licenseFilter;
                 });
             }
-            
+
             return filtered;
         },
-        
+
         remixableDapps() {
             return this.availableDapps.filter(dapp => {
                 const license = this.licenses[dapp.license];
                 return license && license.allowsDerivatives;
             });
         },
-        
+
         totalModifications() {
             return Object.values(this.modificationFiles)
                 .flat()
                 .filter(item => Array.isArray(item) ? item.length > 0 : item !== null).length;
         },
-        
+
         hasBaseDapp() {
             return this.selectedBaseDapp !== null;
         },
-        
+
         isValidJson() {
             try {
                 if (!this.customJsonString.trim()) return true;
@@ -210,7 +210,7 @@ const RemixDappManager = {
                 return false;
             }
         },
-        
+
         customJsonData() {
             try {
                 return this.customJsonString ? JSON.parse(this.customJsonString) : {};
@@ -218,16 +218,16 @@ const RemixDappManager = {
                 return {};
             }
         },
-        
+
         // Generate contracts array from modification files
         contractsArray() {
             const contracts = [];
-            
+
             // Add entry point contract
             if (this.modificationFiles.entry && this.modificationFiles.entry.contractId) {
                 contracts.push(this.modificationFiles.entry.contractId);
             }
-            
+
             // Add all modification contracts
             Object.values(this.modificationFiles).forEach(category => {
                 if (Array.isArray(category)) {
@@ -238,10 +238,10 @@ const RemixDappManager = {
                     });
                 }
             });
-            
+
             return contracts;
         },
-        
+
         // Generate assets array for compatibility
         assetsArray() {
             const assets = [];
@@ -252,24 +252,24 @@ const RemixDappManager = {
             });
             return assets;
         },
-        
+
         combinedRemixData() {
             // Build the complete JSON structure as requested
             const customJsonStructure = {
-                app: "dlux/1.0.0b",
+                app: 'dlux/1.0.0b',
                 dAppType: this.selectedDAppType,
-                format: "markdown",
+                format: 'markdown',
                 assets: this.assetsArray,
                 contracts: this.contractsArray,
-                tags: ["dlux"],
-                dappCID: this.dappCID || (this.modificationFiles.entry ? this.modificationFiles.entry.cid : ""),
-                license: this.licenses[this.selectedLicense]?.name || "CC BY",
+                tags: ['dlux'],
+                dappCID: this.dappCID || (this.modificationFiles.entry ? this.modificationFiles.entry.cid : ''),
+                license: this.licenses[this.selectedLicense]?.name || 'CC BY',
                 attribution: this.attribution,
                 // Include remix-specific data
                 remixStructure: this.remixStructure,
                 modificationFiles: this.modificationFiles
             };
-            
+
             // Add PWA configuration if enabled
             if (this.pwaConfig.enabled) {
                 if (this.pwaConfig.appIcons.length > 0) {
@@ -293,7 +293,7 @@ const RemixDappManager = {
                 customJsonStructure.displayMode = this.pwaConfig.displayMode;
                 customJsonStructure.enableServiceWorker = this.pwaConfig.enableServiceWorker;
             }
-            
+
             // Merge with any additional custom JSON data, but prioritize our structure
             return { ...this.customJsonData, ...customJsonStructure };
         }
@@ -304,23 +304,23 @@ const RemixDappManager = {
                 this.setupRemixFromBase(newDapp);
             }
         },
-        
+
         selectedLicense() {
             this.checkLicenseCompatibility();
             this.emitDataUpdate();
         },
-        
+
         selectedDAppType() {
             this.emitDataUpdate();
         },
-        
+
         attribution: {
             handler() {
                 this.emitDataUpdate();
             },
             deep: true
         },
-        
+
         modificationFiles: {
             handler() {
                 this.updateDappCID();
@@ -328,7 +328,7 @@ const RemixDappManager = {
             },
             deep: true
         },
-        
+
         spkFileToAdd: {
             handler(newFile) {
                 if (newFile) {
@@ -338,7 +338,7 @@ const RemixDappManager = {
             },
             immediate: false
         },
-        
+
         pwaConfig: {
             handler() {
                 this.emitDataUpdate();
@@ -355,28 +355,28 @@ const RemixDappManager = {
         initializeFromProps() {
             if (Object.keys(this.initialCustomJson).length > 0) {
                 this.customJsonString = JSON.stringify(this.initialCustomJson, null, 2);
-                
+
                 // Load existing remix structure if present
                 if (this.initialCustomJson.remixStructure) {
                     this.remixStructure = { ...this.remixStructure, ...this.initialCustomJson.remixStructure };
                 }
-                
+
                 if (this.initialCustomJson.modificationFiles) {
                     this.modificationFiles = { ...this.modificationFiles, ...this.initialCustomJson.modificationFiles };
                 }
-                
+
                 if (this.initialCustomJson.dAppType) {
                     this.selectedDAppType = this.initialCustomJson.dAppType;
                 }
-                
+
                 if (this.initialCustomJson.dappCID) {
                     this.dappCID = this.initialCustomJson.dappCID;
                 }
-                
+
                 if (this.initialCustomJson.attribution) {
                     this.attribution = this.initialCustomJson.attribution;
                 }
-                
+
                 // Load PWA configuration
                 if (this.initialCustomJson.appIcons) {
                     this.pwaConfig.appIcons = this.initialCustomJson.appIcons;
@@ -408,10 +408,10 @@ const RemixDappManager = {
                 if (this.initialCustomJson.enableServiceWorker !== undefined) {
                     this.pwaConfig.enableServiceWorker = this.initialCustomJson.enableServiceWorker;
                 }
-                
+
                 // Convert license from name back to ID for internal use
                 if (this.initialCustomJson.license) {
-                    const licenseEntry = Object.entries(this.licenses).find(([id, license]) => 
+                    const licenseEntry = Object.entries(this.licenses).find(([id, license]) =>
                         license.name === this.initialCustomJson.license
                     );
                     if (licenseEntry) {
@@ -420,7 +420,7 @@ const RemixDappManager = {
                 }
             }
         },
-        
+
         // Load available dApps from blockchain
         async loadAvailableDapps() {
             this.loadingDapps = true;
@@ -428,7 +428,7 @@ const RemixDappManager = {
                 // TODO: Implement actual API call to fetch dApps from Hive blockchain
                 // This would query for posts with custom_json dApp structure
                 // and extract licensing information
-                
+
                 // Mock data for development
                 this.availableDapps = [
                     {
@@ -468,25 +468,25 @@ const RemixDappManager = {
                         files: ['index.html', 'app.css', 'app.js']
                     }
                 ];
-                
+
                 console.log('📱 Loaded available dApps:', this.availableDapps.length);
-                
+
             } catch (error) {
                 console.error('Failed to load available dApps:', error);
             } finally {
                 this.loadingDapps = false;
             }
         },
-        
+
         // Set up remix based on selected dApp
         setupRemixFromBase(baseDapp) {
             this.remixStructure.baseDapp = baseDapp;
-            
+
             // Set up attribution chain - add base dApp to attribution
             this.attribution = [
                 `${baseDapp.author}/${baseDapp.permlink}`
             ];
-            
+
             // Set up remix structure attribution
             this.remixStructure.attribution = [
                 {
@@ -497,28 +497,28 @@ const RemixDappManager = {
                     timestamp: Date.now()
                 }
             ];
-            
+
             // Set default license based on base dApp license
             const baseLicense = this.licenses[baseDapp.license];
             if (baseLicense && baseLicense.requiresSameShare) {
                 this.selectedLicense = baseDapp.license;
             }
-            
+
             // Inherit dApp type from base if not set
             if (!this.selectedDAppType || this.selectedDAppType === 'APP') {
                 // Could potentially detect type from base dApp metadata
                 this.selectedDAppType = baseDapp.dAppType || 'APP';
             }
-            
+
             this.checkLicenseCompatibility();
         },
-        
+
         // Add modification files
         addModificationFile(fileData) {
             const fileName = fileData.fileName || fileData.name || fileData.filename || 'unknown';
             const fileType = this.getFileType(fileName);
             const category = this.getCategoryForFile(fileName, fileType);
-            
+
             const fileObject = {
                 cid: fileData.cid || fileData.hash || fileData.url,
                 name: fileName,
@@ -528,9 +528,9 @@ const RemixDappManager = {
                 description: fileData.description || '',
                 isModification: true
             };
-            
+
             console.log(`📎 Adding modification file to category "${category}":`, fileObject);
-            
+
             if (category === 'entry') {
                 this.modificationFiles.entry = fileObject;
                 this.dappCID = fileObject.cid; // Set dappCID when entry is added
@@ -540,21 +540,21 @@ const RemixDappManager = {
                 }
                 this.modificationFiles[category].push(fileObject);
             }
-            
+
             this.emitDataUpdate();
         },
-        
+
         updateDappCID() {
             if (this.modificationFiles.entry && this.modificationFiles.entry.cid) {
                 this.dappCID = this.modificationFiles.entry.cid;
             }
         },
-        
+
         getFileType(fileName) {
             const extension = fileName.split('.').pop()?.toLowerCase();
             return extension || 'unknown';
         },
-        
+
         getCategoryForFile(fileName, fileType) {
             const mapping = {
                 'html': 'entry',
@@ -585,20 +585,20 @@ const RemixDappManager = {
                 'mp4': 'assets',
                 'webm': 'assets'
             };
-            
+
             const mappedCategory = mapping[fileType];
             if (mappedCategory) return mappedCategory;
-            
+
             // Special logic for entry files
             if (fileName.toLowerCase().includes('index') || fileName.toLowerCase().includes('main')) {
                 if (['html', 'htm', 'js', 'mjs'].includes(fileType)) {
                     return 'entry';
                 }
             }
-            
+
             return 'other';
         },
-        
+
         removeModificationFile(category, index = null) {
             if (category === 'entry') {
                 this.modificationFiles.entry = null;
@@ -608,16 +608,16 @@ const RemixDappManager = {
             }
             this.emitDataUpdate();
         },
-        
+
         // Attribution management
         addAttribution() {
             this.attribution.push('');
         },
-        
+
         removeAttribution(index) {
             this.attribution.splice(index, 1);
         },
-        
+
         // PWA Configuration Management
         addAppIcon() {
             this.pwaConfig.appIcons.push({
@@ -627,87 +627,87 @@ const RemixDappManager = {
                 purpose: 'any'
             });
         },
-        
+
         removeAppIcon(index) {
             this.pwaConfig.appIcons.splice(index, 1);
         },
-        
+
         addPrecacheUrl() {
             this.pwaConfig.morePrecacheUrls.push('');
         },
-        
+
         removePrecacheUrl(index) {
             this.pwaConfig.morePrecacheUrls.splice(index, 1);
         },
-        
+
         resetToDefaultIcons() {
             this.pwaConfig.appIcons = [
-                { "src": "https://dlux.io/img/dlux-hive-logo-alpha.svg", "sizes": "192x192", "type": "image/svg+xml" },
-                { "src": "https://dlux.io/img/dlux-logo-icon.png", "sizes": "695x695", "type": "image/png", "purpose": "any" },
-                { "src": "https://dlux.io/img/dlux-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" }
+                { 'src': 'https://dlux.io/img/dlux-hive-logo-alpha.svg', 'sizes': '192x192', 'type': 'image/svg+xml' },
+                { 'src': 'https://dlux.io/img/dlux-logo-icon.png', 'sizes': '695x695', 'type': 'image/png', 'purpose': 'any' },
+                { 'src': 'https://dlux.io/img/dlux-icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any maskable' }
             ];
         },
-        
+
         // License compatibility checking
         checkLicenseCompatibility() {
             this.licenseCompatibilityWarning = '';
-            
+
             if (!this.selectedBaseDapp) return;
-            
+
             const baseLicense = this.licenses[this.selectedBaseDapp.license];
             const selectedLicense = this.licenses[this.selectedLicense];
-            
+
             if (!baseLicense || !baseLicense.allowsDerivatives) {
                 this.licenseCompatibilityWarning = 'The selected base dApp does not allow derivatives.';
                 return;
             }
-            
+
             if (baseLicense.requiresSameShare && this.selectedLicense !== this.selectedBaseDapp.license) {
                 this.licenseCompatibilityWarning = `The base dApp requires derivatives to use the same license (${baseLicense.name}).`;
                 return;
             }
-            
+
             if (!baseLicense.commercial && selectedLicense.commercial) {
                 this.licenseCompatibilityWarning = 'Cannot use a commercial license for a derivative of a non-commercial work.';
                 return;
             }
         },
-        
+
         // Drag and drop
         setupDragAndDrop() {
             this.$nextTick(() => {
                 const dropZones = this.$el.querySelectorAll('[data-drop-category]');
-                
+
                 dropZones.forEach(zone => {
                     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                         zone.addEventListener(eventName, this.preventDefaults, false);
                     });
-                    
+
                     ['dragenter', 'dragover'].forEach(eventName => {
                         zone.addEventListener(eventName, () => zone.classList.add('dragover'), false);
                     });
-                    
+
                     ['dragleave', 'drop'].forEach(eventName => {
                         zone.addEventListener(eventName, () => zone.classList.remove('dragover'), false);
                     });
-                    
+
                     zone.addEventListener('drop', (e) => this.handleDrop(e, zone.dataset.dropCategory), false);
                 });
             });
         },
-        
+
         preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         },
-        
+
         handleDrop(e, category) {
             this.preventDefaults(e);
-            
+
             // Check if this is a drag from SPK Drive
-            const itemIds = e.dataTransfer.getData("itemids");
-            const contractId = e.dataTransfer.getData("contractid");
-            
+            const itemIds = e.dataTransfer.getData('itemids');
+            const contractId = e.dataTransfer.getData('contractid');
+
             if (itemIds && contractId) {
                 try {
                     const parsedIds = JSON.parse(itemIds);
@@ -723,7 +723,7 @@ const RemixDappManager = {
                                 fromDragDrop: true,
                                 targetCategory: category
                             };
-                            
+
                             console.log('🎯 Processing dropped SPK file for remix category:', category, spkFileData);
                             this.addModificationFile(spkFileData);
                         }
@@ -734,26 +734,26 @@ const RemixDappManager = {
                 return;
             }
         },
-        
+
         // Custom JSON management
         toggleJsonEditor() {
             this.isJsonEditorLocked = !this.isJsonEditorLocked;
         },
-        
+
         formatJson() {
             if (this.isValidJson && this.customJsonString.trim()) {
                 const parsed = JSON.parse(this.customJsonString);
                 this.customJsonString = JSON.stringify(parsed, null, 2);
             }
         },
-        
+
         // Data emission
         emitDataUpdate() {
             // Update the custom JSON string to reflect current structure
             this.customJsonString = JSON.stringify(this.combinedRemixData, null, 2);
             this.$emit('remix-updated', this.combinedRemixData);
         },
-        
+
         // Utility methods
         getFileIcon(fileType) {
             const iconMap = {
@@ -771,10 +771,10 @@ const RemixDappManager = {
                 'pdf': 'fa-solid fa-file-pdf',
                 'zip': 'fa-solid fa-file-archive'
             };
-            
+
             return iconMap[fileType] || 'fa-solid fa-file';
         },
-        
+
         getCategoryIcon(category) {
             const iconMap = {
                 'entry': 'fa-solid fa-home',
@@ -784,15 +784,15 @@ const RemixDappManager = {
                 'data': 'fa-solid fa-database',
                 'other': 'fa-solid fa-folder'
             };
-            
+
             return iconMap[category] || 'fa-solid fa-folder';
         },
-        
+
         formatDate(dateString) {
             return new Date(dateString).toLocaleDateString();
         }
     },
-    
+
     template: `
         <div class="remix-dapp-manager">
             <!-- Header -->
@@ -1353,4 +1353,4 @@ if (typeof window !== 'undefined') {
     window.RemixDappManager = RemixDappManager;
 }
 
-export default RemixDappManager; 
+export default RemixDappManager;

@@ -47,7 +47,7 @@
     <!-- Video.js Core CSS (backup for webpack bundle) -->
     <link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet" />
     <!-- DLUX Video Player Styles -->
-    <link href="/css/dlux-video-player.css" rel="stylesheet" />
+    <link href="/css/ipfs-hls-player.css" rel="stylesheet" />
     <script src="/reg-sw.js"></script>
     <script src="/js/diff.js"></script>
     <script>
@@ -325,7 +325,7 @@
                         <!-- Left Column: All Content (Blog Editor, dApp Builders) -->
                         <div class="col-lg-8 d-flex flex-column">
                             <!-- DLUX Enhancement Hub -->
-                            <div class="dlux-enhancement-hub p-0 mb-2">
+                            <div class="dlux-enhancement-hub p-0 mb-2 d-none">
                                 <!-- Carousel View (shown when no builder active) -->
                                 <div v-if="!showDappBuilder && !showRemixBuilder && !currentRemixApp" class="carousel-view">
                                       <!-- Bootstrap Carousel -->
@@ -740,14 +740,10 @@
                                 </div>
                             </div>
                             
-                           
-                            
-                            
-
                             <!-- Blog Editor (always shown) -->
                             <div class="bg-dark-1 rounded d-flex align-items-center justify-content-center flex-grow-1">
-                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username="account"
-                                    :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
+                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username-prop="account"
+                                    :auth-bridge="authBridge" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
                                         body: postBody,
@@ -1596,8 +1592,8 @@
                         <div id="postEditor" class="accordion-collapse collapse show"
                             data-bs-parent="#postEditorAccordion">
                             <div class="accordion-body p-0">
-                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username="account"
-                                    :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
+                                <tiptap-editor-modular ref="tiptapEditor" v-if="account" :username-prop="account"
+                                    :auth-bridge="authBridge" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
                                         body: postBody,
@@ -1664,6 +1660,10 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Authentication Modal Component -->
+                <dlux-auth-modal :auth-bridge="authBridge" :account="account"></dlux-auth-modal>
+
             </div></main>
 
     </div>
@@ -1866,14 +1866,13 @@
     <!-- DLUX Video Player Bundle (Video.js with HLS quality selector) -->
     <script>
     // Vue app with TipTap - disable static enhancement, Vue components handle their own videos
-    window.dluxVideoPlayerConfig = { 
+    window.ipfsHLSPlayerConfig = { 
         enableStaticEnhancement: false,  // Vue handles video enhancement
         debug: false 
     };
     document.documentElement.setAttribute('data-vue-app', 'true');
     </script>
-    <script src="/js/videoPlayer.bundle.js"></script>
-    <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
+    <!-- TipTap Collaboration Bundle (includes Y.js, HocuspocusProvider, and IPFSHLSPlayer) -->
     <script src="/js/collaboration.bundle.js"></script>
     <script>
         // Verify that the TipTap collaboration bundle is loaded

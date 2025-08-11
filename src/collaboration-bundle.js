@@ -52,6 +52,10 @@ import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 
+// Video player for TipTap videos
+import IPFSHLSPlayerBundle from './ipfs-hls-player';
+const { IPFSHLSPlayer } = IPFSHLSPlayerBundle;
+
 // These may still be individual packages
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
@@ -774,9 +778,9 @@ function shouldShowDropcursor(state, pos, draggingType) {
   return false;
 }
 
-// ✅ CUSTOM VIDEO EXTENSION: DluxVideo for native video elements with Video.js support
-const DluxVideo = Node.create({
-  name: 'dluxvideo',
+// ✅ CUSTOM VIDEO EXTENSION: IPFSVideo for native video elements with Video.js support
+const IPFSVideo = Node.create({
+  name: 'ipfsvideo',
   group: 'block',
   atom: true,
   draggable: true,
@@ -917,7 +921,7 @@ const DluxVideo = Node.create({
 
   addCommands() {
     return {
-      setDluxVideo: (options) => ({ commands }) => {
+      setIPFSVideo: (options) => ({ commands }) => {
         return commands.insertContent({
           type: this.name,
           attrs: options,
@@ -930,7 +934,7 @@ const DluxVideo = Node.create({
     return ({ node, editor }) => {
       // Create wrapper container
       const wrapper = document.createElement('div');
-      wrapper.className = 'dlux-video-container';
+      wrapper.className = 'ipfs-video-container';
       wrapper.style.position = 'relative';
       wrapper.style.marginBottom = '1rem';
       wrapper.style.width = '100%';
@@ -939,7 +943,7 @@ const DluxVideo = Node.create({
       const video = document.createElement('video');
       video.className = 'video-js vjs-default-skin vjs-big-play-centered vjs-fluid';
       video.setAttribute('data-tiptap-video', 'true');
-      // Note: Don't set data-dlux-enhanced until after initialization
+      // Note: Don't set data-ipfs-enhanced until after initialization
       
       wrapper.appendChild(video);
       
@@ -949,13 +953,13 @@ const DluxVideo = Node.create({
       // Self-contained initialization - TipTap DOM is stable
       const initializePlayer = async () => {
         try {
-          if (!window.DluxVideoPlayer) {
-            console.error('🚨 TipTap DluxVideo: DluxVideoPlayer not available. Make sure video-player-bundle.js is loaded.');
+          if (!window.IPFSHLSPlayer) {
+            console.error('🚨 TipTap IPFSVideo: IPFSHLSPlayer not available. Make sure ipfs-hls-player.min.js is loaded.');
             return;
           }
           
           // Initialize immediately - TipTap nodeView DOM is stable
-          player = await window.DluxVideoPlayer.initializePlayer(video, {
+          player = await window.IPFSHLSPlayer.initializePlayer(video, {
             src: node.attrs.src,
             type: node.attrs.type || (node.attrs.src && node.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'),
             poster: node.attrs.poster,
@@ -965,14 +969,14 @@ const DluxVideo = Node.create({
           });
           
           // Store player reference for cleanup
-          wrapper._dluxVideoPlayer = player;
-          video._dluxInitialized = true;
+          wrapper._ipfsHLSPlayer = player;
+          video._ipfsInitialized = true;
           
           // Mark as enhanced AFTER successful initialization
-          video.setAttribute('data-dlux-enhanced', 'true');
+          video.setAttribute('data-ipfs-enhanced', 'true');
           
         } catch (error) {
-          console.error('🚨 TipTap DluxVideo initialization failed:', error);
+          console.error('🚨 TipTap IPFSVideo initialization failed:', error);
         }
       };
       
@@ -1003,10 +1007,10 @@ const DluxVideo = Node.create({
         },
         
         destroy() {
-          // Clean up using DluxVideoPlayer service
-          if (wrapper._dluxVideoPlayer && window.DluxVideoPlayer) {
-            window.DluxVideoPlayer.destroyPlayer(video);
-            wrapper._dluxVideoPlayer = null;
+          // Clean up using IPFSHLSPlayer service
+          if (wrapper._ipfsHLSPlayer && window.IPFSHLSPlayer) {
+            window.IPFSHLSPlayer.destroyPlayer(video);
+            wrapper._ipfsHLSPlayer = null;
           }
         }
       };
@@ -1019,7 +1023,7 @@ const DluxVideo = Node.create({
     return [
       ...plugins,
       new Plugin({
-        key: new PluginKey('dluxVideoDrag'),
+        key: new PluginKey('ipfsVideoDrag'),
         props: {
           handleDOMEvents: {
             dragstart(view, event) {
@@ -1029,7 +1033,7 @@ const DluxVideo = Node.create({
               
               if (targetElement.tagName === 'VIDEO') {
                 videoElement = targetElement;
-              } else if (targetElement.classList.contains('dlux-video-container')) {
+              } else if (targetElement.classList.contains('ipfs-video-container')) {
                 // Find video element inside wrapper
                 videoElement = targetElement.querySelector('video');
               } else {
@@ -1101,7 +1105,7 @@ const DluxVideo = Node.create({
                 window.dluxEditor.draggingVideoPos = pos;
                 
                 // Add visual feedback to original element
-                if (targetElement.classList.contains('dlux-video-container')) {
+                if (targetElement.classList.contains('ipfs-video-container')) {
                   targetElement.style.opacity = '0.5';
                 } else if (videoElement) {
                   videoElement.style.opacity = '0.5';
@@ -1123,7 +1127,7 @@ const DluxVideo = Node.create({
               // Reset opacity - handle both video and wrapper
               if (event.target.tagName === 'VIDEO') {
                 event.target.style.opacity = '';
-              } else if (event.target.classList.contains('dlux-video-container')) {
+              } else if (event.target.classList.contains('ipfs-video-container')) {
                 event.target.style.opacity = '';
                 const video = event.target.querySelector('video');
                 if (video) {
@@ -1158,7 +1162,7 @@ const DluxVideo = Node.create({
                   const $pos = view.state.doc.resolve(pos);
                   const node = view.state.doc.nodeAt(pos);
                   
-                  if (node && node.type.name === 'dluxvideo') {
+                  if (node && node.type.name === 'ipfsvideo') {
                     // Create transaction to move the video
                     const tr = view.state.tr;
                     
@@ -1929,7 +1933,10 @@ const TiptapCollaboration = {
   
   // Media extensions
   Youtube,
-  DluxVideo,
+  IPFSVideo,
+  
+  // Video player
+  IPFSHLSPlayer,
   
   // Table extensions
   TableKit,
@@ -1962,6 +1969,7 @@ if (typeof window !== 'undefined') {
   window.TiptapCollaboration = TiptapCollaboration;
   window.HocuspocusProvider = HocuspocusProvider;
   window.Y = Y;
+  window.IPFSHLSPlayer = IPFSHLSPlayer; // Make player available globally for TipTap videos
   
   // Bundle loaded successfully
 }

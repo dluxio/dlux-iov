@@ -1,5 +1,31 @@
 # DLUX IOV - Claude Development Guide
 
+## Core Architectural Principles
+
+### The 11 Golden Rules
+
+1. **Hybrid Architecture**: Use events for cross-boundary communication, reactivity for internal state. Services must not directly modify other services' state (e.g., `serviceA.serviceB.prop = value`). Services must provide methods for state mutations. Vue components CAN directly modify their own reactive properties - this is normal Vue pattern.
+
+2. **Layer Separation**: Strict boundaries between layers (Utils → Services → Components). Y.js operations must be centralized in a dedicated service (YDocService). No direct Y.js manipulations in components.
+
+3. **Single Source of Truth**: One authoritative source per data type
+
+4. **No Circular Dependencies**: Data flows down, events bubble up. Use flags/guards to prevent race conditions and recursive calls. Track operation state to prevent circular execution.
+
+5. **Login ≠ Authentication**: Login is site-wide user identity, authentication is resource-specific access
+
+6. **No Timing Dependencies**: Never use setTimeout/setInterval for state coordination. Use event-driven alternatives: MutationObserver for DOM changes, requestAnimationFrame for animations, Promises for async coordination.
+
+7. **Single Responsibility**: Each method/function should have one clear purpose and side effect. Services handle state mutations, components handle UI only. No cross-boundary state access.
+
+8. **Offline-First Trust Model**: "Validate Online, Trust Offline" - Cache only validated data, trust cached data for offline access. Maintain cache coherency - no duplicate caches for same data type. Use consistent TTL across all services.
+
+9. **Consistent Patterns**: Use the same patterns for similar operations throughout the codebase. Examples: All Y.js transactions need origin tags, all caches use CacheService, all auth operations use AuthStateManager.
+
+10. **Immutable External State**: Never modify state you don't own. Always use the owning service's methods. Example: Use `authStateManager.setAuthHeaders()` not `this.authHeaders = ...`
+
+11. **Document Type Determines Tier**: Tier is based on document type AND connection state. Collaborative documents use Tier 1 (offline) or Tier 2 (online with CollaborationCaret). Since TipTap extensions are immutable, switching tiers requires editor recreation. Only create Tier 2 AFTER the websocket is connected (critical).
+
 ## Project Overview
 DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and offline-first architecture implementing a two-tier collaboration system.
 
@@ -103,6 +129,14 @@ this.canManagePermissions   // Permission management (owner only)
 - **UI Reactivity**: All computed properties update instantly without page refresh
 - **Performance Validated**: 95%+ improvement in permission update speed (1-2s vs 30-60s)
 
+### Login Modal Close Detection - PRODUCTION READY ✅
+- **Event-Driven Auth Gate**: Auth modal recovery triggered by login modal close events
+- **Bootstrap Modal Integration**: Uses `hidden.bs.modal` events for reliable close detection
+- **Cross-Component Communication**: `v3-user.js` dispatches `loginModalClosed` custom events
+- **Complete Coverage**: Handles dismiss modal, same user selection, and different user selection
+- **Compromise Architecture**: Works with existing login system without refactoring
+- **Auto-Cleanup**: Event listeners automatically removed with `{ once: true }` pattern
+
 ## Critical Implementation Notes
 
 ### Single Editor Architecture
@@ -143,9 +177,49 @@ const nodeBlockLists = {
 - **Documentation**: [`documentation/DLUX_VIDEO_PLAYER_DOCUMENTATION.md`](./documentation/DLUX_VIDEO_PLAYER_DOCUMENTATION.md)
 - **HLS Implementation**: [`documentation/HLS_COMPREHENSIVE_GUIDE.md`](./documentation/HLS_COMPREHENSIVE_GUIDE.md)
 
+## Authentication Architecture Rules
+
+### Layer-Based Architecture
+To prevent circular dependencies and recursion, the authentication system follows a strict 3-layer architecture:
+
+#### Layer 1: Foundation (`/js/utils/auth-helpers.js`)
+- **Purpose**: Pure utility functions with NO dependencies
+- **Rules**: 
+  - NO imports from services or components
+  - NO state management
+  - NO async operations
+  - Pure functions only
+
+#### Layer 2: Services (`/js/services/*`)
+- **Purpose**: Business logic and state management
+- **Allowed**: Import from Layer 1 utilities
+- **Forbidden**: 
+  - Direct component access (`this.component.*`)
+  - Vue-specific code (`this.$emit`)
+  - Importing from components
+
+#### Layer 3: Components (`/js/tiptap-editor-modular.js`)
+- **Purpose**: Vue component logic and UI
+- **Allowed**: Import from both Layer 1 and Layer 2
+- **Best Practice**: Use computed properties to access services
+
+### Recursion Prevention
+- Key methods in AuthStateManager have recursion protection flags
+- Methods check flags before executing to prevent circular calls
+- Always use try/finally blocks to ensure flags are reset
+
+### Dependency Validation
+- Run `node scripts/check-auth-dependencies.js` to validate architecture
+- Script checks for forbidden imports and patterns
+- Detects circular dependencies between services
+
 ## Documentation Index
 
 ### Core Documentation
+- **Service Architecture**: [`documentation/SERVICE_ARCHITECTURE.md`](./documentation/SERVICE_ARCHITECTURE.md) - New service-oriented architecture (August 2025)
+- **Auth System Guide**: [`documentation/AUTH_SYSTEM_GUIDE.md`](./documentation/AUTH_SYSTEM_GUIDE.md) - Complete auth system with authRetryReady behavior
+- **Cache Architecture**: [`documentation/CACHE_ARCHITECTURE.md`](./documentation/CACHE_ARCHITECTURE.md) - Unified caching system
+- **Auth Layers**: [`documentation/AUTH_ARCHITECTURE_LAYERS.md`](./documentation/AUTH_ARCHITECTURE_LAYERS.md) - Layer-based architecture
 - **Y.js Schema**: [`documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md`](./documentation/TIPTAP_YIJS_SCHEMA_ACTUAL.md) - Complete Y.js structure
 - **Collaboration Architecture**: [`documentation/TIPTAP_COLLABORATIVE_SCHEMA.md`](./documentation/TIPTAP_COLLABORATIVE_SCHEMA.md) - High-level design
 - **Best Practices**: [`documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md`](./documentation/TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md) - Implementation patterns
@@ -288,6 +362,12 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 
 ## Recent Implementation Highlights
 
+### Service-Oriented Architecture (August 2025)
+- **Component Adapter Pattern**: Bridges Vue component structure with service expectations
+- **Improved WebSocket Management**: Direct WebSocket lifecycle management without state machine dependencies
+- **Simplified Connection Tracking**: WebSocket state tracked directly in component data property
+- **Bug Fixes**: Removed state machine blocking issues, simplified disconnect/reconnect flow
+
 ### Critical Security Enhancements
 - **Authentication State Management**: Username changes trigger permission re-validation and cache clearing
 - **Local Document Security**: Cross-user access prevention for local documents
@@ -296,10 +376,19 @@ The WebSocket Permission Broadcast System provides instantaneous permission upda
 ### Key Features
 - **WebSocket Permission Broadcasts**: Real-time permission updates (1-2 seconds) via Y.js awareness
 - **Two-Tier Collaboration**: Local (Tier 1) and Cloud (Tier 2) document support
+- **Login Modal Close Detection**: Event-driven auth modal recovery for all user selection scenarios
 - **Modular Drag & Drop**: Registry-based content restrictions for table cells and other nodes
 - **Markdown Export**: Full extension synchronization between editor and export
 - **BubbleMenu Integration**: Floating formatting toolbar with proper cleanup
 - **Table Toolbar**: CSS-based positioning for table manipulation
+- **Offline-First Loading**: Cache-first approach with proper error states for cache misses
+
+### authRetryReady Event Behavior
+- **When it fires**: Only when authentication completes AND there's a pending document to retry
+- **Conditional emission**: Check for `pendingDocumentAccess` before emitting
+- **Expected frequency**: Once per authentication when URL params present (sets pending document)
+- **Not a bug**: Multiple events across user switches is correct behavior
+- **Key change (Jan 2025)**: Made conditional instead of always firing on auth
 
 ### Y.js Awareness Compliance
 - Standard 15-second heartbeat for 30-second timeout

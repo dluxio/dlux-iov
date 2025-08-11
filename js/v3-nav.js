@@ -9,8 +9,21 @@ import VRPresence from '/js/vr-presence.js';
 
 let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
 
+// 🔐 AUTH TIMING: v3-nav module load
+console.log('🔐 AUTH TIMING: v3-nav module loading', {
+  timestamp: new Date().toISOString(),
+  hasLocalStorage: typeof localStorage !== 'undefined',
+  currentUserInLocalStorage: typeof localStorage !== 'undefined' ? localStorage.getItem('user') : 'N/A'
+});
+
 export default {
   data() {
+    // 🔐 AUTH TIMING: v3-nav data() initialization
+    console.log('🔐 AUTH TIMING: v3-nav data() called', {
+      timestamp: new Date().toISOString(),
+      initialUserValue: ""
+    });
+    
     return {
       chatVisible: false,
       userPinFeedback: "",
@@ -2413,23 +2426,46 @@ export default {
       
       try {
         
-        // Check if we have valid cached headers in session storage (user-specific)
-        const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.user}`);
-        if (cachedHeaders) {
-          const headers = JSON.parse(cachedHeaders);
-          const cachedChallenge = parseInt(headers['x-challenge']);
-          const now = Math.floor(Date.now() / 1000);
-          const challengeAge = now - cachedChallenge;
+        // Check if we have valid cached headers in session storage (unless forceRefresh is true)
+        if (!obj.forceRefresh) {
+          // Use AuthStateManager to get cached headers
+          const cachedHeaders = window.authStateManager ? 
+              window.authStateManager.getAuthHeaders() : null;
+          console.log('🔴 AUTH-DEBUG: v3-nav checking for cached headers', {
+            user: this.user,
+            key: `collaborationAuthHeaders_${this.user}`,
+            foundCached: !!cachedHeaders,
+            forceRefresh: obj.forceRefresh
+          });
           
-          // Use cached headers if they're less than 23 hours old
-          if (cachedChallenge && challengeAge < (23 * 60 * 60)) {
-            obj.status = 'Using cached authentication';
+          if (cachedHeaders) {
+            const headers = cachedHeaders;
+            const cachedChallenge = parseInt(headers['x-challenge']);
+            const now = Math.floor(Date.now() / 1000);
+            const challengeAge = now - cachedChallenge;
             
-            // Call success callback if provided
-            if (obj.onSuccess) {
-              obj.onSuccess(headers);
+            // Use cached headers if they're less than 23 hours old
+            if (cachedChallenge && challengeAge < (23 * 60 * 60)) {
+              console.log('🔴 AUTH-DEBUG: v3-nav using cached headers', {
+                user: this.user,
+                challengeAge: challengeAge,
+                challengeAgeHours: (challengeAge / 3600).toFixed(1),
+                headersAccount: headers['x-account']
+              });
+              obj.status = 'Using cached authentication';
+              
+              // Call success callback if provided
+              if (obj.onSuccess) {
+                obj.onSuccess(headers);
+              }
+              return;
+            } else {
+              console.log('🔴 AUTH-FLOW: v3-nav cached headers expired', {
+                user: this.user,
+                challengeAge: challengeAge,
+                challengeAgeHours: (challengeAge / 3600).toFixed(1)
+              });
             }
-            return;
           }
         }
 
@@ -2476,8 +2512,24 @@ export default {
           'x-signature': signResult.signature
         };
 
+        console.log('🔴 AUTH-DEBUG: v3-nav GENERATED NEW auth headers', {
+            user: this.user,
+            challenge: challenge,
+            currentTime: Math.floor(Date.now() / 1000),
+            callStack: new Error().stack.split('\n').slice(2, 5).join(' -> ')
+        });
+
         // Store in session storage for reuse (user-specific)
-        sessionStorage.setItem(`collaborationAuthHeaders_${this.user}`, JSON.stringify(headers));
+        console.log('🔴 AUTH-FLOW: v3-nav saving auth headers to sessionStorage', {
+            user: this.user,
+            key: `collaborationAuthHeaders_${this.user}`,
+            hasHeaders: !!headers,
+            headersAccount: headers['x-account']
+        });
+        // Use AuthStateManager as single source of truth for auth headers
+        if (window.authStateManager) {
+            window.authStateManager.setAuthHeaders(headers);
+        }
         
         obj.status = 'Authentication successful!';
         
@@ -2487,7 +2539,7 @@ export default {
         }
         
       } catch (error) {
-        console.error('Failed to generate collaboration headers:', error);
+        console.error('🔴 AUTH-DEBUG: Failed to generate collaboration headers:', error);
         obj.status = 'Authentication failed: ' + error.message;
         
         // Call error callback if provided
@@ -3293,7 +3345,22 @@ export default {
         this.broadcastCJ(op);
     },
     getUser() {
-      this.user = localStorage.getItem("user");
+      // 🔐 AUTH TIMING: getUser() called - reading from localStorage
+      const beforeRead = Date.now();
+      const savedUser = localStorage.getItem("user");
+      const afterRead = Date.now();
+      
+      console.log('🔐 AUTH TIMING: v3-nav.getUser() localStorage read', {
+        savedUser: savedUser,
+        isNull: savedUser === null,
+        isEmpty: savedUser === '',
+        readTime: `${afterRead - beforeRead}ms`,
+        timestamp: new Date().toISOString(),
+        initialUserValue: this.user,
+        willSetUser: true
+      });
+      
+      this.user = savedUser;
       this.$emit("login", this.user);
       const HAS = localStorage.getItem(this.user + "HAS");
       if (this.HAS && HAS) {
@@ -3310,7 +3377,9 @@ export default {
       } else if (this.HAS) {
         this.HASlogin();
       }
-      this.getNotifications()
+      if (this.user) {
+        this.getNotifications()
+      }
     },
 
     // Refresh notifications (can be called from outside)
@@ -3693,6 +3762,25 @@ export default {
     },
     logout() {
       localStorage.removeItem("user");
+      // Clear ALL auth headers on logout - v3-nav is the single source of truth
+      const allKeys = Object.keys(sessionStorage);
+      const authHeaderKeys = allKeys.filter(k => k.startsWith('collaborationAuthHeaders_'));
+      
+      console.log('🔴 AUTH-FLOW: v3-nav clearing ALL auth headers on logout', {
+        user: this.user,
+        authHeaderKeysBefore: authHeaderKeys,
+        count: authHeaderKeys.length
+      });
+      
+      // Remove all auth header keys
+      authHeaderKeys.forEach(key => {
+        sessionStorage.removeItem(key);
+      });
+      
+      console.log('🔴 AUTH-FLOW: v3-nav cleared all auth headers', {
+        sessionStorageKeysAfter: Object.keys(sessionStorage).filter(k => k.startsWith('collaborationAuthHeaders_')),
+        allCleared: true
+      });
       // Clear PEN session data
       sessionStorage.removeItem('penPin');
       sessionStorage.removeItem('pen');
@@ -3701,7 +3789,17 @@ export default {
         pin: false,
         accounts: {}
       };
+      const oldUser = this.user;
       this.user = "";
+      
+      // Emit custom event for components that need to react to user changes
+      window.dispatchEvent(new CustomEvent('localStorageUserChanged', { 
+        detail: { 
+          newUser: "", 
+          oldUser: oldUser,
+          source: 'v3-nav-logout'
+        } 
+      }));
       
       // Reset device connection on logout
       this.disconnectDevice();
@@ -3712,6 +3810,21 @@ export default {
       this.broadcastUserChange();
     },
     setUser(id) {
+      // 🔐 AUTH TIMING: Log entry to setUser
+      console.log('🔐 AUTH TIMING: setUser() called in v3-nav', {
+        id: id,
+        currentUser: this.user,
+        timestamp: new Date().toISOString(),
+        callStack: new Error().stack.split('\n').slice(1, 5).join('\n')
+      });
+      
+      console.log('👤 DEBUG: setUser called in v3-nav:', {
+        id,
+        userField: this.userField,
+        currentUser: this.user,
+        isAddingNewUser: !id && this.userField
+      });
+      
       const isAddingNewUser = !id && this.userField;
 
       if (isAddingNewUser && (!this.consentPrivacy || !this.consentTerms)) {
@@ -3726,8 +3839,12 @@ export default {
       this.haspich = 50;
 
       const userToAdd = id ? id : this.userField;
-      if (!userToAdd) return;
+      if (!userToAdd) {
+        console.log('👤 DEBUG: setUser - no user to add, returning');
+        return;
+      }
 
+      console.log('👤 DEBUG: setUser - setting user from', this.user, 'to', userToAdd);
       this.user = userToAdd;
 
       if (isAddingNewUser) {
@@ -3737,7 +3854,39 @@ export default {
         this.consentTerms = false;
       }
 
+      // 🔐 AUTH TIMING: Log localStorage save
+      console.log('🔐 AUTH TIMING: About to save user to localStorage in v3-nav.setUser()', {
+        user: this.user,
+        timestamp: new Date().toISOString()
+      });
+      
       localStorage.setItem("user", this.user);
+      
+      // 🔐 AUTH TIMING: Verify save
+      const savedUser = localStorage.getItem("user");
+      console.log('🔐 AUTH TIMING: localStorage save verification', {
+        userToSave: this.user,
+        savedUser: savedUser,
+        saveSuccess: savedUser === this.user,
+        timestamp: new Date().toISOString()
+      });
+
+      // Emit custom event for components that need to react to user changes
+      // This is safe and additive - doesn't affect any existing functionality
+      console.log('🔴 AUTH-FLOW: v3-nav emitting localStorageUserChanged for login', {
+        newUser: this.user,
+        oldUser: savedUser !== this.user ? savedUser : null,
+        source: 'v3-nav'
+      });
+      window.dispatchEvent(new CustomEvent('localStorageUserChanged', { 
+        detail: { 
+          newUser: this.user, 
+          oldUser: savedUser !== this.user ? savedUser : null,
+          source: 'v3-nav'
+        } 
+      }));
+      
+      console.log('👤 DEBUG: setUser - emitting login event with user:', this.user);
       this.$emit("login", this.user);
       
       // Restore device connection for this user
@@ -3745,6 +3894,8 @@ export default {
       
       // Broadcast user change to connected wallets
       this.broadcastUserChange();
+      
+      console.log('👤 DEBUG: setUser - completed user change process');
 
       // Handle PEN setup for new user - only if wallet isn't already decrypted
       if (this.PEN && this.user) {
@@ -3781,6 +3932,26 @@ export default {
       }
 
       if (this.HAS) this.HASsetup();
+
+      // ✅ ARCHITECTURE NOTE: Login Modal Close Detection Compromise
+      // The login modal system (v3-nav.js) operates independently of the auth bridge system.
+      // For auth modal recovery (when users dismiss or select same username), we use a 
+      // compromise approach: v3-user.js dispatches 'loginModalClosed' custom events that
+      // TipTap editor components listen for to trigger auth gate rechecks.
+      // This maintains existing login system architecture while enabling auth modal recovery.
+
+      // ✅ MODAL DISMISSAL: Close login modal after successful user selection
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) {
+        try {
+          const modal = bootstrap.Modal.getInstance(loginModal);
+          if (modal) {
+            modal.hide();
+          }
+        } catch (error) {
+          console.warn('Failed to dismiss login modal:', error);
+        }
+      }
     },
     addRecentUser(user) {
       if (user && this.recentUsers.indexOf(user) == -1)
@@ -4623,8 +4794,8 @@ export default {
 
     toggleShowKey(account, keyType) {
       const keyId = `${account}-${keyType}`;
-      this.showPenKeys[keyId] = !this.showPenKeys[keyId];
-      this.$forceUpdate(); // Force Vue to re-render
+      // Use Vue.set for reactive property updates
+      Vue.set(this.showPenKeys, keyId, !this.showPenKeys[keyId]);
     },
 
     async copyKeyToClipboard(key) {
@@ -5594,6 +5765,11 @@ export default {
     }
   },
   async mounted() {
+    // 🔐 AUTH TIMING: v3-nav mounted - reading localStorage
+    console.log('🔐 AUTH TIMING: v3-nav mounted()', {
+      timestamp: new Date().toISOString(),
+      willCallGetUser: true
+    });
 
     // Initialize wallet messaging for subdomain communication
     this.initWalletMessaging();
@@ -5647,7 +5823,7 @@ export default {
     }
     if ("WebSocket" in window) this.HAS_.wsa = true;
     else this.HAS_.wsa = false;
-    // add sting chat
+    // add sting chat - DISABLED to prevent persistent message listeners
     this.addStingChat();
     // Nav Behavior
     const navMore = document.querySelector(".nav-more .nav-link");
@@ -5872,6 +6048,9 @@ export default {
             class="navbar-username ms-2">{{user}}</span></a>
         <div class="hover-gap"></div>
         <ul class="dropdown-menu container">
+          <li>
+            <a class="dropdown-item subnav-title" href="/new/">New Post</a>
+          </li>
           <li>
             <a class="dropdown-item subnav-title" href="/me#blog/" @click="showTab('blog')">Profile<span
                 class="subnav-subtitle">HIVE

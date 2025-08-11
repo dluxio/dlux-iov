@@ -53,18 +53,18 @@ export default {
     enhanceVideos() {
       // Wait for DOM to update
       this.$nextTick(() => {
-        if (!this.$refs.markdownContent || !window.DluxVideoPlayer) {
+        if (!this.$refs.markdownContent || !window.IPFSHLSPlayer) {
           return;
         }
         
         // Helper function to detect TipTap videos to prevent conflicts
         const isTipTapVideo = (video) => {
           return video.hasAttribute('data-tiptap-video') ||
-                 video.closest('.dlux-video-container') ||
+                 video.closest('.ipfs-video-container') ||
                  (video.classList.contains('video-js') && 
                   (video.classList.contains('vjs-default-skin') || 
                    video.classList.contains('vjs-big-play-centered'))) ||
-                 (video.id && video.id.startsWith('dlux-video-')) ||
+                 (video.id && video.id.startsWith('ipfs-video-')) ||
                  video._dluxVideoPlayer ||
                  video.player;
         };
@@ -81,7 +81,7 @@ export default {
           
           try {
             // Enhance the video with DLUX Video Player
-            window.DluxVideoPlayer.enhanceVideoElement(video);
+            window.IPFSHLSPlayer.enhanceVideoElement(video);
           } catch (error) {
             console.error('Failed to enhance video:', error);
           }

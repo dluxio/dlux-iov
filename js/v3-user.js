@@ -13,6 +13,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import SimpleFieldEditor from "/js/simple-field-editor.js";
 import JsonEditor from "/js/json-editor.js";
+import { calculateChallengeAge } from '/js/utils/auth-helpers.js';
 import ChoicesVue from '/js/choices-vue.js';
 import Replies from "/js/replies.js";
 import CardVue from "/js/cardvue.js";
@@ -35,6 +36,9 @@ import Asset360Manager from "/js/components/360-asset-manager.js";
 import DappManager from "/js/components/dapp-manager.js";
 import RemixDappManager from "/js/components/remix-dapp-manager.js";
 import MCommon from '/js/methods-common.js'
+// Authentication System
+import DLUXAuthBridge from '/js/services/dlux-auth-bridge.js';
+import DluxAuthModal from '/js/components/dlux-auth-modal.js';
 
 // API Constants
 const HIVE_API = localStorage.getItem("hapi") || "https://api.hive.blog";
@@ -90,7 +94,66 @@ if (!lapi) {
 // ) {
 //   //window.history.replaceState(null, null, "dex");
 // }
+// 🔐 AUTH TIMING: Track localStorage operations globally
+const originalGetItem = localStorage.getItem;
+const originalSetItem = localStorage.setItem;
+const originalRemoveItem = localStorage.removeItem;
+const originalClear = localStorage.clear;
+
+localStorage.getItem = function(key) {
+  const value = originalGetItem.call(this, key);
+  if (key === 'user') {
+    console.log('🔐 AUTH TIMING: localStorage.getItem("user") called', {
+      value: value,
+      isNull: value === null,
+      callStack: new Error().stack.split('\n').slice(2, 6).join('\n'),
+      timestamp: new Date().toISOString()
+    });
+  }
+  return value;
+};
+
+localStorage.setItem = function(key, value) {
+  if (key === 'user') {
+    console.log('🔐 AUTH TIMING: localStorage.setItem("user") called', {
+      value: value,
+      callStack: new Error().stack.split('\n').slice(2, 6).join('\n'),
+      timestamp: new Date().toISOString()
+    });
+  }
+  return originalSetItem.call(this, key, value);
+};
+
+localStorage.removeItem = function(key) {
+  if (key === 'user') {
+    console.log('🔐 AUTH TIMING: localStorage.removeItem("user") called!', {
+      key: key,
+      previousValue: originalGetItem.call(this, key),
+      callStack: new Error().stack.split('\n').slice(2, 6).join('\n'),
+      timestamp: new Date().toISOString()
+    });
+  }
+  return originalRemoveItem.call(this, key);
+};
+
+localStorage.clear = function() {
+  console.log('🔐 AUTH TIMING: localStorage.clear() called!', {
+    hadUser: !!originalGetItem.call(this, 'user'),
+    userValue: originalGetItem.call(this, 'user'),
+    callStack: new Error().stack.split('\n').slice(2, 6).join('\n'),
+    timestamp: new Date().toISOString()
+  });
+  return originalClear.call(this);
+};
+
 let user = localStorage.getItem("user") || "GUEST";
+// 🔐 AUTH TIMING: Log initial user from localStorage
+console.log('🔐 AUTH TIMING: Initial user from localStorage at page load', {
+  user: user,
+  timestamp: new Date().toISOString(),
+  hasLocalStorageUser: !!localStorage.getItem("user"),
+  isGuest: user === "GUEST"
+});
 let hapi = HIVE_API; // Use constant instead of hardcoded fallback
 
 // var app = new Vue({
@@ -102,6 +165,9 @@ createApp({
   },
   data() {
     return {
+      // Authentication Bridge for modular auth system
+      authBridge: new DLUXAuthBridge(),
+      
       rcAccount: null,
       signedtx: [],
       hpDelegationsOut: [],
@@ -1155,7 +1221,7 @@ PORT=3000
         // Collaborative editing
         collaborativeDocument: null,
         collaborativeDocumentData: {},
-        collaborationAuthHeaders: {},
+        // REMOVED: collaborationAuthHeaders - using AuthStateManager as single source of truth
         isCollaborativeMode: false,
         collaborativePermission: null,
         canPostFromCollaboration: false,
@@ -1193,9 +1259,226 @@ PORT=3000
     "asset-360-manager": Asset360Manager,
     "dapp-manager": DappManager,
     "remix-dapp-manager": RemixDappManager,
+    "dlux-auth-modal": DluxAuthModal,
   },
   methods: {
     ...MCommon,
+    
+    // Method to update account with proper Vue reactivity
+    updateAccount(newAccount) {
+      console.log('🔴 AUTH-FLOW: v3-user.updateAccount method called', {
+        oldAccount: this.account,
+        newAccount: newAccount,
+        timestamp: new Date().toISOString()
+      });
+      this.account = newAccount;
+    },
+    
+    // ✅ AUTHENTICATION FLOW: Handle login requests from auth modal
+    handleLoginRequest(event) {
+      console.log('🔑 DEBUG: Login request received from auth modal', event.detail);
+      
+      const { reason, pendingDocumentAccess } = event.detail || {};
+      
+      try {
+        // ✅ ENHANCED LOGIN TRIGGER: Try multiple approaches to trigger authentication
+        console.log('🔑 DEBUG: Attempting to trigger authentication...');
+        
+        // Approach 1: Direct modal instantiation (bypasses Bootstrap click issues)
+        const modalIds = ['#loginModal', '#spkWalletModal'];
+        
+        let triggered = false;
+        for (const modalId of modalIds) {
+          const modalElement = document.querySelector(modalId);
+          if (modalElement) {
+            console.log('🔑 DEBUG: Found modal element:', modalId);
+            
+            try {
+              // ✅ DIRECT MODAL: Instantiate Bootstrap modal directly (safer than click)
+              if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                console.log('🔑 DEBUG: Bootstrap modal shown directly:', modalId);
+                
+                // ✅ FOCUS MANAGEMENT: Add hide listener to blur focused elements before modal closes
+                modalElement.addEventListener('hide.bs.modal', () => {
+                  // Find any focused element within the modal
+                  const focusedElement = modalElement.querySelector(':focus');
+                  if (focusedElement) {
+                    console.log('🔍 FOCUS: Blurring focused element before modal hide (programmatic show):', focusedElement);
+                    focusedElement.blur();
+                  }
+                }, { once: true });
+                
+                // ✅ LOGIN MODAL CLOSE DETECTION: Listen for modal close to trigger auth recheck
+                modalElement.addEventListener('hidden.bs.modal', this.handleLoginModalClose, { once: true });
+                console.log('🔑 DEBUG: Added login modal close listener for:', modalId);
+                
+                triggered = true;
+                break;
+              } else {
+                console.warn('🔑 DEBUG: Bootstrap not available, trying fallback approach');
+                // Fallback: try click approach with extra safety
+                const triggerElement = document.querySelector(`[data-bs-target="${modalId}"]`);
+                if (triggerElement) {
+                  triggerElement.click();
+                  console.log('🔑 DEBUG: Fallback click triggered for:', modalId);
+                  triggered = true;
+                  break;
+                }
+              }
+              
+            } catch (modalError) {
+              console.warn('🔑 DEBUG: Direct modal instantiation failed:', modalId, modalError);
+              // Continue to try next modal
+            }
+          }
+        }
+        
+        // Approach 2: Try to trigger SPK wallet modal (common in DLUX apps)
+        if (!triggered) {
+          const spkModal = document.querySelector('#spkWalletModal');
+          if (spkModal) {
+            console.log('🔑 DEBUG: Showing SPK wallet modal directly');
+            const modal = new bootstrap.Modal(spkModal);
+            modal.show();
+            triggered = true;
+          }
+        }
+        
+        // Approach 3: Check if nav component has login method
+        if (!triggered && this.$refs && this.$refs.nav) {
+          console.log('🔑 DEBUG: Trying nav component login method');
+          if (typeof this.$refs.nav.login === 'function') {
+            this.$refs.nav.login();
+            triggered = true;
+          }
+        }
+        
+        // Fallback: Show alert
+        if (!triggered) {
+          console.log('🔑 DEBUG: No login mechanism found - showing alert');
+          alert(`Authentication required${pendingDocumentAccess?.name ? ` for "${pendingDocumentAccess.name}"` : ''}.\n\nPlease use the login options in the navigation menu.`);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error handling login request:', error);
+        alert('Authentication required. Please login to continue.');
+      }
+    },
+    
+    // ✅ LOGIN MODAL CLOSE DETECTION: Handle login modal close events
+    handleLoginModalClose() {
+      console.log('🔑 DEBUG: Login modal closed - dispatching loginModalClosed event', {
+        user: this.account
+      });
+      
+      // Dispatch custom event for auth gate recheck
+      window.dispatchEvent(new CustomEvent('loginModalClosed', {
+        detail: {
+          timestamp: new Date().toISOString(),
+          source: 'v3-user-login-modal',
+          user: this.account  // Include current user for retry logic
+        }
+      }));
+    },
+    
+    // ✅ DIRECT AUTHENTICATION: Handle authentication requests by triggering user's signing method
+    async handleAuthenticationRequest(event) {
+      console.log('🔑 DEBUG: Authentication request received', {
+        ...event.detail,
+        headless: event.detail?.headless || false
+      });
+      
+      const { reason, pendingDocumentAccess, forceRefresh, headless } = event.detail || {};
+      
+      // ✅ FIX: Set pending document access in auth bridge BEFORE authentication
+      if (pendingDocumentAccess) {
+        console.log('🔑 DEBUG: Setting pending document access in auth bridge before authentication', pendingDocumentAccess);
+        this.authBridge.authState.pendingDocumentAccess = pendingDocumentAccess;
+      }
+      
+      try {
+        console.log('🔑 DEBUG: Triggering direct authentication via ensureCollaborationAuth...', {
+          headless,
+          forceRefresh
+        });
+        
+        // Call the same method that other auth buttons use - this triggers the user's signing method
+        console.log('🔐 AUTH DEBUG: About to call ensureCollaborationAuth');
+        
+        // Add timeout to detect if promise never resolves
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Authentication timeout')), 30000)
+        );
+        
+        const headers = await Promise.race([
+          this.ensureCollaborationAuth(forceRefresh),
+          timeoutPromise
+        ]);
+        
+        console.log('🔴 AUTH-DEBUG: ensureCollaborationAuth completed', {
+          hasHeaders: !!headers,
+          account: headers?.['x-account'],
+          headerKeys: headers ? Object.keys(headers) : [],
+          headless
+        });
+        
+        if (headers && headers['x-account']) {
+          console.log('🔑 DEBUG: Authentication successful, headers generated:', {
+            account: headers['x-account'],
+            hasChallenge: !!headers['x-challenge'],
+            hasSignature: !!headers['x-signature'],
+            hasPendingDocument: !!pendingDocumentAccess,
+            headless
+          });
+          
+          // Update auth bridge with fresh headers
+          console.log('🔴 AUTH-FLOW: v3-user calling authBridge.setAuthHeaders from handleAuthenticationRequest', {
+            headers: headers,
+            thisAccount: this.account,
+            headersAccount: headers['x-account'],
+            headerKeys: Object.keys(headers),
+            headless,
+            location: 'handleAuthenticationRequest'
+          });
+          this.authBridge.setAuthHeaders(headers, this.account);
+          
+          // ✅ HEADLESS AUTH: Don't show alerts for headless auth failures
+          // ✅ EMIT AUTH RETRY: After successful authentication, emit retry event
+          // This replaces the emission that was removed from setAuthHeaders
+          // Always emit authRetryReady to ensure document lists refresh when authenticating from File > Open modal
+          console.log('🔴 AUTH-DEBUG: Emitting authRetryReady after successful authentication', {
+            account: this.account,
+            timestamp: Date.now()
+          });
+          this.authBridge.emitAuthRetryIfNeeded('authentication_complete', this.account);
+          
+        } else {
+          console.warn('🔴 AUTH-DEBUG: Authentication failed - no valid headers generated');
+          
+          // ✅ HEADLESS AUTH: Don't show alerts for headless auth
+          if (!headless) {
+            // Show user-friendly error for non-headless auth
+            alert('Authentication failed. Please try again or check your signing method.');
+          }
+        }
+        
+      } catch (error) {
+        console.error('❌ Error handling authentication request:', error);
+        
+        // ✅ HEADLESS AUTH: Don't show alerts for headless auth
+        if (!headless) {
+          // Show user-friendly error based on error type
+          if (error.message && error.message.includes('cancelled')) {
+            console.log('🔑 DEBUG: User cancelled authentication');
+            // Don't show error for user cancellation
+          } else {
+            alert('Authentication failed. Please check your signing method and try again.');
+          }
+        }
+      }
+    },
     
     // Mobile-First UI Methods
     toggleMediaPanel() {
@@ -6750,24 +7033,8 @@ function buyNFT(setname, uid, price, type, callback){
           return {};
         }
 
-        // Check session storage first (user-specific key)
-        if (!forceRefresh) {
-          const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.account}`);
-          if (cachedHeaders) {
-            const headers = JSON.parse(cachedHeaders);
-            const cachedChallenge = parseInt(headers['x-challenge']);
-            const now = Math.floor(Date.now() / 1000);
-            
-            // If headers are valid (less than 23 hours old), reuse them
-            if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
-              this.collaborationAuthHeaders = headers;
-              return headers;
-            } else {
-            }
-          } else {
-          }
-        }
-
+        // ✅ SINGLE SOURCE OF TRUTH: v3-nav handles all auth header caching
+        // Removed duplicate cache check - v3-nav.generateCollaborationAuthHeaders handles this
 
         return new Promise((resolve, reject) => {
           // Use the v3-nav op system for consistency
@@ -6779,9 +7046,27 @@ function buyNFT(setname, uid, price, type, callback){
             time: new Date().getTime(),
             delay: 250,
             title: "Collaboration Authentication",
+            forceRefresh: forceRefresh,  // Pass forceRefresh flag to skip cache in v3-nav
             // Add callbacks for success and error
             onSuccess: (headers) => {
-              this.collaborationAuthHeaders = headers;
+              console.log('🔐 DEBUG: Auth headers generated successfully', {
+                account: headers['x-account'],
+                hasSignature: !!headers['x-signature'],
+                hasChallenge: !!headers['x-challenge']
+              });
+              
+              // ✅ SINGLE SOURCE OF TRUTH: v3-nav.js handles saving auth headers to sessionStorage
+              // Removed duplicate saving here to prevent violations
+              
+              // Update auth bridge with new headers
+              console.log('🔴 AUTH-FLOW: v3-user calling authBridge.setAuthHeaders from generateCollaborationAuthHeaders promise', {
+                headers: headers,
+                thisAccount: this.account,
+                headersAccount: headers['x-account'],
+                location: 'generateCollaborationAuthHeaders-promise'
+              });
+              this.authBridge.setAuthHeaders(headers, this.account);
+              
               resolve(headers);
             },
             onError: (error) => {
@@ -6790,6 +7075,13 @@ function buyNFT(setname, uid, price, type, callback){
           };
 
           // Trigger the operation by setting toSign (this will be picked up by v3-nav)
+          console.log('🔐 AUTH DEBUG: Setting toSign operation', {
+            type: op.type,
+            txid: op.txid,
+            hasOnSuccess: typeof op.onSuccess === 'function',
+            hasOnError: typeof op.onError === 'function',
+            account: this.account
+          });
           this.toSign = op;
         });
       },
@@ -6799,7 +7091,8 @@ function buyNFT(setname, uid, price, type, callback){
       this.isCollaborativeMode = true;
       
       // Generate auth headers if not available
-      if (!this.collaborationAuthHeaders || !this.collaborationAuthHeaders['x-account']) {
+      const currentHeaders = this.authStateManager?.getAuthHeaders();
+      if (!currentHeaders || !currentHeaders['x-account']) {
         await this.generateCollaborationAuthHeaders();
       }
       
@@ -6812,7 +7105,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     
-    async ensureCollaborationAuth() {
+    async ensureCollaborationAuth(forceRefresh = false) {
       // This method ensures auth headers are available for collaborative features
       
       if (!this.account) {
@@ -6821,46 +7114,30 @@ function buyNFT(setname, uid, price, type, callback){
       }
       
       try {
-        const headers = await this.generateCollaborationAuthHeaders();
+        const headers = await this.generateCollaborationAuthHeaders(forceRefresh);
         
-        // Update the reactive data property
-        this.collaborationAuthHeaders = headers;
+        // Headers are already in AuthStateManager from generateCollaborationAuthHeaders
+        
+        // ✅ SINGLE SOURCE OF TRUTH: v3-nav.js handles saving auth headers to sessionStorage
+        // Removed duplicate saving here to prevent violations
         
         return headers;
       } catch (error) {
         console.error('Failed to ensure collaboration auth:', error);
-        // Clear any invalid headers
-        this.collaborationAuthHeaders = {};
+        // Clear any invalid headers from AuthStateManager
+        this.authStateManager?.setAuthHeaders(null);
         return {};
       }
     },
     
     loadCollaborationAuthHeaders() {
-      // Load headers from session storage for current user
-      if (!this.account) {
-        this.collaborationAuthHeaders = {};
-        return;
-      }
-      
-      const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.account}`);
-      if (cachedHeaders) {
-        try {
-          const headers = JSON.parse(cachedHeaders);
-          const cachedChallenge = parseInt(headers['x-challenge']);
-          const now = Math.floor(Date.now() / 1000);
-          
-          // If headers are valid (less than 23 hours old), load them
-          if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
-            this.collaborationAuthHeaders = headers;
-            return;
-          }
-        } catch (e) {
-          console.warn('Invalid cached collaboration headers:', e);
-        }
-      }
-      
-      // Clear invalid/expired headers
-      this.collaborationAuthHeaders = {};
+      // ✅ SINGLE SOURCE OF TRUTH: v3-nav handles all auth header caching
+      // This method is now a no-op to maintain compatibility
+      // v3-nav will handle loading cached headers when needed
+      console.log('🔴 AUTH-FLOW: loadCollaborationAuthHeaders called but skipped - v3-nav is single source of truth', {
+        account: this.account,
+        timestamp: new Date().toISOString()
+      });
     },
     
     exitCollaborativeMode() {
@@ -7929,6 +8206,227 @@ function buyNFT(setname, uid, price, type, callback){
     }
   },
   mounted() {
+    // 🔐 AUTH TIMING: Track component mount order
+    console.log('🔐 AUTH TIMING: v3-user mounted()', {
+      timestamp: new Date().toISOString(),
+      account: this.account,
+      hasLocalStorageUser: !!localStorage.getItem('user')
+    });
+    
+    // 🔐 PERSIST: Enhanced auth persistence logging
+    const mountTime = Date.now();
+    
+    // 🔐 AUTH TIMING: Initial mount state
+    console.log('🔐 AUTH TIMING: v3-user component mounted - initial state', {
+      timestamp: new Date().toISOString(),
+      mountTime: mountTime,
+      currentAccount: this.account,
+      localStorageUser: localStorage.getItem("user"),
+      hasAuthHeaders: !!this.authHeaders,
+      authHeadersAccount: this.authHeaders?.['x-account'],
+      authBridgeExists: !!this.authBridge,
+      authStateManagerExists: !!window.authStateManager
+    });
+    
+    // ✅ FIX: Ensure account is properly initialized from localStorage before auth restoration
+    const storedUser = localStorage.getItem("user");
+    if (storedUser && storedUser !== this.account) {
+      console.log('🔐 PERSIST: Updating account from localStorage before auth restoration', {
+        currentAccount: this.account,
+        storedUser: storedUser
+      });
+      console.log('🔍 V3-USER: Setting account property in mounted:', {
+        oldValue: this.account,
+        newValue: storedUser,
+        timestamp: new Date().toISOString()
+      });
+      this.account = storedUser;
+    }
+    
+    // Listen for user changes from v3-nav
+    this.handleLocalStorageUserChange = (event) => {
+      console.log('🔴 AUTH-FLOW: v3-user received localStorageUserChanged event', {
+        detail: event.detail,
+        currentAccount: this.account
+      });
+      const newUser = event.detail.newUser;
+      if (newUser !== this.account) {
+        console.log('🔴 AUTH-FLOW: v3-user processing user change from v3-nav', { 
+          oldAccount: this.account, 
+          newAccount: newUser,
+          source: event.detail.source,
+          timestamp: new Date().toISOString()
+        });
+        this.updateAccount(newUser); // Use method instead of direct assignment
+      }
+    };
+    window.addEventListener('localStorageUserChanged', this.handleLocalStorageUserChange);
+    
+    // ✅ OFFLINE-FIRST: Connect logout to AuthStateManager
+    // Only clear auth headers on explicit logout, not user switch
+    this.handleLogout = (event) => {
+      if (event.detail && event.detail.source === 'v3-nav-logout') {
+        console.log('🚪 v3-user: Detected logout from v3-nav, clearing all auth state', {
+          source: event.detail.source,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Clear authBridge headers FIRST (it forwards to authStateManager)
+        if (this.authBridge && this.authBridge.logout) {
+          console.log('🔴 AUTH-FLOW: v3-user calling authBridge.logout()');
+          this.authBridge.logout();
+        } else if (window.authStateManager) {
+          // Fallback to direct authStateManager if bridge doesn't have logout
+          console.log('🔴 AUTH-FLOW: v3-user calling authStateManager.logout() directly');
+          window.authStateManager.logout();
+        } else {
+          console.warn('⚠️ v3-user: Neither authBridge.logout nor AuthStateManager available');
+        }
+      }
+    };
+    window.addEventListener('localStorageUserChanged', this.handleLogout);
+    
+    // ✅ SINGLE SOURCE OF TRUTH: Removed auth header restoration from sessionStorage
+    // Headers should only be set during active authentication via v3-nav.js
+    // This prevents stale headers from being restored after logout/login
+    console.log('🔐 SINGLE SOURCE OF TRUTH: Not restoring auth headers from sessionStorage', {
+      timestamp: mountTime,
+      currentAccount: this.account,
+      guestUser: this.account === 'GUEST',
+      authStateManagerExists: !!window.authStateManager,
+      authBridgeExists: !!this.authBridge,
+      note: 'Headers only set during active authentication'
+    });
+    
+    // Sync authentication bridge with current account
+    // This should happen AFTER we potentially restore the account from stored headers
+    this.authBridge.setAccount(this.account);
+    
+    // ✅ AUTH TIMING: Always ensure AuthStateManager knows about the current user
+    if (window.authStateManager && this.account) {
+        window.authStateManager.setUser(this.account);
+        console.log('🔐 AUTH TIMING: Ensured AuthStateManager has current user', {
+            user: this.account,
+            hasAuthHeaders: !!this.authHeaders
+        });
+    }
+    
+    // ✅ AUTHENTICATION FLOW: Listen for login requests from auth modal
+    window.addEventListener('requestLogin', this.handleLoginRequest);
+    
+    // ✅ DIRECT AUTHENTICATION: Listen for direct authentication requests (triggers signing)
+    window.addEventListener('requestAuthentication', this.handleAuthenticationRequest);
+    
+    // ✅ FOCUS MANAGEMENT: Set up global listener for login modal to handle aria-hidden warning
+    this.$nextTick(() => {
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) {
+        // Listen for when modal is about to be hidden
+        loginModal.addEventListener('hide.bs.modal', (e) => {
+          // Blur the modal itself if it has focus
+          if (document.activeElement === loginModal) {
+            console.log('🔍 FOCUS: Blurring login modal before hide');
+            loginModal.blur();
+          }
+          
+          // Also blur any focused element inside the modal
+          const focusedElement = loginModal.querySelector(':focus');
+          if (focusedElement) {
+            console.log('🔍 FOCUS: Blurring focused element inside modal:', focusedElement);
+            focusedElement.blur();
+          }
+          
+          // Move focus to body as a safe fallback
+          document.body.focus();
+        }, { capture: true }); // Use capture phase to run before Bootstrap
+        
+        console.log('🔍 FOCUS: Added focus management listener for login modal');
+      }
+      
+      // ✅ GLOBAL MODAL HANDLER: Add global listener for ALL Bootstrap modals
+      document.addEventListener('hide.bs.modal', function(event) {
+        if (document.activeElement) {
+          console.log('🔍 FOCUS: Global handler - blurring active element before modal hide:', document.activeElement);
+          document.activeElement.blur();
+          // Ensure focus moves to a safe element
+          document.body.focus();
+        }
+      }, true); // Use capture phase
+      
+      console.log('🔍 FOCUS: Added global Bootstrap modal focus handler');
+    });
+    
+    // ✅ SINGLE RESPONSIBILITY: Listen for login modal close
+    // This creates explicit flow: user completes login → emit retry event
+    window.addEventListener('loginModalClosed', (event) => {
+        console.log('🔑 LOGIN MODAL: Detected close event', event.detail);
+        
+        // ✅ MODAL TRANSITION: Check if auth bridge is expecting return to auth modal
+        if (this.authBridge?.authState?.modalTransition?.expectReturn) {
+            // ✅ FIX: Pass the new user account to ensure correct auth check
+            console.log('🔄 AUTH: Completing modal transition back to auth modal with new user', event.detail.user);
+            this.authBridge.completeModalTransition(event.detail.user);
+        }
+        
+        // Only emit retry if user successfully logged in and we have pending access
+        if (event.detail?.user && 
+            event.detail.user !== 'GUEST' && 
+            this.authBridge?.authState?.pendingDocumentAccess) {
+            
+            // ✅ EXPLICIT EMISSION: Following Golden Rule #7
+            // User action (login complete) triggers explicit retry
+            // ✅ FIX: Pass the NEW user to ensure retry uses correct account
+            console.log('🔄 AUTH: User logged in with pending document, triggering retry', {
+                newUser: event.detail.user,
+                pendingDocument: this.authBridge.authState.pendingDocumentAccess
+            });
+            this.authBridge.emitAuthRetryIfNeeded('login_modal_closed', event.detail.user);
+        }
+    });
+    
+    // ✅ EVENT-DRIVEN AUTH CHECK: Handle modal transition completion
+    // This ensures auth check happens AFTER headers are loaded
+    if (this.authBridge) {
+        this.authBridge.on('modalTransitionComplete', async (event) => {
+            console.log('🔄 MODAL TRANSITION: Complete event received', event.detail);
+            
+            // Wait for Vue's reactive system to load headers
+            await this.$nextTick();
+            
+            // Now check if we need authentication
+            const { account, pendingDocumentAccess } = event.detail;
+            
+            // Check if user has valid headers after reactive update
+            const currentHeaders = this.authBridge.getAuthHeaders();
+            const hasValidHeaders = currentHeaders &&
+                                   currentHeaders['x-account'] === account &&
+                                   !this.authBridge.authState.isAuthExpired;
+            
+            const authAction = hasValidHeaders ? 'checking_permissions' : 'authenticate';
+            
+            console.log('🔄 MODAL TRANSITION: Auth check after headers loaded', {
+                account,
+                hasValidHeaders,
+                authAction,
+                currentHeaders: currentHeaders?.['x-account']
+            });
+            
+            // Show auth modal with appropriate action
+            this.authBridge.authState.showModal = true;
+            this.authBridge.authState.authPromptAction = authAction;
+            this.authBridge.notifyStateChange();
+            
+            // If user has valid headers, emit retry
+            if (hasValidHeaders && pendingDocumentAccess) {
+                console.log('🔄 MODAL TRANSITION: Emitting authRetryReady after headers confirmed');
+                this.authBridge.emit('authRetryReady', {
+                    account,
+                    pendingDocumentAccess
+                });
+            }
+        });
+    }
+    
     // Handle responsive behavior
     window.addEventListener('resize', this.handleResize);
     
@@ -8036,8 +8534,8 @@ function buyNFT(setname, uid, price, type, callback){
     }
     //this.init();
     //this.getSNodes();
-    if (localStorage.getItem("user")) {
-      this.account = localStorage.getItem("user");
+    // Account is already set and auth restoration completed, just load user data if not GUEST
+    if (this.account && this.account !== "GUEST") {
       this.getTokenUser(this.account);
       this.getHiveUser(this.account);
       this.getSapi(this.account);
@@ -8121,6 +8619,23 @@ function buyNFT(setname, uid, price, type, callback){
     // Remove resize handler
     window.removeEventListener('resize', this.handleResize);
     
+    // ✅ AUTHENTICATION CLEANUP: Remove login request listener
+    window.removeEventListener('requestLogin', this.handleLoginRequest);
+    
+    // ✅ DIRECT AUTHENTICATION CLEANUP: Remove authentication request listener
+    window.removeEventListener('requestAuthentication', this.handleAuthenticationRequest);
+    
+    // Remove localStorage user change listener
+    if (this.handleLocalStorageUserChange) {
+      window.removeEventListener('localStorageUserChanged', this.handleLocalStorageUserChange);
+    }
+    
+    // ✅ MODAL TRANSITION CLEANUP: Remove modal transition complete listener
+    if (this.authBridge) {
+      // Note: DLUXAuthBridge will clean up its own listeners
+      console.log('🔄 CLEANUP: Auth bridge listeners will be cleaned up by auth bridge');
+    }
+    
     // Remove TipTap editor event listeners
     window.removeEventListener('tiptap-editor-ready', this.handleEditorReady);
     window.removeEventListener('tiptap-editor-destroyed', this.handleEditorDestroyed);
@@ -8151,6 +8666,84 @@ function buyNFT(setname, uid, price, type, callback){
     });
   },
   watch: {
+    // Keep auth bridge in sync with account changes
+    account: {
+      handler(newAccount, oldAccount) {
+        // 🔐 AUTH TIMING: Track account changes
+        console.log('🔐 AUTH TIMING: Account watcher triggered in v3-user', {
+          oldAccount: oldAccount,
+          newAccount: newAccount,
+          timestamp: new Date().toISOString(),
+          isInitial: oldAccount === undefined,
+          authBridgeExists: !!this.authBridge,
+          hasAuthHeaders: !!this.authHeaders
+        });
+        
+        console.log('🔍 V3-USER: Account watcher - detailed state:', {
+          watcherTriggered: true,
+          oldAccount,
+          newAccount,
+          accountChanged: oldAccount !== newAccount,
+          willCallAuthStateManager: !!window.authStateManager && typeof window.authStateManager.handleExternalUsernameChange === 'function' && oldAccount !== undefined
+        });
+        
+        // 🔐 AUTH TIMING: Defensive localStorage save
+        if (newAccount && newAccount !== 'GUEST') {
+          console.log('🔐 AUTH TIMING: Saving user to localStorage from v3-user account watcher', {
+            user: newAccount,
+            timestamp: new Date().toISOString()
+          });
+          localStorage.setItem('user', newAccount);
+          
+          // Verify save
+          const savedUser = localStorage.getItem('user');
+          console.log('🔐 AUTH TIMING: localStorage save verification from v3-user', {
+            saved: savedUser === newAccount,
+            savedUser: savedUser,
+            timestamp: new Date().toISOString()
+          });
+        } else if (!newAccount || newAccount === 'GUEST') {
+          console.log('🔐 AUTH TIMING: Not saving GUEST/null user to localStorage', {
+            newAccount: newAccount
+          });
+        }
+        
+        if (this.authBridge) {
+          this.authBridge.setAccount(newAccount);
+        }
+        
+        // ✅ GOLDEN RULE #1: Notify AuthStateManager of username change
+        // This ensures auth headers are cleared when switching users
+        console.log('🔴 AUTH-FLOW: v3-user account watcher checking if should notify AuthStateManager', {
+          hasAuthStateManager: !!window.authStateManager,
+          hasMethod: window.authStateManager && typeof window.authStateManager.handleExternalUsernameChange === 'function',
+          oldAccountNotUndefined: oldAccount !== undefined,
+          oldAccount,
+          newAccount
+        });
+        if (window.authStateManager && 
+            typeof window.authStateManager.handleExternalUsernameChange === 'function' && 
+            oldAccount !== undefined) {  // Skip initial load
+          console.log('🔴 AUTH-FLOW: v3-user notifying AuthStateManager of username change', {
+            oldAccount,
+            newAccount,
+            source: 'v3-user-watcher'
+          });
+          window.authStateManager.handleExternalUsernameChange(newAccount, 'v3-user-watcher');
+        }
+        
+        // Logic from the second watcher
+        this.getHiveUser(newAccount);
+        this.getSapi(newAccount);
+        this.getRcAccount(newAccount);
+        if (document.getElementById('accountDistributionChart') || document.getElementById('typeDistributionChart')) {
+          this.initializeCharts();
+        }
+        this.loadCollaborationAuthHeaders();
+      },
+      immediate: true
+    },
+    
     activeTab: {
       handler(newTab, oldTab) {
         
@@ -8199,19 +8792,6 @@ function buyNFT(setname, uid, price, type, callback){
         }, 0);
       },
       deep: true,
-    },
-    "account": {
-      handler(newValue) {
-        this.getHiveUser(newValue);
-        //this.getSpkStats();
-        this.getSapi(newValue);
-        this.getRcAccount(newValue); // Fetch RC account data
-        //this.fetchDelegationsData(); // Fetch delegations data
-        if (document.getElementById('accountDistributionChart') || document.getElementById('typeDistributionChart')) {
-          this.initializeCharts(); // Initialize charts
-        }
-        this.loadCollaborationAuthHeaders(); // Load collaboration headers for new user
-      },
     },
     "pageAccount": {
       handler(newValue, oldValue) {

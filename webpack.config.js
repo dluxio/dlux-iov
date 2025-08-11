@@ -4,8 +4,7 @@ const webpack = require('webpack');
 module.exports = {
   mode: 'production',
   entry: {
-    'collaboration': './src/collaboration-bundle.js',
-    videoPlayer: './src/video-player-bundle.js'
+    'collaboration': './src/collaboration-bundle.js'
   },
   output: {
     filename: '[name].bundle.js',
