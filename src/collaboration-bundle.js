@@ -975,7 +975,7 @@ const IPFSVideo = Node.create({
           // Initialize immediately - TipTap nodeView DOM is stable
           player = await window.IPFSHLSPlayer.initializePlayer(video, {
             src: node.attrs.src,
-            type: node.attrs.type || (node.attrs.src && node.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'),
+            type: node.attrs.type,  // Pass through as-is, let IPFSHLSPlayer handle detection
             poster: node.attrs.poster,
             autoplay: node.attrs.autoplay,
             loop: node.attrs.loop,
@@ -1024,11 +1024,15 @@ const IPFSVideo = Node.create({
           
           // Update source if changed
           if (player && updatedNode.attrs.src !== node.attrs.src) {
-            const sourceType = updatedNode.attrs.type || (updatedNode.attrs.src.includes('.m3u8') ? 'application/x-mpegURL' : 'video/mp4');
-            player.src({
-              src: updatedNode.attrs.src,
-              type: sourceType
-            });
+            // Let IPFSHLSPlayer's internal logic handle type detection
+            if (updatedNode.attrs.type) {
+              player.src({
+                src: updatedNode.attrs.src,
+                type: updatedNode.attrs.type
+              });
+            } else {
+              player.src(updatedNode.attrs.src);
+            }
           }
           
           node = updatedNode;

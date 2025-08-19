@@ -24,12 +24,240 @@ import 'videojs-hls-quality-selector';
  */
 class IPFSHLSPlayer {
   /**
+   * Check if URL is an IPFS URL
+   * @param {string} url - URL to check
+   * @returns {boolean} True if IPFS URL
+   */
+  static isIPFSURL(url) {
+    if (!url) return false;
+    return url.includes('/ipfs/') || 
+           url.includes('ipfs.io') || 
+           url.includes('ipfs.dlux.io') || 
+           url.includes('gateway.pinata.cloud') ||
+           url.includes('dweb.link') || 
+           url.includes('cf-ipfs.com') ||
+           url.includes('cloudflare-ipfs.com');
+  }
+
+  /**
+   * MIME type normalization map
+   * Maps various MIME type variants to Video.js-compatible types
+   */
+  static MIME_NORMALIZATION = {
+    // QuickTime/MOV → MP4 (same container)
+    'video/quicktime': 'video/mp4',
+    'video/x-quicktime': 'video/mp4',
+    
+    // MP4 variants
+    'video/x-m4v': 'video/mp4',
+    'video/3gpp': 'video/mp4',
+    'video/3gpp2': 'video/mp4',
+    'video/mp4v-es': 'video/mp4',
+    
+    // WebM variants
+    'video/x-webm': 'video/webm',
+    
+    // HLS variants
+    'application/vnd.apple.mpegurl': 'application/x-mpegURL',
+    'audio/mpegurl': 'application/x-mpegURL',
+    'audio/x-mpegurl': 'application/x-mpegURL',
+    
+    // AVI variants
+    'video/avi': 'video/x-msvideo',
+    'video/msvideo': 'video/x-msvideo',
+    'video/x-avi': 'video/x-msvideo',
+    
+    // MPEG variants
+    'video/mpeg': 'video/mp2t',
+    'video/x-mpeg': 'video/mp2t',
+    
+    // Keep standard types as-is
+    'video/mp4': 'video/mp4',
+    'video/webm': 'video/webm',
+    'video/ogg': 'video/ogg',
+    'video/x-msvideo': 'video/x-msvideo',
+    'video/mp2t': 'video/mp2t',
+    'application/x-mpegURL': 'application/x-mpegURL'
+  };
+
+  /**
+   * Detect MIME type from file content (magic bytes and text signatures)
+   * @param {string} url - URL to check
+   * @returns {Promise<string|null>} MIME type or null
+   */
+  static async detectFromContent(url) {
+    const config = window.ipfsHLSPlayerConfig || {};
+    
+    try {
+      // Fetch first 200 bytes (enough for all formats including MPEG-TS)
+      const response = await fetch(url, {
+        headers: { 'Range': 'bytes=0-200' },
+        mode: 'cors'
+      });
+      
+      const buffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(buffer);
+      
+      // Check for HLS (text-based, starts with #EXTM3U)
+      if (bytes[0] === 0x23) { // '#' character
+        const text = new TextDecoder().decode(bytes);
+        if (text.startsWith('#EXTM3U')) {
+          if (config.debug) {
+            console.log('IPFSHLSPlayer: Detected HLS playlist');
+          }
+          return 'application/x-mpegURL';
+        }
+      }
+      
+      // Check for MP4/MOV/QuickTime (all use ftyp box)
+      if (bytes.length > 7 &&
+          bytes[4] === 0x66 && bytes[5] === 0x74 && 
+          bytes[6] === 0x79 && bytes[7] === 0x70) {
+        // Extract brand for debugging
+        if (config.debug && bytes.length > 11) {
+          const brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]).replace(/\0/g, ' ').trim();
+          console.log(`IPFSHLSPlayer: Detected MP4-compatible with brand: ${brand}`);
+        }
+        return 'video/mp4';
+      }
+      
+      // Check for WebM/MKV (EBML header)
+      if (bytes.length > 3 &&
+          bytes[0] === 0x1A && bytes[1] === 0x45 && 
+          bytes[2] === 0xDF && bytes[3] === 0xA3) {
+        if (config.debug) {
+          console.log('IPFSHLSPlayer: Detected WebM/Matroska');
+        }
+        return 'video/webm';
+      }
+      
+      // Check for Ogg
+      if (bytes.length > 3 &&
+          bytes[0] === 0x4F && bytes[1] === 0x67 && 
+          bytes[2] === 0x67 && bytes[3] === 0x53) {
+        if (config.debug) {
+          console.log('IPFSHLSPlayer: Detected Ogg');
+        }
+        return 'video/ogg';
+      }
+      
+      // Check for AVI
+      if (bytes.length > 11 &&
+          bytes[0] === 0x52 && bytes[1] === 0x49 && 
+          bytes[2] === 0x46 && bytes[3] === 0x46 &&
+          bytes[8] === 0x41 && bytes[9] === 0x56 && 
+          bytes[10] === 0x49 && bytes[11] === 0x20) {
+        if (config.debug) {
+          console.log('IPFSHLSPlayer: Detected AVI');
+        }
+        return 'video/x-msvideo';
+      }
+      
+      // Check for MPEG-TS (sync byte 0x47)
+      if (bytes[0] === 0x47) {
+        // MPEG-TS has sync bytes every 188 bytes
+        if (bytes.length > 188 && bytes[188] === 0x47) {
+          if (config.debug) {
+            console.log('IPFSHLSPlayer: Detected MPEG-TS (confirmed by sync pattern)');
+          }
+          return 'video/mp2t';
+        }
+        // Single sync byte might still be TS
+        if (config.debug) {
+          console.log('IPFSHLSPlayer: Possible MPEG-TS (single sync byte)');
+        }
+        return 'video/mp2t';
+      }
+      
+      // Fallback: Check Content-Type header
+      const contentType = response.headers.get('content-type');
+      if (contentType) {
+        const mimeType = contentType.split(';')[0].trim();
+        const normalized = this.MIME_NORMALIZATION[mimeType];
+        if (config.debug) {
+          if (normalized && normalized !== mimeType) {
+            console.log(`IPFSHLSPlayer: Normalized ${mimeType} to ${normalized}`);
+          }
+        }
+        return normalized || mimeType;
+      }
+      
+    } catch (error) {
+      if (config.debug) {
+        console.warn('IPFSHLSPlayer: Content detection failed:', error);
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Register Video.js middleware for IPFS MIME type detection
+   * Must be called before creating any players
+   */
+  static registerIPFSMiddleware() {
+    // Check if middleware already registered
+    if (this._middlewareRegistered) return;
+    
+    const self = this;
+    const config = window.ipfsHLSPlayerConfig || {};
+    
+    // Register middleware for all sources
+    videojs.use('*', () => {
+      return {
+        async setSource(srcObj, next) {
+          // Only process IPFS URLs without explicit type
+          if (self.isIPFSURL(srcObj.src) && !srcObj.type) {
+            if (config.debug) {
+              console.log('IPFSHLSPlayer: Detecting MIME type for IPFS URL:', srcObj.src);
+            }
+            
+            try {
+              // Use comprehensive content detection
+              const type = await self.detectFromContent(srcObj.src);
+              
+              if (config.debug) {
+                console.log('IPFSHLSPlayer: Final MIME type:', type || 'unknown (using fallback)');
+              }
+              
+              // Pass modified source with detected type
+              return next(null, {
+                src: srcObj.src,
+                type: type || 'video/mp4' // Last resort fallback
+              });
+              
+            } catch (error) {
+              console.warn('IPFSHLSPlayer: MIME detection failed:', error);
+              // On error, proceed with fallback type
+              return next(null, {
+                src: srcObj.src,
+                type: 'video/mp4'
+              });
+            }
+          }
+          
+          // Pass through non-IPFS or already-typed sources
+          return next(null, srcObj);
+        }
+      };
+    });
+    
+    this._middlewareRegistered = true;
+    
+    if (config.debug) {
+      console.log('IPFSHLSPlayer: Middleware registered for IPFS MIME type detection');
+    }
+  }
+  /**
    * Initialize a Video.js player with IPFS-optimized settings
    * @param {HTMLVideoElement} element - Video element to enhance
    * @param {Object} options - Player configuration options
    * @returns {Promise<Player>} Video.js player instance
    */
   static async initializePlayer(element, options = {}) {
+    // Register middleware on first initialization
+    this.registerIPFSMiddleware();
+    
     // Prevent double initialization
     if (element._ipfsHLSPlayer || element.dataset.ipfsEnhanced === 'true') {
       const config = window.ipfsHLSPlayerConfig || {};
@@ -77,25 +305,57 @@ class IPFSHLSPlayer {
     // Initialize Video.js
     const player = videojs(element, playerOptions);
     
+    // Always initialize quality levels so it can track them as they load
+    player.qualityLevels();
+    
     // Set source if provided
     if (options.src) {
       const sourceType = options.type || this.detectSourceType(options.src);
-      player.src({
-        src: options.src,
-        type: sourceType
-      });
+      
+      // Build source config
+      const sourceConfig = { src: options.src };
+      
+      // Add type if we have one (middleware will handle IPFS URLs without type)
+      if (sourceType) {
+        sourceConfig.type = sourceType;
+      }
+      
+      // Pass to Video.js - middleware will intercept if needed
+      player.src(sourceConfig);
       
       // Add HLS quality selector if it's HLS content
       if (sourceType === 'application/x-mpegURL' || options.src.includes('.m3u8')) {
-        player.ready(() => {
-          // Initialize quality levels
-          player.qualityLevels();
+        // We know it's HLS from the start
+        player.hlsQualitySelector({
+          displayCurrentQuality: true,
+          placementIndex: 2
+        });
+        
+        const config = window.ipfsHLSPlayerConfig || {};
+        if (config.debug) {
+          console.log('IPFSHLSPlayer: Added HLS quality selector for known HLS content');
+        }
+      } else {
+        // For unknown types (like IPFS URLs), check as soon as the source type is determined
+        // Use loadstart which fires earlier than loadedmetadata
+        player.one('loadstart', () => {
+          const actualType = player.currentType();
           
-          // Add quality selector to control bar
-          player.hlsQualitySelector({
-            displayCurrentQuality: true,
-            placementIndex: 2
-          });
+          // Check if it's HLS content detected by middleware
+          if (actualType === 'application/x-mpegURL' || 
+              actualType === 'application/vnd.apple.mpegurl') {
+            
+            // Add quality selector immediately - quality levels haven't loaded yet
+            player.hlsQualitySelector({
+              displayCurrentQuality: true,
+              placementIndex: 2
+            });
+            
+            const config = window.ipfsHLSPlayerConfig || {};
+            if (config.debug) {
+              console.log('IPFSHLSPlayer: Added HLS quality selector after type detection:', actualType);
+            }
+          }
         });
       }
     }
@@ -131,10 +391,10 @@ class IPFSHLSPlayer {
   /**
    * Detect video source type from URL
    * @param {string} src - Video source URL
-   * @returns {string} MIME type
+   * @returns {string|null} MIME type or null if unknown
    */
   static detectSourceType(src) {
-    if (!src) return 'video/mp4';
+    if (!src) return null;
     
     const srcLower = src.toLowerCase();
     if (srcLower.includes('.m3u8')) return 'application/x-mpegURL';
@@ -142,7 +402,7 @@ class IPFSHLSPlayer {
     if (srcLower.includes('.webm')) return 'video/webm';
     if (srcLower.includes('.ogg') || srcLower.includes('.ogv')) return 'video/ogg';
     
-    return 'video/mp4'; // Default
+    return null; // Let browser detect type
   }
   
   /**
