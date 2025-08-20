@@ -74286,30 +74286,176 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
         console.log('IPFSHLSPlayer: Middleware registered for IPFS MIME type detection');
       }
     }
+
+    /**
+     * Capability Detection System
+     * Detect browser capabilities to determine the best playback strategy
+     */
+
+    // Cache capabilities to avoid repeated detection
+  }, {
+    key: "detectCapabilities",
+    value:
+    /**
+     * Detect all relevant browser capabilities
+     * @returns {Object} Browser capabilities
+     */
+    function detectCapabilities() {
+      if (this.capabilities) return this.capabilities;
+      this.capabilities = {
+        hasNativeHLS: this.hasNativeHLSSupport(),
+        hasMSE: this.hasMSESupport(),
+        canOverrideNativeHLS: this.canOverrideNativeHLS(),
+        supportsAbsoluteURLsInHLS: this.supportsAbsoluteURLsInHLS()
+      };
+      var config = window.ipfsHLSPlayerConfig || {};
+      if (config.debug) {
+        console.log('IPFSHLSPlayer: Detected capabilities:', this.capabilities);
+      }
+      return this.capabilities;
+    }
+
+    /**
+     * Check if browser has native HLS support
+     * @returns {boolean} True if native HLS is supported
+     */
+  }, {
+    key: "hasNativeHLSSupport",
+    value: function hasNativeHLSSupport() {
+      var video = document.createElement('video');
+      var canPlayHLS = video.canPlayType('application/vnd.apple.mpegurl') !== '' || video.canPlayType('application/x-mpegURL') !== '';
+      return canPlayHLS;
+    }
+
+    /**
+     * Check if browser has MediaSource Extensions support
+     * @returns {boolean} True if MSE is supported
+     */
+  }, {
+    key: "hasMSESupport",
+    value: function hasMSESupport() {
+      return !!(window.MediaSource || window.WebKitMediaSource);
+    }
+
+    /**
+     * Check if Video.js can successfully override native HLS
+     * Safari's native HLS cannot be properly overridden by Video.js
+     * @returns {boolean} True if override will work
+     */
+  }, {
+    key: "canOverrideNativeHLS",
+    value: function canOverrideNativeHLS() {
+      // If no native HLS, override isn't needed
+      if (!this.hasNativeHLSSupport()) return true;
+
+      // If browser has both native HLS and MSE, it's likely Safari
+      // Safari's native HLS cannot be properly overridden by Video.js
+      // This is a known Video.js 8.x limitation
+      if (this.hasNativeHLSSupport() && this.hasMSESupport()) {
+        // Conservative approach: assume override won't work
+        // This catches Safari without browser sniffing
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     * Check if native HLS supports absolute URLs in playlists
+     * Required for IPFS HLS content with CID-based URLs
+     * @returns {boolean} True if absolute URLs are supported
+     */
+  }, {
+    key: "supportsAbsoluteURLsInHLS",
+    value: function supportsAbsoluteURLsInHLS() {
+      // All known native HLS implementations support absolute URLs
+      // This could be tested more rigorously if edge cases are found
+      return this.hasNativeHLSSupport();
+    }
+
+    /**
+     * Determine which player strategy to use based on capabilities
+     * @param {string} src - Source URL
+     * @param {string} type - MIME type (optional)
+     * @returns {string} 'native' or 'videojs'
+     */
+  }, {
+    key: "getPlayerStrategy",
+    value: function getPlayerStrategy(src, type) {
+      var caps = this.detectCapabilities();
+      var isHLS = this.isHLSContent(src, type);
+      var config = window.ipfsHLSPlayerConfig || {};
+      if (isHLS) {
+        // For HLS content, choose based on capabilities
+        if (caps.hasNativeHLS && !caps.canOverrideNativeHLS) {
+          // Has native HLS but Video.js can't override (Safari scenario)
+          if (config.debug) {
+            console.log('IPFSHLSPlayer: Using native HLS (Video.js override not possible)');
+          }
+          return 'native';
+        } else if (caps.hasMSE) {
+          // Has MSE, use Video.js HLS
+          if (config.debug) {
+            console.log('IPFSHLSPlayer: Using Video.js HLS (MSE available)');
+          }
+          return 'videojs';
+        } else if (caps.hasNativeHLS) {
+          // Fallback to native if available
+          if (config.debug) {
+            console.log('IPFSHLSPlayer: Using native HLS (no MSE)');
+          }
+          return 'native';
+        } else {
+          // No HLS support at all
+          console.warn('IPFSHLSPlayer: No HLS support detected');
+          return 'videojs'; // Try Video.js anyway
+        }
+      }
+
+      // For non-HLS content, prefer Video.js if available
+      return caps.hasMSE ? 'videojs' : 'native';
+    }
+
+    /**
+     * Check if content is HLS
+     * @param {string} src - Source URL
+     * @param {string} type - MIME type (optional)
+     * @returns {boolean} True if HLS content
+     */
+  }, {
+    key: "isHLSContent",
+    value: function isHLSContent(src, type) {
+      if (!src) return false;
+
+      // Check explicit type
+      if (type === 'application/x-mpegURL' || type === 'application/vnd.apple.mpegurl') {
+        return true;
+      }
+
+      // Check URL patterns
+      return src.includes('.m3u8') || src.includes('/hls/');
+    }
+
     /**
      * Initialize a Video.js player with IPFS-optimized settings
      * @param {HTMLVideoElement} element - Video element to enhance
      * @param {Object} options - Player configuration options
-     * @returns {Promise<Player>} Video.js player instance
+     * @returns {Promise<Player>} Video.js player instance or native wrapper
      */
   }, {
     key: "initializePlayer",
     value: (function () {
       var _initializePlayer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(element) {
         var options,
-          config,
-          defaultOptions,
-          playerOptions,
-          player,
-          sourceType,
-          sourceConfig,
           _config,
+          sourceType,
+          strategy,
+          config,
           _args3 = arguments;
         return _regenerator().w(function (_context3) {
           while (1) switch (_context3.n) {
             case 0:
               options = _args3.length > 1 && _args3[1] !== undefined ? _args3[1] : {};
-              // Register middleware on first initialization
+              // Register middleware on first initialization (for Video.js path)
               this.registerIPFSMiddleware();
 
               // Prevent double initialization
@@ -74317,15 +74463,201 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
                 _context3.n = 1;
                 break;
               }
-              config = window.ipfsHLSPlayerConfig || {};
-              if (config.debug) {
+              _config = window.ipfsHLSPlayerConfig || {};
+              if (_config.debug) {
                 console.log('IPFSHLSPlayer: Video already enhanced, skipping duplicate initialization for:', element.id || 'no-id');
               }
               return _context3.a(2, element._ipfsHLSPlayer);
             case 1:
-              _context3.n = 2;
-              return _ensureVideoJSStyles();
+              // Detect source type if not provided
+              sourceType = options.type || (options.src ? this.detectSourceType(options.src) : null); // Determine which player to use based on capabilities
+              strategy = this.getPlayerStrategy(options.src, sourceType);
+              config = window.ipfsHLSPlayerConfig || {};
+              if (config.debug) {
+                console.log('IPFSHLSPlayer: Player strategy:', strategy, 'for', options.src);
+              }
+
+              // Route to appropriate player implementation
+              if (!(strategy === 'native')) {
+                _context3.n = 2;
+                break;
+              }
+              return _context3.a(2, this.initializeNativePlayer(element, options));
             case 2:
+              return _context3.a(2, this.initializeVideoJSPlayer(element, options));
+            case 3:
+              return _context3.a(2);
+          }
+        }, _callee3, this);
+      }));
+      function initializePlayer(_x2) {
+        return _initializePlayer.apply(this, arguments);
+      }
+      return initializePlayer;
+    }()
+    /**
+     * Initialize a native HTML5 player (for Safari HLS)
+     * @param {HTMLVideoElement} element - Video element to enhance
+     * @param {Object} options - Player configuration options
+     * @returns {Object} Native player wrapper with Video.js-compatible API
+     */
+    )
+  }, {
+    key: "initializeNativePlayer",
+    value: function initializeNativePlayer(element) {
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      var config = window.ipfsHLSPlayerConfig || {};
+      if (config.debug) {
+        console.log('IPFSHLSPlayer: Initializing native player for:', options.src);
+      }
+
+      // Ensure element has an ID
+      if (!element.id) {
+        element.id = "ipfs-video-".concat(Math.random().toString(36).substr(2, 9));
+      }
+
+      // Configure native video element
+      element.controls = true;
+      if (options.src) element.src = options.src;
+
+      // Apply options
+      if (options.poster) element.poster = options.poster;
+      if (options.autoplay) element.autoplay = true;
+      if (options.muted) element.muted = true;
+      if (options.loop) element.loop = true;
+      if (options.preload) element.preload = options.preload;
+
+      // Apply CSS for consistent styling
+      element.classList.add('video-js', 'vjs-default-skin');
+
+      // Mark as enhanced
+      element.dataset.ipfsEnhanced = 'true';
+
+      // Create wrapper with Video.js-compatible API
+      var wrapper = {
+        // Core methods
+        play: function play() {
+          return element.play();
+        },
+        pause: function pause() {
+          return element.pause();
+        },
+        paused: function paused() {
+          return element.paused;
+        },
+        currentTime: function currentTime(time) {
+          if (time !== undefined) element.currentTime = time;
+          return element.currentTime;
+        },
+        duration: function duration() {
+          return element.duration;
+        },
+        volume: function volume(vol) {
+          if (vol !== undefined) element.volume = vol;
+          return element.volume;
+        },
+        muted: function muted(mute) {
+          if (mute !== undefined) element.muted = mute;
+          return element.muted;
+        },
+        // Source management
+        src: function src(source) {
+          if (source) {
+            element.src = typeof source === 'string' ? source : source.src;
+          }
+          return element.src;
+        },
+        currentSrc: function currentSrc() {
+          return element.currentSrc;
+        },
+        currentType: function currentType() {
+          return options.type || 'application/x-mpegURL';
+        },
+        // Event handling
+        on: function on(event, handler) {
+          return element.addEventListener(event, handler);
+        },
+        off: function off(event, handler) {
+          return element.removeEventListener(event, handler);
+        },
+        one: function one(event, handler) {
+          return element.addEventListener(event, handler, {
+            once: true
+          });
+        },
+        // Lifecycle
+        ready: function ready(callback) {
+          if (element.readyState >= 1) {
+            callback();
+          } else {
+            element.addEventListener('loadedmetadata', callback, {
+              once: true
+            });
+          }
+        },
+        dispose: function dispose() {
+          element.src = '';
+          element.load();
+          delete element._ipfsHLSPlayer;
+          element.dataset.ipfsEnhanced = 'false';
+        },
+        // Element access
+        el: function el() {
+          return element;
+        },
+        // Control bar (mock for compatibility)
+        controlBar: {
+          getChild: function getChild() {
+            return null;
+          },
+          show: function show() {},
+          hide: function hide() {}
+        },
+        // Quality levels (mock for compatibility)
+        qualityLevels: function qualityLevels() {
+          return {
+            on: function on() {},
+            off: function off() {},
+            levels_: []
+          };
+        },
+        // Type identification
+        isNativePlayer: true
+      };
+
+      // Store reference
+      element._ipfsHLSPlayer = wrapper;
+      if (config.debug) {
+        console.log('IPFSHLSPlayer: Native player initialized successfully');
+      }
+      return wrapper;
+    }
+
+    /**
+     * Initialize a Video.js player with IPFS-optimized settings
+     * @param {HTMLVideoElement} element - Video element to enhance
+     * @param {Object} options - Player configuration options
+     * @returns {Promise<Player>} Video.js player instance
+     */
+  }, {
+    key: "initializeVideoJSPlayer",
+    value: (function () {
+      var _initializeVideoJSPlayer = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(element) {
+        var options,
+          defaultOptions,
+          playerOptions,
+          player,
+          sourceType,
+          sourceConfig,
+          config,
+          _args4 = arguments;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
+            case 0:
+              options = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : {};
+              _context4.n = 1;
+              return _ensureVideoJSStyles();
+            case 1:
               // Ensure element has an ID for Video.js
               if (!element.id) {
                 element.id = "ipfs-video-".concat(Math.random().toString(36).substr(2, 9));
@@ -74378,8 +74710,8 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
                     displayCurrentQuality: true,
                     placementIndex: 2
                   });
-                  _config = window.ipfsHLSPlayerConfig || {};
-                  if (_config.debug) {
+                  config = window.ipfsHLSPlayerConfig || {};
+                  if (config.debug) {
                     console.log('IPFSHLSPlayer: Added HLS quality selector for known HLS content');
                   }
                 } else {
@@ -74414,14 +74746,14 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
 
               // Mark as enhanced to prevent double initialization
               element.dataset.ipfsEnhanced = 'true';
-              return _context3.a(2, player);
+              return _context4.a(2, player);
           }
-        }, _callee3, this);
+        }, _callee4, this);
       }));
-      function initializePlayer(_x2) {
-        return _initializePlayer.apply(this, arguments);
+      function initializeVideoJSPlayer(_x3) {
+        return _initializeVideoJSPlayer.apply(this, arguments);
       }
-      return initializePlayer;
+      return initializeVideoJSPlayer;
     }()
     /**
      * Destroy a player instance and clean up
@@ -74466,36 +74798,36 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
   }, {
     key: "enhanceVideoElement",
     value: (function () {
-      var _enhanceVideoElement = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(video) {
+      var _enhanceVideoElement = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(video) {
         var options,
           state,
           config,
           elementOptions,
           player,
-          _args4 = arguments,
+          _args5 = arguments,
           _t3;
-        return _regenerator().w(function (_context4) {
-          while (1) switch (_context4.p = _context4.n) {
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.p = _context5.n) {
             case 0:
-              options = _args4.length > 1 && _args4[1] !== undefined ? _args4[1] : {};
+              options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {};
               if (this.isVideoReady(video)) {
-                _context4.n = 1;
+                _context5.n = 1;
                 break;
               }
               state = this.getVideoState(video);
               throw new Error("Video not ready for enhancement: ".concat(JSON.stringify(state)));
             case 1:
               if (!(video.dataset.ipfsEnhanced === 'true')) {
-                _context4.n = 2;
+                _context5.n = 2;
                 break;
               }
               config = window.ipfsHLSPlayerConfig || {};
               if (config.debug) {
                 console.log('IPFSHLSPlayer: Video already enhanced, returning existing player:', video.id || 'no-id');
               }
-              return _context4.a(2, video._ipfsHLSPlayer);
+              return _context5.a(2, video._ipfsHLSPlayer);
             case 2:
-              _context4.p = 2;
+              _context5.p = 2;
               // Apply Video.js classes and ensure wrapper
               this.applyVideoJSClasses(video, options);
               this.ensureVideoWrapper(video);
@@ -74509,24 +74841,24 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
                 loop: video.loop,
                 muted: video.muted
               }, options); // Initialize player
-              _context4.n = 3;
+              _context5.n = 3;
               return this.initializePlayer(video, elementOptions);
             case 3:
-              player = _context4.v;
+              player = _context5.v;
               // Mark as enhanced
               video.dataset.ipfsEnhanced = 'true';
-              return _context4.a(2, player);
+              return _context5.a(2, player);
             case 4:
-              _context4.p = 4;
-              _t3 = _context4.v;
+              _context5.p = 4;
+              _t3 = _context5.v;
               console.error('IPFSHLSPlayer: Enhancement failed for video:', video.id || 'no-id', _t3);
               throw _t3;
             case 5:
-              return _context4.a(2);
+              return _context5.a(2);
           }
-        }, _callee4, this, [[2, 4]]);
+        }, _callee5, this, [[2, 4]]);
       }));
-      function enhanceVideoElement(_x3) {
+      function enhanceVideoElement(_x4) {
         return _enhanceVideoElement.apply(this, arguments);
       }
       return enhanceVideoElement;
@@ -74652,7 +74984,7 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
   }, {
     key: "enhanceStaticVideos",
     value: (function () {
-      var _enhanceStaticVideos = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+      var _enhanceStaticVideos = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
         var container,
           config,
           videos,
@@ -74661,13 +74993,13 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
           _step,
           video,
           player,
-          _args5 = arguments,
+          _args6 = arguments,
           _t4,
           _t5;
-        return _regenerator().w(function (_context5) {
-          while (1) switch (_context5.p = _context5.n) {
+        return _regenerator().w(function (_context6) {
+          while (1) switch (_context6.p = _context6.n) {
             case 0:
-              container = _args5.length > 0 && _args5[0] !== undefined ? _args5[0] : document;
+              container = _args6.length > 0 && _args6[0] !== undefined ? _args6[0] : document;
               config = window.ipfsHLSPlayerConfig || {};
               videos = container.querySelectorAll('video:not([data-ipfs-enhanced])');
               players = [];
@@ -74675,47 +75007,47 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
                 console.log("IPFSHLSPlayer: Found ".concat(videos.length, " static videos to enhance"));
               }
               _iterator = _createForOfIteratorHelper(videos);
-              _context5.p = 1;
+              _context6.p = 1;
               _iterator.s();
             case 2:
               if ((_step = _iterator.n()).done) {
-                _context5.n = 7;
+                _context6.n = 7;
                 break;
               }
               video = _step.value;
-              _context5.p = 3;
-              _context5.n = 4;
+              _context6.p = 3;
+              _context6.n = 4;
               return this.enhanceVideoElement(video);
             case 4:
-              player = _context5.v;
+              player = _context6.v;
               players.push(player);
               if (config.debug) {
                 console.log('IPFSHLSPlayer: Successfully enhanced static video:', video.id || 'no-id');
               }
-              _context5.n = 6;
+              _context6.n = 6;
               break;
             case 5:
-              _context5.p = 5;
-              _t4 = _context5.v;
+              _context6.p = 5;
+              _t4 = _context6.v;
               console.error('Failed to enhance static video:', _t4);
             case 6:
-              _context5.n = 2;
+              _context6.n = 2;
               break;
             case 7:
-              _context5.n = 9;
+              _context6.n = 9;
               break;
             case 8:
-              _context5.p = 8;
-              _t5 = _context5.v;
+              _context6.p = 8;
+              _t5 = _context6.v;
               _iterator.e(_t5);
             case 9:
-              _context5.p = 9;
+              _context6.p = 9;
               _iterator.f();
-              return _context5.f(9);
+              return _context6.f(9);
             case 10:
-              return _context5.a(2, players);
+              return _context6.a(2, players);
           }
-        }, _callee5, this, [[3, 5], [1, 8, 9, 10]]);
+        }, _callee6, this, [[3, 5], [1, 8, 9, 10]]);
       }));
       function enhanceStaticVideos() {
         return _enhanceStaticVideos.apply(this, arguments);
@@ -74730,13 +75062,13 @@ var IPFSHLSPlayer = /*#__PURE__*/function () {
   }, {
     key: "ensureVideoJSStyles",
     value: (function () {
-      var _ensureVideoJSStyles2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-        return _regenerator().w(function (_context6) {
-          while (1) switch (_context6.n) {
+      var _ensureVideoJSStyles2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
+        return _regenerator().w(function (_context7) {
+          while (1) switch (_context7.n) {
             case 0:
-              return _context6.a(2, _ensureVideoJSStyles());
+              return _context7.a(2, _ensureVideoJSStyles());
           }
-        }, _callee6);
+        }, _callee7);
       }));
       function ensureVideoJSStyles() {
         return _ensureVideoJSStyles2.apply(this, arguments);
@@ -74779,6 +75111,7 @@ _defineProperty(IPFSHLSPlayer, "MIME_NORMALIZATION", {
   'video/mp2t': 'video/mp2t',
   'application/x-mpegURL': 'application/x-mpegURL'
 });
+_defineProperty(IPFSHLSPlayer, "capabilities", null);
 function _ensureVideoJSStyles() {
   var config = window.ipfsHLSPlayerConfig || {};
   return new Promise(function (resolve) {
@@ -74886,12 +75219,12 @@ if (typeof window !== 'undefined') {
   // Static enhancement for documentation and non-framework contexts
   var config = window.ipfsHLSPlayerConfig || {};
   if (config.enableStaticEnhancement !== false) {
-    document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
+    document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8() {
       var isFrameworkApp, _t6;
-      return _regenerator().w(function (_context7) {
-        while (1) switch (_context7.p = _context7.n) {
+      return _regenerator().w(function (_context8) {
+        while (1) switch (_context8.p = _context8.n) {
           case 0:
-            _context7.p = 0;
+            _context8.p = 0;
             if (config.debug) {
               console.log('IPFSHLSPlayer: Starting static page enhancement');
             }
@@ -74899,29 +75232,29 @@ if (typeof window !== 'undefined') {
             // Only enhance if not in a Vue/React app context
             isFrameworkApp = document.querySelector('[data-vue-app], [data-react-app], .react-app');
             if (isFrameworkApp) {
-              _context7.n = 2;
+              _context8.n = 2;
               break;
             }
-            _context7.n = 1;
+            _context8.n = 1;
             return IPFSHLSPlayer.enhanceStaticVideos();
           case 1:
-            _context7.n = 3;
+            _context8.n = 3;
             break;
           case 2:
             if (config.debug) {
               console.log('IPFSHLSPlayer: Framework app detected, skipping static enhancement');
             }
           case 3:
-            _context7.n = 5;
+            _context8.n = 5;
             break;
           case 4:
-            _context7.p = 4;
-            _t6 = _context7.v;
+            _context8.p = 4;
+            _t6 = _context8.v;
             console.error('Static video enhancement failed:', _t6);
           case 5:
-            return _context7.a(2);
+            return _context8.a(2);
         }
-      }, _callee7, null, [[0, 4]]);
+      }, _callee8, null, [[0, 4]]);
     })));
   }
 }

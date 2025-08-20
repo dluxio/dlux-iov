@@ -5,21 +5,24 @@ const CACHE_NAME = "sw-cache-v" + version;
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.08.20.1",
-  "generated": "2025-08-19T22:28:26Z",
+  "version": "2025.08.19.19",
+  "generated": "2025-08-20T02:07:35Z",
   "files": {
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     }
   }
 }
+;
+
+
 ;
 
 
