@@ -70,7 +70,7 @@ export default {
         };
         
         // Find all video elements in the rendered content, excluding TipTap and already enhanced videos
-        const videos = this.$refs.markdownContent.querySelectorAll('video:not([data-dlux-enhanced])');
+        const videos = this.$refs.markdownContent.querySelectorAll('video:not([data-ipfs-enhanced])');
         
         videos.forEach(video => {
           // Skip TipTap videos to prevent double processing

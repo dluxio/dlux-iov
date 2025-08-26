@@ -1094,9 +1094,9 @@ export default {
         return true;
       }
       
-      // Method 7: Check for data-dlux-enhanced attribute
-      if (video.hasAttribute('data-dlux-enhanced') && video.getAttribute('data-dlux-enhanced') === 'true') {
-        console.log('Video already dlux-enhanced - skipping:', video.id || 'no-id');
+      // Method 7: Check for data-ipfs-enhanced attribute
+      if (video.hasAttribute('data-ipfs-enhanced') && video.getAttribute('data-ipfs-enhanced') === 'true') {
+        console.log('Video already ipfs-enhanced - skipping:', video.id || 'no-id');
         return true;
       }
       

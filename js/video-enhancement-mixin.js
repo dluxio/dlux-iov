@@ -59,8 +59,13 @@ export default {
           }
           
           try {
-            // Enhance the video with IPFS HLS Player
-            VideoPlayer.enhanceVideoElement(video).catch(error => {
+            // Get type hint from data attribute if available
+            const typeHint = video.dataset.videoType || undefined;
+            
+            // Enhance the video with IPFS HLS Player, passing type if available
+            const options = typeHint ? { type: typeHint } : {};
+            
+            VideoPlayer.enhanceVideoElement(video, options).catch(error => {
               console.error('🚨 Vue Video Mixin: Failed to enhance video:', video.id || 'no-id', error);
             });
           } catch (error) {

@@ -1102,7 +1102,7 @@ export default {
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
                          class="hls-video-wrapper text-center p-3">
                         <video :src="getFileUrlWithType(previewModal.file)" 
-                               :type="getVideoMimeType(previewModal.file)"
+                               :data-video-type="getVideoMimeType(previewModal.file)"
                                controls 
                                class="w-100">
                             Your browser does not support the video tag.

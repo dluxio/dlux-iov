@@ -177,12 +177,117 @@
   object-fit: contain;
 }
 
+/* Preemptive video initialization - prevent flash of unstyled video */
+/* Target all videos that aren't enhanced yet or Video.js tech elements */
+video:not([data-ipfs-enhanced="true"]):not([id$="_html5_api"]) {
+  /* Establish proper size immediately */
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-color: #000;
+  object-fit: contain;
+  /* Hide initially to prevent flash */
+  opacity: 0;
+  visibility: hidden;
+  /* Display block ensures consistent rendering */
+  display: block;
+}
+
 /* Container wrapper styles */
 .ipfs-video-container {
   width: 100%;
+  aspect-ratio: 16/9;
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Enhanced player container - base styles inherited from .ipfs-video-container */
+
+/* Native player sizing - proper letterboxing with object-fit */
+.ipfs-native-player {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Maintains aspect ratio with letterboxing */
+  background-color: #000;
 }
 
 /* Modal video styles */
 .modal .ipfs-hls-player .video-js {
   max-height: 80vh;
+}
+
+/* Modal native player styles - prevent clipping */
+.modal .ipfs-video-container.ipfs-hls-player {
+  max-height: 80vh;
+  aspect-ratio: 16/9;
+}
+
+.modal .ipfs-native-player {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+/* Loading State Styles */
+
+.ipfs-video-container.ipfs-video-loading video {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Loading spinner */
+.ipfs-video-container.ipfs-video-loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: ipfs-spinner 0.8s linear infinite;
+  z-index: 10;
+}
+
+/* Spinner animation */
+@keyframes ipfs-spinner {
+  to { 
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Ready state - smooth reveal */
+.ipfs-video-container.ipfs-video-ready video {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Enhanced videos are always visible (unless in loading state) */
+video[data-ipfs-enhanced="true"]:not(.ipfs-video-container.ipfs-video-loading video) {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Error state - show video anyway for fallback */
+.ipfs-video-container.ipfs-video-error video {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Ensure Video.js players also respect loading states */
+.ipfs-video-container.ipfs-video-loading .video-js {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.ipfs-video-container.ipfs-video-ready .video-js {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
 }
