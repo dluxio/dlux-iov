@@ -1,6 +1,6 @@
 var activeWorker = null;
 if (window.location.hostname.includes('dlux') && 'serviceWorker' in navigator) {
-    const version = '2025.08.20.2'; // Ensure this version matches sw.js
+    const version = '2025.08.26.1'; // Ensure this version matches sw.js
     console.log('Desired service worker version:', version);
 
     navigator.serviceWorker.getRegistration('/')
