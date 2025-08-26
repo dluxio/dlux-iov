@@ -850,30 +850,7 @@ const IPFSVideo = Node.create({
           return {};
         }
       },
-      type: {
-        default: null,
-        parseHTML: element => element.getAttribute('type'),
-        renderHTML: attributes => {
-          if (!attributes.type) return {};
-          return { type: attributes.type };
-        }
-      },
-      'data-type': {
-        default: null,
-        parseHTML: element => element.getAttribute('data-type'),
-        renderHTML: attributes => {
-          if (!attributes['data-type']) return {};
-          return { 'data-type': attributes['data-type'] };
-        }
-      },
-      'data-mime-type': {
-        default: null,
-        parseHTML: element => element.getAttribute('data-mime-type'),
-        renderHTML: attributes => {
-          if (!attributes['data-mime-type']) return {};
-          return { 'data-mime-type': attributes['data-mime-type'] };
-        }
-      },
+      // Type attributes removed - IPFS HLS Player v1.2.3+ auto-detects all formats
       crossorigin: {
         default: 'anonymous',
         parseHTML: element => element.getAttribute('crossorigin') || 'anonymous',
@@ -903,7 +880,7 @@ const IPFSVideo = Node.create({
     delete attrs['data-ipfs-enhanced'];
     delete attrs['data-tiptap-video'];
     delete attrs['class']; // Remove Video.js classes
-    // Do NOT delete 'type' - it's critical for m3u8/HLS videos!
+    // Type attributes no longer needed - IPFS HLS Player auto-detects all formats
     
     // Ensure controls attribute is properly formatted
     if (attrs.controls === true || attrs.controls === 'true') {

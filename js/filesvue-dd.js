@@ -7,7 +7,6 @@ import common from './methods-common.js';
 import spk from './methods-spk.js';
 import watchers from './watchers-common.js';
 import debugLogger from './utils/debug-logger.js';
-import hlsDebug from './utils/hls-debug.js';
 import VideoEnhancementMixin from './video-enhancement-mixin.js';
 
 export default {
@@ -1102,7 +1101,6 @@ export default {
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
                          class="hls-video-wrapper text-center p-3">
                         <video :src="getFileUrlWithType(previewModal.file)" 
-                               :data-video-type="getVideoMimeType(previewModal.file)"
                                controls 
                                class="w-100">
                             Your browser does not support the video tag.
@@ -5186,40 +5184,6 @@ export default {
             return url;
         },
 
-        getVideoMimeType(file) {
-            if (!file) return undefined;
-            
-            // Log file for debugging
-            hlsDebug.fileDetection(file);
-            
-            // Check explicit MIME type in file.type
-            if (file.type === 'application/x-mpegURL' || 
-                file.type === 'audio/x-mpegurl' ||
-                file.type === 'application/vnd.apple.mpegurl') {
-                return 'application/x-mpegURL';
-            }
-            
-            // Check metadata type field (VFS stores extension here)
-            if (file.meta?.type === 'm3u8' || file.type === 'm3u8') {
-                hlsDebug.log('DETECTION', 'HLS detected from VFS metadata type field', file);
-                return 'application/x-mpegURL';
-            }
-            
-            // Check file name with extension
-            if (file.name?.endsWith('.m3u8')) {
-                return 'application/x-mpegURL';
-            }
-            
-            // For VFS files, reconstruct full name with extension
-            const fullName = file.meta ? `${file.name}.${file.meta.type}` : file.name;
-            if (fullName?.endsWith('.m3u8')) {
-                hlsDebug.log('DETECTION', `HLS detected from reconstructed VFS name: ${fullName}`, file);
-                return 'application/x-mpegURL';
-            }
-            
-            return undefined;
-        },
-
         isImageFile(type) {
             return type && (type.includes('image') ||
                 type.includes('jpg') ||
@@ -5342,10 +5306,8 @@ export default {
                 fileName.toLowerCase().endsWith('.wmv') ||
                 fileName.toLowerCase().endsWith('.m4v') ||
                 fileName.toLowerCase().endsWith('.3gp')) {
-                // Set proper type attribute for M3U8 playlists
-                const typeAttr = (fileTypeFormatted.includes('m3u8') || fileName.toLowerCase().endsWith('.m3u8')) 
-                    ? ' type="application/x-mpegURL"' : '';
-                formattedContent = `<video src="https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}"${typeAttr} controls></video>`;
+                // Let IPFS HLS Player auto-detect video type
+                formattedContent = `<video src="https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}" controls></video>`;
             }
             // Image files
             else if (fileTypeFormatted.includes('image') ||

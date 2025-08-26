@@ -3595,12 +3595,8 @@ class EditorFactory {
                     crossorigin: 'anonymous'
                 };
 
-                // Only set type attributes for m3u8 which requires it
-                if (fileName.endsWith('.m3u8') || cleanFileType === 'm3u8') {
-                    videoAttrs.type = 'application/x-mpegURL';
-                    videoAttrs['data-type'] = 'm3u8';
-                    videoAttrs['data-mime-type'] = 'application/x-mpegURL';
-                }
+                // Let IPFS HLS Player auto-detect all video types
+                // No need to set type attributes - the player handles this intelligently
 
                 // Insert video at drop position
                 editor.chain()
@@ -9780,8 +9776,8 @@ export default {
                 const isVideo = file && videoExtensions.some(ext => file.toLowerCase().endsWith(ext));
 
                 if (isVideo && url) {
-                    // Pass metadata to insertVideoEmbed for proper type detection
-                    this.insertVideoEmbed(url, metadata);
+                    // Let the player auto-detect video type
+                    this.insertVideoEmbed(url, null);
                 }
             }
         };
@@ -18961,12 +18957,8 @@ export default {
                 dialog.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#212529;border:1px solid #495057;padding:20px;border-radius:8px;z-index:10000;';
                 dialog.innerHTML = `
                     <h5 style="color:#fff;margin:0 0 15px 0;">Insert Video</h5>
-                    <input type="text" id="videoUrl" placeholder="Enter video URL" style="width:400px;padding:8px;margin-bottom:10px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
+                    <input type="text" id="videoUrl" placeholder="Enter video URL" style="width:400px;padding:8px;margin-bottom:15px;background:#2c2f33;border:1px solid #495057;color:#fff;border-radius:4px;">
                     <br>
-                    <label style="color:#adb5bd;display:flex;align-items:center;margin-bottom:15px;">
-                        <input type="checkbox" id="isHls" style="margin-right:8px;">
-                        This is an HLS/streaming video (m3u8)
-                    </label>
                     <div style="text-align:right;">
                         <button id="cancelBtn" style="padding:6px 12px;margin-right:8px;background:#6c757d;border:none;color:#fff;border-radius:4px;cursor:pointer;">Cancel</button>
                         <button id="insertBtn" style="padding:6px 12px;background:#0d6efd;border:none;color:#fff;border-radius:4px;cursor:pointer;">Insert</button>
@@ -18984,7 +18976,6 @@ export default {
                 document.body.appendChild(dialog);
 
                 const urlInput = dialog.querySelector('#videoUrl');
-                const hlsCheckbox = dialog.querySelector('#isHls');
                 const insertBtn = dialog.querySelector('#insertBtn');
                 const cancelBtn = dialog.querySelector('#cancelBtn');
 
@@ -18993,8 +18984,8 @@ export default {
                 const handleInsert = () => {
                     const url = urlInput.value.trim();
                     if (url) {
-                        const isHls = hlsCheckbox.checked;
-                        this.insertVideoEmbed(url, isHls ? { type: 'm3u8' } : null);
+                        // Let the player auto-detect the video type
+                        this.insertVideoEmbed(url, null);
                         dialog.remove();
                         backdrop.remove();
                     }
@@ -19026,13 +19017,8 @@ export default {
                 crossorigin: 'anonymous'
             };
 
-            // Only set type attributes for m3u8 which requires it
-            if (fileType === 'm3u8') {
-                videoAttrs.type = 'application/x-mpegURL';
-                videoAttrs['data-type'] = 'm3u8';
-                videoAttrs['data-mime-type'] = 'application/x-mpegURL';
-            }
-            // For all other formats, let the browser auto-detect
+            // Let IPFS HLS Player auto-detect all video types
+            // No need to set type attributes - the player handles this intelligently
 
             this.bodyEditor.chain()
                 .focus()
@@ -19101,8 +19087,8 @@ export default {
                 ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'tif', 'avif', 'jfif', 'heic', 'heif'].includes(cleanFileType);
 
             if (isVideo) {
-                // Insert as video
-                this.insertVideoEmbed(url, { type: cleanFileType });
+                // Insert as video - let player auto-detect type
+                this.insertVideoEmbed(url, null);
             } else if (isImage) {
                 // Insert as image with filename as caption
                 this.insertImageEmbed(url, fileName);
