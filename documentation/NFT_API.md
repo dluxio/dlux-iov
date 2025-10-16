@@ -67,7 +67,7 @@ Deploy from heroku or similar and set ENV variables with a hive name and active 
 * Node.js and git are required
 
 ### Server Installation
-Detailed Instructions also at /docs/setup.md
+Detailed Instructions also at docs.dlux.io/setup.md
 Which include Docker and IPFS linking
 
 * Clone this repository

@@ -255,7 +255,7 @@ InVR is part of the DLUX project and follows the same licensing terms.
 ## 🔗 Links
 
 - **DLUX Main Site**: https://dlux.io
-- **Documentation**: https://dlux.io/docs
+- **Documentation**: https://docs.dlux.io
 - **GitHub Repository**: https://github.com/dlux-io/dlux
 - **Community Discord**: [Join our community](https://discord.gg/dlux)
 

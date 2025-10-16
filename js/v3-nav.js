@@ -6137,7 +6137,7 @@ export default {
           <li><a class="dropdown-item subnav-title" href="/node/">Node Rewards<span class="subnav-subtitle">Earn Tokens for DePIN Services</span></a></li>
           <li><a class="dropdown-item subnav-title" href="/dao/">Honeycomb DAO<span class="subnav-subtitle">Launch Your
                 DeFi Project</span></a></li>
-          <li><a class="dropdown-item subnav-title position-relative" href="/docs/" target="_blank">Docs<span
+          <li><a class="dropdown-item subnav-title position-relative" href="docs.dlux.io" target="_blank">Docs<span
                 class="subnav-subtitle">Explore
                 DLUX Documentation</span><span class="position-absolute top-50 end-0 translate-middle-y"><i class="mx-2 fa-solid fa-arrow-up-right-from-square"></i></span></a></li>
           <li><a class="dropdown-item subnav-title" href="/proposals/">DHF Proposals<span class="subnav-subtitle">Hive Development Fund</span></a></li>

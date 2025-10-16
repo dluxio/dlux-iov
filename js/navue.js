@@ -1072,7 +1072,7 @@ export default {
                       class="fa-solid fa-qrcode fa-fw me-2"></i>Invite</a></li>
                 <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
                       class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-                <li class=""><a class="dropdown-item" href="https://www.dlux.io/docs/" target="_blank"><i
+                <li class=""><a class="dropdown-item" href="docs.dlux.io" target="_blank"><i
                       class="fa-solid fa-book fa-fw me-2"></i>Docs</a></li>
                 <li v-if="!node" class=""><a class="dropdown-item" href="/about/"><i
                       class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
@@ -1133,7 +1133,7 @@ export default {
               </li>
               <li v-if="!node" class=""><a class="dropdown-item" href="/build/"><i
                     class="fa-solid fa-shapes fa-fw me-2"></i>Build</a></li>
-              <li class=""><a class="dropdown-item" href="/docs/" target="_blank"><i
+              <li class=""><a class="dropdown-item" href="docs.dlux.io" target="_blank"><i
                     class="fa-solid fa-book me-2 fa-fw"></i>Docs</a></li>
               <li v-if="!node" class=""><a class="dropdown-item" href="/about/"><i
                     class="fas fa-info-circle fa-fw me-2"></i>About</a></li>
