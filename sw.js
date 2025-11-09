@@ -1,25 +1,28 @@
-this.version = "2025.10.16.2";
+this.version = "2025.11.09.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.10.16.2",
-  "generated": "2025-10-16T19:59:56Z",
+  "version": "2025.11.09.1",
+  "generated": "2025-11-09T22:13:03Z",
   "files": {
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     }
   }
 }
+;
+
+
 ;
 
 
